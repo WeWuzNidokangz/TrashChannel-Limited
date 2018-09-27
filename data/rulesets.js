@@ -871,6 +871,46 @@ let BattleFormats = {
 		desc: "Allows Gen 1 pokemon to have moves from their Gen 2 learnsets",
 		// Implemented in team-validator.js
 	},
+	/////////////////////////////
+	// TrashChannel: New rules //
+	/////////////////////////////
+    r350cuprule: {
+		effectType: 'Rule',
+		name: 'R 350 Cup Rule',
+		desc: "The mod for 350 Cup: Pok&eacute;mon with a base stat total of 350 or lower get their stats doubled.",
+        onModifyTemplate: function (template, pokemon) {
+			console.log('r350cuprule: onModifyTemplate');
+            let bst = 0;
+            Object.values(template.baseStats).forEach(stat => {
+                bst += stat;
+            });
+			if (bst <= 350) {
+				for (let i in template.baseStats) {
+					template.baseStats[i] *= 2;
+				}
+			}
+            return template;
+        },
+	},
+	camomonsrule: {
+		effectType: 'Rule',
+		name: 'Camomons Rule',
+		desc: "The mod for Camomons: Pok&eacute;mon change type to match their first two moves.",
+		onModifyTemplate: function (template, target, source) {
+			console.log('camomonsrule: onModifyTemplate');
+			if (!source) return;
+			let types = [...new Set(target.baseMoveSlots.slice(0, 2).map(move => this.getMove(move.id).type))];
+			return Object.assign({}, template, {types: types});
+		},
+		onSwitchIn: function (pokemon) {
+			console.log('camomonsrule: onSwitchIn');
+			this.add('-start', pokemon, 'typechange', pokemon.types.join('/'), '[silent]');
+		},
+		onAfterMega: function (pokemon) {
+			console.log('camomonsrule: onAfterMega');
+			this.add('-start', pokemon, 'typechange', pokemon.types.join('/'), '[silent]');
+		},
+	},
 };
 
 exports.BattleFormats = BattleFormats;

@@ -44,7 +44,9 @@ class Battle extends Dex.ModdedDex {
 	 * @param {BattleOptions} options
 	 */
 	constructor(options) {
+		console.log("battle constructor formatid: " + options.formatid );
 		let format = Dex.getFormat(options.formatid, true);
+		console.log("battle constructor format: " + format );
 		super(format.mod);
 		this.zMoveTable = {};
 		Object.assign(this, this.data.Scripts);
@@ -72,6 +74,13 @@ class Battle extends Dex.ModdedDex {
 		this.formatid = options.formatid;
 		this.cachedFormat = format;
 		this.formatData = {id: format.id};
+
+		// 18/09/27 TrashChannel: We need to hold onto the custom rules
+		// throughout the battle to be able to call onModifyTemplate etc for
+		// every rule
+		/** @type {string[]} */
+		this.customRules = Dex.getCustomRules(options.formatid);
+		//console.log('this.customRules: '+ this.customRules);
 
 		/** @type {Effect} */
 		this.effect = /** @type {Effect} */ ({id: ''});
@@ -768,7 +777,7 @@ class Battle extends Dex.ModdedDex {
 		let hasRelayVar = true;
 		effect = this.getEffect(effect);
 		let args = [target, source, effect];
-		//console.log('Event: ' + eventid + ' (depth ' + this.eventDepth + ') t:' + target.id + ' s:' + (!source || source.id) + ' e:' + effect.id);
+		console.log('Event: ' + eventid + ' (depth ' + this.eventDepth + ') t:' + target.id + ' s:' + (!source || source.id) + ' e:' + effect.id);
 		if (relayVar === undefined || relayVar === null) {
 			relayVar = true;
 			hasRelayVar = false;
@@ -787,7 +796,7 @@ class Battle extends Dex.ModdedDex {
 		for (const statusid of statuses) {
 			let status = statusid.status;
 			let thing = statusid.thing;
-			//this.debug('match ' + eventid + ': ' + status.id + ' ' + status.effectType);
+			this.debug('match ' + eventid + ': ' + status.id + ' ' + status.effectType);
 			if (status.effectType === 'Status' && thing.status !== status.id) {
 				// it's changed; call it off
 				continue;

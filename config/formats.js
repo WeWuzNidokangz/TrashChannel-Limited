@@ -793,20 +793,8 @@ let Formats = [
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3598418/">Camomons</a>`,
 		],
 		mod: 'gen7',
-		searchShow: false,
-		ruleset: ['[Gen 7] OU'],
+		ruleset: ['[Gen 7] OU', 'Camomons Rule'],
 		banlist: ['Kartana', 'Kyurem-Black', 'Shedinja'],
-		onModifyTemplate: function (template, target, source) {
-			if (!source) return;
-			let types = [...new Set(target.baseMoveSlots.slice(0, 2).map(move => this.getMove(move.id).type))];
-			return Object.assign({}, template, {types: types});
-		},
-		onSwitchIn: function (pokemon) {
-			this.add('-start', pokemon, 'typechange', pokemon.types.join('/'), '[silent]');
-		},
-		onAfterMega: function (pokemon) {
-			this.add('-start', pokemon, 'typechange', pokemon.types.join('/'), '[silent]');
-		},
 	},
 	{
 		name: "[Gen 7] 2v2 Doubles",
@@ -817,7 +805,6 @@ let Formats = [
 
 		mod: 'gen7',
 		gameType: 'doubles',
-		searchShow: false,
 		teamLength: {
 			validate: [2, 4],
 			battle: 2,
@@ -833,9 +820,31 @@ let Formats = [
 		name: "[Gen 6] Gen-NEXT OU",
 
 		mod: 'gennext',
-		searchShow: false,
 		ruleset: ['Pokemon', 'Standard NEXT', 'Team Preview'],
 		banlist: ['Uber'],
+	},
+    {
+        name: "[Gen 7] 350 Cup",
+        desc: [
+            "Pok&eacute;mon with a base stat total of 350 or lower get their stats doubled.",
+            "&bullet; <a href=\"https://www.smogon.com/forums/threads/3589641/\">350 Cup</a>",
+	       ],
+        mod: 'gen7',
+        ruleset: ['[Gen 7] Ubers', 'R 350 Cup Rule'],
+        banlist: ['Deep Sea Tooth', 'Eevium Z', 'Eviolite', 'Light Ball'],
+    },
+	{
+		name: "[Gen 7] Inverse",
+		desc: [
+			"The effectiveness of each attack is inverted.",
+			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3590154/\">Inverse</a>",
+		],
+
+		mod: 'gen7',
+		searchShow: false,
+		ruleset: ['[Gen 7] OU', 'Inverse Mod'],
+		banlist: ['Hoopa-Unbound', 'Kyurem-Black', 'Serperior'],
+		unbanlist: ['Aegislash', 'Dialga', 'Giratina', 'Pheromosa', 'Solgaleo', 'Lucarionite'],
 	},
 
 	// Randomized Metas

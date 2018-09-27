@@ -106,7 +106,7 @@ class Side {
 
 		this.team = team;
 		for (let i = 0; i < this.team.length && i < 24; i++) {
-			//console.log("NEW POKEMON: " + (this.team[i] ? this.team[i].name : '[unidentified]'));
+			console.log("NEW POKEMON: " + (this.team[i] ? this.team[i].name : '[unidentified]'));
 			this.pokemon.push(new Pokemon(this.team[i], this));
 		}
 		this.pokemonLeft = this.pokemon.length;

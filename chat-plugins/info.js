@@ -456,8 +456,49 @@ const commands = {
 				return this.sendReply(buffer);
 			case 'pokemon':
 				let pokemon = mod.getTemplate(newTarget.name);
-				if (format && format.onModifyTemplate) {
-					pokemon = format.onModifyTemplate.call(require('../sim/battle'), pokemon) || pokemon;
+
+				// 18/09/23 TrashChannel: We want to be able run onModifyTemplate per rule as well as for format
+				if(format) {
+					if (format.onModifyTemplate) {
+						pokemon = format.onModifyTemplate.call(require('../sim/battle'), pokemon) || pokemon;
+					}
+
+					for( let rsItr=0; rsItr<format.ruleset.length; ++rsItr ) {
+						console.log('format.ruleset[rsItr]: '+ format.ruleset[rsItr]);
+						console.log('format.ruleset[rsItr].onModifyTemplate: '+ format.ruleset[rsItr].onModifyTemplate);
+						let id = toId(format.ruleset[rsItr]);
+						console.log('id: '+ id);
+						
+						let ruleEffect = this.battle.getEffect(id);
+		
+						if(!ruleEffect) continue;
+						console.log('ruleEffect: '+ ruleEffect);
+		
+						if(!ruleEffect.onModifyTemplate) continue;
+		
+						console.log('run template: ');
+						pokemon = ruleEffect.onModifyTemplate.call(require('../sim/battle'), pokemon) || pokemon;
+					}
+				}
+
+				// And for custom rules
+				if (room && room.battle) {
+					for( let rsItr=0; rsItr<room.battle.customRules.length; ++rsItr ) {
+						console.log('room.battle.customRules[rsItr]: '+ room.battle.customRules[rsItr]);
+						console.log('room.battle.customRules[rsItr].onModifyTemplate: '+ room.battle.customRules[rsItr].onModifyTemplate);
+						let id = toId(room.battle.customRules[rsItr]);
+						console.log('id: '+ id);
+						
+						let ruleEffect = this.battle.getEffect(id);
+		
+						if(!ruleEffect) continue;
+						console.log('ruleEffect: '+ ruleEffect);
+		
+						if(!ruleEffect.onModifyTemplate) continue;
+		
+						console.log('run template: ');
+						pokemon = ruleEffect.onModifyTemplate.call(require('../sim/battle'), pokemon) || pokemon;
+					}
 				}
 				let tier = pokemon.tier;
 				if (room && (room.id === 'smogondoubles' ||

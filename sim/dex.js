@@ -522,6 +522,27 @@ class ModdedDex {
 		return validatedFormatid;
 	}
 	/**
+	 * 18/09/27 TrashChannel: Create an array of additional format rules
+	 * @param {string} formatid
+	 * @return {string[]}
+	 */
+	getCustomRules(formatid) {
+		console.log('getCustomRules formatid: '+ formatid);
+
+		/** @type {string[]} */
+		let	customRules = [];
+
+		let [baseFormatString, customRulesString] = formatid.split('@@@', 2);
+		if (customRulesString) {
+			customRules = customRulesString.split(',');
+		}
+
+		console.log('getCustomRules customRulesString: '+ customRulesString);
+		console.log('getCustomRules customRules: '+ customRules);
+
+		return customRules;
+	}
+	/**
 	 * @param {string | Format} [name]
 	 * @return {Format}
 	 */
@@ -538,6 +559,7 @@ class ModdedDex {
 		if (this.data.Formats.hasOwnProperty('gen7' + id)) {
 			id = 'gen7' + id;
 		}
+		// TrashChannel: TODO: Might want to add labels from rules
 		let supplementaryAttributes = /** @type {AnyObject?} */ (null);
 		if (name.includes('@@@')) {
 			if (!isTrusted) {
@@ -854,7 +876,9 @@ class ModdedDex {
 			}
 			return rule.charAt(0) + this.validateBanRule(rule.slice(1));
 		default:
+			console.log('rule:' + rule );
 			let id = toId(rule);
+			console.log('id:' + id );
 			if (!this.data.Formats.hasOwnProperty(id)) {
 				throw new Error(`Unrecognized rule "${rule}"`);
 			}

@@ -910,9 +910,57 @@ class Pokemon {
 	formeChange(templateId, source = this.battle.effect, isPermanent, message, abilitySlot = '0') {
 		let rawTemplate = this.battle.getTemplate(templateId);
 
+		console.log('rawTemplate: '+ rawTemplate);
+
 		if (!rawTemplate.abilities) return false;
 
+		// 18/09/27 TrashChannel: First, modify template based on format as usual
 		let template = this.battle.singleEvent('ModifyTemplate', this.battle.getFormat(), null, this, source, null, rawTemplate);
+
+		// Then modify it per rule to apply each rule-based onModifyTemplate
+		/** @type {Format?} */
+		let format = this.battle.getFormat();
+		console.log('format: '+ format);
+		if(format) {
+			console.log('format.ruleset.length: '+ format.ruleset.length);
+			for( let rsItr=0; rsItr<format.ruleset.length; ++rsItr ) {
+				console.log('format.ruleset[rsItr]: '+ format.ruleset[rsItr]);
+				console.log('format.ruleset[rsItr].onModifyTemplate: '+ format.ruleset[rsItr].onModifyTemplate);
+				let id = toId(format.ruleset[rsItr]);
+				console.log('id: '+ id);
+
+				let ruleEffect = this.battle.getEffect(id);
+
+				if(!ruleEffect) continue;
+				console.log('ruleEffect: '+ ruleEffect);
+
+				if(!ruleEffect.onModifyTemplate) continue;
+
+				console.log('run template: ');
+				template = this.battle.singleEvent('ModifyTemplate', ruleEffect, null, this, source, null, template);
+			}
+		}
+
+		// Then apply the effects of each custom rule
+		console.log('this.battle.customRules: '+ this.battle.customRules);
+		//for( const addRule in this.battle.customRules ) {
+		for( let rsItr=0; rsItr<this.battle.customRules.length; ++rsItr ) {
+			//console.log('addRule: ' + addRule);
+			console.log('addRule: ' + this.battle.customRules[rsItr]);
+			
+			//let id = toId(addRule);
+			let id = toId(this.battle.customRules[rsItr]);
+			console.log('id: ' + id);
+			let ruleEffect = this.battle.getEffect(id);
+
+			if(!ruleEffect) continue;
+			console.log('ruleEffect: '+ ruleEffect);
+
+			if(!ruleEffect.onModifyTemplate) continue;
+
+			console.log('run template: ');
+			template = this.battle.singleEvent('ModifyTemplate', ruleEffect, null, this, source, null, template);
+		}
 
 		if (!template) return false;
 
@@ -984,6 +1032,8 @@ class Pokemon {
 	}
 
 	clearVolatile(includeSwitchFlags = true) {
+		console.log("clearVolatile");
+
 		this.boosts = {
 			atk: 0,
 			def: 0,
@@ -1027,6 +1077,7 @@ class Pokemon {
 		this.newlySwitched = true;
 		this.beingCalledBack = false;
 
+		console.log("starting forme change");
 		this.formeChange(this.baseTemplate);
 	}
 
