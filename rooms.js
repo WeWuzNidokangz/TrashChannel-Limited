@@ -1557,6 +1557,8 @@ let Rooms = Object.assign(getRoom, {
 	 * @param {AnyObject} options
 	 */
 	createBattle(formatid, options) {
+		//console.log("createBattle: formatid: " + formatid);
+
 		const p1 = /** @type {User?} */ (options.p1);
 		const p2 = /** @type {User?} */ (options.p2);
 		if (p1 && p1 === p2) throw new Error(`Players can't battle themselves`);

@@ -908,7 +908,10 @@ class Pokemon {
 	 * @param {string} [message]
 	 */
 	formeChange(templateId, source = this.battle.effect, isPermanent, message, abilitySlot = '0') {
-		let rawTemplate = this.battle.getTemplate(templateId);
+		let baseTemplate = this.battle.getTemplate(templateId);
+
+		// Seems like we need to deepclone the template to avoid permanently altering the original here...
+		let rawTemplate = this.battle.deepClone(baseTemplate) 
 
 		console.log('rawTemplate: '+ rawTemplate);
 

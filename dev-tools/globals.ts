@@ -1,3 +1,8 @@
+// 18/10/08: TrashChannel Globals
+/**@type {boolean} */
+//const DEF_TCDEBUG = true;
+const DEF_TCDEBUG = false;
+
 type Battle = typeof Sim.nullBattle
 type ModdedDex = typeof Dex
 type Pokemon = typeof Sim.nullPokemon

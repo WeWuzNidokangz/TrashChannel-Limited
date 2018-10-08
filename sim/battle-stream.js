@@ -97,11 +97,13 @@ class BattleStream extends Streams.ObjectReadWriteStream {
 			this.battle = new Battle(options);
 			break;
 		case 'player':
+			if( null == this.battle) break;
 			const [slot, optionsText] = splitFirst(message, ' ');
 			this.battle.setPlayer(/** @type {PlayerSlot} */ (slot), JSON.parse(optionsText));
 			break;
 		case 'p1':
 		case 'p2':
+			if( null == this.battle) break;
 			if (message === 'undo') {
 				this.battle.undoChoice(type);
 			} else {
@@ -110,12 +112,15 @@ class BattleStream extends Streams.ObjectReadWriteStream {
 			break;
 		case 'forcewin':
 		case 'forcetie':
+			if( null == this.battle) break;
 			this.battle.win(message);
 			break;
 		case 'tiebreak':
+			if( null == this.battle) break;
 			this.battle.tiebreak();
 			break;
 		case 'eval':
+			if( null == this.battle) break;
 			/* eslint-disable no-eval, no-unused-vars */
 			let battle = this.battle;
 			let p1 = battle && battle.p1;

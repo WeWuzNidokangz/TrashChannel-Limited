@@ -470,6 +470,9 @@ class Battle {
 
 		this.listen();
 
+		console.log('options.p1team: ' + options.p1team);
+		console.log('options.p2team: ' + options.p2team);
+
 		if (options.p1) this.addPlayer(options.p1, 'p1', options.p1team, true);
 		if (options.p2) this.addPlayer(options.p2, 'p2', options.p2team, true);
 	}
