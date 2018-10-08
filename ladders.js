@@ -592,10 +592,10 @@ class Ladder extends LadderStore {
 			return false;
 		}
 
-		if (DEF_TCDEBUG) {
+		//if (DEF_TCDEBUG) {
 			console.log('ready1.team: ' + ready1.team);
 			console.log('ready2.team: ' + ready2.team);
-		}
+		//}
 
 		Rooms.createBattle(ready1.formatid, {
 			p1: user1,

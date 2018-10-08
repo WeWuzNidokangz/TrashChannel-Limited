@@ -522,6 +522,7 @@ let Formats = [
 
 		mod: 'gen7',
 		ruleset: ['[Gen 7] Ubers'],
+		banlist: ['Baton Pass'],
 		onValidateTeam: function (team, format, teamHas) {
 			let problemsArray = /** @type {string[]} */ ([]);
 			let types = /** @type {string[]} */ ([]);
@@ -537,11 +538,23 @@ let Formats = [
 						let baseTemplate = this.getTemplate(item.megaEvolves);
 						types = baseTemplate.types.filter(type => template.types.includes(type));
 					}
-					let problems = TeamValidator('gen7ubers').validateSet(set, teamHas);
-					if (problems) problemsArray = problemsArray.concat(problems);
+					// 18/10/08: TrashChannel: Since this is already an ubers-based meta,
+					// we shouldn't need to check the gods for any additional bans
 				} else {
-					let problems = TeamValidator('gen7ou').validateSet(set, teamHas);
-					if (problems) problemsArray = problemsArray.concat(problems);
+					// 18/10/08: TrashChannel: Avoid using OU validator as it interferes with mashups
+					// followerbanlist: ['Uber', 'Arena Trap', 'Power Construct', 'Shadow Tag', 'Baton Pass'],
+					if("Uber" == template.tier) { // Ban ubers
+						problemsArray.push("You can't use an Ubers pokemon as a follower!");
+					}
+					let followerBannedAbilities = ['Arena Trap', 'Power Construct', 'Shadow Tag'];
+					let ability = this.getAbility(set.ability);
+					let abilityName = ability.toString();
+					for( let nBanAbItr=0; nBanAbItr<followerBannedAbilities.length; ++nBanAbItr) {
+						if(followerBannedAbilities[nBanAbItr] == abilityName) { // Ban OU banned abilities
+							problemsArray.push("Follower has the banned ability: " + followerBannedAbilities[nBanAbItr] + "!");
+						}
+					}
+					// Baton Pass is also banned on Ubers, so we move it to general banlist
 					let followerTypes = template.types;
 					if (item.megaStone && template.species === item.megaEvolves) {
 						template = this.getTemplate(item.megaStone);
