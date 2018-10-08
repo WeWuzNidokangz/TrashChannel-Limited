@@ -3,11 +3,15 @@
 //const DEF_TCDEBUG = true;
 const DEF_TCDEBUG = false;
 
-type Battle = typeof Sim.nullBattle
-type ModdedDex = typeof Dex
-type Pokemon = typeof Sim.nullPokemon
-type Side = typeof Sim.nullSide
-type Validator = typeof Sim.nullValidator
+type Battle = import('./../sim/battle')
+type ModdedDex = typeof import('./../sim/dex')
+type Pokemon = import('./../sim/pokemon')
+type Side = import('./../sim/side')
+type Validator = ReturnType<typeof import('./../sim/team-validator')>
+type PageTable = import('./../chat').PageTable
+type ChatCommands = import('./../chat').ChatCommands
+type ChatFilter = import('./../chat').ChatFilter
+type NameFilter = import('./../chat').NameFilter
 
 interface AnyObject {[k: string]: any}
 type DexTable<T> = {[key: string]: T}
@@ -879,6 +883,7 @@ interface RandomTeamsTypes {
 		toxicSpikes?: number
 		hazardClear?: number
 		rapidSpin?: number
+		illusion?: number
 	}
 	FactoryTeamDetails: {
 		megaCount: number

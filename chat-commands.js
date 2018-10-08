@@ -26,9 +26,6 @@ const HOURMUTE_LENGTH = 60 * 60 * 1000;
 
 const MAX_CHATROOM_ID_LENGTH = 225;
 
-/** @typedef {(this: Chat.CommandContext, target: string, room: Room, user: User, connection: Connection, cmd: string) => (void)} ChatHandler */
-/** @typedef {{[k: string]: ChatHandler | string | true | string[]}} ChatCommands */
-
 /** @type {ChatCommands} */
 const commands = {
 
@@ -1902,7 +1899,66 @@ const commands = {
 			this.errorReply(`User '${target}' is not locked.`);
 		}
 	},
-	unlockhelp: [`/unlock [username] - Unlocks the user. Requires: % @ * & ~`],
+	unlockname: function (target, room, user) {
+		if (!target) return this.parse('/help unlock');
+		if (!this.can('lock')) return false;
+
+		const userid = toId(target);
+		const punishment = Punishments.userids.get(userid);
+		if (!punishment) return this.errorReply("This name isn't locked.");
+		if (punishment[1] === userid) return this.errorReply(`"${userid}" was specifically locked by a staff member (check the global modlog). Use /unlock if you really want to unlock this name.`);
+
+		Punishments.userids.delete(userid);
+		Punishments.savePunishments();
+
+		for (const curUser of Users.findUsers([userid], [])) {
+			if (curUser.locked && !curUser.locked.startsWith('#') && !Punishments.getPunishType(curUser.userid)) {
+				curUser.locked = false;
+				curUser.namelocked = false;
+				curUser.updateIdentity();
+			}
+		}
+		this.globalModlog("UNLOCKNAME", userid, ` by ${user.name}`);
+
+		const unlockMessage = `The name '${target}' was unlocked by ${user.name}.`;
+
+		this.addModAction(unlockMessage);
+		if (room.id !== 'staff' && Rooms('staff')) {
+			Rooms('staff').addByUser(user, `<<${room.id}>> ${unlockMessage}`);
+		}
+	},
+	unlockip: function (target, room, user) {
+		target = target.trim();
+		if (!target) return this.parse('/help unlock');
+		if (!this.can('ban')) return false;
+		const range = target.charAt(target.length - 1) === '*';
+		if (range && !this.can('rangeban')) return false;
+
+		if (!/^[0-9.*]+$/.test(target)) return this.errorReply("Please enter a valid IP address.");
+
+		const punishment = Punishments.ips.get(target);
+		if (!punishment) return this.errorReply(`${target} is not a locked/banned IP or IP range.`);
+
+		Punishments.ips.delete(target);
+		Punishments.savePunishments();
+
+		for (const curUser of Users.findUsers([], [target])) {
+			if (curUser.locked && !curUser.locked.startsWith('#') && !Punishments.getPunishType(curUser.userid)) {
+				curUser.locked = false;
+				curUser.namelocked = false;
+				curUser.updateIdentity();
+			}
+		}
+		this.globalModlog(`UNLOCK${range ? 'RANGE' : 'IP'}`, target, ` by ${user.name}`);
+
+		const broadcastRoom = Rooms('staff') || room;
+		broadcastRoom.addByUser(user, `${user.name} unlocked the ${range ? "IP range" : "IP"}: ${target}`);
+	},
+	unlockhelp: [
+		`/unlock [username] - Unlocks the user. Requires: % @ * & ~`,
+		`/unlockname [username] - Unlocks a punished alt while leaving the original punishment intact. Requires: % @ * & ~`,
+		`/unlockip [ip] - Unlocks a punished ip while leaving the original punishment intact. Requires: @ * & ~`,
+	],
 
 	forceglobalban: 'globalban',
 	gban: 'globalban',
@@ -2123,19 +2179,6 @@ const commands = {
 
 	unrangelock: 'unlockip',
 	rangeunlock: 'unlockip',
-	unlockip: function (target, room, user) {
-		target = target.trim();
-		if (!target) {
-			return this.parse('/help unbanip');
-		}
-		if (!this.can('rangeban')) return false;
-		if (!Punishments.ips.has(target)) {
-			return this.errorReply(`${target} is not a locked/banned IP or IP range.`);
-		}
-		Punishments.ips.delete(target);
-		this.addModAction(`${user.name} unlocked the ${(target.charAt(target.length - 1) === '*' ? "IP range" : "IP")}: ${target}`);
-		this.modlog('UNRANGELOCK', null, target);
-	},
 
 	/*********************************************************
 	 * Moderating: Other
@@ -2361,24 +2404,35 @@ const commands = {
 		if (!target) return this.parse(`/help notifyrank`);
 		if (!this.can('addhtml', null, room)) return false;
 		if (!this.canTalk()) return;
-		let [rank, notification] = this.splitOne(target);
+		let [rank, titleNotification] = this.splitOne(target);
+		if (rank === 'all') rank = ` `;
 		if (!(rank in Config.groups)) return this.errorReply(`Group '${rank}' does not exist.`);
-		const id = `${room.id}-rank-${Config.groups[rank].id}`;
+		const id = `${room.id}-rank-${(Config.groups[rank].id || `all`)}`;
 		if (cmd === 'notifyoffrank') {
-			room.sendRankedUsers(`|tempnotifyoff|${id}`, rank);
+			if (rank === ' ') {
+				room.send(`|tempnotifyoff|${id}`);
+			} else {
+				room.sendRankedUsers(`|tempnotifyoff|${id}`, rank);
+			}
 		} else {
-			let [title, message] = this.splitOne(notification);
-			if (!title) title = `${room.title} ${Config.groups[rank].name}+ message!`;
+			let [title, notificationHighlight] = this.splitOne(titleNotification);
+			if (!title) title = `${room.title} ${(Config.groups[rank].name ? `${Config.groups[rank].name}+ ` : ``)}message!`;
 			if (!user.can('addhtml')) {
 				title += ` (notification from ${user.name})`;
 			}
-			if (message.length > 300) return this.errorReply(`Notifications should not exceed 300 characters.`);
-			room.sendRankedUsers(`|tempnotify|${id}|${title}|${message}`, rank);
+			const [notification, highlight] = this.splitOne(notificationHighlight);
+			if (notification.length > 300) return this.errorReply(`Notifications should not exceed 300 characters.`);
+			const message = `|tempnotify|${id}|${title}|${notification}${(highlight ? `|${highlight}` : ``)}`;
+			if (rank === ' ') {
+				room.send(message);
+			} else {
+				room.sendRankedUsers(message, rank);
+			}
 			this.modlog(`NOTIFYRANK`, null, target);
 		}
 	},
 	notifyrankhelp: [
-		`/notifyrank [rank], [title], [message] - Sends a notification to everyone with the specified rank or higher. Requires: # * & ~`,
+		`/notifyrank [rank], [title], [message], [highlight] - Sends a notification to users who are [rank] or higher (and highlight on [highlight], if specified). Requires: # * & ~`,
 		`/notifyoffrank [rank] - Closes the notification previously sent with /notifyrank [rank]. Requires: # * & ~`,
 	],
 

@@ -809,9 +809,8 @@ class ModdedDex {
 			if ("!+-".includes(ruleSpec.charAt(0))) {
 				if (ruleSpec.charAt(0) === '+' && ruleTable.has('-' + ruleSpec.slice(1))) {
 					ruleTable.delete('-' + ruleSpec.slice(1));
-				} else {
-					ruleTable.set(ruleSpec, '');
 				}
+				ruleTable.set(ruleSpec, '');
 				continue;
 			}
 			const subformat = this.getFormat(ruleSpec);
@@ -916,7 +915,7 @@ class ModdedDex {
 				// valid pokemontags
 				const validTags = [
 					// singles tiers
-					'uber', 'ou', 'uubl', 'uu', 'rubl', 'ru', 'nubl', 'nu', 'publ', 'pu', 'nfe', 'lcuber', 'lc', 'cap', 'caplc', 'capnfe',
+					'uber', 'ou', 'uubl', 'uu', 'rubl', 'ru', 'nubl', 'nu', 'publ', 'pu', 'zu', 'nfe', 'lcuber', 'lc', 'cap', 'caplc', 'capnfe',
 					//doubles tiers
 					'duber', 'dou', 'dbl', 'duu',
 					// custom tags
@@ -1078,6 +1077,7 @@ class ModdedDex {
 			if (res.exists && res.gen <= this.gen) {
 				searchResults.push({
 					isInexact: isInexact,
+					// @ts-ignore
 					searchType: searchTypes[table],
 					name: res.species ? res.species : res.name,
 				});
@@ -1447,11 +1447,14 @@ class ModdedDex {
 		// @ts-ignore
 		for (const dataType of DATA_TYPES.concat('Aliases')) {
 			if (dataType === 'Natures' && this.isBase) {
+				// @ts-ignore
 				dataCache[dataType] = BattleNatures;
 				continue;
 			}
 			let BattleData = this.loadDataFile(basePath, dataType);
+			// @ts-ignore
 			if (!BattleData || typeof BattleData !== 'object') throw new TypeError("Exported property `Battle" + dataType + "`from `" + './data/' + DATA_FILES[dataType] + "` must be an object except `null`.");
+			// @ts-ignore
 			if (BattleData !== dataCache[dataType]) dataCache[dataType] = Object.assign(BattleData, dataCache[dataType]);
 			if (dataType === 'Formats' && !parentDex) Object.assign(BattleData, this.formats);
 		}
@@ -1461,6 +1464,7 @@ class ModdedDex {
 		} else {
 			for (const dataType of DATA_TYPES) {
 				const parentTypedData = parentDex.data[dataType];
+				// @ts-ignore
 				const childTypedData = dataCache[dataType] || (dataCache[dataType] = {});
 				for (let entryId in parentTypedData) {
 					if (childTypedData[entryId] === null) {
@@ -1488,10 +1492,12 @@ class ModdedDex {
 					}
 				}
 			}
+			// @ts-ignore
 			dataCache['Aliases'] = parentDex.data['Aliases'];
 		}
 
 		// Flag the generation. Required for team validator.
+		// @ts-ignore
 		this.gen = dataCache.Scripts.gen || 7;
 		// @ts-ignore
 		this.dataCache = dataCache;

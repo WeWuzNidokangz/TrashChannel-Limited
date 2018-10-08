@@ -1031,8 +1031,17 @@ let BattleAbilities = {
 			if (showMsg && !effect.secondaries) this.add('-fail', this.effectData.target, 'unboost', '[from] ability: Flower Veil', '[of] ' + target);
 		},
 		onAllySetStatus: function (status, target, source, effect) {
-			if (target.hasType('Grass')) {
-				if (!effect || !effect.status) return false;
+			if (target.hasType('Grass') && source && target !== source && effect) {
+				this.debug('interrupting setStatus with Flower Veil');
+				if (effect.id === 'synchronize' || (effect.effectType === 'Move' && !effect.secondaries)) {
+					this.add('-activate', this.effectData.target, 'ability: Flower Veil', '[of] ' + target);
+				}
+				return null;
+			}
+		},
+		onAllyTryAddVolatile: function (status, target) {
+			if (target.hasType('Grass') && status.id === 'yawn') {
+				this.debug('Flower Veil blocking yawn');
 				this.add('-activate', this.effectData.target, 'ability: Flower Veil', '[of] ' + target);
 				return null;
 			}
@@ -1726,6 +1735,7 @@ let BattleAbilities = {
 		id: "liquidooze",
 		onSourceTryHeal: function (damage, target, source, effect) {
 			this.debug("Heal is occurring: " + target + " <- " + source + " :: " + effect.id);
+			/**@type {{[k: string]: number}} */
 			let canOoze = {drain: 1, leechseed: 1, strengthsap: 1};
 			if (canOoze[effect.id]) {
 				this.damage(damage);
@@ -1956,6 +1966,7 @@ let BattleAbilities = {
 				}
 			}
 			let randomStat = stats.length ? this.sample(stats) : "";
+			// @ts-ignore
 			if (randomStat) boost[randomStat] = 2;
 
 			stats = [];
@@ -1966,6 +1977,7 @@ let BattleAbilities = {
 				}
 			}
 			randomStat = stats.length ? this.sample(stats) : "";
+			// @ts-ignore
 			if (randomStat) boost[randomStat] = -1;
 
 			this.boost(boost);

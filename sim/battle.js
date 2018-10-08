@@ -68,6 +68,7 @@ class Battle extends Dex.ModdedDex {
 		this.weatherData = {id: ''};
 		/** @type {AnyObject} */
 		this.terrainData = {id: ''};
+		/** @type {AnyObject} */
 		this.pseudoWeather = {};
 
 		this.format = format.id;
@@ -129,8 +130,8 @@ class Battle extends Dex.ModdedDex {
 		this.currentRequest = '';
 		this.lastMoveLine = 0;
 		this.reportPercentages = false;
-		this.illusionCopiesLevels = false;
 		this.supportCancel = false;
+		/** @type {?AnyObject} */
 		this.events = null;
 
 		// old-gens
@@ -145,6 +146,7 @@ class Battle extends Dex.ModdedDex {
 		this.prngSeed = this.prng.startingSeed.slice();
 		this.teamGenerator = null;
 
+		/** @type {{formatid: string, seed: [number, number, number, number], rated?: string | true}} */
 		const inputOptions = {formatid: options.formatid, seed: this.prng.seed};
 		if (this.rated) inputOptions.rated = this.rated;
 		if (global.__version) {
@@ -2241,7 +2243,9 @@ class Battle extends Dex.ModdedDex {
 		}
 
 		// Apply Stat Modifiers
+		// @ts-ignore
 		attack = this.runEvent('Modify' + statTable[attackStat], attacker, defender, move, attack);
+		// @ts-ignore
 		defense = this.runEvent('Modify' + statTable[defenseStat], defender, attacker, move, defense);
 
 		//int(int(int(2 * L / 5 + 2) * A * P / D) / 50);
@@ -2576,6 +2580,7 @@ class Battle extends Dex.ModdedDex {
 				'start': 101,
 			};
 			if (action.choice in priorities) {
+				// @ts-ignore
 				action.priority = priorities[action.choice];
 			}
 		}
@@ -3077,6 +3082,10 @@ class Battle extends Dex.ModdedDex {
 
 		if (!side.choose(input)) return false;
 
+		if (!side.isChoiceDone()) {
+			side.emitChoiceError(`Incomplete choice: ${input} - missing other pokemon`);
+			return false;
+		}
 		this.checkActions();
 		return true;
 	}
@@ -3173,6 +3182,7 @@ class Battle extends Dex.ModdedDex {
 		if (this.reportExactHP) {
 			parts = parts.map(part => {
 				if (typeof part !== 'function') return part;
+				// @ts-ignore
 				return part(true);
 			});
 			this.log.push(`|${parts.join('|')}`);
@@ -3184,6 +3194,7 @@ class Battle extends Dex.ModdedDex {
 		for (const side of sides) {
 			let sideUpdate = '|' + parts.map(part => {
 				if (typeof part !== 'function') return part;
+				// @ts-ignore
 				return part(side);
 			}).join('|');
 			this.log.push(sideUpdate);
