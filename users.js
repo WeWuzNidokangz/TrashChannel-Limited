@@ -433,6 +433,16 @@ class Connection {
 
 /** @typedef {[string, string, Connection]} ChatQueueEntry */
 
+/**@type {() => number} */
+var UserUniqueId = (function () {
+	/**@type {number} */
+	let counter = 0;
+
+	return function () {
+		return counter++;
+	}
+})();
+
 // User
 class User {
 	/**
@@ -456,12 +466,20 @@ class User {
 		/**@type {string} */
 		this.latestHost = '';
 		this.ips = Object.create(null);
-		this.ips[connection.ip] = 1;
+
+		// 18/10/11 TrashChannel: Glitch turns all user IPs into localhost so we need to
+		// artificially diverge each connection's IP
+		/**@type {number} */
+		let nUserUniqueId = UserUniqueId();
+		/**@type {string} */
+		let sGlitchSafeIP = connection.ip + "_" + nUserUniqueId.toString();
+
+		this.ips[sGlitchSafeIP] = 1;
 		// Note: Using the user's latest IP for anything will usually be
 		//       wrong. Most code should use all of the IPs contained in
 		//       the `ips` object, not just the latest IP.
 		/** @type {string} */
-		this.latestIp = connection.ip;
+		this.latestIp = sGlitchSafeIP;
 		/** @type {?false | string} */
 		this.locked = false;
 		/** @type {?false | string} */
