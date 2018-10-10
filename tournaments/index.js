@@ -995,8 +995,7 @@ const commands = {
 		j: 'join',
 		in: 'join',
 		join: function (tournament, user) {
-			// 18/10/11 TrashChannel: Glitch causes all users to be considered alts so we need to enable alt joining by default
-			tournament.addUser(user, true, this);
+			tournament.addUser(user, false, this);
 		},
 		l: 'leave',
 		out: 'leave',
