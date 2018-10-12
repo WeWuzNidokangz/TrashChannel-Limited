@@ -1016,7 +1016,10 @@ class BasicChatRoom extends BasicRoom {
 		this.filterCaps = false;
 		/** @type {false | number} */
 		this.slowchat = false;
-		this.introMessage = '';
+		this.introMessage = 
+		'<b>TrashChannel added tour commands:-</b>' +
+		'<br>Camomons Rule - Adds Camomons rules to battles' +
+		'<br>R 350 Cup Rule - Adds 350 Cup rules to battles';
 		this.staffMessage = '';
 		this.autojoin = false;
 		this.staffAutojoin = /** @type {string | boolean} */ (false);
