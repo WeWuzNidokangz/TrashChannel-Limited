@@ -1018,8 +1018,9 @@ class BasicChatRoom extends BasicRoom {
 		this.slowchat = false;
 		this.introMessage = 
 		'<b>TrashChannel added tour commands:-</b>' +
+		'<br>R 350 Cup Rule - Adds 350 Cup rules to battles' +
 		'<br>Camomons Rule - Adds Camomons rules to battles' +
-		'<br>R 350 Cup Rule - Adds 350 Cup rules to battles';
+		'<br>NEW!! Tier Shift Rule - Adds Tier Shift rules to battles';
 		this.staffMessage = '';
 		this.autojoin = false;
 		this.staffAutojoin = /** @type {string | boolean} */ (false);
