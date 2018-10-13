@@ -10,6 +10,8 @@
 
 'use strict';
 
+const DexCalculator = require('../../sim/dex-calculator');
+
 /**@type {{[k: string]: ModdedEffectData}} */
 let BattleStatuses = {
 	brn: {
@@ -28,13 +30,13 @@ let BattleStatuses = {
 				pokemon.volatiles['residualdmg'].counter++;
 				toxicCounter = pokemon.volatiles['residualdmg'].counter;
 			}
-			this.damage(this.clampIntRange(Math.floor(pokemon.maxhp / 16), 1) * toxicCounter, pokemon);
+			this.damage(DexCalculator.clampIntRange(Math.floor(pokemon.maxhp / 16), 1) * toxicCounter, pokemon);
 		},
 		onSwitchIn: function (pokemon) {
 			pokemon.addVolatile('brnattackdrop');
 		},
 		onAfterSwitchInSelf: function (pokemon) {
-			this.damage(this.clampIntRange(Math.floor(pokemon.maxhp / 16), 1));
+			this.damage(DexCalculator.clampIntRange(Math.floor(pokemon.maxhp / 16), 1));
 		},
 	},
 	par: {
@@ -123,10 +125,10 @@ let BattleStatuses = {
 				pokemon.volatiles['residualdmg'].counter++;
 				toxicCounter = pokemon.volatiles['residualdmg'].counter;
 			}
-			this.damage(this.clampIntRange(Math.floor(pokemon.maxhp / 16), 1) * toxicCounter, pokemon);
+			this.damage(DexCalculator.clampIntRange(Math.floor(pokemon.maxhp / 16), 1) * toxicCounter, pokemon);
 		},
 		onAfterSwitchInSelf: function (pokemon) {
-			this.damage(this.clampIntRange(Math.floor(pokemon.maxhp / 16), 1));
+			this.damage(DexCalculator.clampIntRange(Math.floor(pokemon.maxhp / 16), 1));
 		},
 	},
 	tox: {
@@ -142,14 +144,14 @@ let BattleStatuses = {
 		onAfterMoveSelfPriority: 2,
 		onAfterMoveSelf: function (pokemon) {
 			pokemon.volatiles['residualdmg'].counter++;
-			this.damage(this.clampIntRange(Math.floor(pokemon.maxhp / 16), 1) * pokemon.volatiles['residualdmg'].counter, pokemon, pokemon);
+			this.damage(DexCalculator.clampIntRange(Math.floor(pokemon.maxhp / 16), 1) * pokemon.volatiles['residualdmg'].counter, pokemon, pokemon);
 		},
 		onSwitchIn: function (pokemon) {
 			// Regular poison status and damage after a switchout -> switchin.
 			pokemon.setStatus('psn');
 		},
 		onAfterSwitchInSelf: function (pokemon) {
-			this.damage(this.clampIntRange(Math.floor(pokemon.maxhp / 16), 1));
+			this.damage(DexCalculator.clampIntRange(Math.floor(pokemon.maxhp / 16), 1));
 		},
 	},
 	confusion: {

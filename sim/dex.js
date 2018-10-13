@@ -34,6 +34,7 @@ const fs = require('fs');
 const path = require('path');
 
 const Data = require('./dex-data');
+const DexCalculator = require('./dex-calculator');
 
 const DATA_DIR = path.resolve(__dirname, '../data');
 const MODS_DIR = path.resolve(__dirname, '../mods');
@@ -198,7 +199,7 @@ class ModdedDex {
 	modData(dataType, id) {
 		if (this.isBase) return this.data[dataType][id];
 		if (this.data[dataType][id] !== dexes[this.parentMod].data[dataType][id]) return this.data[dataType][id];
-		return (this.data[dataType][id] = this.deepClone(this.data[dataType][id]));
+		return (this.data[dataType][id] = DexCalculator.deepClone(this.data[dataType][id]));
 	}
 
 	effectToString() {
@@ -454,7 +455,7 @@ class ModdedDex {
 		// @ts-ignore
 		if (move && move.isCopy) return move;
 		move = this.getMove(move);
-		let moveCopy = this.deepClone(move);
+		let moveCopy = DexCalculator.deepClone(move);
 		moveCopy.isCopy = true;
 		return moveCopy;
 	}
@@ -1023,21 +1024,6 @@ class ModdedDex {
 	}
 
 	/**
-	 * Forces num to be an integer (between min and max).
-	 * @param {any} num
-	 * @param {number=} min
-	 * @param {number=} max
-	 * @return {number}
-	 */
-	clampIntRange(num, min, max) {
-		if (typeof num !== 'number') num = 0;
-		num = Math.floor(num);
-		if (min !== undefined && num < min) num = min;
-		if (max !== undefined && num > max) num = max;
-		return num;
-	}
-
-	/**
 	 * @param {Format | string} format
 	 * @param {PRNG | PRNGSeed?} [seed]
 	 */
@@ -1358,21 +1344,6 @@ class ModdedDex {
 	}
 
 	/**
-	 * @param {any} obj
-	 * @return {any}
-	 */
-	deepClone(obj) {
-		if (typeof obj === 'function') return obj;
-		if (obj === null || typeof obj !== 'object') return obj;
-		if (Array.isArray(obj)) return obj.map(prop => this.deepClone(prop));
-		const clone = Object.create(Object.getPrototypeOf(obj));
-		for (const key of Object.keys(obj)) {
-			clone[key] = this.deepClone(obj[key]);
-		}
-		return clone;
-	}
-
-	/**
 	 * @param {string} basePath
 	 * @param {DataType} dataType
 	 * @return {AnyObject}
@@ -1475,7 +1446,7 @@ class ModdedDex {
 						if (dataType === 'Pokedex') {
 							// Pokedex entries can be modified too many different ways
 							// e.g. inheriting different formats-data/learnsets
-							childTypedData[entryId] = this.deepClone(parentTypedData[entryId]);
+							childTypedData[entryId] = DexCalculator.deepClone(parentTypedData[entryId]);
 						} else {
 							childTypedData[entryId] = parentTypedData[entryId];
 						}

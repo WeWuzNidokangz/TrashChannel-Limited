@@ -6,6 +6,7 @@
  */
 'use strict';
 
+const DexCalculator = require('./dex-calculator');
 const Dex = require('./dex');
 global.toId = Dex.getId;
 const Data = require('./dex-data');
@@ -1910,7 +1911,7 @@ class Battle extends Dex.ModdedDex {
 		if (!target.isActive) return false;
 		effect = this.getEffect(effect);
 		if (!(damage || damage === 0)) return damage;
-		if (damage !== 0) damage = this.clampIntRange(damage, 1);
+		if (damage !== 0) damage = DexCalculator.clampIntRange(damage, 1);
 
 		if (effect.id !== 'struggle-recoil') { // Struggle recoil is not affected by effects
 			if (effect.effectType === 'Weather' && !target.runStatusImmunity(effect.id)) {
@@ -1923,7 +1924,7 @@ class Battle extends Dex.ModdedDex {
 				return damage;
 			}
 		}
-		if (damage !== 0) damage = this.clampIntRange(damage, 1);
+		if (damage !== 0) damage = DexCalculator.clampIntRange(damage, 1);
 		damage = target.damage(damage, source, effect);
 		if (source && effect.effectType === 'Move') source.lastDamage = damage;
 		let name = effect.fullname;
@@ -1979,7 +1980,7 @@ class Battle extends Dex.ModdedDex {
 		}
 		if (!target || !target.hp) return 0;
 		if (!damage) return 0;
-		damage = this.clampIntRange(damage, 1);
+		damage = DexCalculator.clampIntRange(damage, 1);
 
 		damage = target.damage(damage, source, effect);
 		switch (effect && effect.id) {
@@ -2163,15 +2164,15 @@ class Battle extends Dex.ModdedDex {
 			if (basePower === 0) return; // returning undefined means not dealing damage
 			return basePower;
 		}
-		basePower = this.clampIntRange(basePower, 1);
+		basePower = DexCalculator.clampIntRange(basePower, 1);
 
 		let critMult;
 		let critRatio = this.runEvent('ModifyCritRatio', pokemon, target, move, move.critRatio || 0);
 		if (this.gen <= 5) {
-			critRatio = this.clampIntRange(critRatio, 0, 5);
+			critRatio = DexCalculator.clampIntRange(critRatio, 0, 5);
 			critMult = [0, 16, 8, 4, 3, 2];
 		} else {
-			critRatio = this.clampIntRange(critRatio, 0, 4);
+			critRatio = DexCalculator.clampIntRange(critRatio, 0, 4);
 			if (this.gen === 6) {
 				critMult = [0, 16, 8, 2, 1];
 			} else {
@@ -2194,7 +2195,7 @@ class Battle extends Dex.ModdedDex {
 		basePower = this.runEvent('BasePower', pokemon, target, move, basePower, true);
 
 		if (!basePower) return 0;
-		basePower = this.clampIntRange(basePower, 1);
+		basePower = DexCalculator.clampIntRange(basePower, 1);
 
 		let level = pokemon.level;
 
@@ -2297,7 +2298,7 @@ class Battle extends Dex.ModdedDex {
 		// types
 		move.typeMod = target.runEffectiveness(move);
 
-		move.typeMod = this.clampIntRange(move.typeMod, -6, 6);
+		move.typeMod = DexCalculator.clampIntRange(move.typeMod, -6, 6);
 		if (move.typeMod > 0) {
 			if (!suppressMessages) this.add('-supereffective', target);
 

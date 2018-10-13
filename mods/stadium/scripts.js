@@ -1,5 +1,7 @@
 'use strict';
 
+const DexCalculator = require('../../sim/dex-calculator');
+
 /**
  * Stadium mechanics inherit from gen 1 mechanics, but fixes some stuff.
  */
@@ -22,7 +24,7 @@ let BattleScripts = {
 		modifyStat: function (stat, modifier) {
 			if (!(stat in this.stats)) return;
 			// @ts-ignore
-			this.modifiedStats[stat] = this.battle.clampIntRange(Math.floor(this.modifiedStats[stat] * modifier), 1);
+			this.modifiedStats[stat] = DexCalculator.clampIntRange(Math.floor(this.modifiedStats[stat] * modifier), 1);
 		},
 		// This is run on Stadium after boosts and status changes.
 		recalculateStats: function () {
@@ -504,7 +506,7 @@ let BattleScripts = {
 			if (basePower === 0) return; // Returning undefined means not dealing damage
 			return basePower;
 		}
-		basePower = this.clampIntRange(basePower, 1);
+		basePower = DexCalculator.clampIntRange(basePower, 1);
 
 		// Checking for the move's Critical Hit possibility. We check if it's a 100% crit move, otherwise we calculate the chance.
 		move.crit = move.willCrit || false;
@@ -537,7 +539,7 @@ let BattleScripts = {
 			}
 
 			// Now we make sure it's a number between 1 and 255.
-			critChance = this.clampIntRange(critChance, 1, 255);
+			critChance = DexCalculator.clampIntRange(critChance, 1, 255);
 
 			// Last, we check deppending on ratio if the move critical hits or not.
 			// We compare our critical hit chance against a random number between 0 and 255.
@@ -559,7 +561,7 @@ let BattleScripts = {
 			}
 		}
 		if (!basePower) return 0;
-		basePower = this.clampIntRange(basePower, 1);
+		basePower = DexCalculator.clampIntRange(basePower, 1);
 
 		// We now check attacker's and defender's stats.
 		let level = pokemon.level;
@@ -575,7 +577,7 @@ let BattleScripts = {
 		if ((defType === 'def' && defender.volatiles['reflect']) || (defType === 'spd' && defender.volatiles['lightscreen'])) {
 			this.debug('Screen doubling (Sp)Def');
 			defense *= 2;
-			defense = this.clampIntRange(defense, 1, 1998);
+			defense = DexCalculator.clampIntRange(defense, 1, 1998);
 		}
 
 		// In the event of a critical hit, the offense and defense changes are ignored.
@@ -599,14 +601,14 @@ let BattleScripts = {
 		// When either attack or defense are higher than 256, they are both divided by 4 and moded by 256.
 		// This is what cuases the roll over bugs.
 		if (attack >= 256 || defense >= 256) {
-			attack = this.clampIntRange(Math.floor(attack / 4) % 256, 1);
+			attack = DexCalculator.clampIntRange(Math.floor(attack / 4) % 256, 1);
 			// Defense isn't checked on the cartridge, but we don't want those / 0 bugs on the sim.
-			defense = this.clampIntRange(Math.floor(defense / 4) % 256, 1);
+			defense = DexCalculator.clampIntRange(Math.floor(defense / 4) % 256, 1);
 		}
 
 		// Self destruct moves halve defense at this point.
 		if (move.selfdestruct && defType === 'def') {
-			defense = this.clampIntRange(Math.floor(defense / 2), 1);
+			defense = DexCalculator.clampIntRange(Math.floor(defense / 2), 1);
 		}
 
 		// Let's go with the calculation now that we have what we need.
@@ -617,7 +619,7 @@ let BattleScripts = {
 		damage *= basePower;
 		damage *= attack;
 		damage = Math.floor(damage / defense);
-		damage = this.clampIntRange(Math.floor(damage / 50), 1, 997);
+		damage = DexCalculator.clampIntRange(Math.floor(damage / 50), 1, 997);
 		damage += 2;
 
 		// STAB damage bonus, the "???" type never gets STAB
@@ -673,7 +675,7 @@ let BattleScripts = {
 		if (!target || !target.hp) return 0;
 		effect = this.getEffect(effect);
 		if (!(damage || damage === 0)) return damage;
-		if (damage !== 0) damage = this.clampIntRange(damage, 1);
+		if (damage !== 0) damage = DexCalculator.clampIntRange(damage, 1);
 
 		if (effect.id !== 'struggle-recoil') { // Struggle recoil is not affected by effects
 			damage = this.runEvent('Damage', target, source, effect, damage);
@@ -682,7 +684,7 @@ let BattleScripts = {
 				return damage;
 			}
 		}
-		if (damage !== 0) damage = this.clampIntRange(damage, 1);
+		if (damage !== 0) damage = DexCalculator.clampIntRange(damage, 1);
 		this.lastDamage = damage;
 		damage = target.damage(damage, source, effect);
 		if (source) source.lastDamage = damage;
@@ -705,10 +707,10 @@ let BattleScripts = {
 
 		// In Stadium, recoil doesn't happen if you faint an opponent.
 		if (effect.recoil && source && target && target.hp > 0) {
-			this.damage(this.clampIntRange(Math.floor(damage * effect.recoil[0] / effect.recoil[1]), 1), source, target, 'recoil');
+			this.damage(DexCalculator.clampIntRange(Math.floor(damage * effect.recoil[0] / effect.recoil[1]), 1), source, target, 'recoil');
 		}
 		if (effect.drain && source) {
-			this.heal(this.clampIntRange(Math.floor(damage * effect.drain[0] / effect.drain[1]), 1), source, target, 'drain');
+			this.heal(DexCalculator.clampIntRange(Math.floor(damage * effect.drain[0] / effect.drain[1]), 1), source, target, 'drain');
 		}
 
 		if (target.fainted) {
@@ -727,7 +729,7 @@ let BattleScripts = {
 		}
 		if (!target || !target.hp) return 0;
 		if (!damage) return 0;
-		damage = this.clampIntRange(damage, 1);
+		damage = DexCalculator.clampIntRange(damage, 1);
 		damage = target.damage(damage, source, effect);
 		// Now we sent the proper -damage.
 		switch (effect.id) {

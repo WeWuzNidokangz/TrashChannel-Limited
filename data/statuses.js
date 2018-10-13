@@ -1,5 +1,7 @@
 'use strict';
 
+const DexCalculator = require('../sim/dex-calculator');
+
 /**@type {{[k: string]: EffectData}} */
 let BattleStatuses = {
 	brn: {
@@ -156,7 +158,7 @@ let BattleStatuses = {
 			if (this.effectData.stage < 15) {
 				this.effectData.stage++;
 			}
-			this.damage(this.clampIntRange(pokemon.maxhp / 16, 1) * this.effectData.stage);
+			this.damage(DexCalculator.clampIntRange(pokemon.maxhp / 16, 1) * this.effectData.stage);
 		},
 	},
 	confusion: {

@@ -1,6 +1,7 @@
 import BattleType = require('./../sim/battle');
 import BattleStreamType = require('./../sim/battle-stream');
 import DataType = require('./../sim/dex-data');
+import DexCalculatorType = require('./../sim/dex-calculator');
 import DexType = require('./../sim/dex');
 import SimType = require('./../sim/index');
 import PokemonType = require('./../sim/pokemon');

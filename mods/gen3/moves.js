@@ -4,6 +4,8 @@
 
 'use strict';
 
+const DexCalculator = require('../../sim/dex-calculator');
+
 /**@type {{[k: string]: ModdedMoveData}} */
 let BattleMovedex = {
 	absorb: {
@@ -449,7 +451,7 @@ let BattleMovedex = {
 		onMoveFail: function (target, source, move) {
 			if (target.runImmunity('Fighting')) {
 				let damage = this.getDamage(source, target, move, true);
-				this.damage(this.clampIntRange(damage / 2, 1, Math.floor(target.maxhp / 2)), source, source, 'highjumpkick');
+				this.damage(DexCalculator.clampIntRange(damage / 2, 1, Math.floor(target.maxhp / 2)), source, source, 'highjumpkick');
 			}
 		},
 	},
@@ -474,7 +476,7 @@ let BattleMovedex = {
 		onMoveFail: function (target, source, move) {
 			if (target.runImmunity('Fighting')) {
 				let damage = this.getDamage(source, target, move, true);
-				this.damage(this.clampIntRange(damage / 2, 1, Math.floor(target.maxhp / 2)), source, source, 'jumpkick');
+				this.damage(DexCalculator.clampIntRange(damage / 2, 1, Math.floor(target.maxhp / 2)), source, source, 'jumpkick');
 			}
 		},
 	},

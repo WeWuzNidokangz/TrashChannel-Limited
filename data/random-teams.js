@@ -1,5 +1,6 @@
 'use strict';
 
+const DexCalculator = require('./../sim/dex-calculator');
 const Dex = require('./../sim/dex');
 const PRNG = require('./../sim/prng');
 
@@ -1622,7 +1623,7 @@ class RandomTeams extends Dex.ModdedDex {
 			if (item === 'Eviolite') {
 				bst += 0.5 * (baseStats.def + baseStats.spd);
 			}
-			level = 70 + Math.floor(((600 - this.clampIntRange(bst, 300, 600)) / 10.34));
+			level = 70 + Math.floor(((600 - DexCalculator.clampIntRange(bst, 300, 600)) / 10.34));
 		}
 
 		if (template.species === 'Stunfisk') {

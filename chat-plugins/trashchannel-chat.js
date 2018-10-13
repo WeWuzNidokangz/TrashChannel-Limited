@@ -8,6 +8,13 @@
 
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
+
+const DexCalculator = require('../sim/dex-calculator');
+
+const RULESETS = path.resolve(__dirname, '../data/rulesets');
+
 const MAX_PROCESSES = 1;
 const RESULTS_MAX_LENGTH = 10;
 
@@ -21,6 +28,7 @@ function escapeHTML(str) {
 
 /** @type {ChatCommands} */
 const commands = {
+	// DEBUG
 	'!forcebattle': true,
 	forcebattle: 'forcebattle',
 	forcebattle: function (target, room, user, connection, cmd, message) {
@@ -84,6 +92,40 @@ const commands = {
 			rated: '',
 		});
 	},
+
+	// HELP
+	'!350tiershift': true,
+	'350tiershift': '350cuptiershift',
+	'350ts': '350cuptiershift',
+	'350cuptiershift': function (target, room, user) {
+		if (!this.runBroadcast()) return;
+		if (!toId(target)) return this.parse('/help 350tiershift');
+		let template = Object.assign({}, Dex.getTemplate(target));
+		if (!template.exists) return this.errorReply("Error: Pokemon not found.");
+
+		console.log('RULESETS: ' + RULESETS);
+
+		// Load rulesets
+		/**@type {{[k: string]: FormatsData}} */
+		let Rulesets;
+		try {
+			Rulesets = require(RULESETS).BattleFormats;
+		} catch (e) {
+			console.log('e.code: ' + e.code);
+			if (e.code !== 'MODULE_NOT_FOUND' && e.code !== 'ENOENT') {
+				throw e;
+			}
+		}
+
+		// Deepclone template to avoid permanently altering the original
+		let cloneTemplate = DexCalculator.deepClone(template) 
+
+		cloneTemplate = Rulesets['r350cuprule'].onModifyTemplate(cloneTemplate, null);
+		cloneTemplate = Rulesets['tiershiftrule'].onModifyTemplate(cloneTemplate, null);
+
+		this.sendReply(`|html|${Chat.getDataPokemonHTML(cloneTemplate)}`);
+	},
+	'350cuptiershifthelp': [`/350ts OR /350tiershift OR /350tiershift <pokemon> - Shows the base stats that a Pokemon would have in a mashup including 350 Cup and Tier Shift.`],
 };
 
 exports.commands = commands;

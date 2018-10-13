@@ -1,5 +1,7 @@
 'use strict';
 
+const DexCalculator = require('../../sim/dex-calculator');
+
 /**@type {ModdedBattleScriptsData} */
 let BattleScripts = {
 	init: function () {
@@ -105,7 +107,7 @@ let BattleScripts = {
 		template.baseStats = {};
 		for (let statName in baseStats) {
 			// @ts-ignore
-			template.baseStats[statName] = this.clampIntRange(baseStats[statName] + deltas.baseStats[statName], 1, 255);
+			template.baseStats[statName] = DexCalculator.clampIntRange(baseStats[statName] + deltas.baseStats[statName], 1, 255);
 		}
 		template.weightkg = Math.max(0.1, template.weightkg + deltas.weightkg);
 		template.originalMega = deltas.originalMega;

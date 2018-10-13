@@ -3,6 +3,8 @@
 
 'use strict';
 
+const DexCalculator = require('../sim/dex-calculator');
+
 /**@type {{[k: string]: FormatsData}} */
 let BattleFormats = {
 
@@ -969,7 +971,9 @@ let BattleFormats = {
 		desc: "The mod for Tier Shift: Pokemon get a +10 boost to each stat per tier below OU they are in. UU gets +10, RU +20, NU +30, and PU +40.",
         onModifyTemplate: function (template, pokemon) {
 			console.log('tiershiftrule: onModifyTemplate');
-			if (pokemon.tierShifted) return template;
+			if(null != pokemon) {
+				if (pokemon.tierShifted) return template;
+			}
 			let tierShift = Object.assign({}, template);
 			const boosts = {
 				'UU': 10,
@@ -984,16 +988,20 @@ let BattleFormats = {
 				'LC': 40,
 			};
 			let tier = template.tier;
-			if (pokemon.set.item) {
-				let item = this.getItem(pokemon.set.item);
-				if (item.megaEvolves === template.species) tier = this.getTemplate(item.megaStone).tier;
+			if(null != pokemon) {
+				if (pokemon.set.item) {
+					let item = this.getItem(pokemon.set.item);
+					if (item.megaEvolves === template.species) tier = this.getTemplate(item.megaStone).tier;
+				}
 			}
 			if (tier.charAt(0) === '(') tier = tier.slice(1, -1);
 			let boost = (tier in boosts) ? boosts[tier] : 0;
 			for (let statName in template.baseStats) {
-				tierShift.baseStats[statName] = this.clampIntRange(template.baseStats[statName] + boost, 1, 255);
+				tierShift.baseStats[statName] = DexCalculator.clampIntRange(template.baseStats[statName] + boost, 1, 255);
 			}
-			pokemon.tierShifted = true;
+			if(null != pokemon) {
+				pokemon.tierShifted = true;
+			}
 			return tierShift;
         },
 	},

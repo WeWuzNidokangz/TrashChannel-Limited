@@ -6,6 +6,8 @@
  */
 'use strict';
 
+const DexCalculator = require('./dex-calculator');
+
 /**
  * An object representing a Pokemon's move
  *
@@ -169,7 +171,7 @@ class Pokemon {
 		this.speed = 0;
 		this.abilityOrder = 0;
 
-		set.level = this.battle.clampIntRange(set.forcedLevel || set.level || 100, 1, 9999);
+		set.level = DexCalculator.clampIntRange(set.forcedLevel || set.level || 100, 1, 9999);
 		this.level = set.level;
 
 		let genders = {M: 'M', F: 'F', N: 'N'};
@@ -177,7 +179,7 @@ class Pokemon {
 		// @ts-ignore
 		this.gender = genders[set.gender] || this.template.gender || (this.battle.random() * 2 < 1 ? 'M' : 'F');
 		if (this.gender === 'N') this.gender = '';
-		this.happiness = typeof set.happiness === 'number' ? this.battle.clampIntRange(set.happiness, 0, 255) : 255;
+		this.happiness = typeof set.happiness === 'number' ? DexCalculator.clampIntRange(set.happiness, 0, 255) : 255;
 		this.pokeball = this.set.pokeball || 'pokeball';
 
 		this.fullname = this.side.id + ': ' + this.name;
@@ -251,11 +253,11 @@ class Pokemon {
 		}
 		for (let i in this.set.evs) {
 			// @ts-ignore
-			this.set.evs[i] = this.battle.clampIntRange(this.set.evs[i], 0, 255);
+			this.set.evs[i] = DexCalculator.clampIntRange(this.set.evs[i], 0, 255);
 		}
 		for (let i in this.set.ivs) {
 			// @ts-ignore
-			this.set.ivs[i] = this.battle.clampIntRange(this.set.ivs[i], 0, 31);
+			this.set.ivs[i] = DexCalculator.clampIntRange(this.set.ivs[i], 0, 31);
 		}
 		if (this.battle.gen && this.battle.gen <= 2) {
 			// We represent DVs using even IVs. Ensure they are in fact even.
@@ -920,7 +922,7 @@ class Pokemon {
 		let baseTemplate = this.battle.getTemplate(templateId);
 
 		// Seems like we need to deepclone the template to avoid permanently altering the original here...
-		let rawTemplate = this.battle.deepClone(baseTemplate) 
+		let rawTemplate = DexCalculator.deepClone(baseTemplate) 
 
 		console.log('rawTemplate: '+ rawTemplate);
 

@@ -4,6 +4,8 @@
 
 'use strict';
 
+const DexCalculator = require('../../sim/dex-calculator');
+
 /**@type {{[k: string]: ModdedMoveData}} */
 let BattleMovedex = {
 	absorb: {
@@ -381,7 +383,7 @@ let BattleMovedex = {
 		onMoveFail: function (target, source, move) {
 			if (target.runImmunity('Fighting')) {
 				let damage = this.getDamage(source, target, move, true);
-				this.damage(this.clampIntRange(damage / 8, 1), source, source, 'highjumpkick');
+				this.damage(DexCalculator.clampIntRange(damage / 8, 1), source, source, 'highjumpkick');
 			}
 		},
 	},
@@ -400,7 +402,7 @@ let BattleMovedex = {
 		onMoveFail: function (target, source, move) {
 			if (target.runImmunity('Fighting')) {
 				let damage = this.getDamage(source, target, move, true);
-				this.damage(this.clampIntRange(damage / 8, 1), source, source, 'jumpkick');
+				this.damage(DexCalculator.clampIntRange(damage / 8, 1), source, source, 'jumpkick');
 			}
 		},
 	},
@@ -422,7 +424,7 @@ let BattleMovedex = {
 				if (!leecher || leecher.fainted || leecher.hp <= 0) {
 					return;
 				}
-				let toLeech = this.clampIntRange(pokemon.maxhp / 8, 1);
+				let toLeech = DexCalculator.clampIntRange(pokemon.maxhp / 8, 1);
 				let damage = this.damage(toLeech, pokemon, leecher);
 				if (damage) {
 					this.heal(damage, leecher, pokemon);

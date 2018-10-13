@@ -1,5 +1,7 @@
 'use strict';
 
+const DexCalculator = require('../../sim/dex-calculator');
+
 /**
  * Gen 2 scripts.
  */
@@ -44,7 +46,7 @@ let BattleScripts = {
 			}
 
 			// Gen 2 caps stats at 999 and min is 1.
-			stat = this.battle.clampIntRange(stat, 1, 999);
+			stat = DexCalculator.clampIntRange(stat, 1, 999);
 
 			// Screens
 			if (!unboosted) {
@@ -491,11 +493,11 @@ let BattleScripts = {
 			if (basePower === 0) return; // Returning undefined means not dealing damage
 			return basePower;
 		}
-		basePower = this.clampIntRange(basePower, 1);
+		basePower = DexCalculator.clampIntRange(basePower, 1);
 
 		// Checking for the move's Critical Hit ratio
 		let critRatio = this.runEvent('ModifyCritRatio', pokemon, target, move, move.critRatio || 0);
-		critRatio = this.clampIntRange(critRatio, 0, 5);
+		critRatio = DexCalculator.clampIntRange(critRatio, 0, 5);
 		let critMult = [0, 16, 8, 4, 3, 2];
 		move.crit = move.willCrit || false;
 		if (typeof move.willCrit === 'undefined') {
@@ -524,7 +526,7 @@ let BattleScripts = {
 			}
 		}
 		if (!basePower) return 0;
-		basePower = this.clampIntRange(basePower, 1);
+		basePower = DexCalculator.clampIntRange(basePower, 1);
 
 		// We now check for attacker and defender
 		let level = pokemon.level;
@@ -598,13 +600,13 @@ let BattleScripts = {
 		// When either attack or defense are higher than 256, they are both divided by 4 and moded by 256.
 		// This is what cuases the roll over bugs.
 		if (attack >= 256 || defense >= 256) {
-			attack = this.clampIntRange(Math.floor(attack / 4) % 256, 1);
-			defense = this.clampIntRange(Math.floor(defense / 4) % 256, 1);
+			attack = DexCalculator.clampIntRange(Math.floor(attack / 4) % 256, 1);
+			defense = DexCalculator.clampIntRange(Math.floor(defense / 4) % 256, 1);
 		}
 
 		// Self destruct moves halve defense at this point.
 		if (move.selfdestruct && defType === 'def') {
-			defense = this.clampIntRange(Math.floor(defense / 2), 1);
+			defense = DexCalculator.clampIntRange(Math.floor(defense / 2), 1);
 		}
 
 		// Let's go with the calculation now that we have what we need.
@@ -615,7 +617,7 @@ let BattleScripts = {
 		damage *= basePower;
 		damage *= attack;
 		damage = Math.floor(damage / defense);
-		damage = this.clampIntRange(Math.floor(damage / 50), 1, 997);
+		damage = DexCalculator.clampIntRange(Math.floor(damage / 50), 1, 997);
 		damage += 2;
 
 		// Weather modifiers
@@ -672,7 +674,7 @@ let BattleScripts = {
 		if (!target || !target.hp) return 0;
 		effect = this.getEffect(effect);
 		if (!(damage || damage === 0)) return damage;
-		if (damage !== 0) damage = this.clampIntRange(damage, 1);
+		if (damage !== 0) damage = DexCalculator.clampIntRange(damage, 1);
 
 		if (effect.id !== 'struggle-recoil') { // Struggle recoil is not affected by effects
 			if (effect.effectType === 'Weather' && !target.runStatusImmunity(effect.id)) {
@@ -685,7 +687,7 @@ let BattleScripts = {
 				return damage;
 			}
 		}
-		if (damage !== 0) damage = this.clampIntRange(damage, 1);
+		if (damage !== 0) damage = DexCalculator.clampIntRange(damage, 1);
 		damage = target.damage(damage, source, effect);
 		if (source) source.lastDamage = damage;
 		let name = effect.fullname;

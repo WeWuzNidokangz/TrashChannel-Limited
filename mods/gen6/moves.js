@@ -1,5 +1,7 @@
 'use strict';
 
+const DexCalculator = require('../../sim/dex-calculator');
+
 /**@type {{[k: string]: ModdedMoveData}} */
 let BattleMovedex = {
 	allyswitch: {
@@ -306,7 +308,7 @@ let BattleMovedex = {
 			onTryMove: function (pokemon, target, move) {
 				if (move.type === 'Fire') {
 					this.add('-activate', pokemon, 'move: Powder');
-					this.damage(this.clampIntRange(Math.round(pokemon.maxhp / 4), 1));
+					this.damage(DexCalculator.clampIntRange(Math.round(pokemon.maxhp / 4), 1));
 					return false;
 				}
 			},

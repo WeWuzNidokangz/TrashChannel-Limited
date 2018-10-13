@@ -49,6 +49,8 @@ const BROADCAST_TOKEN = '!';
 
 const FS = require('./lib/fs');
 
+const DexCalculator = require('./sim/dex-calculator');
+
 /** @type {(url: string) => Promise<{width: number, height: number}>} */
 // @ts-ignore ignoring until there is a ts typedef available for this module.
 const probe = require('probe-image-size');

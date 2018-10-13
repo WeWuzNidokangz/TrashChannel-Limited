@@ -28,6 +28,8 @@ sound: Has no effect on Pokemon with the Soundproof Ability.
 
 'use strict';
 
+const DexCalculator = require('../sim/dex-calculator');
+
 /**@type {{[k: string]: MoveData}} */
 let BattleMovedex = {
 	"10000000voltthunderbolt": {
@@ -6000,7 +6002,7 @@ let BattleMovedex = {
 			if (!pokemon.volatiles.furycutter) {
 				pokemon.addVolatile('furycutter');
 			}
-			return this.clampIntRange(move.basePower * pokemon.volatiles.furycutter.multiplier, 1, 160);
+			return DexCalculator.clampIntRange(move.basePower * pokemon.volatiles.furycutter.multiplier, 1, 160);
 		},
 		category: "Physical",
 		desc: "Power doubles with each successful hit, up to a maximum of 160 power. The power is reset if this move misses or another move is used.",
@@ -6825,9 +6827,9 @@ let BattleMovedex = {
 		damageCallback: function (pokemon, target) {
 			if (target.volatiles['banefulbunker'] || target.volatiles['kingsshield'] || target.side.sideConditions['matblock'] || target.volatiles['protect'] || target.volatiles['spikyshield']) {
 				this.add('-zbroken', target);
-				return this.clampIntRange(Math.ceil(Math.floor(target.hp * 3 / 4) / 4 - 0.5), 1);
+				return DexCalculator.clampIntRange(Math.ceil(Math.floor(target.hp * 3 / 4) / 4 - 0.5), 1);
 			}
-			return this.clampIntRange(Math.floor(target.hp * 3 / 4), 1);
+			return DexCalculator.clampIntRange(Math.floor(target.hp * 3 / 4), 1);
 		},
 		category: "Special",
 		desc: "Deals damage to the target equal to 3/4 of its current HP, rounded down, but not less than 1 HP.",
@@ -11046,7 +11048,7 @@ let BattleMovedex = {
 		accuracy: 90,
 		basePower: 0,
 		damageCallback: function (pokemon, target) {
-			return this.clampIntRange(Math.floor(target.hp / 2), 1);
+			return DexCalculator.clampIntRange(Math.floor(target.hp / 2), 1);
 		},
 		category: "Special",
 		desc: "Deals damage to the target equal to half of its current HP, rounded down, but not less than 1 HP.",
@@ -12018,7 +12020,7 @@ let BattleMovedex = {
 			onTryMove: function (pokemon, target, move) {
 				if (move.type === 'Fire') {
 					this.add('-activate', pokemon, 'move: Powder');
-					this.damage(this.clampIntRange(Math.round(pokemon.maxhp / 4), 1));
+					this.damage(DexCalculator.clampIntRange(Math.round(pokemon.maxhp / 4), 1));
 					return false;
 				}
 			},
@@ -16043,7 +16045,7 @@ let BattleMovedex = {
 				this.add('-sidestart', side, 'move: Stealth Rock');
 			},
 			onSwitchIn: function (pokemon) {
-				let typeMod = this.clampIntRange(pokemon.runEffectiveness('Rock'), -6, 6);
+				let typeMod = DexCalculator.clampIntRange(pokemon.runEffectiveness('Rock'), -6, 6);
 				this.damage(pokemon.maxhp * Math.pow(2, typeMod) / 8);
 			},
 		},
@@ -16634,7 +16636,7 @@ let BattleMovedex = {
 		accuracy: 90,
 		basePower: 0,
 		damageCallback: function (pokemon, target) {
-			return this.clampIntRange(Math.floor(target.hp / 2), 1);
+			return DexCalculator.clampIntRange(Math.floor(target.hp / 2), 1);
 		},
 		category: "Physical",
 		desc: "Deals damage to the target equal to half of its current HP, rounded down, but not less than 1 HP.",

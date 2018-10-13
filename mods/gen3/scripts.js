@@ -1,5 +1,7 @@
 'use strict';
 
+const DexCalculator = require('../../sim/dex-calculator');
+
 /**@type {ModdedBattleScriptsData} */
 let BattleScripts = {
 	inherit: 'gen4',
@@ -73,7 +75,7 @@ let BattleScripts = {
 		if (accuracy !== true) {
 			if (!move.ignoreAccuracy) {
 				boosts = this.runEvent('ModifyBoost', pokemon, null, null, Object.assign({}, pokemon.boosts));
-				boost = this.clampIntRange(boosts['accuracy'], -6, 6);
+				boost = DexCalculator.clampIntRange(boosts['accuracy'], -6, 6);
 				if (boost > 0) {
 					accuracy *= boostTable[boost];
 				} else {
@@ -82,7 +84,7 @@ let BattleScripts = {
 			}
 			if (!move.ignoreEvasion) {
 				boosts = this.runEvent('ModifyBoost', target, null, null, Object.assign({}, target.boosts));
-				boost = this.clampIntRange(boosts['evasion'], -6, 6);
+				boost = DexCalculator.clampIntRange(boosts['evasion'], -6, 6);
 				if (boost > 0) {
 					accuracy /= boostTable[boost];
 				} else if (boost < 0) {
@@ -160,7 +162,7 @@ let BattleScripts = {
 					if (accuracy !== true) {
 						if (!move.ignoreAccuracy) {
 							boosts = this.runEvent('ModifyBoost', pokemon, null, null, Object.assign({}, pokemon.boosts));
-							boost = this.clampIntRange(boosts['accuracy'], -6, 6);
+							boost = DexCalculator.clampIntRange(boosts['accuracy'], -6, 6);
 							if (boost > 0) {
 								accuracy *= boostTable[boost];
 							} else {
@@ -169,7 +171,7 @@ let BattleScripts = {
 						}
 						if (!move.ignoreEvasion) {
 							boosts = this.runEvent('ModifyBoost', target, null, null, Object.assign({}, target.boosts));
-							boost = this.clampIntRange(boosts['evasion'], -6, 6);
+							boost = DexCalculator.clampIntRange(boosts['evasion'], -6, 6);
 							if (boost > 0) {
 								accuracy /= boostTable[boost];
 							} else if (boost < 0) {
@@ -223,7 +225,7 @@ let BattleScripts = {
 
 	calcRecoilDamage: function (damageDealt, move) {
 		// @ts-ignore
-		return this.clampIntRange(Math.floor(damageDealt * move.recoil[0] / move.recoil[1]), 1);
+		return DexCalculator.clampIntRange(Math.floor(damageDealt * move.recoil[0] / move.recoil[1]), 1);
 	},
 };
 

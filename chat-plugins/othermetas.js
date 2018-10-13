@@ -1,6 +1,8 @@
 // Other Metas plugin by Spandan
 'use strict';
 
+const DexCalculator = require('../sim/dex-calculator');
+
 /**
  * @param {string} stone
  * @return {Object}
@@ -141,7 +143,7 @@ const commands = {
 		mixedTemplate.baseStats = Object.assign({}, mixedTemplate.baseStats);
 		for (let statName in template.baseStats) { // Add the changed stats and weight
 			// @ts-ignore
-			mixedTemplate.baseStats[statName] = Dex.clampIntRange(mixedTemplate.baseStats[statName] + deltas.baseStats[statName], 1, 255);
+			mixedTemplate.baseStats[statName] = DexCalculator.clampIntRange(mixedTemplate.baseStats[statName] + deltas.baseStats[statName], 1, 255);
 		}
 		mixedTemplate.weightkg = Math.round(Math.max(0.1, template.weightkg + deltas.weightkg) * 100) / 100;
 		mixedTemplate.tier = "MnM";
@@ -321,7 +323,7 @@ const commands = {
 		let newStats = Object.assign({}, template.baseStats);
 		for (let statName in template.baseStats) {
 			// @ts-ignore
-			newStats[statName] = Dex.clampIntRange(newStats[statName] + boost, 1, 255);
+			newStats[statName] = DexCalculator.clampIntRange(newStats[statName] + boost, 1, 255);
 		}
 		template.baseStats = Object.assign({}, newStats);
 		this.sendReply(`|raw|${Chat.getDataPokemonHTML(template)}`);
@@ -342,7 +344,7 @@ const commands = {
 		let scale = 600 - template.baseStats['hp'];
 		for (const stat of stats) {
 			// @ts-ignore
-			newStats[stat] = Dex.clampIntRange(template.baseStats[stat] * scale / pst, 1, 255);
+			newStats[stat] = DexCalculator.clampIntRange(template.baseStats[stat] * scale / pst, 1, 255);
 		}
 		template.baseStats = Object.assign({}, newStats);
 		this.sendReply(`|raw|${Chat.getDataPokemonHTML(template)}`);

@@ -5,6 +5,8 @@
 
 'use strict';
 
+const DexCalculator = require('../../sim/dex-calculator');
+
 /**@type {{[k: string]: ModdedMoveData}} */
 let BattleMovedex = {
 	absorb: {
@@ -566,7 +568,7 @@ let BattleMovedex = {
 					pokemon.volatiles['residualdmg'].counter++;
 					toxicCounter = pokemon.volatiles['residualdmg'].counter;
 				}
-				let toLeech = this.clampIntRange(Math.floor(pokemon.maxhp / 16), 1) * toxicCounter;
+				let toLeech = DexCalculator.clampIntRange(Math.floor(pokemon.maxhp / 16), 1) * toxicCounter;
 				let damage = this.damage(toLeech, pokemon, leecher);
 				if (damage) this.heal(damage, leecher, pokemon);
 			},

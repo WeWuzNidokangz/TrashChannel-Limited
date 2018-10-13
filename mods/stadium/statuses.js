@@ -1,5 +1,7 @@
 'use strict';
 
+const DexCalculator = require('../../sim/dex-calculator');
+
 /**@type {{[k: string]: ModdedEffectData}} */
 let BattleStatuses = {
 	brn: {
@@ -12,10 +14,10 @@ let BattleStatuses = {
 		},
 		onAfterMoveSelfPriority: 2,
 		onAfterMoveSelf: function (pokemon) {
-			this.damage(this.clampIntRange(Math.floor(pokemon.maxhp / 16), 1));
+			this.damage(DexCalculator.clampIntRange(Math.floor(pokemon.maxhp / 16), 1));
 		},
 		onAfterSwitchInSelf: function (pokemon) {
-			this.damage(this.clampIntRange(Math.floor(pokemon.maxhp / 16), 1));
+			this.damage(DexCalculator.clampIntRange(Math.floor(pokemon.maxhp / 16), 1));
 		},
 	},
 	par: {
@@ -94,10 +96,10 @@ let BattleStatuses = {
 		},
 		onAfterMoveSelfPriority: 2,
 		onAfterMoveSelf: function (pokemon) {
-			this.damage(this.clampIntRange(Math.floor(pokemon.maxhp / 16), 1));
+			this.damage(DexCalculator.clampIntRange(Math.floor(pokemon.maxhp / 16), 1));
 		},
 		onAfterSwitchInSelf: function (pokemon) {
-			this.damage(this.clampIntRange(Math.floor(pokemon.maxhp / 16), 1));
+			this.damage(DexCalculator.clampIntRange(Math.floor(pokemon.maxhp / 16), 1));
 		},
 	},
 	tox: {
@@ -110,14 +112,14 @@ let BattleStatuses = {
 		},
 		onAfterMoveSelfPriority: 2,
 		onAfterMoveSelf: function (pokemon) {
-			this.damage(this.clampIntRange(Math.floor(pokemon.maxhp / 16), 1));
+			this.damage(DexCalculator.clampIntRange(Math.floor(pokemon.maxhp / 16), 1));
 		},
 		onAfterSwitchInSelf: function (pokemon) {
 			// Regular poison status and damage after a switchout -> switchin.
 			pokemon.setStatus('psn');
 			pokemon.addVolatile('residualdmg');
 			pokemon.volatiles['residualdmg'].counter = 1;
-			this.damage(this.clampIntRange(Math.floor(pokemon.maxhp / 16), 1));
+			this.damage(DexCalculator.clampIntRange(Math.floor(pokemon.maxhp / 16), 1));
 		},
 	},
 	partiallytrapped: {
