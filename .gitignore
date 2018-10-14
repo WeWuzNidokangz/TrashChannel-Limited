@@ -1,6 +1,7 @@
 /config/*
 !/config/formats.js
 !/config/usergroups.csv
+!/config/roomintro.html
 /logs/*
 /node_modules
 /eslint-cache

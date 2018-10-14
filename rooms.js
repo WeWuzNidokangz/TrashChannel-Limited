@@ -21,6 +21,8 @@ const CRASH_REPORT_THROTTLE = 60 * 60 * 1000;
 const RETRY_AFTER_LOGIN = null;
 
 const FS = require('./lib/fs');
+const fs = require('fs');
+const path = require('path');
 const Roomlogs = require('./roomlogs');
 
 /*********************************************************
@@ -1016,13 +1018,7 @@ class BasicChatRoom extends BasicRoom {
 		this.filterCaps = false;
 		/** @type {false | number} */
 		this.slowchat = false;
-		this.introMessage = 
-		'<b>TrashChannel added tour commands:-</b>' +
-		'<br>R 350 Cup Rule - Adds 350 Cup rules to battles' +
-		'<br>Camomons Rule - Adds Camomons rules to battles' +
-		'<br><b>NEW!!</b> Tier Shift Rule - Adds Tier Shift rules to battles' +
-		'<br><br><b>Added chat commands:-</b>' +
-		'<br><b>NEW!!</b> /350ts - /350 + /ts';
+		this.introMessage = fs.readFileSync(path.resolve(__dirname, 'config/roomintro.html'), 'utf8');
 		this.staffMessage = '';
 		this.autojoin = false;
 		this.staffAutojoin = /** @type {string | boolean} */ (false);
