@@ -12,6 +12,8 @@
 
 'use strict';
 
+const DexCalculator = require('../sim/dex-calculator');
+
 /** @type {ChatCommands} */
 const commands = {
 
