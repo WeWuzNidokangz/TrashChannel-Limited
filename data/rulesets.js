@@ -965,6 +965,15 @@ let BattleFormats = {
 			}
 		},
 	},
+	suicidecuprule: {
+		effectType: 'Rule',
+		name: 'Suicide Cup Rule',
+		desc: "The mod for Suicide Cup: The first side to lose of their Pok&eacute;mon wins.",
+		mod: 'suicidecup',
+		onValidateSet: function (set) {
+			if(set.level !== 100) return [`All Pokemon should be Level 100. (${set.name || set.species} is Level ${set.level})`];
+		},
+	},
 	tiershiftrule: {
 		effectType: 'Rule',
 		name: 'Tier Shift Rule',

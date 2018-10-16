@@ -913,9 +913,16 @@ let Formats = [
 		},
 	},
 	{
+		name: "[Gen 7] Suicide Cup",
+		desc: "The first side to lose of their Pok&eacute;mon wins.",
+		mod: 'suicidecup',
+		ruleset: ['[Gen 7] Anything Goes', 'Suicide Cup Rule', 'Sleep Clause Mod', 'Species Clause', 'Nickname Clause', 'Moody Clause', 'Evasion Moves Clause'],
+		banlist: ['Assault Vest', 'Explosion', 'Final Gambit', 'Healing Wish', 'Lunar Dance', 'Magic Room', 'Memento', 'Self Destruct', 'Shedinja'],
+	},
+	{
 		name: "[Gen 7] Tier Shift",
 		ruleset: ['[Gen 7] OU', 'Tier Shift Rule'],
-		desc: ['<a href="http://www.smogon.com/forums/threads/3610073/">Tier Shift</a>: Pokemon get a +10 boost to each stat per tier below OU they are in. UU gets +10, RU +20, NU +30, and PU +40.'],
+		desc: '<a href="http://www.smogon.com/forums/threads/3610073/">Tier Shift</a>: Pokemon get a +10 boost to each stat per tier below OU they are in. UU gets +10, RU +20, NU +30, and PU +40.',
 		mod: 'gen7',
 	},
 
