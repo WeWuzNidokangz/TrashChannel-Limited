@@ -284,6 +284,40 @@ class RuleTable extends Map {
 	}
 }
 
+/**
+ * A RestrictionTable keeps track of the restrictions that a format has. The key can be:
+ * - '[restrictionid]' the ID of a rule in effect
+ * - '-[thing]' or '-[category]:[thing]' restrict a thing
+ * - '+[thing]' or '+[category]:[thing]' allow a thing (override a restriction)
+ * [category] is one of: item, move, ability, species, basespecies
+ * @augments {Map<string, string>}
+ */
+// @ts-ignore TypeScript bug
+class RestrictionTable extends Map {
+	constructor() {
+		super();
+	}
+	// FIXME: refactor prolly
+	/**
+	 * @param {string} thing
+	 * @param {{[id: string]: true}?} setHas
+	 * @return {string}
+	 */
+	check(thing, setHas = null) {
+		if (setHas) setHas[thing] = true;
+		return this.getReason('-' + thing);
+	}
+	/**
+	 * @param {string} key
+	 * @return {string}
+	 */
+	getReason(key) {
+		const source = this.get(key);
+		if (source === undefined) return '';
+		return source ? `banned by ${source}` : `banned`;
+	}
+}
+
 class Format extends Effect {
 	/**
 	 * @param {AnyObject} data
@@ -349,6 +383,32 @@ class Format extends Effect {
 		 * @type {?RuleTable}
 		 */
 		this.ruleTable = null;
+		/**
+		 * List of restriction names.
+		 * @type {string[]}
+		 */
+		this.restrictionset = this.restrictionset || [];
+		/**
+		 * List of restricted effects.
+		 * @type {string[]}
+		 */
+		this.restrictionlist = this.restrictionlist || [];
+		/**
+		 * List of inherited restricted effects to override.
+		 * @type {string[]}
+		 */
+		this.unrestrictionlist = this.unrestrictionlist || [];
+		/**
+		 * List of restrictionlist changes in a custom format.
+		 * @type {?string[]}
+		 */
+		this.customRestrictions = this.customRestrictions || null;
+		/**
+		 * Table of restricted effects.
+		 * @type {?RestrictionTable}
+		 */
+		this.restrictionTable = null;
+		
 		/**
 		 * The number of Pokemon players can bring to battle and
 		 * the number that can actually be used.
@@ -1321,6 +1381,7 @@ exports.Tools = Tools;
 exports.Effect = Effect;
 exports.PureEffect = PureEffect;
 exports.RuleTable = RuleTable;
+exports.RestrictionTable = RestrictionTable;
 exports.Format = Format;
 exports.Item = Item;
 exports.Template = Template;

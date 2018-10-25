@@ -1685,6 +1685,7 @@ const commands = {
 			`- /tour end: forcibly end the tournament in the current room<br />` +
 			`- /tour start: start the tournament in the current room<br />` +
 			`- /tour banlist [pokemon], [talent], [...]: ban moves, abilities, Pokémon or items from being used in a tournament (it must be created first)<br />` +
+			`- /tour restrictlist [pokemon], [talent], [...]: restrict moves, abilities, Pokémon or items in a tournament depending on the OM context (it must be created first)<br />` +
 			`<br />` +
 			`More detailed help can be found in the <a href="https://www.smogon.com/forums/posts/6777489/">tournaments guide</a><br />` +
 			`</div>`

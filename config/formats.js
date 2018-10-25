@@ -523,7 +523,14 @@ let Formats = [
 		mod: 'gen7',
 		ruleset: ['[Gen 7] Ubers'],
 		banlist: ['Baton Pass'],
+		restrictionlist: ['Uber', 'Arena Trap', 'Power Construct', 'Shadow Tag'],
 		onValidateTeam: function (team, format, teamHas) {
+			/*console.log("onvt: " + this.formatsCache);
+			for( let i=0; i<this.formatsCache.length; i++) {
+				console.console.log("i: " + this.formatsCache[i]);
+				
+			}*/
+
 			let problemsArray = /** @type {string[]} */ ([]);
 			let types = /** @type {string[]} */ ([]);
 			for (const [i, set] of team.entries()) {

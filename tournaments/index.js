@@ -46,6 +46,7 @@ class Tournament {
 		this.originalFormat = format;
 		this.teambuilderFormat = format;
 		this.customRules = [];
+		this.customRestrictions = [];
 		this.generator = generator;
 		this.isRated = isRated;
 		this.scouting = true;
@@ -117,7 +118,7 @@ class Tournament {
 
 	setCustomRules(rules, output) {
 		try {
-			this.teambuilderFormat = Dex.validateFormat(`${this.originalFormat}@@@${rules}`);
+			this.teambuilderFormat = Dex.validateFormat(`${this.originalFormat}@@@${rules}@@@${this.customRestrictions}`);
 		} catch (e) {
 			output.errorReply(`Custom rule error: ${e.message}`);
 			return false;
@@ -148,6 +149,35 @@ class Tournament {
 		if (unbans.length) html.push(`<b>Unbans</b> - ${Chat.escapeHTML(unbans.join(', '))}`);
 		if (addedRules.length) html.push(`<b>Added rules</b> - ${Chat.escapeHTML(addedRules.join(', '))}`);
 		if (removedRules.length) html.push(`<b>Removed rules</b> - ${Chat.escapeHTML(removedRules.join(', '))}`);
+		return html.join(`<br />`);
+	}
+
+	// 18/10/16 TrashChannel: Custom restrictions
+	setCustomRestrictions(restrictions, output) {
+		try {
+			this.teambuilderFormat = Dex.validateFormat(`${this.originalFormat}@@@${this.customRules}@@@${restrictions}`);
+		} catch (e) {
+			output.errorReply(`Custom restriction error: ${e.message}`);
+			return false;
+		}
+		this.customRestrictions = Dex.getFormat(this.teambuilderFormat, true).customRestrictions;
+		return true;
+	}
+
+	getCustomRestrictions() {
+		const restricts = [];
+		const unrestricts = [];
+		for (const restriction of this.customRestrictions) {
+			let charAt0 = restriction.charAt(0);
+			if (charAt0 === '+') {
+				unrestricts.push(restriction.substr(1));
+			} else if (charAt0 === '-') {
+				restricts.push(restriction.substr(1));
+			}
+		}
+		const html = [];
+		if (restricts.length) html.push(`<b>Restricts</b> - ${Chat.escapeHTML(restricts.join(', '))}`);
+		if (unrestricts.length) html.push(`<b>Unrestricts</b> - ${Chat.escapeHTML(unrestricts.join(', '))}`);
 		return html.join(`<br />`);
 	}
 
@@ -1054,6 +1084,16 @@ const commands = {
 			}
 			this.sendReply(`|html|<div class='infobox infobox-limited'>This tournament includes:<br />${tournament.getCustomRules()}</div>`);
 		},
+		viewrestrictionset: 'viewcustomrestrictions',
+		viewrestrictionslist: 'viewcustomrestrictions',
+		viewrestrictions: 'viewcustomrestrictions',
+		viewcustomrestrictions: function (tournament) {
+			if (!this.runBroadcast()) return;
+			if (tournament.customRestrictions.length < 1) {
+				return this.errorReply("The tournament does not have any custom restrictions.");
+			}
+			this.sendReply(`|html|<div class='infobox infobox-limited'>This tournament includes:<br />${tournament.getCustomRestrictions()}</div>`);
+		},
 	},
 	creation: {
 		settype: function (tournament, user, params, cmd) {
@@ -1161,6 +1201,41 @@ const commands = {
 			this.room.addRaw(`<b>The tournament's custom rules were cleared.</b>`);
 			this.privateModAction(`(${user.name} cleared the tournament's custom rules.)`);
 			this.modlog('TOUR CLEARRULES');
+		},
+		// 18/10/16 TrashChannel: Custom restrictions
+		restrictionset: 'customrestrictions',
+		restrictionlist: 'customrestrictions',
+		restrictions: 'customrestrictions',
+		customrestrictions: function (tournament, user, params, cmd) {
+			if (params.length < 1) {
+				this.sendReply("Usage: /tour restrictions <list of restrictions>");
+				this.sendReply("Restrictions can be: -restrictedthing, +restrictedthing");
+				return this.parse('/tour viewrestrictions');
+			}
+			if (tournament.isTournamentStarted) { // Is this even true?
+				return this.errorReply("The custom restrictions cannot be changed once the tournament has started.");
+			}
+			if (tournament.setCustomRestrictions(params, this)) {
+				this.room.addRaw(`<div class='infobox infobox-limited'>This tournament includes restriction changes:<br />${tournament.getCustomRestrictions()}</div>`);
+				this.privateModAction(`(${user.name} updated the tournament's custom restrictions.)`);
+				this.modlog('TOUR RESTRICTIONS', null, tournament.customRestrictions.join(', '));
+			}
+		},
+		clearrestrictionset: 'clearcustomrestrictions',
+		clearrestrictionlist: 'clearcustomrestrictions',
+		clearrestrictions: 'clearcustomrestrictions',
+		clearcustomrestrictions: function (tournament, user) {
+			if (tournament.isTournamentStarted) { // Is this even true?
+				return this.errorReply("The custom restrictions cannot be changed once the tournament has started.");
+			}
+			if (tournament.customRestrictions.length < 1) {
+				return this.errorReply("The tournament does not have any custom restrictions.");
+			}
+			tournament.customRestrictions = [];
+			tournament.teambuilderFormat = tournament.originalFormat;
+			this.room.addRaw(`<b>The tournament's custom restrictions were cleared.</b>`);
+			this.privateModAction(`(${user.name} cleared the tournament's custom restrictions.)`);
+			this.modlog('TOUR CLEARRESTRICTIONS');
 		},
 		name: 'setname',
 		customname: 'setname',
@@ -1541,6 +1616,9 @@ Chat.commands.tournamenthelp = function (target, room, user) {
 		`- rules/banlist &lt;comma-separated arguments>: Sets the custom rules for the tournament before it has started.<br />` +
 		`- viewrules/viewbanlist: Shows the custom rules for the tournament.<br />` +
 		`- clearrules/clearbanlist: Clears the custom rules for the tournament before it has started.<br />` +
+		`- restrictions &lt;comma-separated arguments>: Sets the custom restrictions for the tournament before it has started.<br />` +
+		`- viewrestrictions: Shows the custom restrictions for the tournament.<br />` +
+		`- clearrestrictions: Clears the custom restrictions for the tournament before it has started.<br />` +
 		`- name &lt;name>: Sets a custom name for the tournament.<br />` +
 		`- clearname: Clears the custom name of the tournament.<br />` +
 		`- end/stop/delete: Forcibly ends the tournament in the current room.<br />` +

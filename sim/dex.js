@@ -506,20 +506,43 @@ class ModdedDex {
 	 * @param {string} name
 	 */
 	validateFormat(name) {
-		const [formatName, customRulesString] = name.split('@@@', 2);
+		console.log("vf name: " + name);
+		let [formatName, customRulesString, customRestrictionsString] = name.split('@@@', 3);
 		const format = this.getFormat(formatName);
 		if (!format.exists) throw new Error(`Unrecognized format "${formatName}"`);
-		if (!customRulesString) return format.id;
-		const ruleTable = this.getRuleTable(format);
-		const customRules = customRulesString.split(',').map(rule => {
-			const ruleSpec = this.validateRule(rule);
-			if (typeof ruleSpec === 'string' && ruleTable.has(ruleSpec)) return null;
-			return rule.replace(/[\r\n|]*/g, '').trim();
-		}).filter(rule => rule);
-		if (!customRules.length) throw new Error(`The format already has your custom rules`);
-		const validatedFormatid = format.id + '@@@' + customRules.join(',');
+		if (!customRulesString && !customRestrictionsString) return format.id;
+
+		/** @type {string} */
+		let customRulesJoined = '';
+		if(customRulesString && '' !== customRulesString) {
+			const ruleTable = this.getRuleTable(format);
+			const customRules = customRulesString.split(',').map(rule => {
+				const ruleSpec = this.validateRule(rule);
+				if (typeof ruleSpec === 'string' && ruleTable.has(ruleSpec)) return null;
+				return rule.replace(/[\r\n|]*/g, '').trim();
+			}).filter(rule => rule);
+			if (!customRules.length) throw new Error(`The format already has your custom rules`);
+			customRulesJoined = customRules.join(',');
+		}
+
+		/** @type {string} */
+		let customRestrictionsJoined = '';
+		if(customRestrictionsString && '' !== customRestrictionsString) {
+			const restrictionTable = this.getRestrictionTable(format);
+			const customRestrictions = customRestrictionsString.split(',').map(restriction => {
+				const restrictionSpec = this.validateRestriction(restriction);
+				console.log("restrictionSpec: " + restrictionSpec);
+				if (typeof restrictionSpec === 'string' && restrictionTable.has(restrictionSpec)) return null;
+				return restriction.replace(/[\r\n|]*/g, '').trim();
+			}).filter(restriction => restriction);
+			if (!customRestrictions.length) throw new Error(`The format already has your custom restrictions`);
+			customRestrictionsJoined = customRestrictions.join(',');
+		}
+
+		const validatedFormatid = format.id + '@@@' + customRulesJoined + '@@@' + customRestrictionsJoined;
 		const moddedFormat = this.getFormat(validatedFormatid, true);
 		this.getRuleTable(moddedFormat);
+		this.getRestrictionTable(moddedFormat);
 		return validatedFormatid;
 	}
 	/**
@@ -533,8 +556,8 @@ class ModdedDex {
 		/** @type {string[]} */
 		let	customRules = [];
 
-		let [baseFormatString, customRulesString] = formatid.split('@@@', 2);
-		if (customRulesString) {
+		let [baseFormatString, customRulesString, customRestrictionsString] = formatid.split('@@@', 3);
+		if (customRulesString && '' !== customRulesString) {
 			customRules = customRulesString.split(',');
 		}
 
@@ -542,6 +565,27 @@ class ModdedDex {
 		console.log('getCustomRules customRules: '+ customRules);
 
 		return customRules;
+	}
+	/**
+	 * 18/10/17 TrashChannel: Create an array of additional restrictions
+	 * @param {string} formatid
+	 * @return {string[]}
+	 */
+	getCustomRestrictions(formatid) {
+		console.log('getCustomRestrictions formatid: '+ formatid);
+
+		/** @type {string[]} */
+		let	customRestrictions = [];
+
+		let [baseFormatString, customRulesString, customRestrictionsString] = formatid.split('@@@', 3);
+		if (customRestrictionsString && '' !== customRestrictionsString) {
+			customRestrictions = customRestrictionsString.split(',');
+		}
+
+		console.log('getCustomRestrictions customRestrictionsString: '+ customRestrictionsString);
+		console.log('getCustomRestrictions customRestrictions: '+ customRestrictions);
+
+		return customRestrictions;
 	}
 	/**
 	 * @param {string | Format} [name]
@@ -569,12 +613,18 @@ class ModdedDex {
 					isTrusted = true;
 				} catch (e) {}
 			}
-			let [newName, customRulesString] = name.split('@@@', 2);
+			let [newName, customRulesString, customRestrictionsString] = name.split('@@@', 3);
 			name = newName;
 			id = toId(name);
-			if (isTrusted && customRulesString) {
+			if (isTrusted && customRulesString && '' !== customRulesString) {
 				supplementaryAttributes = {
 					customRules: customRulesString.split(','),
+					searchShow: false,
+				};
+			}
+			if (isTrusted && customRestrictionsString && '' !== customRestrictionsString) {
+				supplementaryAttributes = {
+					customRestrictions: customRestrictionsString.split(','),
 					searchShow: false,
 				};
 			}
@@ -949,6 +999,164 @@ class ModdedDex {
 		}
 		if (matches.length < 1) {
 			throw new Error(`Nothing matches "${rule}"`);
+		}
+		return matches[0];
+	}
+
+	// 18/10/16 TrashChannel: Custom restrictions
+	/**
+	 * @param {Format} format
+	 * @param {number} [depth = 0]
+	 * @return {RestrictionTable}
+	 */
+	getRestrictionTable(format, depth = 0) {
+		console.log("getRestrictionTable");
+		let restrictionTable = new Data.RestrictionTable();
+		if (format.restrictionTable) return format.restrictionTable;
+
+		let restrictionset = format.restrictionset.slice();
+		for (const restriction of format.restrictionlist) {
+			restrictionset.push('-' + restriction);
+		}
+		for (const restriction of format.unrestrictionlist) {
+			restrictionset.push('+' + restriction);
+		}
+
+		for (const restriction of restrictionset) {
+			const restrictionSpec = this.validateRestriction(restriction, format);
+			if ("+-".includes(restrictionSpec.charAt(0))) {
+				if (restrictionSpec.charAt(0) === '+' && restrictionTable.has('-' + restrictionSpec.slice(1))) {
+					restrictionTable.delete('-' + restrictionSpec.slice(1));
+				}
+				restrictionTable.set(restrictionSpec, '');
+				continue;
+			}
+			/*
+			const subformat = this.getFormat(restrictionSpec);
+			if (restrictionTable.has('!' + subformat.id)) continue;
+			restrictionTable.set(subformat.id, '');
+			if (!subformat.exists) continue;
+			if (depth > 16) {
+				throw new Error(`Excessive restrictionTable recursion in ${format.name}: ${restrictionSpec} of ${format.restrictionset}`);
+			}
+			const subRuleTable = this.getRuleTable(subformat, depth + 1);
+			for (const [k, v] of subRuleTable) {
+				if (!restrictionTable.has('!' + k)) restrictionTable.set(k, v || subformat.name);
+			}*/
+		}
+
+		format.restrictionTable = restrictionTable;
+		return restrictionTable;
+	}
+
+	/**
+	 * @param {string} restriction
+	 * @param {Format?} format
+	 */
+	validateRestriction(restriction, format = null) {
+		console.log("validateRestriction: " + restriction);
+		switch (restriction.charAt(0)) {
+		case '-':
+		case '+':
+			if (format && format.team) throw new Error(`We don't currently support restrictions in generated teams`);
+			if (restriction.slice(1).includes('>') || restriction.slice(1).includes('+')) {
+				let buf = restriction.slice(1);
+				const gtIndex = buf.lastIndexOf('>');
+				let limit = restriction.charAt(0) === '+' ? Infinity : 0;
+				if (gtIndex >= 0 && /^[0-9]+$/.test(buf.slice(gtIndex + 1).trim())) {
+					if (limit === 0) limit = parseInt(buf.slice(gtIndex + 1));
+					buf = buf.slice(0, gtIndex);
+				}
+				// Questionable
+				let checkTeam = buf.includes('++');
+				const banNames = buf.split(checkTeam ? '++' : '+').map(v => v.trim());
+				if (banNames.length === 1 && limit > 0) checkTeam = true;
+				const innerRule = banNames.join(checkTeam ? ' ++ ' : ' + ');
+				const bans = banNames.map(v => this.validateBanRule(v));
+
+				if (checkTeam) {
+					return ['complexTeamBan', innerRule, '', limit, bans];
+				}
+				if (bans.length > 1 || limit > 0) {
+					return ['complexBan', innerRule, '', limit, bans];
+				}
+				throw new Error(`Confusing restriction ${restriction}`);
+			}
+			return restriction.charAt(0) + this.validateBanRule(restriction.slice(1));
+		default:
+			console.log('restriction:' + restriction );
+			let id = toId(restriction);
+			console.log('id:' + id );
+			if (!this.data.Formats.hasOwnProperty(id)) {
+				throw new Error(`Unrecognized restriction "${restriction}"`);
+			}
+			return id;
+		}
+	}
+
+	/**
+	 * @param {string} restriction
+	 */
+	validateAtomicRestriction(restriction) {
+		console.log("validateAtomicRestriction: " + restriction);
+		let id = toId(restriction);
+		if (id === 'unreleased') return 'unreleased';
+		if (id === 'illegal') return 'illegal';
+		const matches = [];
+		let matchTypes = ['pokemon', 'move', 'ability', 'item', 'pokemontag'];
+		for (const matchType of matchTypes) {
+			if (restriction.slice(0, 1 + matchType.length) === matchType + ':') {
+				matchTypes = [matchType];
+				id = id.slice(matchType.length);
+				break;
+			}
+		}
+		const ruleid = id;
+		if (this.data.Aliases.hasOwnProperty(id)) id = toId(this.data.Aliases[id]);
+		for (const matchType of matchTypes) {
+			let table;
+			switch (matchType) {
+			case 'pokemon': table = this.data.Pokedex; break;
+			case 'move': table = this.data.Movedex; break;
+			case 'item': table = this.data.Items; break;
+			case 'ability': table = this.data.Abilities; break;
+			case 'pokemontag':
+				// valid pokemontags
+				const validTags = [
+					// singles tiers
+					'uber', 'ou', 'uubl', 'uu', 'rubl', 'ru', 'nubl', 'nu', 'publ', 'pu', 'zu', 'nfe', 'lcuber', 'lc', 'cap', 'caplc', 'capnfe',
+					//doubles tiers
+					'duber', 'dou', 'dbl', 'duu',
+					// custom tags
+					'mega',
+				];
+				if (validTags.includes(ruleid)) matches.push('pokemontag:' + ruleid);
+				continue;
+			default:
+				throw new Error(`Unrecognized match type.`);
+			}
+			if (table.hasOwnProperty(id)) {
+				if (matchType === 'pokemon') {
+					const template = table[id];
+					// @ts-ignore
+					if (template.otherFormes) {
+						matches.push('basepokemon:' + id);
+						continue;
+					}
+				}
+				matches.push(matchType + ':' + id);
+			} else if (matchType === 'pokemon' && id.slice(-4) === 'base') {
+				id = id.slice(0, -4);
+				if (table.hasOwnProperty(id)) {
+					matches.push('pokemon:' + id);
+				}
+			}
+		}
+		if (matches.length > 1) {
+			throw new Error(`More than one thing matches "${restriction}"; please use something like "-item:metronome" to disambiguate`);
+		}
+		if (matches.length < 1) {
+			throw new Error(`Nothing matches "${restriction}"`);
 		}
 		return matches[0];
 	}

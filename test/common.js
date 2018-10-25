@@ -78,6 +78,7 @@ class TestTools {
 		});
 		if (!format.ruleset) format.ruleset = [];
 		if (!format.banlist) format.banlist = [];
+		if (!format.restrictionlist) format.restrictionlist = [];
 
 		if (options.pokemon) format.ruleset.push('Pokemon');
 		if (options.legality) format.banlist.push('Illegal', 'Unreleased');

@@ -675,6 +675,8 @@ interface FormatsData extends EventMethods {
 	timer?: {starting?: number, perTurn?: number, maxPerTurn?: number, maxFirstTurn?: number, timeoutAutoChoose?: boolean, accelerate?: boolean}
 	tournamentShow?: boolean
 	unbanlist?: string[]
+	restrictionlist?: string[]
+	unrestrictionlist?: string[]
 	checkLearnset?: (this: Validator, move: Move, template: Template, lsetData: PokemonSources, set: PokemonSet) => {type: string, [any: string]: any} | null
 	onAfterMega?: (this: Battle, pokemon: Pokemon) => void
 	onBegin?: (this: Battle) => void
@@ -701,6 +703,12 @@ interface RuleTable extends Map<string, string> {
 	getReason: (key: string) => string
 }
 
+// 18/10/16 TrashChannel: Custom restrictions
+interface RestrictionTable extends Map<string, string> {
+	check: (thing: string, setHas: {[k: string]: true}) => string
+	getReason: (key: string) => string
+}
+
 interface Format extends Effect, FormatsData {
 	effectType: 'Format' | 'Ruleset' | 'Rule' | 'ValidatorRule'
 	baseRuleset: string[]
@@ -712,6 +720,10 @@ interface Format extends Effect, FormatsData {
 	ruleset: string[]
 	ruleTable: RuleTable | null
 	unbanlist: string[]
+	restrictionTable: RestrictionTable | null
+	restrictionlist: string[]
+	unrestrictionlist: string[]
+	restrictionset: string[]
 }
 
 interface BattleScriptsData {
