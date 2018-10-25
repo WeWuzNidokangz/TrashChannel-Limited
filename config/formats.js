@@ -6,6 +6,25 @@
 /**@type {(FormatsData | {section: string, column?: number})[]} */
 let Formats = [
 
+	// Trash Channel Original Programming
+	///////////////////////////////////////////////////////////////////
+	{
+		section: "Trash Channel Original Programming",
+	},
+	{
+		name: "[Gen 7] The Call of Pikacthulhu",
+		desc: `Pok&eacute;mon gets Perish status applied when entering battle.`,
+		threads: [
+			``,
+		],
+		mod: 'gen7',
+		ruleset: ['[Gen 7] OU'],
+		onSwitchIn: function (pokemon) {
+			// @ts-ignore
+			pokemon.addVolatile('perishsong', pokemon);
+		},
+	},
+
 	// US/UM Singles
 	///////////////////////////////////////////////////////////////////
 	{
