@@ -13,7 +13,7 @@ let Formats = [
 	},
 	{
 		name: "[Gen 7] The Call of Pikacthulhu",
-		desc: `Pok&eacute;mon gets Perish status applied when entering battle.`,
+		desc: `Pok&eacute;mon get Perish status applied when entering battle.`,
 		threads: [
 			``,
 		],
@@ -937,6 +937,17 @@ let Formats = [
 				delete ally.innate;
 			}
 		},
+	},
+	{
+		name: "[Gen 7] Reversed",
+		desc: `Every Pok&eacute;mon has its base Atk and Sp. Atk stat, as well as its base Def and Sp. Def stat, swapped.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3623871/">Reversed</a>`,
+		],
+		mod: 'gen7',
+		ruleset: ['[Gen 7] OU', 'Reversed Rule'],
+		banlist: ['Kyurem-Black', 'Tapu Koko'],
+		unbanlist: ['Kyurem-White', 'Marshadow', 'Metagross-Mega', 'Naganadel', 'Reshiram'],
 	},
 	{
 		name: "[Gen 7] Suicide Cup",

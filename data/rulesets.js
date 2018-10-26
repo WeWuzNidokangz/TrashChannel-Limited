@@ -965,6 +965,22 @@ let BattleFormats = {
 			}
 		},
 	},
+	reversedrule: {
+		effectType: 'Rule',
+		name: 'Reversed Rule',
+		desc: "The mod for Reversed: Every Pok&eacute;mon has its base Atk and Sp. Atk stat, as well as its base Def and Sp. Def stat, swapped.",
+		onModifyTemplate: function (template, target, source) {
+			template = Object.assign({}, template);
+			template.baseStats = Object.assign({}, template.baseStats);
+			const atk = template.baseStats.atk;
+			const def = template.baseStats.def;
+			template.baseStats.atk = template.baseStats.spa;
+			template.baseStats.def = template.baseStats.spd;
+			template.baseStats.spa = atk;
+			template.baseStats.spd = def;
+			return template;
+		},
+	},
 	suicidecuprule: {
 		effectType: 'Rule',
 		name: 'Suicide Cup Rule',
