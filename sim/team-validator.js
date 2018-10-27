@@ -196,7 +196,16 @@ class Validator {
 			return [`The Pokemon "${set.species}" does not exist.`];
 		}
 
-		if (item.id && !item.exists) {
+		// TrashChannel 18/10/28: Bitch and Beggar beggar evos use non-existent items
+		/** @type {Boolean} */
+		let bitchAndBeggarItemException = false;
+		if( ruleTable.has('bitchandbeggarrule') ) {
+			let bitchTemplate = dex.getTemplate(set.item);
+			if(bitchTemplate.exists) {
+				bitchAndBeggarItemException = true;
+			}
+		}
+		if (item.id && !item.exists && !bitchAndBeggarItemException) {
 			return [`"${set.item}" is an invalid item.`];
 		}
 		if (ability.id && !ability.exists) {

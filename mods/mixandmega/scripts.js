@@ -55,6 +55,7 @@ let BattleScripts = {
 
 		pokemon.canMegaEvo = null;
 		if (isUltraBurst) pokemon.canUltraBurst = null;
+		this.runEvent('AfterMega', pokemon);
 		return true;
 	},
 	getMixedTemplate: function (originalSpecies, megaSpecies) {

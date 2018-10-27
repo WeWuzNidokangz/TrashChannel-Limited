@@ -12,6 +12,69 @@ let Formats = [
 		section: "Trash Channel Original Programming",
 	},
 	{
+		name: "[Gen 7] Bitch and Beggar",
+		desc: `Pok&eacute;mon can 'Beggar-Evolve' using low BST Pok&eacute;mon as Stones.`,
+		threads: [
+			``,
+		],
+
+		mod: 'bitchandbeggar',
+		ruleset: ['Pokemon', 'Standard', 'Bitch And Beggar Rule', 'Mega Rayquaza Clause', 'Team Preview'],
+		banlist: ['Shadow Tag', 'Baton Pass', 'Electrify'],
+		cannotMega: [
+			'Arceus', 'Deoxys', 'Deoxys-Attack', 'Deoxys-Speed', 'Dialga', 'Dragonite', 'Giratina', 'Groudon', 'Ho-Oh', 'Kyogre',
+			'Kyurem-Black', 'Kyurem-White', 'Lugia', 'Lunala', 'Marshadow', 'Mewtwo', 'Naganadel', 'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane',
+			'Palkia', 'Pheromosa', 'Rayquaza', 'Regigigas', 'Reshiram', 'Slaking', 'Solgaleo', 'Xerneas', 'Yveltal', 'Zekrom',
+		],
+		modValueNumberA: 230,
+		onValidateTeam: function (team) {
+			/**@type {{[k: string]: true}} */
+			let itemTable = {};
+			for (const set of team) {
+				let bitchTemplate = this.getTemplate(set.item);
+				if (!bitchTemplate.exists) continue;
+				if (itemTable[bitchTemplate.id]) return ["You are limited to one of each Bitch.", "(You have more than one " + bitchTemplate.name + ")"];
+				itemTable[bitchTemplate.id] = true;
+			}
+		},
+		onValidateSet: function (set, format) {
+			let template = this.getTemplate(set.species || set.name);
+			let bitchTemplate = this.getTemplate(set.item);
+			if(!bitchTemplate.exists) return;
+			let bitchBST = this.calcBST(bitchTemplate.baseStats);
+			if(format.modValueNumberA) {
+				if(bitchBST > format.modValueNumberA) {
+					return ["Bitches are limited to " + format.modValueNumberA.toString() + " BST, but " + bitchTemplate.name + " has " + bitchBST.toString() + "!"];
+				}
+			}
+			let uberBitches = format.restrictedStones || [];
+			let uberPokemon = format.cannotMega || [];
+			if (uberPokemon.includes(template.name) || set.ability === 'Power Construct' || uberBitches.includes(bitchTemplate.name)) return ["" + template.species + " is not allowed to hold " + bitchTemplate.name + "."];
+		},
+		onBegin: function () {
+			for (const pokemon of this.p1.pokemon.concat(this.p2.pokemon)) {
+				pokemon.originalSpecies = pokemon.baseTemplate.species;
+			}
+		},
+		onSwitchIn: function (pokemon) {
+			let oMegaTemplate = this.getTemplate(pokemon.template.originalMega);
+			if (oMegaTemplate.exists && pokemon.originalSpecies !== oMegaTemplate.baseSpecies) {
+				// Place volatiles on the Pokémon to show its mega-evolved condition and details
+				this.add('-start', pokemon, oMegaTemplate.requiredItem || oMegaTemplate.requiredMove, '[silent]');
+				let oTemplate = this.getTemplate(pokemon.originalSpecies);
+				if (oTemplate.types.length !== pokemon.template.types.length || oTemplate.types[1] !== pokemon.template.types[1]) {
+					this.add('-start', pokemon, 'typechange', pokemon.template.types.join('/'), '[silent]');
+				}
+			}
+		},
+		onSwitchOut: function (pokemon) {
+			let oMegaTemplate = this.getTemplate(pokemon.template.originalMega);
+			if (oMegaTemplate.exists && pokemon.originalSpecies !== oMegaTemplate.baseSpecies) {
+				this.add('-end', pokemon, oMegaTemplate.requiredItem || oMegaTemplate.requiredMove, '[silent]');
+			}
+		},
+	},
+	{
 		name: "[Gen 7] The Call of Pikacthulhu",
 		desc: `Pok&eacute;mon get Perish status applied when entering battle.`,
 		threads: [
@@ -24,7 +87,6 @@ let Formats = [
 			pokemon.addVolatile('perishsong', pokemon);
 		},
 	},
-
 	// US/UM Singles
 	///////////////////////////////////////////////////////////////////
 	{

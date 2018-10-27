@@ -14,6 +14,9 @@ const path = require('path');
 const DexCalculator = require('../sim/dex-calculator');
 
 const RULESETS = path.resolve(__dirname, '../data/rulesets');
+const FORMATS = path.resolve(__dirname, '../config/formats');
+
+const BITCHANDBEGGARMOD = path.resolve(__dirname, '../mods/bitchandbeggar/scripts');
 
 const MAX_PROCESSES = 1;
 const RESULTS_MAX_LENGTH = 10;
@@ -126,6 +129,118 @@ const commands = {
 		this.sendReply(`|html|${Chat.getDataPokemonHTML(cloneTemplate)}`);
 	},
 	'350cuptiershifthelp': [`/350ts OR /350tiershift OR /350tiershift <pokemon> - Shows the base stats that a Pokemon would have in a mashup including 350 Cup and Tier Shift.`],
+
+	'!bitchandbeggar': true,
+	bnb: 'bitchandbeggar',
+	bitchandbeggar: function (target, room, user) {
+		if (!this.runBroadcast()) return;
+		if (!toId(target) || !target.includes('@')) return this.parse('/help bitchandbeggar');
+		let sep = target.split('@');
+		let bitchTemplate = Dex.getTemplate(sep[1]);
+		let beggarTemplate = Object.assign({}, Dex.getTemplate(sep[0]));
+		if (!bitchTemplate.exists) return this.errorReply(`Error: Bitch Pokemon not found.`);
+		if (!beggarTemplate.exists) return this.errorReply(`Error: Beggar Pokemon not found.`);
+		if (beggarTemplate.isMega || beggarTemplate.name === 'Necrozma-Ultra') { // Mega Pokemon and Ultra Necrozma cannot be beggar evolved
+			this.errorReply(`Warning: You cannot beggar evolve Mega Pokemon and Ultra Necrozma in Bitch and Beggar.`);
+		}
+		let banlist = Dex.getFormat('gen7bitchandbeggar').banlist;
+		if (banlist.includes(bitchTemplate.name)) {
+			this.errorReply(`Warning: ${bitchTemplate.name} is banned from Bitch and Beggar.`);
+		}
+		let cannotMega = Dex.getFormat('gen7bitchandbeggar').cannotMega || [];
+		if (cannotMega.includes(beggarTemplate.name) && beggarTemplate.name !== bitchTemplate.megaEvolves && !beggarTemplate.isMega) { // Separate messages because there's a difference between being already beggar evolved / NFE and being banned from beggar evolving
+			this.errorReply(`Warning: ${beggarTemplate.name} is banned from mega evolving with a non-native mega stone in Bitch and Beggar.`);
+		}
+		if (['Multitype', 'RKS System'].includes(beggarTemplate.abilities['0']) && !['Arceus', 'Silvally'].includes(beggarTemplate.name)) {
+			this.errorReply(`Warning: ${beggarTemplate.name} is required to hold ${beggarTemplate.baseSpecies === 'Arceus' && beggarTemplate.requiredItems ? 'either ' + beggarTemplate.requiredItems[0] + ' or ' + beggarTemplate.requiredItems[1] : beggarTemplate.requiredItem}.`);
+		}
+		if (bitchTemplate.isUnreleased) {
+			this.errorReply(`Warning: ${bitchTemplate.name} is unreleased and is not usable in current Bitch and Beggar.`);
+		}
+		
+		// Load formats
+		/**@type {{[k: string]: FormatsData}} */
+		let Formats;
+		try {
+			Formats = require(FORMATS).Formats;
+		} catch (e) {
+			console.log('e.code: ' + e.code);
+			if (e.code !== 'MODULE_NOT_FOUND' && e.code !== 'ENOENT') {
+				throw e;
+			}
+		}
+
+		// BnB BST limit
+		if(Formats) {
+			let bitchBST = Dex.calcBST(bitchTemplate.baseStats);
+			/**@type {FormatsData} */
+			let BnBFormat = null;
+			for(let nFrmItr=0; nFrmItr<Formats.length; ++nFrmItr) {
+				//console.log("nFrmItr: " + nFrmItr.toString() + ", name: " + Formats[nFrmItr].name);
+				if(Formats[nFrmItr].name === '[Gen 7] Bitch and Beggar') {
+					BnBFormat = Formats[nFrmItr];
+				}
+			}
+			if( null != BnBFormat ) {
+				let bitchBSTLimit = BnBFormat.modValueNumberA;
+				if(bitchBST > bitchBSTLimit) {
+					this.errorReply(`Bitches are limited to ` + bitchBSTLimit.toString() + ` BST, but ` + bitchTemplate.name + ` has ` + bitchBST.toString() + `.`);
+				}
+			}
+		}
+		// Fake Pokemon and Mega Stones
+		if (beggarTemplate.isNonstandard) {
+			this.errorReply(`Warning: ${beggarTemplate.name} is not a real Pokemon and is therefore not usable in Bitch and Beggar.`);
+		}
+		// This error is too funny to delete so just comment out
+		//if (bitchTemplate.isNonstandard) {
+		//	this.errorReply(`Warning: ${bitchTemplate.name} is a fake beggar bitch created by the CAP Project and is restricted to the CAP ${bitchTemplate.megaEvolves}.`);
+		//}
+
+		// Load BnB mod functions
+		/**@type {ModdedBattleScriptsData} */
+		let BnBMod;
+		try {
+			BnBMod = require(BITCHANDBEGGARMOD).BattleScripts;
+		} catch (e) {
+			console.log('e.code: ' + e.code);
+			if (e.code !== 'MODULE_NOT_FOUND' && e.code !== 'ENOENT') {
+				throw e;
+			}
+		}
+
+		// Do beggar evo calcs
+		const mixedTemplate = BnBMod.getMixedTemplate(beggarTemplate.baseSpecies, bitchTemplate.baseSpecies);
+		mixedTemplate.tier = "BnB";
+		let weighthit = 20;
+		if (mixedTemplate.weightkg >= 200) {
+			weighthit = 120;
+		} else if (mixedTemplate.weightkg >= 100) {
+			weighthit = 100;
+		} else if (mixedTemplate.weightkg >= 50) {
+			weighthit = 80;
+		} else if (mixedTemplate.weightkg >= 25) {
+			weighthit = 60;
+		} else if (mixedTemplate.weightkg >= 10) {
+			weighthit = 40;
+		}
+		/** @type {{[k: string]: string}} */
+		let details = {
+			"Dex#": '' + mixedTemplate.num,
+			"Gen": '' + mixedTemplate.gen,
+			"Height": mixedTemplate.heightm + " m",
+			"Weight": mixedTemplate.weightkg + " kg <em>(" + weighthit + " BP)</em>",
+			"Dex Colour": mixedTemplate.color,
+		};
+		if (mixedTemplate.eggGroups) details["Egg Group(s)"] = mixedTemplate.eggGroups.join(", ");
+		details['<font color="#686868">Does Not Evolve</font>'] = "";
+		this.sendReply(`|raw|${Chat.getDataPokemonHTML(mixedTemplate)}`);
+		this.sendReply('|raw|<font size="1">' + Object.keys(details).map(detail => {
+			if (details[detail] === '') return detail;
+			return '<font color="#686868">' + detail + ':</font> ' + details[detail];
+		}).join("&nbsp;|&ThickSpace;") + '</font>');
+	},
+	bitchandbeggarhelp: [`/bnb <pokemon> @ <beggar bitch> - Shows the Bitch and Beggar evolved Pokemon's type and stats.`],
 };
 
 exports.commands = commands;

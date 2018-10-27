@@ -677,6 +677,7 @@ interface FormatsData extends EventMethods {
 	unbanlist?: string[]
 	restrictionlist?: string[]
 	unrestrictionlist?: string[]
+	modValueNumberA?: number
 	checkLearnset?: (this: Validator, move: Move, template: Template, lsetData: PokemonSources, set: PokemonSet) => {type: string, [any: string]: any} | null
 	onAfterMega?: (this: Battle, pokemon: Pokemon) => void
 	onBegin?: (this: Battle) => void

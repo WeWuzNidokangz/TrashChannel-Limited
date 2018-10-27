@@ -965,6 +965,11 @@ let BattleFormats = {
 			}
 		},
 	},
+	bitchandbeggarrule: {
+		effectType: 'Rule',
+		name: 'Bitch And Beggar Rule',
+		desc: "The mod for Bitch And Beggar: ",
+	},
 	reversedrule: {
 		effectType: 'Rule',
 		name: 'Reversed Rule',

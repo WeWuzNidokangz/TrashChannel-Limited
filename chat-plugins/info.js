@@ -464,6 +464,11 @@ const commands = {
 			case 'pokemon':
 				let pokemon = mod.getTemplate(newTarget.name);
 
+				// 18/10/23 TrashChannel: Crashes when called in-battle due to this.battle context, prolly unnecessary anyway
+				if (format && format.onModifyTemplate) {
+					pokemon = format.onModifyTemplate.call(require('../sim/battle'), pokemon) || pokemon;
+				}
+				/*
 				// 18/09/23 TrashChannel: We want to be able run onModifyTemplate per rule as well as for format
 				if(format) {
 					if (format.onModifyTemplate) {
@@ -507,6 +512,7 @@ const commands = {
 						pokemon = ruleEffect.onModifyTemplate.call(require('../sim/battle'), pokemon) || pokemon;
 					}
 				}
+				*/
 				let tier = pokemon.tier;
 				if (room && (room.id === 'smogondoubles' ||
 					['gen7doublesou', 'gen7doublesubers', 'gen7doublesuu'].includes(room.battle && room.battle.format))) {

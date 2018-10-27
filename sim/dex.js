@@ -776,6 +776,18 @@ class ModdedDex {
 		if (nature.minus) stats[nature.minus] = Math.floor(stats[nature.minus] * 0.9);
 		return stats;
 	}
+	/**
+	 * @param {StatsTable} stats
+	 * @return {number}
+	 */
+	calcBST(stats) {
+		/**@type {number} */
+		let bst = 0;
+        Object.values(stats).forEach(stat => {
+        	bst += stat;
+        });
+		return bst;
+	}
 
 	/**
 	 * @param {AnyObject} ivs
