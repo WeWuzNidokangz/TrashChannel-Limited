@@ -10,6 +10,10 @@ let BattleItems = {
 			}
 		},
 		onPrimal: function (pokemon) {
+			let originalTemplate = this.getTemplate(pokemon.originalSpecies);
+			let oSecondaryTyping = originalTemplate.types[1];
+			console.log("oSecondaryTyping: " + oSecondaryTyping);
+
 			/**@type {Template} */
 			// @ts-ignore
 			let template = this.getMixedTemplate(pokemon.originalSpecies, 'Kyogre-Primal');
@@ -20,6 +24,14 @@ let BattleItems = {
 				pokemon.baseTemplate = template;
 				this.add('-start', pokemon, 'Blue Orb', '[silent]');
 			}
+
+			let nSecondaryTyping = template.types[1];
+			console.log("nSecondaryTyping: " + oSecondaryTyping);
+			if(oSecondaryTyping != nSecondaryTyping) {
+				pokemon.lockTypesArray[1] = template.types[1];
+			}
+
+			this.runEvent('AfterMega', pokemon);
 		},
 		onTakeItem: function (item) {
 			return false;
@@ -33,6 +45,10 @@ let BattleItems = {
 			}
 		},
 		onPrimal: function (pokemon) {
+			let originalTemplate = this.getTemplate(pokemon.originalSpecies);
+			let oSecondaryTyping = originalTemplate.types[1];
+			console.log("oSecondaryTyping: " + oSecondaryTyping);
+
 			/**@type {Template} */
 			// @ts-ignore
 			let template = this.getMixedTemplate(pokemon.originalSpecies, 'Groudon-Primal');
@@ -55,6 +71,14 @@ let BattleItems = {
 					this.add('-start', pokemon, 'typechange', pokemon.template.types.join('/'), '[silent]');
 				}
 			}
+
+			let nSecondaryTyping = template.types[1];
+			console.log("nSecondaryTyping: " + oSecondaryTyping);
+			if(oSecondaryTyping != nSecondaryTyping) {
+				pokemon.lockTypesArray[1] = template.types[1];
+			}
+
+			this.runEvent('AfterMega', pokemon);
 		},
 		onTakeItem: function (item) {
 			return false;

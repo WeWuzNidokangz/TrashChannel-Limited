@@ -207,6 +207,8 @@ class Pokemon {
 
 		/**@type {string[]} */
 		this.types = this.baseTemplate.types;
+		/**@type {string?[]} */
+		this.lockTypesArray = [null, null];
 		/**@type {string} */
 		this.addedType = '';
 		/**@type {boolean} */

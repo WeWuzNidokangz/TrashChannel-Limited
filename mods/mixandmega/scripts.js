@@ -26,6 +26,10 @@ let BattleScripts = {
 	runMegaEvo: function (pokemon) {
 		if (pokemon.template.isMega || pokemon.template.isPrimal) return false;
 
+		let originalTemplate = this.getTemplate(pokemon.originalSpecies);
+		let oSecondaryTyping = originalTemplate.types[1];
+		console.log("oSecondaryTyping: " + oSecondaryTyping);
+
 		const isUltraBurst = !pokemon.canMegaEvo;
 		/**@type {Template} */
 		// @ts-ignore
@@ -53,9 +57,16 @@ let BattleScripts = {
 			}
 		}
 
+		let nSecondaryTyping = template.types[1];
+		console.log("nSecondaryTyping: " + oSecondaryTyping);
+		if(oSecondaryTyping != nSecondaryTyping) {
+			pokemon.lockTypesArray[1] = template.types[1];
+		}
+
 		pokemon.canMegaEvo = null;
 		if (isUltraBurst) pokemon.canUltraBurst = null;
 		this.runEvent('AfterMega', pokemon);
+
 		return true;
 	},
 	getMixedTemplate: function (originalSpecies, megaSpecies) {

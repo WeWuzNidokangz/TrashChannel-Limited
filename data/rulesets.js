@@ -906,10 +906,23 @@ let BattleFormats = {
 		},
 		onSwitchIn: function (pokemon) {
 			console.log('camomonsrule: onSwitchIn');
+			for( let nTypeItr=0; nTypeItr<2; ++nTypeItr) {
+				console.log('nTypeItr: ' + nTypeItr.toString() + ' pokemon.types: ' + pokemon.types[nTypeItr].toString() );
+				if(null === pokemon.lockTypesArray[nTypeItr]) continue;
+				// @ts-ignore
+				pokemon.types[nTypeItr] = pokemon.lockTypesArray[nTypeItr];
+			}
 			this.add('-start', pokemon, 'typechange', pokemon.types.join('/'), '[silent]');
 		},
 		onAfterMega: function (pokemon) {
 			console.log('camomonsrule: onAfterMega');
+			for( let nTypeItr=0; nTypeItr<2; ++nTypeItr) {
+				console.log('nTypeItr: ' + nTypeItr.toString() + ' pokemon.types: ' + pokemon.types[nTypeItr].toString() );
+				if(null === pokemon.lockTypesArray[nTypeItr]) continue;
+				// @ts-ignore
+				pokemon.types[nTypeItr] = pokemon.lockTypesArray[nTypeItr];
+			}
+			//pokemon.types
 			this.add('-start', pokemon, 'typechange', pokemon.types.join('/'), '[silent]');
 		},
 	},
