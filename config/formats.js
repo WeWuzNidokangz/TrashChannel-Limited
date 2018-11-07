@@ -705,17 +705,11 @@ let Formats = [
 		],
 
 		mod: 'gen7',
-		ruleset: ['Pokemon', 'Standard', 'Team Preview'],
+		ruleset: ['Pokemon', 'Averagemons Rule', 'Standard', 'Team Preview'],
 		banlist: [
 			'Gengar-Mega', 'Mawile-Mega', 'Medicham-Mega', 'Smeargle',
 			'Arena Trap', 'Huge Power', 'Pure Power', 'Shadow Tag', 'Deep Sea Tooth', 'Eviolite', 'Light Ball', 'Thick Club', 'Baton Pass', 'Chatter',
 		],
-		onModifyTemplate: function (template) {
-			let dex = this && DexCalculator.deepClone ? this : Dex;
-			let newTemplate = DexCalculator.deepClone(template);
-			newTemplate.baseStats = {hp: 100, atk: 100, def: 100, spa: 100, spd: 100, spe: 100};
-			return newTemplate;
-		},
 	},
 	{
 		section: "Other Metagames",

@@ -894,6 +894,17 @@ let BattleFormats = {
             return template;
         },
 	},
+	averagemonsrule: {
+		effectType: 'Rule',
+		name: 'Averagemons Rule',
+		desc: "The mod for Averagemons: Every Pok&eacute;mon, including formes, has base 100 in every stat.",
+		onModifyTemplate: function (template) {
+			let dex = this && DexCalculator.deepClone ? this : Dex;
+			let newTemplate = DexCalculator.deepClone(template);
+			newTemplate.baseStats = {hp: 100, atk: 100, def: 100, spa: 100, spd: 100, spe: 100};
+			return newTemplate;
+		},
+	},
 	camomonsrule: {
 		effectType: 'Rule',
 		name: 'Camomons Rule',
