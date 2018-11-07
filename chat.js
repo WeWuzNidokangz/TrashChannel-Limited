@@ -284,21 +284,22 @@ class CommandContext {
 	}
 
 	/**
-	 * @param {any} [message]
+	 * @param {string} [msg]
 	 * @return {any}
 	 */
-	parse(message) {
-		if (message) {
+	parse(msg) {
+		if (typeof msg === 'string') {
 			// spawn subcontext
 			let subcontext = new CommandContext(this);
 			subcontext.recursionDepth++;
 			if (subcontext.recursionDepth > MAX_PARSE_RECURSION) {
 				throw new Error("Too much command recursion");
 			}
-			subcontext.message = message;
+			subcontext.message = msg;
 			return subcontext.parse();
 		}
-		message = this.message;
+		/** @type {any} */
+		let message = this.message;
 
 		let commandHandler = this.splitCommand(message);
 
@@ -477,13 +478,12 @@ class CommandContext {
 			// @ts-ignore
 			result = commandHandler.call(this, this.target, this.room, this.user, this.connection, this.cmd, this.message);
 		} catch (err) {
-			require('./lib/crashlogger')(err, 'A chat command', {
+			Monitor.crashlog(err, 'A chat command', {
 				user: this.user.name,
 				room: this.room && this.room.id,
 				pmTarget: this.pmTarget && this.pmTarget.name,
 				message: this.message,
 			});
-			Rooms.global.reportCrash(err);
 			this.sendReply(`|html|<div class="broadcast-red"><b>Pokemon Showdown crashed!</b><br />Don't worry, we're working on fixing it.</div>`);
 		}
 		if (result === undefined) result = false;
@@ -988,6 +988,11 @@ class CommandContext {
 			}
 			user.lastMessage = message;
 			user.lastMessageTime = Date.now();
+		}
+
+		if (room && room.highTraffic && toId(message).replace(/[^a-z]+/, '').length < 2 && !user.can('mute', null, room)) {
+			this.errorReply('Due to this room being a high traffic room, your message must contain at least two letters.');
+			return false;
 		}
 
 		if (Chat.filters.length) {
@@ -1660,10 +1665,9 @@ Chat.getImageDimensions = function (url) {
 Chat.fitImage = async function (url, maxHeight = 300, maxWidth = 300) {
 	let {height, width} = await Chat.getImageDimensions(url);
 
-	let ratio = 1;
-
 	if (width <= maxWidth && height <= maxHeight) return [width, height];
 
+	let ratio;
 	if (height * (maxWidth / maxHeight) > width) {
 		ratio = maxHeight / height;
 	} else {

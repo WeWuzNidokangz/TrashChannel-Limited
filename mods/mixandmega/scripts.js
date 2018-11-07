@@ -4,13 +4,13 @@ const DexCalculator = require('../../sim/dex-calculator');
 
 /**@type {ModdedBattleScriptsData} */
 let BattleScripts = {
-	init: function () {
+	init() {
 		for (let id in this.data.Items) {
 			if (!this.data.Items[id].megaStone) continue;
 			this.modData('Items', id).onTakeItem = false;
 		}
 	},
-	canMegaEvo: function (pokemon) {
+	canMegaEvo(pokemon) {
 		if (pokemon.template.isMega || pokemon.template.isPrimal) return null;
 
 		const item = pokemon.getItem();
@@ -23,7 +23,7 @@ let BattleScripts = {
 			return null;
 		}
 	},
-	runMegaEvo: function (pokemon) {
+	runMegaEvo(pokemon) {
 		if (pokemon.template.isMega || pokemon.template.isPrimal) return false;
 
 		let originalTemplate = this.getTemplate(pokemon.originalSpecies);
@@ -69,7 +69,7 @@ let BattleScripts = {
 
 		return true;
 	},
-	getMixedTemplate: function (originalSpecies, megaSpecies) {
+	getMixedTemplate(originalSpecies, megaSpecies) {
 		let originalTemplate = this.getTemplate(originalSpecies);
 		let megaTemplate = this.getTemplate(megaSpecies);
 		if (originalTemplate.baseSpecies === megaTemplate.baseSpecies) return megaTemplate;
@@ -79,7 +79,7 @@ let BattleScripts = {
 		let template = this.doGetMixedTemplate(originalTemplate, deltas);
 		return template;
 	},
-	getMegaDeltas: function (megaTemplate) {
+	getMegaDeltas(megaTemplate) {
 		let baseTemplate = this.getTemplate(megaTemplate.baseSpecies);
 		/**@type {{ability: string, baseStats: {[k: string]: number}, weightkg: number, originalMega: string, requiredItem: string | undefined, type?: string, isMega?: boolean, isPrimal?: boolean}} */
 		let deltas = {
@@ -104,10 +104,9 @@ let BattleScripts = {
 		if (megaTemplate.isPrimal) deltas.isPrimal = true;
 		return deltas;
 	},
-	doGetMixedTemplate: function (template, deltas) {
+	doGetMixedTemplate(templateOrTemplateName, deltas) {
 		if (!deltas) throw new TypeError("Must specify deltas!");
-		if (!template || typeof template === 'string') template = this.getTemplate(template);
-		template = Object.assign({}, template);
+		let template = DexCalculator.deepClone(this.getTemplate(templateOrTemplateName));
 		template.abilities = {'0': deltas.ability};
 		if (template.types[0] === deltas.type) {
 			template.types = [deltas.type];
@@ -115,11 +114,8 @@ let BattleScripts = {
 			template.types = [template.types[0], deltas.type];
 		}
 		let baseStats = template.baseStats;
-		// @ts-ignore
-		template.baseStats = {};
 		for (let statName in baseStats) {
-			// @ts-ignore
-			template.baseStats[statName] = DexCalculator.clampIntRange(baseStats[statName] + deltas.baseStats[statName], 1, 255);
+			baseStats[statName] = DexCalculator.clampIntRange(baseStats[statName] + deltas.baseStats[statName], 1, 255);
 		}
 		template.weightkg = Math.max(0.1, template.weightkg + deltas.weightkg);
 		template.originalMega = deltas.originalMega;

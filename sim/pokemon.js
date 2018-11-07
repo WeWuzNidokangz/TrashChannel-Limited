@@ -156,9 +156,11 @@ class Pokemon {
 		 */
 		this.moveThisTurnResult = undefined;
 
+		/** used for Assurance check */
+		this.hurtThisTurn = false;
 		this.lastDamage = 0;
-		/**@type {?{pokemon: Pokemon, damage: number, thisTurn: boolean, move?: string}} */
-		this.lastAttackedBy = null;
+		/**@type {{source: Pokemon, damage: number, thisTurn: boolean, move?: string}[]} */
+		this.attackedBy = [];
 		this.usedItemThisTurn = false;
 		this.newlySwitched = false;
 		this.beingCalledBack = false;
@@ -314,6 +316,8 @@ class Pokemon {
 
 		// OMs
 
+		/**@type {string | undefined} */
+		this.innate = undefined;
 		/**@type {string | undefined} */
 		this.originalSpecies = undefined;
 		/**@type {?boolean} */
@@ -615,12 +619,18 @@ class Pokemon {
 	gotAttacked(move, damage, source) {
 		if (!damage) damage = 0;
 		move = this.battle.getMove(move);
-		this.lastAttackedBy = {
-			pokemon: source,
+		let lastAttackedBy = {
+			source: source,
 			damage: damage,
 			move: move.id,
 			thisTurn: true,
 		};
+		this.attackedBy.push(lastAttackedBy);
+	}
+
+	getLastAttackedBy() {
+		if (this.attackedBy.length === 0) return undefined;
+		return this.attackedBy[this.attackedBy.length - 1];
 	}
 
 	/**
@@ -986,6 +996,7 @@ class Pokemon {
 		this.apparentType = rawTemplate.types.join('/');
 		this.addedType = template.addedType || '';
 		this.knownType = true;
+		if (this.battle.gen >= 7) this.removeVolatile('autotomize');
 
 		if (source) {
 			let stats = this.battle.spreadModify(this.template.baseStats, this.set);
@@ -1020,7 +1031,12 @@ class Pokemon {
 						this.battle.add('-burst', this, apparentSpecies, template.requiredItem);
 						this.moveThisTurnResult = true; // Ultra Burst counts as an action for Truant
 					} else if (source.onPrimal) {
-						this.battle.add('-primal', !this.illusion && this);
+						if (this.illusion) {
+							this.ability = '';
+							this.battle.add('-primal', this.illusion);
+						} else {
+							this.battle.add('-primal', this);
+						}
 					} else {
 						this.battle.add('-mega', this, apparentSpecies, template.requiredItem);
 						this.moveThisTurnResult = true; // Mega Evolution counts as an action for Truant
@@ -1089,7 +1105,8 @@ class Pokemon {
 		this.moveThisTurn = '';
 
 		this.lastDamage = 0;
-		this.lastAttackedBy = null;
+		this.attackedBy = [];
+		this.hurtThisTurn = false;
 		this.newlySwitched = true;
 		this.beingCalledBack = false;
 
@@ -1141,11 +1158,9 @@ class Pokemon {
 	 * @param {Effect?} effect
 	 */
 	damage(d, source = null, effect = null) {
-		if (!this.hp) return 0;
+		if (!this.hp || isNaN(d) || d <= 0) return 0;
 		if (d < 1 && d > 0) d = 1;
 		d = Math.floor(d);
-		if (isNaN(d)) return 0;
-		if (d <= 0) return 0;
 		this.hp -= d;
 		if (this.hp <= 0) {
 			d += this.hp;
@@ -1279,7 +1294,8 @@ class Pokemon {
 			if (sourceEffect && sourceEffect.status === this.status) {
 				this.battle.add('-fail', this, this.status);
 			} else if (sourceEffect && sourceEffect.status) {
-				this.battle.add('-fail', this);
+				this.battle.add('-fail', source);
+				this.battle.attrLastMove('[still]');
 			}
 			return false;
 		}

@@ -39,11 +39,12 @@ class DexCalculator {
 	 * @return {any}
 	 */
 	static deepClone(obj) {
-		if (typeof obj === 'function') return obj;
 		if (obj === null || typeof obj !== 'object') return obj;
+		// @ts-ignore
 		if (Array.isArray(obj)) return obj.map(prop => DexCalculator.deepClone(prop));
 		const clone = Object.create(Object.getPrototypeOf(obj));
 		for (const key of Object.keys(obj)) {
+			// @ts-ignore
 			clone[key] = DexCalculator.deepClone(obj[key]);
 		}
 		return clone;

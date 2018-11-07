@@ -146,8 +146,7 @@ let BattleStatuses = {
 			if (this.randomChance(1, 2)) {
 				return;
 			}
-			// @ts-ignore
-			move = {
+			move = /** @type {ActiveMove} */ ({
 				basePower: 40,
 				type: '???',
 				baseMoveType: move.type,
@@ -156,7 +155,7 @@ let BattleStatuses = {
 				isSelfHit: true,
 				noDamageVariance: true,
 				flags: {},
-			};
+			});
 			this.directDamage(this.getDamage(pokemon, pokemon, move));
 			return false;
 		},

@@ -49,6 +49,7 @@ class Battle extends Dex.ModdedDex {
 		let format = Dex.getFormat(options.formatid, true);
 		console.log("battle constructor format: " + format );
 		super(format.mod);
+		/** @type {{[k: string]: string}} */
 		this.zMoveTable = {};
 		Object.assign(this, this.data.Scripts);
 
@@ -124,6 +125,7 @@ class Battle extends Dex.ModdedDex {
 		this.eventDepth = 0;
 		/** @type {?Move} */
 		this.lastMove = null;
+		/** @type {?ActiveMove} */
 		this.activeMove = null;
 		this.activePokemon = null;
 		this.activeTarget = null;
@@ -427,7 +429,7 @@ class Battle extends Dex.ModdedDex {
 	}
 
 	/**
-	 * @param {?Move} [move]
+	 * @param {?ActiveMove} [move]
 	 * @param {?Pokemon} [pokemon]
 	 * @param {?Pokemon | false} [target]
 	 */
@@ -1546,6 +1548,7 @@ class Battle extends Dex.ModdedDex {
 				pokemon.newlySwitched = false;
 				pokemon.moveLastTurnResult = pokemon.moveThisTurnResult;
 				pokemon.moveThisTurnResult = undefined;
+				pokemon.hurtThisTurn = false;
 
 				pokemon.maybeDisabled = false;
 				for (const moveSlot of pokemon.moveSlots) {
@@ -1555,13 +1558,16 @@ class Battle extends Dex.ModdedDex {
 				this.runEvent('DisableMove', pokemon);
 				if (!pokemon.ateBerry) pokemon.disableMove('belch');
 
-				if (pokemon.lastAttackedBy) {
-					if (pokemon.lastAttackedBy.pokemon.isActive) {
-						pokemon.lastAttackedBy.thisTurn = false;
+				// If it was an illusion, it's not any more
+				if (pokemon.getLastAttackedBy() && this.gen >= 7) pokemon.knownType = true;
+
+				for (let i = pokemon.attackedBy.length - 1; i >= 0; i--) {
+					let attack = pokemon.attackedBy[i];
+					if (attack.source.isActive) {
+						attack.thisTurn = false;
 					} else {
-						pokemon.lastAttackedBy = null;
+						pokemon.attackedBy.splice(pokemon.attackedBy.indexOf(attack), 1);
 					}
-					if (this.gen >= 7) pokemon.knownType = true; // If it was an illusion, it's not any more
 				}
 
 				if (this.gen >= 7) {
@@ -1926,7 +1932,9 @@ class Battle extends Dex.ModdedDex {
 		}
 		if (damage !== 0) damage = DexCalculator.clampIntRange(damage, 1);
 		damage = target.damage(damage, source, effect);
+		if (damage !== 0) target.hurtThisTurn = true;
 		if (source && effect.effectType === 'Move') source.lastDamage = damage;
+
 		let name = effect.fullname;
 		if (name === 'tox') name = 'psn';
 		switch (effect.id) {
@@ -2117,20 +2125,21 @@ class Battle extends Dex.ModdedDex {
 	/**
 	 * @param {Pokemon} pokemon
 	 * @param {Pokemon} target
-	 * @param {string | number | Move} move
+	 * @param {string | number | ActiveMove} move
 	 * @param {boolean} [suppressMessages]
 	 */
 	getDamage(pokemon, target, move, suppressMessages = false) {
-		if (typeof move === 'string') move = this.getMove(move);
+		if (typeof move === 'string') move = this.getActiveMove(move);
 
 		if (typeof move === 'number') {
 			let basePower = move;
-			move = new Data.Move({
+			move = /** @type {ActiveMove} */ (new Data.Move({
 				basePower,
 				type: '???',
 				category: 'Physical',
 				willCrit: false,
-			});
+			}));
+			move.hit = 0;
 		}
 
 		if (!move.ignoreImmunity || (move.ignoreImmunity !== true && !move.ignoreImmunity[move.type])) {
@@ -2260,7 +2269,7 @@ class Battle extends Dex.ModdedDex {
 	 * @param {number} baseDamage
 	 * @param {Pokemon} pokemon
 	 * @param {Pokemon} target
-	 * @param {Move} move
+	 * @param {ActiveMove} move
 	 * @param {boolean} [suppressMessages]
 	 */
 	modifyDamage(baseDamage, pokemon, target, move, suppressMessages = false) {
@@ -2288,7 +2297,7 @@ class Battle extends Dex.ModdedDex {
 		baseDamage = this.randomizer(baseDamage);
 
 		// STAB
-		if (move.hasSTAB || (type !== '???' && pokemon.hasType(type))) {
+		if (move.forceSTAB || (type !== '???' && pokemon.hasType(type))) {
 			// The "???" type never gets STAB
 			// Not even if you Roost in Gen 4 and somehow manage to use
 			// Struggle in the same turn.
@@ -2330,7 +2339,7 @@ class Battle extends Dex.ModdedDex {
 		// Final modifier. Modifiers that modify damage after min damage check, such as Life Orb.
 		baseDamage = this.runEvent('ModifyDamage', pokemon, target, move, baseDamage);
 
-		if (move.zPowered && move.zBrokeProtect) {
+		if (move.isZPowered && move.zBrokeProtect) {
 			baseDamage = this.modify(baseDamage, 0.25);
 			this.add('-zbroken', target);
 		}
@@ -2564,7 +2573,7 @@ class Battle extends Dex.ModdedDex {
 		if (!action) throw new Error(`Action not passed to resolveAction`);
 
 		if (!action.side && action.pokemon) action.side = action.pokemon.side;
-		if (!action.move && action.moveid) action.move = this.getMoveCopy(action.moveid);
+		if (!action.move && action.moveid) action.move = this.getActiveMove(action.moveid);
 		if (!action.choice && action.move) action.choice = 'move';
 		if (!action.priority && action.priority !== 0) {
 			let priorities = {
@@ -2610,7 +2619,7 @@ class Battle extends Dex.ModdedDex {
 		let deferPriority = this.gen >= 7 && action.mega && action.mega !== 'done';
 		if (action.move) {
 			let target = null;
-			action.move = this.getMoveCopy(action.move);
+			action.move = this.getActiveMove(action.move);
 
 			if (!action.targetLoc) {
 				target = this.resolveTarget(action.pokemon, action.move);
@@ -2701,7 +2710,6 @@ class Battle extends Dex.ModdedDex {
 	 */
 	prioritizeAction(action, source, sourceEffect) {
 		if (this.event) {
-			if (!source) source = this.event.source;
 			if (!sourceEffect) sourceEffect = this.effect;
 		}
 		for (const [i, curAction] of this.queue.entries()) {
@@ -3214,6 +3222,12 @@ class Battle extends Dex.ModdedDex {
 	 * @param {(string | number | Function | AnyObject)[]} args
 	 */
 	attrLastMove(...args) {
+		if (args.includes('[still]')) {
+			// If no animation plays, the target should never be known
+			let parts = this.log[this.lastMoveLine].split('|');
+			parts[4] = '';
+			this.log[this.lastMoveLine] = parts.join('|');
+		}
 		this.log[this.lastMoveLine] += `|${args.join('|')}`;
 	}
 
@@ -3394,7 +3408,7 @@ class Battle extends Dex.ModdedDex {
 	 * @param {?Pokemon} target
 	 * @param {Pokemon} pokemon
 	 * @param {string | Move} move
-	 * @param {Move | SelfEffect | SecondaryEffect} [moveData]
+	 * @param {ActiveMove | SelfEffect | SecondaryEffect} [moveData]
 	 * @param {boolean} [isSecondary]
 	 * @param {boolean} [isSelf]
 	 * @return {number | false}
@@ -3460,14 +3474,14 @@ class Battle extends Dex.ModdedDex {
 	/**
 	 * @param {string | Move} move
 	 * @param {Pokemon} pokemon
-	 * @return {Move}
+	 * @return {ActiveMove}
 	 */
-	getZMoveCopy(move, pokemon) {
-		throw new Error(`The getZMoveCopy function needs to be implemented in scripts.js or the battle format.`);
+	getActiveZMove(move, pokemon) {
+		throw new Error(`The getActiveZMove function needs to be implemented in scripts.js or the battle format.`);
 	}
 
 	/**
-	 * @param {Move} move
+	 * @param {ActiveMove} move
 	 * @param {Pokemon} pokemon
 	 */
 	runZPower(move, pokemon) {

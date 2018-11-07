@@ -431,16 +431,14 @@ let BattleMovedex = {
 			if (target.side.sideConditions['futuremove'].positions[target.position]) {
 				return false;
 			}
-			/**@type {Move} */
-			// @ts-ignore
-			let moveData = {
+			let moveData = /** @type {ActiveMove} */ ({
 				name: "Doom Desire",
 				basePower: 120,
 				category: "Special",
 				flags: {},
 				willCrit: false,
 				type: '???',
-			};
+			});
 			let damage = this.getDamage(source, target, moveData, true);
 			target.side.sideConditions['futuremove'].positions[target.position] = {
 				duration: 3,
@@ -521,12 +519,13 @@ let BattleMovedex = {
 			durationCallback: function () {
 				return this.random(4, 9);
 			},
-			onStart: function (target) {
+			onStart: function (target, source) {
 				let noEncore = ['encore', 'mimic', 'mirrormove', 'sketch', 'struggle', 'transform'];
 				let moveIndex = target.lastMove ? target.moves.indexOf(target.lastMove.id) : -1;
 				if (!target.lastMove || noEncore.includes(target.lastMove.id) || !target.moveSlots[moveIndex] || target.moveSlots[moveIndex].pp <= 0) {
 					// it failed
-					this.add('-fail', target);
+					this.add('-fail', source);
+					this.attrLastMove('[still]');
 					delete target.volatiles['encore'];
 					return;
 				}
@@ -693,16 +692,14 @@ let BattleMovedex = {
 			if (target.side.sideConditions['futuremove'].positions[target.position]) {
 				return false;
 			}
-			/**@type {Move} */
-			// @ts-ignore
-			let moveData = {
+			let moveData = /** @type {ActiveMove} */ ({
 				name: "Future Sight",
 				basePower: 80,
 				category: "Special",
 				flags: {},
 				willCrit: false,
 				type: '???',
-			};
+			});
 			let damage = this.getDamage(source, target, moveData, true);
 			target.side.sideConditions['futuremove'].positions[target.position] = {
 				duration: 3,
@@ -986,7 +983,7 @@ let BattleMovedex = {
 					return;
 				}
 				target.removeVolatile('magiccoat');
-				let newMove = this.getMoveCopy(move.id);
+				let newMove = this.getActiveMove(move.id);
 				newMove.hasBounced = true;
 				this.useMove(newMove, target, source);
 				return null;
@@ -1107,10 +1104,11 @@ let BattleMovedex = {
 		onTryHit: function () { },
 		onHit: function (pokemon) {
 			let noMirror = ['acupressure', 'aromatherapy', 'assist', 'chatter', 'copycat', 'counter', 'curse', 'doomdesire', 'feint', 'focuspunch', 'futuresight', 'gravity', 'hail', 'haze', 'healbell', 'helpinghand', 'lightscreen', 'luckychant', 'magiccoat', 'mefirst', 'metronome', 'mimic', 'mirrorcoat', 'mirrormove', 'mist', 'mudsport', 'naturepower', 'perishsong', 'psychup', 'raindance', 'reflect', 'roleplay', 'safeguard', 'sandstorm', 'sketch', 'sleeptalk', 'snatch', 'spikes', 'spitup', 'stealthrock', 'struggle', 'sunnyday', 'tailwind', 'toxicspikes', 'transform', 'watersport'];
-			if (!pokemon.lastAttackedBy || !pokemon.lastAttackedBy.pokemon.lastMove || !pokemon.lastAttackedBy.move || noMirror.includes(pokemon.lastAttackedBy.move) || !pokemon.lastAttackedBy.pokemon.hasMove(pokemon.lastAttackedBy.move)) {
-				return false;
+			let lastAttackedBy = pokemon.getLastAttackedBy();
+			if (!lastAttackedBy || !lastAttackedBy.source.lastMove || !lastAttackedBy.move || noMirror.includes(lastAttackedBy.move) || !lastAttackedBy.source.hasMove(lastAttackedBy.move)) {
+				 return false;
 			}
-			this.useMove(pokemon.lastAttackedBy.move, pokemon);
+			this.useMove(lastAttackedBy.move, pokemon);
 		},
 		target: "self",
 	},
@@ -1163,6 +1161,9 @@ let BattleMovedex = {
 		inherit: true,
 		desc: "This move calls another move for use based on the battle terrain. Tri Attack in Wi-Fi battles.",
 		shortDesc: "Attack changes based on terrain. (Tri Attack)",
+		onHit: function (pokemon) {
+			this.useMove('triattack', pokemon);
+		},
 	},
 	odorsleuth: {
 		inherit: true,

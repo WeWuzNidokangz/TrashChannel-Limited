@@ -917,6 +917,7 @@ class RandomTeams extends Dex.ModdedDex {
 				case 'superpower':
 					if (counter['Fighting'] > 1 && counter.setupType) rejected = true;
 					if (hasMove['rest'] && hasMove['sleeptalk']) rejected = true;
+					if (hasAbility['Contrary']) isSetup = true;
 					break;
 				case 'vacuumwave':
 					if ((hasMove['closecombat'] || hasMove['machpunch']) && counter.setupType !== 'Special') rejected = true;
@@ -1032,6 +1033,7 @@ class RandomTeams extends Dex.ModdedDex {
 					break;
 				case 'psychocut': case 'zenheadbutt':
 					if ((hasMove['psychic'] || hasMove['psyshock']) && counter.setupType !== 'Physical') rejected = true;
+					if (hasMove['rest'] && hasMove['sleeptalk'] && (hasMove['superpower'] || movePool.includes('superpower'))) rejected = true;
 					break;
 				case 'psyshock':
 					if (movePool.length > 1) {
@@ -1555,9 +1557,10 @@ class RandomTeams extends Dex.ModdedDex {
 			item = 'Black Sludge';
 		}
 
-		let level = 75;
+		let level;
 
 		if (!isDoubles) {
+			/** @type {{[tier: string]: number}} */
 			let levelScale = {
 				LC: 88,
 				'LC Uber': 86,
@@ -1574,6 +1577,7 @@ class RandomTeams extends Dex.ModdedDex {
 				Uber: 73,
 				AG: 71,
 			};
+			/** @type {{[species: string]: number}} */
 			let customScale = {
 				// Banned Abilities
 				Dugtrio: 77, Gothitelle: 77, Pelipper: 79, Politoed: 79, Wobbuffet: 77,
@@ -1588,9 +1592,7 @@ class RandomTeams extends Dex.ModdedDex {
 			if (tier.charAt(0) === '(') {
 				tier = tier.slice(1, -1);
 			}
-			// @ts-ignore
 			level = levelScale[tier] || 75;
-			// @ts-ignore
 			if (customScale[template.name]) level = customScale[template.name];
 
 			// Custom level based on moveset
@@ -1773,8 +1775,10 @@ class RandomTeams extends Dex.ModdedDex {
 				if (pokemon.length === 1) {
 					template = potd;
 					if (template.species === 'Magikarp') {
+						// @ts-ignore
 						template.randomBattleMoves = ['bounce', 'flail', 'splash', 'magikarpsrevenge'];
 					} else if (template.species === 'Delibird') {
+						// @ts-ignore
 						template.randomBattleMoves = ['present', 'bestow'];
 					}
 				} else if (template.species === potd.species) {

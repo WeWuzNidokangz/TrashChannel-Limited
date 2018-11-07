@@ -99,8 +99,8 @@ if (cluster.isMaster) {
 	});
 
 	/**
-	 * @param {number} port
-	 * @param {string} bindAddress
+	 * @param {number} [port]
+	 * @param {string} [bindAddress]
 	 * @param {number} [workerCount]
 	 */
 	exports.listen = function (port, bindAddress, workerCount) {
@@ -121,6 +121,9 @@ if (cluster.isMaster) {
 		}
 		if (bindAddress !== undefined) {
 			Config.bindaddress = bindAddress;
+		}
+		if (port !== undefined) {
+			Config.port = port;
 		}
 		if (workerCount === undefined) {
 			workerCount = (Config.workers !== undefined ? Config.workers : 1);
@@ -546,19 +549,19 @@ if (cluster.isMaster) {
 				switch (subchannel ? subchannel.get(socketid) : '0') {
 				case '1':
 					if (!messages[1]) {
-						messages[1] = message.replace(/\n\|split\n[^\n]*\n([^\n]*)\n[^\n]*\n[^\n]*/g, '\n$1');
+						messages[1] = message.replace(/\n\|split\n[^\n]*\n([^\n]*)\n[^\n]*\n[^\n]*/g, '\n$1').replace(/\n\n/g, '\n');
 					}
 					socket.write(messages[1]);
 					break;
 				case '2':
 					if (!messages[2]) {
-						messages[2] = message.replace(/\n\|split\n[^\n]*\n[^\n]*\n([^\n]*)\n[^\n]*/g, '\n$1');
+						messages[2] = message.replace(/\n\|split\n[^\n]*\n[^\n]*\n([^\n]*)\n[^\n]*/g, '\n$1').replace(/\n\n/g, '\n');
 					}
 					socket.write(messages[2]);
 					break;
 				default:
 					if (!messages[0]) {
-						messages[0] = message.replace(/\n\|split\n([^\n]*)\n[^\n]*\n[^\n]*\n[^\n]*/g, '\n$1');
+						messages[0] = message.replace(/\n\|split\n([^\n]*)\n[^\n]*\n[^\n]*\n[^\n]*/g, '\n$1').replace(/\n\n/g, '\n');
 					}
 					socket.write(messages[0]);
 					break;

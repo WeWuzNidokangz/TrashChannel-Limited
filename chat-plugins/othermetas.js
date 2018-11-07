@@ -73,7 +73,7 @@ const commands = {
 		if (!toId(target) || !target.includes('@')) return this.parse('/help mixandmega');
 		let sep = target.split('@');
 		let stone = getMegaStone(sep[1]);
-		let template = Object.assign({}, Dex.getTemplate(sep[0]));
+		let template = Dex.getTemplate(sep[0]);
 		if (!stone.exists) return this.errorReply(`Error: Mega Stone not found.`);
 		if (!template.exists) return this.errorReply(`Error: Pokemon not found.`);
 		if (template.isMega || template.name === 'Necrozma-Ultra') { // Mega Pokemon and Ultra Necrozma cannot be mega evolved
@@ -133,16 +133,14 @@ const commands = {
 			deltas.type = megaTemplate.types[1];
 		}
 		//////////////////////////////////////////
-		let mixedTemplate = Object.assign({}, template);
+		let mixedTemplate = DexCalculator.deepClone(template);
 		mixedTemplate.abilities = Object.assign({}, megaTemplate.abilities);
 		if (mixedTemplate.types[0] === deltas.type) { // Add any type gains
 			mixedTemplate.types = [deltas.type];
 		} else if (deltas.type) {
 			mixedTemplate.types = [mixedTemplate.types[0], deltas.type];
 		}
-		mixedTemplate.baseStats = Object.assign({}, mixedTemplate.baseStats);
 		for (let statName in template.baseStats) { // Add the changed stats and weight
-			// @ts-ignore
 			mixedTemplate.baseStats[statName] = DexCalculator.clampIntRange(mixedTemplate.baseStats[statName] + deltas.baseStats[statName], 1, 255);
 		}
 		mixedTemplate.weightkg = Math.round(Math.max(0.1, template.weightkg + deltas.weightkg) * 100) / 100;
@@ -282,16 +280,13 @@ const commands = {
 	'350cup': function (target, room, user) {
 		if (!this.runBroadcast()) return;
 		if (!toId(target)) return this.parse('/help 350cup');
-		let template = Object.assign({}, Dex.getTemplate(target));
+		let template = DexCalculator.deepClone(Dex.getTemplate(target));
 		if (!template.exists) return this.errorReply("Error: Pokemon not found.");
 		let bst = 0;
 		for (let i in template.baseStats) {
-			// @ts-ignore
 			bst += template.baseStats[i];
 		}
-		template.baseStats = Object.assign({}, template.baseStats);
 		for (let i in template.baseStats) {
-			// @ts-ignore
 			template.baseStats[i] = template.baseStats[i] * (bst <= 350 ? 2 : 1);
 		}
 		this.sendReply(`|html|${Chat.getDataPokemonHTML(template)}`);
@@ -303,7 +298,7 @@ const commands = {
 	tiershift: function (target, room, user) {
 		if (!this.runBroadcast()) return;
 		if (!toId(target)) return this.parse('/help tiershift');
-		let template = Object.assign({}, Dex.getTemplate(target));
+		let template = DexCalculator.deepClone(Dex.getTemplate(target));
 		if (!template.exists) return this.errorReply("Error: Pokemon not found.");
 		/** @type {{[k: string]: number}} */
 		let boosts = {
@@ -318,14 +313,13 @@ const commands = {
 			'LC Uber': 40,
 			'LC': 40,
 		};
-		if (!(template.tier in boosts)) return this.sendReply(`|html|${Chat.getDataPokemonHTML(template)}`);
-		let boost = boosts[template.tier];
-		let newStats = Object.assign({}, template.baseStats);
+		let tier = template.tier;
+		if (tier[0] === '(') tier = tier.slice(1, -1);
+		if (!(tier in boosts)) return this.sendReply(`|html|${Chat.getDataPokemonHTML(template)}`);
+		let boost = boosts[tier];
 		for (let statName in template.baseStats) {
-			// @ts-ignore
-			newStats[statName] = DexCalculator.clampIntRange(newStats[statName] + boost, 1, 255);
+			template.baseStats[statName] = DexCalculator.clampIntRange(template.baseStats[statName] + boost, 1, 255);
 		}
-		template.baseStats = Object.assign({}, newStats);
 		this.sendReply(`|raw|${Chat.getDataPokemonHTML(template)}`);
 	},
 	tiershifthelp: [`/ts OR /tiershift <pokemon> - Shows the base stats that a Pokemon would have in Tier Shift.`],
@@ -335,18 +329,14 @@ const commands = {
 	scalemons: function (target, room, user) {
 		if (!this.runBroadcast()) return;
 		if (!toId(target)) return this.parse(`/help scalemons`);
-		let template = Object.assign({}, Dex.getTemplate(target));
+		let template = DexCalculator.deepClone(Dex.getTemplate(target));
 		if (!template.exists) return this.errorReply(`Error: Pokemon ${target} not found.`);
-		let newStats = Object.assign({}, template.baseStats);
 		let stats = ['atk', 'def', 'spa', 'spd', 'spe'];
-		// @ts-ignore
 		let pst = stats.map(stat => template.baseStats[stat]).reduce((x, y) => x + y);
 		let scale = 600 - template.baseStats['hp'];
 		for (const stat of stats) {
-			// @ts-ignore
-			newStats[stat] = DexCalculator.clampIntRange(template.baseStats[stat] * scale / pst, 1, 255);
+			template.baseStats[stat] = DexCalculator.clampIntRange(template.baseStats[stat] * scale / pst, 1, 255);
 		}
-		template.baseStats = Object.assign({}, newStats);
 		this.sendReply(`|raw|${Chat.getDataPokemonHTML(template)}`);
 	},
 	scalemonshelp: [`/scale OR /scalemons <pokemon> - Shows the base stats that a Pokemon would have in Scalemons.`],

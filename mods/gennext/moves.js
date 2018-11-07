@@ -656,7 +656,7 @@ let BattleMovedex = {
 			onDamage: function (damage, target, source, effect) {
 				if (!effect || effect.effectType !== 'Move') return;
 				if (!source || source.side === target.side) return;
-				if (effect && effect.effectType === 'Move' && damage >= target.hp) {
+				if (effect.effectType === 'Move' && damage >= target.hp) {
 					damage = target.hp - 1;
 				}
 				this.effectData.totalDamage += damage;
@@ -679,11 +679,9 @@ let BattleMovedex = {
 					}
 					this.add('-end', pokemon, 'Bide');
 					let target = this.effectData.sourceSide.active[this.effectData.sourcePosition];
-					/**@type {Move} */
-					// @ts-ignore
-					let moveData = {
+					let moveData = /** @type {ActiveMove} */ ({
 						damage: this.effectData.totalDamage * 2,
-					};
+					});
 					this.moveHit(target, pokemon, 'bide', moveData);
 					return false;
 				}
@@ -979,9 +977,12 @@ let BattleMovedex = {
 	avalanche: {
 		inherit: true,
 		basePowerCallback: function (pokemon, source) {
-			if ((source.lastDamage > 0 && pokemon.lastAttackedBy && pokemon.lastAttackedBy.thisTurn)) {
-				this.debug('Boosted for getting hit by ' + pokemon.lastAttackedBy.move);
-				return this.isWeather('hail') ? 180 : 120;
+			let lastAttackedBy = pokemon.getLastAttackedBy();
+			if (lastAttackedBy) {
+				if (lastAttackedBy.damage > 0 && lastAttackedBy.thisTurn) {
+					this.debug('Boosted for getting hit by ' + lastAttackedBy.move);
+					return this.isWeather('hail') ? 180 : 120;
+				}
 			}
 			return this.isWeather('hail') ? 90 : 60;
 		},
