@@ -26,6 +26,7 @@ let BattleScripts = {
 	runMegaEvo(pokemon) {
 		if (pokemon.template.isMega || pokemon.template.isPrimal) return false;
 
+		console.log("originalSpecies: " + pokemon.originalSpecies);
 		let originalTemplate = this.getTemplate(pokemon.originalSpecies);
 		let oSecondaryTyping = originalTemplate.types[1];
 		console.log("oSecondaryTyping: " + oSecondaryTyping);
