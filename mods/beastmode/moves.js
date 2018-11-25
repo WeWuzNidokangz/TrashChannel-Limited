@@ -1,0 +1,94 @@
+'use strict';
+
+// Needed to implement the beast mode transformation
+const BeastModeTeams = require('./random-teams');
+const Pokemon = require('../../sim/pokemon');
+const DexCalculator = require('../../sim/dex-calculator');
+
+/** @type {{[k: string]: ModdedMoveData}} */
+let BattleMovedex = {
+	"beastmodebase": {
+		accuracy: true,
+		basePower: 0,
+		category: "Special",
+		desc: "Change forme by making a pact with the named Pokemon!",
+		shortDesc: "Go BEA5T M0D3!",
+		id: "beastmodebase",
+		name: "Beast Mode Base",
+		isNonstandard: false,
+		pp: 5,
+		noPPBoosts: true,
+		priority: 6,
+		onTryMovePriority: 100,
+		onTryMove: function () {
+			//throw new Error(`Reached beast mode!`);
+			this.attrLastMove('[still]');
+		},
+		onPrepareHit: function (target, source) {
+			this.add('-anim', source, 'Howl', source);
+			this.add('-anim', source, 'Boomburst', source);
+		},
+		onHit: function (target, source, move) {
+			// HP recovery support
+			let oMaxHP = source.maxhp;
+			if( 0 == oMaxHP ) oMaxHP = 1;
+			let currentHPProp = source.hp / source.maxhp;
+			console.log("source.hp: "+ source.hp.toString() +" source.maxhp: "+source.maxhp.toString());
+
+			// Generate new beast mode template for this move
+			const generator = new BeastModeTeams('gen7randombattle', this.prng);
+			let set = generator.beastModeTransformation(move.id, source);
+			source.formeChange(set.species, source.getItem(), false);
+			
+			// Copy evs/ivs
+			for (let i in set.evs) {
+				// @ts-ignore
+				source.set.evs[i] = DexCalculator.clampIntRange(set.evs[i], 0, 255);
+			}
+			for (let i in set.ivs) {
+				// @ts-ignore
+				source.set.ivs[i] = DexCalculator.clampIntRange(set.ivs[i], 0, 31);
+			}
+			let hpData = this.getHiddenPower(set.ivs);
+			/**@type {string} */
+			source.hpType = hpData.type;
+			/**@type {number} */
+			source.hpPower = hpData.power;
+
+			// Overwrite moves
+			source.moveSlots = [];
+			for (let newMove of set.moves) {
+				let moveTemplate = this.getMove(newMove);
+				if (source.moves.includes(moveTemplate.id)) continue;
+				source.moveSlots.push({
+					move: moveTemplate.name,
+					id: moveTemplate.id,
+					pp: ((moveTemplate.noPPBoosts || moveTemplate.isZ) ? moveTemplate.pp : moveTemplate.pp * 8 / 5),
+					maxpp: ((moveTemplate.noPPBoosts || moveTemplate.isZ) ? moveTemplate.pp : moveTemplate.pp * 8 / 5),
+					target: moveTemplate.target,
+					disabled: false,
+					disabledSource: '',
+					used: false,
+				});
+			}
+			
+			// Recover HP to maintain proportion
+			let newMaxHP = source.baseStats.hp;
+			if( 0 == newMaxHP ) newMaxHP = 1;
+			if( newMaxHP != oMaxHP ) {
+				let newMaxHP = Math.floor(Math.floor(2 * source.baseStats['hp'] + source.set.ivs['hp'] + Math.floor(source.set.evs['hp'] / 4) + 100) * source.level / 100 + 10);
+				source.hp = Math.floor(currentHPProp * newMaxHP);
+				this.add('-heal', source, source.getHealth, '[silent]');
+			}
+
+			this.add('message', `${source.name} went BEA5T M0D3!`);
+		},
+		flags: {mirror: 1, snatch: 1, authentic: 1},
+		secondary: null,
+		dontShowUseMoveMessage: true,
+		target: "normal",
+		type: "Normal",
+	},
+};
+
+exports.BattleMovedex = BattleMovedex;

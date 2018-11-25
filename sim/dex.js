@@ -954,6 +954,7 @@ class ModdedDex {
 	 * @param {string} rule
 	 */
 	validateBanRule(rule) {
+		//console.log('rule:' + rule );
 		let id = toId(rule);
 		if (id === 'unreleased') return 'unreleased';
 		if (id === 'illegal') return 'illegal';
@@ -968,11 +969,24 @@ class ModdedDex {
 		}
 		const ruleid = id;
 		if (this.data.Aliases.hasOwnProperty(id)) id = toId(this.data.Aliases[id]);
+		/** @type {any} */
+		let template = undefined;
 		for (const matchType of matchTypes) {
+			//console.log('id:' + id );
+			//console.log('matchType:' + matchType );
 			let table;
 			switch (matchType) {
-			case 'pokemon': table = this.data.Pokedex; break;
-			case 'move': table = this.data.Movedex; break;
+			case 'pokemon': 
+				table = this.data.Pokedex;
+				break;
+			case 'move':
+				// 18/11/24 TrashChannel: Needed to avoid dupes from Pokemon names used as moves in Beast Mode
+				template = this.getTemplate(id);
+				if(undefined !== template) {
+					if(template.exists) continue;
+				}
+				table = this.data.Movedex;
+				break;
 			case 'item': table = this.data.Items; break;
 			case 'ability': table = this.data.Abilities; break;
 			case 'pokemontag':

@@ -994,6 +994,11 @@ let BattleFormats = {
 		name: 'Bitch And Beggar Rule',
 		desc: "The mod for Bitch And Beggar: ",
 	},
+	beastmoderule: {
+		effectType: 'Rule',
+		name: 'Beast Mode Rule',
+		desc: "The mod for BEA5T M0D3: ",
+	},
 	reversedrule: {
 		effectType: 'Rule',
 		name: 'Reversed Rule',

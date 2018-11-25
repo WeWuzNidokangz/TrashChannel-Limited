@@ -516,6 +516,8 @@ interface MoveData extends EffectData {
 	zMovePower?: number
 	zMoveEffect?: string
 	zMoveBoost?: SparseBoostsTable
+	// TrashChannel additions
+	dontShowUseMoveMessage?: boolean
 	basePowerCallback?: (this: Battle, pokemon: Pokemon, target: Pokemon, move: ActiveMove) => number | boolean | null
 }
 

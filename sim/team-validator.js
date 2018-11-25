@@ -341,7 +341,18 @@ class Validator {
 		for (const moveName of set.moves) {
 			if (!moveName) continue;
 			let move = dex.getMove(Dex.getString(moveName));
-			if (!move.exists) return [`"${move.name}" is an invalid move.`];
+
+			// TrashChannel 18/11/23: BEA5T M0D3 transformations use non-existent moves
+			/** @type {Boolean} */
+			let beastModeMoveException = false;
+			if( ruleTable.has('beastmoderule') ) {
+				let beastTemplate = dex.getTemplate(Dex.getString(moveName));
+				if(beastTemplate.exists) {
+					beastModeMoveException = true;
+				}
+			}
+
+			if (!move.exists && !beastModeMoveException) return [`"${move.name}" is an invalid move.`];
 			banReason = ruleTable.check('move:' + move.id, setHas);
 			if (banReason) {
 				problems.push(`${name}'s move ${move.name} is ${banReason}.`);
@@ -359,10 +370,12 @@ class Validator {
 
 			if (ruleTable.has('-illegal')) {
 				const checkLearnset = (ruleTable.checkLearnset && ruleTable.checkLearnset[0] || this.checkLearnset);
-				lsetProblem = checkLearnset.call(this, move, template, lsetData, set);
-				if (lsetProblem) {
-					lsetProblem.moveName = move.name;
-					break;
+				if(!beastModeMoveException || move.isNonstandard){
+					lsetProblem = checkLearnset.call(this, move, template, lsetData, set);
+					if (lsetProblem) {
+						lsetProblem.moveName = move.name;
+						break;
+					}
 				}
 			}
 		}
@@ -783,6 +796,7 @@ class Validator {
 			} else if (problem.type === 'pastgen') {
 				problemString += ` is not available in generation ${problem.gen} or later.`;
 			} else if (problem.type === 'invalid') {
+				//throw new Error(`p r o b`);
 				problemString = `${name} can't learn ${problem.moveName}.`;
 			} else {
 				throw new Error(`Unrecognized problem ${JSON.stringify(problem)}`);
