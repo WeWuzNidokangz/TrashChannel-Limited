@@ -110,7 +110,7 @@ let Formats = [
 	},
 	{
 		name: "[Gen 7] BEA5T M0D3",
-		desc: `Pok&eacute;mon in this ZU-based meta can set other species as moves (including Ubers) to transform into them.`,
+		desc: `Pok&eacute;mon in this ZU-based meta can set other species as moves (including Ubers and Mega formes) to transform into them.`,
 		threads: [
 			``,
 		],

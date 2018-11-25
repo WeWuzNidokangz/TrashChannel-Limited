@@ -24,9 +24,8 @@ let BattleMovedex = {
 			//throw new Error(`Reached beast mode!`);
 			this.attrLastMove('[still]');
 		},
-		onPrepareHit: function (target, source) {
-			this.add('-anim', source, 'Howl', source);
-			this.add('-anim', source, 'Boomburst', source);
+		onPrepareHit: function (target, source, move) {
+			this.add('-anim', source, "Extreme Evoboost", source);
 		},
 		onHit: function (target, source, move) {
 			// HP recovery support
