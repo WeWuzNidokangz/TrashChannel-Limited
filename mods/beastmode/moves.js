@@ -15,11 +15,13 @@ let BattleMovedex = {
 		shortDesc: "Go BEA5T M0D3!",
 		id: "beastmodebase",
 		name: "Beast Mode Base",
+		infiltrates: true,
 		isNonstandard: false,
 		pp: 5,
 		noPPBoosts: true,
 		priority: 6,
 		onTryMovePriority: 100,
+		breaksProtect: true,
 		onTryMove: function () {
 			//throw new Error(`Reached beast mode!`);
 			this.attrLastMove('[still]');
@@ -83,10 +85,11 @@ let BattleMovedex = {
 			this.add('message', `${source.name} went BEA5T M0D3!`);
 		},
 		flags: {mirror: 1, snatch: 1, authentic: 1},
+		ignoreAbility: true,
 		secondary: null,
 		dontShowUseMoveMessage: true,
 		target: "normal",
-		type: "Normal",
+		type: "Fairy",
 	},
 };
 
