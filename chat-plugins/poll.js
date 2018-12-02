@@ -222,13 +222,13 @@ const commands = {
 		create: 'new',
 		new: function (target, room, user, connection, cmd, message) {
 			if (!target) return this.parse('/help poll new');
+			target = target.trim();
 			if (target.length > 1024) return this.errorReply("Poll too long.");
 			if (room.battle) return this.errorReply("Battles do not support polls.");
 
 			/** @type {string} */
-			let text = this.canTalk(target);
-			if (!text) return this.errorReply("You cannot do this while unable to talk.");
-			if (target !== text) return this.errorReply("You are not allowed to use fitered words in polls.");
+			let text = Chat.filter.call(this, target, user, room, connection);
+			if (target !== text) return this.errorReply("You are not allowed to use filtered words in polls.");
 
 			const supportHTML = cmd === 'htmlcreate';
 			let separator = '';
