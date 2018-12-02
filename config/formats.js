@@ -15,7 +15,10 @@ let Formats = [
 	},
 	{
 		name: "[Gen 7] Bitch and Beggar",
-		desc: `Pok&eacute;mon can 'Beggar-Evolve' using low BST Pok&eacute;mon as Stones.`,
+		onDesc: function () {
+			let bstLimitString = this.modValueNumberA ? " (<=" + this.modValueNumberA.toString() + ")" : "";
+			return "Pok&eacute;mon can 'Beggar-Evolve' using low" + bstLimitString + " BST Pok&eacute;mon as Stones.";
+		},
 		threads: [
 			``,
 		],
@@ -28,7 +31,10 @@ let Formats = [
 			'Kyurem-Black', 'Kyurem-White', 'Lugia', 'Lunala', 'Marshadow', 'Mewtwo', 'Naganadel', 'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane',
 			'Palkia', 'Pheromosa', 'Rayquaza', 'Regigigas', 'Reshiram', 'Slaking', 'Solgaleo', 'Xerneas', 'Yveltal', 'Zekrom',
 		],
-		modValueNumberA: 230,
+		restrictionlist: [
+			'Huge Power', 'Pure Power', 'Wonder Guard', 
+		],
+		modValueNumberA: 300,
 		onValidateTeam: function (team) {
 			/**@type {{[k: string]: true}} */
 			let itemTable = {};
@@ -38,6 +44,14 @@ let Formats = [
 				if (itemTable[bitchTemplate.id]) return ["You are limited to one of each Bitch.", "(You have more than one " + bitchTemplate.name + ")"];
 				itemTable[bitchTemplate.id] = true;
 			}
+		},
+		validateSet: function (set, teamHas) {
+			// Avoid hard item validation by validating with item removed
+			let item = set.item;
+			set.item = '';
+			let problems = this.validateSet(set, teamHas) || [];
+			set.item = item;
+			return problems;
 		},
 		onValidateSet: function (set, format) {
 			let template = this.getTemplate(set.species || set.name);

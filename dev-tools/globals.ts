@@ -669,6 +669,7 @@ interface FormatsData extends EventMethods {
 	debug?: boolean
 	defaultLevel?: number
 	desc?: string
+	onDesc?: (this: FormatsData) => string
 	effectType?: string
 	forcedLevel?: number
 	gameType?: GameType
@@ -704,8 +705,8 @@ interface FormatsData extends EventMethods {
 	onChangeSet?: (this: ModdedDex, set: PokemonSet, format: Format, setHas: AnyObject, teamHas: AnyObject) => string[] | false | void
 	onModifyTemplate?: (this: Battle, template: Template, target: Pokemon, source: Pokemon | null) => Template | void
 	onTeamPreview?: (this: Battle) => void
-	onValidateSet?: (this: ModdedDex, set: PokemonSet, format: Format, setHas: AnyObject, teamHas: AnyObject) => string[] | false | void
-	onValidateTeam?: (this: ModdedDex, team: PokemonSet[], format: Format, teamHas: AnyObject) => string[] | false | void
+	onValidateSet?: (this: ModdedDex, set: PokemonSet, format: Format, setHas: AnyObject, teamHas: AnyObject, ruleTable: RuleTable) => string[] | false | void
+	onValidateTeam?: (this: ModdedDex, team: PokemonSet[], format: Format, teamHas: AnyObject, ruleTable: RuleTable) => string[] | false | void
 	validateSet?: (this: Validator, set: PokemonSet, teamHas: AnyObject) => string[] | false | void
 	validateTeam?: (this: Validator, team: PokemonSet[], removeNicknames: boolean) => string[] | false | void,
 	section?: string,

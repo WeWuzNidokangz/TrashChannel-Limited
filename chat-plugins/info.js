@@ -1635,14 +1635,16 @@ const commands = {
 			}
 			let formatType = (format.gameType || "singles");
 			formatType = formatType.charAt(0).toUpperCase() + formatType.slice(1).toLowerCase();
-			if (!format.desc && !format.threads) {
+			if (!format.desc && !format.onDesc && !format.threads) {
 				if (format.effectType === 'Format') {
 					return this.sendReplyBox("No description found for this " + formatType + " " + format.section + " format." + "<br />" + rulesetHtml);
 				} else {
 					return this.sendReplyBox("No description found for this rule." + "<br />" + rulesetHtml);
 				}
 			}
-			let descHtml = format.desc ? [format.desc] : [];
+			// TrashChannel 18/12/02: Allow description to be procedurally generated
+			let generateDesc = format.onDesc ? format.onDesc() : format.desc;
+			let descHtml = generateDesc ? [generateDesc] : [];
 			if (format.threads) descHtml = descHtml.concat(format.threads);
 			return this.sendReplyBox(descHtml.join("<br />") + "<br />" + rulesetHtml);
 		}

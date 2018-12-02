@@ -94,14 +94,15 @@ class Validator {
 			}
 		}
 
+		// TrashChannel 18/12/02: We want each rule's onValidateTeam to know about other rules so we can do mashup validation
 		for (const [rule] of ruleTable) {
 			let subformat = dex.getFormat(rule);
 			if (subformat.onValidateTeam && ruleTable.has(subformat.id)) {
-				problems = problems.concat(subformat.onValidateTeam.call(dex, team, format, teamHas) || []);
+				problems = problems.concat(subformat.onValidateTeam.call(dex, team, format, teamHas, ruleTable) || []);
 			}
 		}
 		if (format.onValidateTeam) {
-			problems = problems.concat(format.onValidateTeam.call(dex, team, format, teamHas) || []);
+			problems = problems.concat(format.onValidateTeam.call(dex, team, format, teamHas, ruleTable) || []);
 		}
 
 		if (!problems.length) return null;
@@ -557,15 +558,16 @@ class Validator {
 			}
 		}
 
+		// TrashChannel 18/12/02: We want each rule's onValidateSet to know about other rules so we can do mashup validation
 		for (const [rule] of ruleTable) {
 			if (rule.startsWith('!')) continue;
 			let subformat = dex.getFormat(rule);
 			if (subformat.onValidateSet && ruleTable.has(subformat.id)) {
-				problems = problems.concat(subformat.onValidateSet.call(dex, set, format, setHas, teamHas) || []);
+				problems = problems.concat(subformat.onValidateSet.call(dex, set, format, setHas, teamHas, ruleTable) || []);
 			}
 		}
 		if (format.onValidateSet) {
-			problems = problems.concat(format.onValidateSet.call(dex, set, format, setHas, teamHas) || []);
+			problems = problems.concat(format.onValidateSet.call(dex, set, format, setHas, teamHas, ruleTable) || []);
 		}
 
 		if (!problems.length) {
