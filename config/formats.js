@@ -73,10 +73,13 @@ let Formats = [
 			}
 		},
 		onSwitchIn: function (pokemon) {
-			let oMegaTemplate = this.getTemplate(pokemon.template.originalMega);
-			if (oMegaTemplate.exists && pokemon.originalSpecies !== oMegaTemplate.baseSpecies) {
-				// Place volatiles on the Pokémon to show its mega-evolved condition and details
-				this.add('-start', pokemon, oMegaTemplate.requiredItem || oMegaTemplate.requiredMove, '[silent]');
+			// Take care of non-BnB case
+			let bitchTemplate = this.getTemplate(pokemon.item);
+			if(!bitchTemplate.exists) return;
+			if (null === pokemon.canMegaEvo) {
+				// Place volatiles on the Pokémon to show its beggar-evolved condition and details
+				let bitchSpecies = pokemon.item;
+				this.add('-start', pokemon, bitchSpecies, '[silent]');
 				let oTemplate = this.getTemplate(pokemon.originalSpecies);
 				if (oTemplate.types.length !== pokemon.template.types.length || oTemplate.types[1] !== pokemon.template.types[1]) {
 					this.add('-start', pokemon, 'typechange', pokemon.template.types.join('/'), '[silent]');

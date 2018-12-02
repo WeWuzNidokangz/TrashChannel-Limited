@@ -76,9 +76,10 @@ let BattleScripts = {
 		console.log("pokemon.hp: "+ pokemon.hp.toString() +" pokemon.maxhp: "+pokemon.maxhp.toString());
 
 		// Bitch and Beggar case
+		let bitchSpecies = pokemon.canMegaEvo || pokemon.canUltraBurst;
 		/**@type {Template} */
 		// @ts-ignore
-		const template = this.getMixedTemplate(pokemon.originalSpecies, pokemon.canMegaEvo || pokemon.canUltraBurst);
+		const template = this.getMixedTemplate(pokemon.originalSpecies, bitchSpecies);
 		
 		// Update ability for slot
 		let oTemplate = this.getTemplate(pokemon.template);
@@ -93,17 +94,12 @@ let BattleScripts = {
 		// @ts-ignore
 		template.abilities = {'0': template.abilities[oAbilitySlot]};
 
-		// Do we have a proper sprite for it?
+		// Graphical volatiles
 		// @ts-ignore
-		if (this.getTemplate(pokemon.canMegaEvo).baseSpecies === pokemon.originalSpecies || isUltraBurst) {
-			pokemon.formeChange(template, pokemon.getItem(), true);
-		} else {
-			let oMegaTemplate = this.getTemplate(template.originalMega);
-			pokemon.formeChange(template, pokemon.getItem(), true);
-			this.add('-start', pokemon, oMegaTemplate.requiredItem || oMegaTemplate.requiredMove, '[silent]');
-			if (oTemplate.types.length !== pokemon.template.types.length || oTemplate.types[1] !== pokemon.template.types[1]) {
-				this.add('-start', pokemon, 'typechange', pokemon.template.types.join('/'), '[silent]');
-			}
+		pokemon.formeChange(template, pokemon.getItem(), true);
+		this.add('-start', pokemon, bitchSpecies, '[silent]');
+		if (oTemplate.types.length !== pokemon.template.types.length || oTemplate.types[1] !== pokemon.template.types[1]) {
+			this.add('-start', pokemon, 'typechange', pokemon.template.types.join('/'), '[silent]');
 		}
 
 		// Recover HP to maintain proportion
