@@ -659,7 +659,7 @@ let Formats = [
 		mod: 'gen7',
 		ruleset: ['[Gen 7] OU'],
 		banlist: [
-			'Blacephalon', 'Cresselia', 'Hoopa-Unbound', 'Kartana', 'Kyurem-Black', 'Regigigas', 'Shedinja', 'Slaking', 'Gyaradosite',
+			'Blacephalon', 'Cresselia', 'Hoopa-Unbound', 'Kartana', 'Kyurem-Black', 'Regigigas', 'Shedinja', 'Slaking', 'Gyaradosite', 'Smeargle',
 			'Huge Power', 'Imposter', 'Innards Out', 'Pure Power', 'Speed Boost', 'Water Bubble', 'Assist', 'Chatter', 'Shell Smash',
 		],
 		noChangeForme: true,
@@ -673,12 +673,23 @@ let Formats = [
 			return template.speciesid;
 		},
 		validateSet: function (set, teamHas) {
+			const ruleTable = this.ruleTable;
+
+			ruleTable.forEach((v, rule) => {
+				console.log("Inheritance rule: " + rule);
+			});
+
 			// @ts-ignore
 			if (!this.format.abilityMap) {
 				let abilityMap = Object.create(null);
 				for (let speciesid in Dex.data.Pokedex) {
 					let pokemon = Dex.data.Pokedex[speciesid];
-					if (pokemon.num < 1 || pokemon.species === 'Smeargle') continue;
+					if( ruleTable.has('-unreleased') ) {
+						if (pokemon.num < 1) continue;
+					}
+					if( ruleTable.has('-pokemon:smeargle') ) {
+						if (pokemon.species === 'Smeargle') continue;
+					}
 					if (Dex.data.FormatsData[speciesid].requiredItem || Dex.data.FormatsData[speciesid].requiredMove) continue;
 					for (let key in pokemon.abilities) {
 						// @ts-ignore
@@ -704,9 +715,16 @@ let Formats = [
 			let species = toId(set.species);
 			let template = Dex.getTemplate(species);
 			if (!template.exists) return [`The Pokemon "${set.species}" does not exist.`];
-			if (template.isUnreleased) return [`${template.species} is unreleased.`];
+			if( ruleTable.has('-unreleased') ) {
+				if (template.isUnreleased) return [`${template.species} is unreleased.`];
+			}
 			let megaTemplate = Dex.getTemplate(Dex.getItem(set.item).megaStone);
-			if (template.tier === 'Uber' || megaTemplate.tier === 'Uber' || this.format.banlist.includes(template.species)) return [`${megaTemplate.tier === 'Uber' ? megaTemplate.species : template.species} is banned.`];
+			if( ruleTable.has('-pokemontag:uber') ) {
+				if (template.tier === 'Uber' || megaTemplate.tier === 'Uber') return [`${megaTemplate.tier === 'Uber' ? megaTemplate.species : template.species} is banned.`];
+			}
+			if( ruleTable.has('-pokemon:'+toId(template.species) ) ) {
+				return [`${template.species} + 'is banned.`];
+			}
 
 			let name = set.name;
 
