@@ -149,7 +149,7 @@ const commands = {
 		}
 		let cannotMega = Dex.getFormat('gen7bitchandbeggar').cannotMega || [];
 		if (cannotMega.includes(beggarTemplate.name) && beggarTemplate.name !== bitchTemplate.megaEvolves && !beggarTemplate.isMega) { // Separate messages because there's a difference between being already beggar evolved / NFE and being banned from beggar evolving
-			this.errorReply(`Warning: ${beggarTemplate.name} is banned from mega evolving with a non-native mega stone in Bitch and Beggar.`);
+			this.errorReply(`Warning: ${beggarTemplate.name} is banned from beggar evolving in Bitch and Beggar.`);
 		}
 		if (['Multitype', 'RKS System'].includes(beggarTemplate.abilities['0']) && !['Arceus', 'Silvally'].includes(beggarTemplate.name)) {
 			this.errorReply(`Warning: ${beggarTemplate.name} is required to hold ${beggarTemplate.baseSpecies === 'Arceus' && beggarTemplate.requiredItems ? 'either ' + beggarTemplate.requiredItems[0] + ' or ' + beggarTemplate.requiredItems[1] : beggarTemplate.requiredItem}.`);
@@ -210,7 +210,7 @@ const commands = {
 		}
 
 		// Do beggar evo calcs
-		const mixedTemplate = BnBMod.getMixedTemplate(beggarTemplate.name, bitchTemplate.baseSpecies);
+		const mixedTemplate = BnBMod.getMixedTemplate(beggarTemplate.name, bitchTemplate.name);
 		mixedTemplate.tier = "BnB";
 		let weighthit = 20;
 		if (mixedTemplate.weightkg >= 200) {
