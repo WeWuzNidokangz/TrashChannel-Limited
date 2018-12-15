@@ -1526,6 +1526,10 @@ class Pokemon {
 		return this.battle.getAbility(this.ability);
 	}
 
+	calcActiveAbilitySlot() {
+		return this.battle.calcActiveAbilitySlot(this.template, this.ability);
+	}
+
 	/**
 	 * @param {string | string[]} ability
 	 */

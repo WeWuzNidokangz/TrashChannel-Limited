@@ -19,6 +19,7 @@ class Validator {
 		this.format = Dex.getFormat(format);
 		this.dex = Dex.forFormat(this.format);
 		this.ruleTable = this.dex.getRuleTable(this.format);
+		this.restrictionTable = this.dex.getRestrictionTable(this.format);
 	}
 
 	/**
@@ -167,6 +168,7 @@ class Validator {
 		/**@type {{[k: string]: true}} */
 		let setHas = {};
 		const ruleTable = this.ruleTable;
+		const restrictionTable = this.restrictionTable;
 
 		for (const [rule] of ruleTable) {
 			let subformat = dex.getFormat(rule);
@@ -563,11 +565,11 @@ class Validator {
 			if (rule.startsWith('!')) continue;
 			let subformat = dex.getFormat(rule);
 			if (subformat.onValidateSet && ruleTable.has(subformat.id)) {
-				problems = problems.concat(subformat.onValidateSet.call(dex, set, format, setHas, teamHas, ruleTable) || []);
+				problems = problems.concat(subformat.onValidateSet.call(dex, set, format, setHas, teamHas, ruleTable, restrictionTable) || []);
 			}
 		}
 		if (format.onValidateSet) {
-			problems = problems.concat(format.onValidateSet.call(dex, set, format, setHas, teamHas, ruleTable) || []);
+			problems = problems.concat(format.onValidateSet.call(dex, set, format, setHas, teamHas, ruleTable, restrictionTable) || []);
 		}
 
 		if (!problems.length) {

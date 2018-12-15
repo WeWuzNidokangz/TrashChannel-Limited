@@ -49,6 +49,23 @@ class DexCalculator {
 		}
 		return clone;
 	}
+
+	/**
+	 * @param {string} character
+	 * @return {boolean}
+	 */
+	static isVowel(character) {
+		switch(character) {
+			case 'a':
+			case 'e':
+			case 'i':
+			case 'o':
+			case 'u':
+				return true;
+		}
+
+		return false;
+	}
 }
 
 module.exports = DexCalculator;

@@ -3,7 +3,12 @@
 // Note: This is the list of formats
 // The rules that formats use are stored in data/rulesets.js
 
+const fs = require('fs');
+const path = require('path');
+
 const DexCalculator = require('../sim/dex-calculator');
+
+const BITCHANDBEGGARMOD = path.resolve(__dirname, '../mods/bitchandbeggar/scripts');
 
 /**@type {(FormatsData | {section: string, column?: number})[]} */
 let Formats = [
@@ -45,27 +50,66 @@ let Formats = [
 				itemTable[bitchTemplate.id] = true;
 			}
 		},
-		validateSet: function (set, teamHas) {
-			// Avoid hard item validation by validating with item removed
-			let item = set.item;
-			set.item = '';
-			let problems = this.validateSet(set, teamHas) || [];
-			set.item = item;
-			return problems;
-		},
-		onValidateSet: function (set, format) {
-			let template = this.getTemplate(set.species || set.name);
+		onValidateSet: function (set, format, setHas, teamHas, ruleTable, restrictionTable) {
+			//console.log('BnB: val ');
+			//console.log('format.modValueNumberA: '+format.modValueNumberA.toString());
+
+			let beggarTemplate = this.getTemplate(set.species || set.name);
 			let bitchTemplate = this.getTemplate(set.item);
+			//console.log('bitch: '+set.item);
 			if(!bitchTemplate.exists) return;
+
+			let problems = [];
 			let bitchBST = this.calcBST(bitchTemplate.baseStats);
+			//console.log('bitchBST: '+bitchBST.toString());
 			if(format.modValueNumberA) {
 				if(bitchBST > format.modValueNumberA) {
-					return ["Bitches are limited to " + format.modValueNumberA.toString() + " BST, but " + bitchTemplate.name + " has " + bitchBST.toString() + "!"];
+					problems.push("Bitches are limited to " + format.modValueNumberA.toString() + " BST, but " + bitchTemplate.name + " has " + bitchBST.toString() + "!");
 				}
 			}
 			let uberBitches = format.restrictedStones || [];
 			let uberPokemon = format.cannotMega || [];
-			if (uberPokemon.includes(template.name) || set.ability === 'Power Construct' || uberBitches.includes(bitchTemplate.name)) return ["" + template.species + " is not allowed to hold " + bitchTemplate.name + "."];
+			if (uberPokemon.includes(beggarTemplate.name) || set.ability === 'Power Construct' || uberBitches.includes(bitchTemplate.name)) return ["" + beggarTemplate.species + " is not allowed to hold " + bitchTemplate.name + "."];
+			
+			// Load BnB mod functions
+			/**@type {ModdedBattleScriptsData} */
+			let BnBMod;
+			try {
+				BnBMod = require(BITCHANDBEGGARMOD).BattleScripts;
+			} catch (e) {
+				console.log('e.code: ' + e.code);
+				if (e.code !== 'MODULE_NOT_FOUND' && e.code !== 'ENOENT') {
+					throw e;
+				}
+				problems.push("BnBMod not found!");
+			}
+
+			const mixedTemplate = BnBMod.getMixedTemplate(beggarTemplate.name, bitchTemplate.baseSpecies);
+			let oAbilitySlot = this.calcActiveAbilitySlot(beggarTemplate, set.ability);
+			//console.log("oAbilitySlot: " + oAbilitySlot);
+			// @ts-ignore
+			let postBeggarAbilityName = mixedTemplate.abilities[oAbilitySlot];
+			let postBeggarAbilityId = toId(postBeggarAbilityName);
+			//console.log("postBeggarAbilityId: " + postBeggarAbilityId);
+			let abilityTest = '-ability:'+postBeggarAbilityId;
+			//console.log("abilityTest: " + abilityTest);
+			ruleTable.forEach((v, rule) => {
+				//console.log("BnB rule: " + rule);
+				if( rule === abilityTest ) {
+					//console.log("BnB rule IN ");
+					problems.push("If "+set.name+" beggar-evolves with the ability "+ set.ability + ", it will gain the banned ability "
+						+ postBeggarAbilityName + " from its bitch "+ bitchTemplate.name + ".");
+				}
+			});
+			restrictionTable.forEach((v, restriction) => {
+				//console.log("BnB restriction: " + restriction);
+				if( restriction === abilityTest ) {
+					//console.log("BnB restriction IN ");
+					problems.push("If "+set.name+" beggar-evolves with the ability "+ set.ability + ", it will gain the restricted ability "
+						+ postBeggarAbilityName + " from its bitch "+ bitchTemplate.name + ".");
+				}
+			});
+			return problems;
 		},
 		onBegin: function () {
 			for (const pokemon of this.p1.pokemon.concat(this.p2.pokemon)) {
@@ -79,7 +123,7 @@ let Formats = [
 			if (null === pokemon.canMegaEvo) {
 				// Place volatiles on the Pokémon to show its beggar-evolved condition and details
 				let bitchSpecies = pokemon.item;
-				this.add('-start', pokemon, bitchSpecies, '[silent]');
+				this.add('-start', pokemon, this.generateMegaStoneName(bitchSpecies), '[silent]');
 				let oTemplate = this.getTemplate(pokemon.originalSpecies);
 				if (oTemplate.types.length !== pokemon.template.types.length || oTemplate.types[1] !== pokemon.template.types[1]) {
 					this.add('-start', pokemon, 'typechange', pokemon.template.types.join('/'), '[silent]');

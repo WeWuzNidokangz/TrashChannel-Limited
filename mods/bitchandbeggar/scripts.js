@@ -83,21 +83,15 @@ let BattleScripts = {
 		
 		// Update ability for slot
 		let oTemplate = this.getTemplate(pokemon.template);
-		let oAbilitySlot = '0'; // Fallback to standard ability if we're in a meta that allows illegal abilities
-		for (let abilityItr in oTemplate.abilities) {
-			console.log("Ability slot: "+ abilityItr.toString() +" mine: "+pokemon.ability.toString()+" theirs: "+toId(oTemplate.abilities[abilityItr]).toString());
-			// @ts-ignore
-			if(pokemon.ability !== toId(oTemplate.abilities[abilityItr])) continue;
-			oAbilitySlot = abilityItr;
-			break;
-		}
+		let oAbilitySlot = pokemon.calcActiveAbilitySlot();
 		// @ts-ignore
 		template.abilities = {'0': template.abilities[oAbilitySlot]};
 
 		// Graphical volatiles
 		// @ts-ignore
 		pokemon.formeChange(template, pokemon.getItem(), true);
-		this.add('-start', pokemon, bitchSpecies, '[silent]');
+		// @ts-ignore
+		this.add('-start', pokemon, this.generateMegaStoneName(bitchSpecies), '[silent]');
 		if (oTemplate.types.length !== pokemon.template.types.length || oTemplate.types[1] !== pokemon.template.types[1]) {
 			this.add('-start', pokemon, 'typechange', pokemon.template.types.join('/'), '[silent]');
 		}
@@ -108,7 +102,9 @@ let BattleScripts = {
 		if( newMaxHP != oMaxHP ) {
 			let newMaxHP = Math.floor(Math.floor(2 * template.baseStats['hp'] + pokemon.set.ivs['hp'] + Math.floor(pokemon.set.evs['hp'] / 4) + 100) * pokemon.level / 100 + 10);
 			pokemon.hp = Math.floor(currentHPProp * newMaxHP);
-			this.add('-heal', pokemon, pokemon.getHealth, '[silent]');
+			pokemon.maxhp = Math.floor(newMaxHP);
+			// Proportional HP remains the same so heal effect seems unnecessary
+			//this.add('-heal', pokemon, pokemon.getHealth, '[silent]');
 		}
 
 		pokemon.canMegaEvo = null;
@@ -148,7 +144,7 @@ let BattleScripts = {
 		if (!deltas) throw new TypeError("Must specify deltas!");
 		let context = (typeof Dex != 'undefined') ? Dex : this;
 		if (!template || typeof template === 'string') template = context.getTemplate(template);
-		template = Object.assign({}, template);
+		template = DexCalculator.deepClone(template);
 		// Generate ability mapping: take bitch's ability for slot if it exists,
 		// otherwise fallback to standard ability
 		for (let abilityItr in template.abilities) {

@@ -705,8 +705,8 @@ interface FormatsData extends EventMethods {
 	onChangeSet?: (this: ModdedDex, set: PokemonSet, format: Format, setHas: AnyObject, teamHas: AnyObject) => string[] | false | void
 	onModifyTemplate?: (this: Battle, template: Template, target: Pokemon, source: Pokemon | null) => Template | void
 	onTeamPreview?: (this: Battle) => void
-	onValidateSet?: (this: ModdedDex, set: PokemonSet, format: Format, setHas: AnyObject, teamHas: AnyObject, ruleTable: RuleTable) => string[] | false | void
-	onValidateTeam?: (this: ModdedDex, team: PokemonSet[], format: Format, teamHas: AnyObject, ruleTable: RuleTable) => string[] | false | void
+	onValidateSet?: (this: ModdedDex, set: PokemonSet, format: Format, setHas: AnyObject, teamHas: AnyObject, ruleTable: RuleTable, restrictionTable: RestrictionTable) => string[] | false | void
+	onValidateTeam?: (this: ModdedDex, team: PokemonSet[], format: Format, teamHas: AnyObject, ruleTable: RuleTable, restrictionTable: RestrictionTable) => string[] | false | void
 	validateSet?: (this: Validator, set: PokemonSet, teamHas: AnyObject) => string[] | false | void
 	validateTeam?: (this: Validator, team: PokemonSet[], removeNicknames: boolean) => string[] | false | void,
 	section?: string,
@@ -806,6 +806,8 @@ interface ModdedBattleScriptsData extends Partial<BattleScriptsData> {
 	doGetMixedTemplate?: (this: Battle, template: Template, deltas: AnyObject) => Template
 	getMegaDeltas?: (this: Battle, megaSpecies: Template) => AnyObject
 	getMixedTemplate?: (this: Battle, originalSpecies: string, megaSpecies: string) => Template
+	//
+	getAbilityMapping?: (this: Battle, pokemon: Pokemon, ) => TemplateAbility
 }
 
 interface TypeData {

@@ -192,10 +192,10 @@ const commands = {
 		if (beggarTemplate.isNonstandard) {
 			this.errorReply(`Warning: ${beggarTemplate.name} is not a real Pokemon and is therefore not usable in Bitch and Beggar.`);
 		}
-		// This error is too funny to delete so just comment out
-		//if (bitchTemplate.isNonstandard) {
-		//	this.errorReply(`Warning: ${bitchTemplate.name} is a fake beggar bitch created by the CAP Project and is restricted to the CAP ${bitchTemplate.megaEvolves}.`);
-		//}
+		// Actually can be used with CAP
+		if (bitchTemplate.isNonstandard) {
+			this.errorReply(`Warning: ${bitchTemplate.name} is a fake bitch created by the CAP Project and is restricted to CAP mashups.`);
+		}
 
 		// Load BnB mod functions
 		/**@type {ModdedBattleScriptsData} */
@@ -210,7 +210,7 @@ const commands = {
 		}
 
 		// Do beggar evo calcs
-		const mixedTemplate = BnBMod.getMixedTemplate(beggarTemplate.baseSpecies, bitchTemplate.baseSpecies);
+		const mixedTemplate = BnBMod.getMixedTemplate(beggarTemplate.name, bitchTemplate.baseSpecies);
 		mixedTemplate.tier = "BnB";
 		let weighthit = 20;
 		if (mixedTemplate.weightkg >= 200) {
