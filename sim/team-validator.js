@@ -117,6 +117,21 @@ class Validator {
 	 */
 	validateSet(set, teamHas) {
 		let format = this.format;
+		const ruleTable = this.ruleTable;
+		const restrictionTable = this.restrictionTable;
+		return this.validateSetInternal(set, teamHas, format, ruleTable, restrictionTable, false);
+	}
+
+	/**
+	 * @param {PokemonSet} set
+	 * @param {AnyObject} teamHas
+	 * @param {Format} format
+	 * @param {RuleTable} ruleTable
+	 * @param {RestrictionTable} restrictionTable
+	 * @param {boolean} ignoreNonCriticalProblems
+	 * @return {string[]?}
+	 */
+	validateSetInternal(set, teamHas, format, ruleTable, restrictionTable, ignoreNonCriticalProblems) {
 		let dex = this.dex;
 
 		let problems = /** @type {string[]} */ ([]);
@@ -167,8 +182,6 @@ class Validator {
 
 		/**@type {{[k: string]: true}} */
 		let setHas = {};
-		const ruleTable = this.ruleTable;
-		const restrictionTable = this.restrictionTable;
 
 		for (const [rule] of ruleTable) {
 			let subformat = dex.getFormat(rule);
@@ -449,15 +462,17 @@ class Validator {
 				}
 			}
 		}
-		if (dex.gen <= 2 || dex.gen !== 6 && (format.id.endsWith('hackmons') || format.name.includes('BH'))) {
-			if (!set.evs) set.evs = Validator.fillStats(null, 252);
-			let evTotal = (set.evs.hp || 0) + (set.evs.atk || 0) + (set.evs.def || 0) + (set.evs.spa || 0) + (set.evs.spd || 0) + (set.evs.spe || 0);
-			if (evTotal === 508 || evTotal === 510) {
-				problems.push(`${name} has exactly 510 EVs, but this format does not restrict you to 510 EVs: you can max out every EV (If this was intentional, add exactly 1 to one of your EVs, which won't change its stats but will tell us that it wasn't a mistake).`);
+		if(!ignoreNonCriticalProblems) {
+			if (dex.gen <= 2 || dex.gen !== 6 && (format.id.endsWith('hackmons') || format.name.includes('BH'))) {
+				if (!set.evs) set.evs = Validator.fillStats(null, 252);
+				let evTotal = (set.evs.hp || 0) + (set.evs.atk || 0) + (set.evs.def || 0) + (set.evs.spa || 0) + (set.evs.spd || 0) + (set.evs.spe || 0);
+				if (evTotal === 508 || evTotal === 510) {
+					problems.push(`${name} has exactly 510 EVs, but this format does not restrict you to 510 EVs: you can max out every EV (If this was intentional, add exactly 1 to one of your EVs, which won't change its stats but will tell us that it wasn't a mistake).`);
+				}
 			}
-		}
-		if (set.evs && !Object.values(set.evs).some(value => value > 0) && !format.id.includes('letsgo')) {
-			problems.push(`${name} has exactly 0 EVs - did you forget to EV it? (If this was intentional, add exactly 1 to one of your EVs, which won't change its stats but will tell us that it wasn't a mistake).`);
+			if (set.evs && !Object.values(set.evs).some(value => value > 0) && !format.id.includes('letsgo')) {
+				problems.push(`${name} has exactly 0 EVs - did you forget to EV it? (If this was intentional, add exactly 1 to one of your EVs, which won't change its stats but will tell us that it wasn't a mistake).`);
+			}
 		}
 
 		lsetData.isHidden = isHidden;

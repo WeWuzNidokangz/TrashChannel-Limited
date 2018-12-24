@@ -711,6 +711,10 @@ interface FormatsData extends EventMethods {
 	validateTeam?: (this: Validator, team: PokemonSet[], removeNicknames: boolean) => string[] | false | void,
 	section?: string,
 	column?: number
+
+	// TrashChannel
+	// Where a format includes multiple potential metas, determine which one a Pokemon set qualifies as
+	determineMeta?: (this: ModdedDex, set: PokemonSet, teamHas: AnyObject) => string | undefined
 }
 
 interface ModdedFormatsData extends Partial<FormatsData> {
@@ -806,8 +810,8 @@ interface ModdedBattleScriptsData extends Partial<BattleScriptsData> {
 	doGetMixedTemplate?: (this: Battle, template: Template, deltas: AnyObject) => Template
 	getMegaDeltas?: (this: Battle, megaSpecies: Template) => AnyObject
 	getMixedTemplate?: (this: Battle, originalSpecies: string, megaSpecies: string) => Template
-	//
-	getAbilityMapping?: (this: Battle, pokemon: Pokemon, ) => TemplateAbility
+	// TrashChannel
+	getAbilityMapping?: (this: Battle, pokemon: Pokemon ) => TemplateAbility
 }
 
 interface TypeData {
@@ -982,4 +986,14 @@ interface RandomTeamsTypes {
 		fillerMoves3?: string[]
 		fillerMoves4?: string[]
 	}
+}
+
+// 18/12/20 TrashChannel: For Mix and Meta
+interface MixedMeta {
+	format: string
+	weightTier: string
+	bstLimit?: number
+	// Implement to force the validator to treat this meta as the intended meta when true
+	// (e.g. Mix and Meta when there is a non-native megastone set)
+	isSetRedFlag?: (this: ModdedDex, pokemonSet: PokemonSet) => string | undefined
 }

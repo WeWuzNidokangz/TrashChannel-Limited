@@ -918,6 +918,7 @@ let BattleFormats = {
 		onModifyTemplate: function (template, target, source) {
 			console.log('camomonsrule: onModifyTemplate');
 			if (!source) return;
+			console.log('passed source');
 			let types = [...new Set(target.baseMoveSlots.slice(0, 2).map(move => this.getMove(move.id).type))];
 			return Object.assign({}, template, {types: types});
 		},

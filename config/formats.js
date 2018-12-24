@@ -8,7 +8,11 @@ const path = require('path');
 
 const DexCalculator = require('../sim/dex-calculator');
 
+// Bitch and Beggar includes
 const BITCHANDBEGGARMOD = path.resolve(__dirname, '../mods/bitchandbeggar/scripts');
+
+// Mix and Meta includes
+const MMCOLLECTION = path.resolve(__dirname, '../mods/mixandmeta/mixedmetacollection');
 
 /**@type {(FormatsData | {section: string, column?: number})[]} */
 let Formats = [
@@ -182,6 +186,512 @@ let Formats = [
 			'Uber', 'OU', 'UUBL', 'UU', 'RUBL', 'RU', 'NUBL', 'NU', 'PU', 'Carracosta', 'Crabominable', 'Exeggutor-Base', 'Gorebyss', 'Jynx', 'Musharna',
 			'Raticate-Alola', 'Raticate-Alola-Totem', 'Throh', 'Turtonator', 'Ursaring', 'Victreebel', 'Zangoose',
 		],
+	},
+	{
+		name: "[Gen 7] Mix and Meta",
+		onDesc: function () {
+			let descString = `<b>Are you ready, true believers? Mashups and Trash Channel have joined forces once again to bring you...MIX AND META!</b> <br>Pit sets from a variety of popular OMs against each other to see which is the strongest. Supported metas:-`;
+
+			// Load MxM mod functions
+			/**@type {{[k: string]: MixedMeta}} */
+			let MMCollection;
+			try {
+				MMCollection = require(MMCOLLECTION).MixedMetaCollection;
+			} catch (e) {
+				console.log('e.code: ' + e.code);
+				if (e.code !== 'MODULE_NOT_FOUND' && e.code !== 'ENOENT') {
+					throw e;
+				}
+			}
+
+			let ourFormat = Dex.getFormat('[Gen 7] Mix and Meta', true);
+			if(undefined === ourFormat) return descString;
+
+			for (const mixedMetaKey in MMCollection) {
+				console.log("mixedMetaKey: " + mixedMetaKey);
+				
+				let mixedMetaValue = MMCollection[mixedMetaKey];
+				let metaFormat = Dex.getFormat(MMCollection[mixedMetaKey].format, true);
+
+				descString += `<br><br><b>${metaFormat.name}</b> <br>Description: ${metaFormat.desc} <br>Tier limit: ${mixedMetaValue.weightTier}`;
+				if(mixedMetaValue.bstLimit) {
+					descString += `<br>BST Limit: ${mixedMetaValue.bstLimit.toString()}`;
+				}
+			}
+
+			return descString;
+		},
+		threads: [
+			``,
+		],
+
+		mod: 'mixandmeta',
+		ruleset: ['Pokemon', 'Standard', 'Team Preview'],
+		banlist: [
+		],
+		modValueNumberA: 2,
+		onValidateTeam: function (team) { // FIXME: Not working
+			let problems = [];
+
+			// Load MxM mod functions
+			/**@type {{[k: string]: MixedMeta}} */
+			let MMCollection;
+			try {
+				MMCollection = require(MMCOLLECTION).MixedMetaCollection;
+			} catch (e) {
+				console.log('e.code: ' + e.code);
+				if (e.code !== 'MODULE_NOT_FOUND' && e.code !== 'ENOENT') {
+					throw e;
+				}
+				problems.push("MMCollection not found!");
+				return problems;
+			}
+
+			let MMCollectionLength = Object.keys(MMCollection).length;
+
+			let ourFormat = Dex.getFormat('[Gen 7] Mix and Meta', true);
+			if(undefined === ourFormat) return;
+
+			// @ts-ignore
+			let perMetaUserCount = [];
+
+			for (const mixedMetaKey in MMCollection) {
+				console.log("mixedMetaKey: " + mixedMetaKey);
+				
+				//let mixedMetaValue = MMCollection[mixedMetaKey];
+
+				perMetaUserCount[mixedMetaKey] = 0;
+			}
+
+			//determineMeta: function (set, teamHas)
+			for (const set of team) {
+				if(undefined === ourFormat.determineMeta) continue;
+				let setMetaKey = ourFormat.determineMeta.call(this, set, null);
+
+				perMetaUserCount[setMetaKey]++;
+
+				if(ourFormat.modValueNumberA) {
+					if(perMetaUserCount[setMetaKey] === (ourFormat.modValueNumberA+1) ) {
+						problems.push(`Mix and Meta limits teams to ${ourFormat.modValueNumberA} users per meta, ` +
+						`but you seem to have ${ourFormat.modValueNumberA}+ Pokemon intended as ${setMetaKey} users.`);
+					}
+				}
+			}
+			return problems;
+		},
+		validateSet: function (set, teamHas) {
+			// @ts-ignore
+			let problems = [];
+
+			// Calc set data
+			let template = Dex.getTemplate(set.species || set.name);
+			let isNativeMega = false;
+			let item = Dex.getItem(set.item);
+			if (set.item && item.megaStone && ( item.megaEvolves === template.baseSpecies)) {
+				let bstMega = 0;
+				template = Dex.getTemplate(item.megaStone);
+				isNativeMega = true;
+			}
+			let setTierEnum = DexCalculator.calcTierEnumeration(template.tier);
+
+			console.log("template.tier: " + template.tier);
+			console.log("setTierEnum: " + setTierEnum.toString());
+			let setBst = 0;
+			for (let stat in template.baseStats) {
+				// @ts-ignore
+				setBst += template.baseStats[stat];
+			}
+
+			// Load MxM mod functions
+			/**@type {{[k: string]: MixedMeta}} */
+			let MMCollection;
+			try {
+				MMCollection = require(MMCOLLECTION).MixedMetaCollection;
+			} catch (e) {
+				console.log('e.code: ' + e.code);
+				if (e.code !== 'MODULE_NOT_FOUND' && e.code !== 'ENOENT') {
+					throw e;
+				}
+				problems.push("MMCollection not found!");
+				return problems;
+			}
+
+			let MMCollectionLength = Object.keys(MMCollection).length;
+
+			// @ts-ignore
+			let metaIncurredRedFlagDict = [];
+
+			// @ts-ignore
+			let perMetaValidatorProblemsDict = [];
+			let lowestValidatorProblemsMetaCount = Number.MAX_SAFE_INTEGER;
+			let lowestValidatorProblemsMetaKey = 'None';
+
+			// @ts-ignore
+			let perMetaWeightingProblemsDict = [];
+			let lowestWeightingProblemsMetaCount = Number.MAX_SAFE_INTEGER;
+			let lowestWeightingProblemsMetaKey = 'None';
+			let validatorPassMetaWithMinimalWeightingViolation = 'None';
+			let minimalViolationTierDifference = Number.MAX_SAFE_INTEGER;
+
+			let lowestTotalProblemsMetaCount = Number.MAX_SAFE_INTEGER;
+			let lowestTotalProblemsMetaKey = 'None';
+
+			// @ts-ignore
+			let perMetaTotalProblemsCount = [];
+
+			let agFormat = Dex.getFormat('[Gen 7] Anything Goes', true);
+			let clearRuleTable = Dex.getRuleTable(agFormat);
+			clearRuleTable.set("Illegal", "+illegal");
+			clearRuleTable.set("Unreleased", "+unreleased");
+			let clearRestrictionTable = Dex.getRestrictionTable(agFormat);
+
+			for (const mixedMetaKey in MMCollection) {
+				console.log("mixedMetaKey: " + mixedMetaKey);
+				
+				let mixedMetaValue = MMCollection[mixedMetaKey];
+
+				// Check for red flags
+				metaIncurredRedFlagDict[mixedMetaKey] = undefined;
+				if(MMCollection[mixedMetaKey].isSetRedFlag) {
+					metaIncurredRedFlagDict[mixedMetaKey] = MMCollection[mixedMetaKey].isSetRedFlag.call(this, set);
+				}
+
+				// Regular validation problem for this OM
+				let metaFormat = Dex.getFormat(MMCollection[mixedMetaKey].format, true);
+				let metaRuleTable = Dex.getRuleTable(metaFormat);
+				let metaRestrictionTable = Dex.getRestrictionTable(metaFormat);
+
+				let validatorProblems = this.validateSetInternal(set, teamHas, metaFormat, metaRuleTable, metaRestrictionTable, true) || [];
+				perMetaValidatorProblemsDict[mixedMetaKey] = validatorProblems;
+				if(validatorProblems.length < lowestValidatorProblemsMetaCount) { // FIXME: Tie-break based on tier difference
+					lowestValidatorProblemsMetaCount = validatorProblems.length;
+					lowestValidatorProblemsMetaKey = mixedMetaKey;
+				}
+
+				console.log("validatorProblems.length: " + validatorProblems.length.toString());
+				
+				// MxM weighting restrictions
+				// @ts-ignore
+				let currentMetaWeightingProblems = [];
+				let violationTierDifference = (0 == validatorProblems.length) ? 0 : DexCalculator.calcTierEnumeration("lc")+1;
+				let metaTierEnum = DexCalculator.calcTierEnumeration(mixedMetaValue.weightTier);
+				console.log("mixedMetaValue.weightTier: " + mixedMetaValue.weightTier);
+				console.log("metaTierEnum: " + metaTierEnum.toString());
+				if( metaTierEnum > setTierEnum ) {
+					const problemText = 
+					`${template.name} is in the tier ${template.tier}, `+
+					`but the meta ${metaFormat.name} has a ${mixedMetaValue.weightTier} tier restriction.`
+					currentMetaWeightingProblems.push( problemText );
+					console.log(problemText);
+					violationTierDifference += (metaTierEnum-setTierEnum);
+				}
+
+				if(mixedMetaValue.bstLimit) {
+					console.log("mixedMetaValue.bstLimit: " + mixedMetaValue.bstLimit.toString());
+					if( ( mixedMetaValue.bstLimit >= 0 ) && ( setBst > mixedMetaValue.bstLimit ) ) {
+						const problemText = 
+						`${template.name} has a BST of ${setBst}, `+
+						`but the meta ${metaFormat.name} has a ${mixedMetaValue.bstLimit} BST limit.`
+						currentMetaWeightingProblems.push(problemText);
+						console.log(problemText);
+						violationTierDifference += 0.5; // Offset between tiers as a tie-breaker
+					}
+				}
+
+				if(validatorProblems.length === 0) {
+					if(violationTierDifference < minimalViolationTierDifference) {
+						minimalViolationTierDifference = violationTierDifference;
+						validatorPassMetaWithMinimalWeightingViolation = mixedMetaKey;
+					}
+				}
+
+				perMetaWeightingProblemsDict[mixedMetaKey] = currentMetaWeightingProblems;
+				if(currentMetaWeightingProblems.length < lowestWeightingProblemsMetaCount) {
+					lowestWeightingProblemsMetaCount = currentMetaWeightingProblems.length;
+					lowestWeightingProblemsMetaKey = mixedMetaKey;
+				}
+
+				console.log("currentMetaWeightingProblems.length: " + currentMetaWeightingProblems.length.toString());
+
+				// Total problems
+				let totalProblemsCount = (validatorProblems.length + currentMetaWeightingProblems.length);
+				if( totalProblemsCount < lowestTotalProblemsMetaCount) {
+					lowestTotalProblemsMetaCount = totalProblemsCount;
+					lowestTotalProblemsMetaKey = mixedMetaKey;
+				}
+				perMetaTotalProblemsCount[mixedMetaKey] = totalProblemsCount;
+
+				// If any meta incurs a red flag check, assume it is ours
+				if(metaIncurredRedFlagDict[mixedMetaKey]) {
+					if(totalProblemsCount > 0) { // If red flag meta has any problems, we can't continue
+						problems.push(`Due to ${set.name || set.species} ${metaIncurredRedFlagDict[mixedMetaKey]} ` +
+						`it was forcibly validated as a ${metaFormat.name} user, and the following problems with it were found:- `);
+						if(validatorProblems.length > 0) {
+							problems = problems.concat(validatorProblems);
+						}
+						if(currentMetaWeightingProblems.length > 0) {
+							problems = problems.concat(currentMetaWeightingProblems);
+						}
+					}
+					return problems;
+				}
+
+
+			}
+
+			// Check if any meta has no problems and that we can therefore use it
+			for (const mixedMetaKey in MMCollection) {
+				console.log("mixedMetaKey: " + mixedMetaKey);
+				
+				let mixedMetaValue = MMCollection[mixedMetaKey];
+
+				let noProblemsIntersection = (0 === perMetaTotalProblemsCount[mixedMetaKey]);
+				if(noProblemsIntersection) { // Determined legal, exit
+					return problems;
+				}
+			}
+
+			// We do have some problems if we reached this point,
+			// we just have to determine what meta the set was probably intended for
+
+			// Prioritise meta that has no inherent illegalities within an OM, but fails MxM tier/BST limits least severely
+			if( ('None' !== validatorPassMetaWithMinimalWeightingViolation) &&
+				(0 === perMetaValidatorProblemsDict[validatorPassMetaWithMinimalWeightingViolation].length) )
+			{
+				let metaFormat = Dex.getFormat(MMCollection[validatorPassMetaWithMinimalWeightingViolation].format, true);
+				problems.push(`${set.name || set.species} is not supported by any Mix and Meta sub-format. ` +
+				`Based on the set, it seems to be intended as a ${metaFormat.name} user. ` +
+				`It would be legal in ${metaFormat.name}, but has the following weighting violations ` +
+				`in Mix and Meta:-`);
+				problems = problems.concat(perMetaWeightingProblemsDict[validatorPassMetaWithMinimalWeightingViolation]);
+				return problems;
+			}
+
+			// If no such meta exists, prioritise meta with lowest number of inherent illegalities
+			let metaFormat = Dex.getFormat(MMCollection[lowestValidatorProblemsMetaKey].format, true);
+			problems.push(`${set.name || set.species} would not be legal in any Mix and Meta sub-format. ` +
+				`The format that reports the fewest problems is ${metaFormat.name}, and those problems are:- `);
+			problems = problems.concat(perMetaValidatorProblemsDict[lowestValidatorProblemsMetaKey]);
+			return problems;
+		},
+		onBegin: function () {
+			console.log("1 onBegin");
+
+			// Determine and cache the Pokemons' metas
+			let format = this.getFormat();
+			for (const pokemon of this.p1.pokemon.concat(this.p2.pokemon)) {
+				if(format.determineMeta) {
+					pokemon.meta = format.determineMeta.call(this, pokemon.set, null);
+				}
+
+				if(undefined === pokemon.meta) continue;
+
+				let metaFormat = this.getFormat(pokemon.meta);
+
+				if(metaFormat.onBegin) {
+					metaFormat.onBegin.call(this);
+				}
+			}
+		},
+		onModifyTemplate: function (template, pokemon, source) {
+			if(pokemon.meta) {
+				let metaFormat = this.getFormat(pokemon.meta);
+
+				if(metaFormat.onModifyTemplate) {
+					metaFormat.onModifyTemplate.call(this, pokemon, source);
+				}
+
+				// Then apply the effects of each custom rule
+				let metaCustomRules = metaFormat.ruleset;
+				console.log('onModifyTemplate metaCustomRules: '+ metaCustomRules);
+				console.log('onModifyTemplate metaFormat.id: '+ metaFormat.id);
+				//for( const checkRule in metaCustomRules ) {
+				for( let rsItr=0; rsItr<metaCustomRules.length; ++rsItr ) {
+					//console.log('checkRule: ' + addRule);
+					console.log('checkRule: ' + metaCustomRules[rsItr]);
+					
+					let id = toId(metaCustomRules[rsItr]);
+					console.log('id: ' + id);
+					let ruleEffect = this.getEffect(id);
+
+					if(!ruleEffect) continue;
+					console.log('ruleEffect: '+ ruleEffect);
+
+					if(!ruleEffect.onModifyTemplate) continue;
+
+					console.log('run template: ');
+					return ruleEffect.onModifyTemplate.call(this, template, pokemon, source);
+				}
+			}
+		},
+		onSwitchIn: function (pokemon) {
+			if(pokemon.meta) {
+				// Place volatiles on the Pokémon to show its meta if defined
+				this.add('-start', pokemon, toId(pokemon.meta), '[silent]');
+
+				let metaFormat = this.getFormat(pokemon.meta);
+
+				if(metaFormat.onSwitchIn) {
+					metaFormat.onSwitchIn.call(this, pokemon);
+				}
+
+				// Then apply the effects of each custom rule
+				let metaCustomRules = metaFormat.ruleset;
+				console.log('onSwitchIn metaCustomRules: '+ metaCustomRules);
+				console.log('onSwitchIn metaFormat.id: '+ metaFormat.id);
+				//for( const checkRule in metaCustomRules ) {
+				for( let rsItr=0; rsItr<metaCustomRules.length; ++rsItr ) {
+					//console.log('checkRule: ' + addRule);
+					console.log('checkRule: ' + metaCustomRules[rsItr]);
+					
+					let id = toId(metaCustomRules[rsItr]);
+					console.log('id: ' + id);
+					let ruleEffect = this.getEffect(id);
+
+					if(!ruleEffect) continue;
+					console.log('ruleEffect: '+ ruleEffect);
+
+					if(!ruleEffect.onSwitchIn) continue;
+
+					console.log('run template: ');
+					ruleEffect.onSwitchIn.call(this, pokemon);
+				}
+			}
+		},
+		onSwitchOut: function (pokemon) {
+			if(pokemon.meta) {
+				let metaFormat = this.getFormat(pokemon.meta);
+
+				if(metaFormat.onSwitchOut) {
+					metaFormat.onSwitchOut.call(this, pokemon);
+				}
+			}
+		},
+		onAfterMega: function (pokemon) {
+			if(pokemon.meta) {
+				let metaFormat = this.getFormat(pokemon.meta);
+
+				if(metaFormat.onAfterMega) {
+					metaFormat.onAfterMega.call(this, pokemon);
+				}
+
+				// Then apply the effects of each custom rule
+				let metaCustomRules = metaFormat.ruleset;
+				console.log('onAfterMega metaCustomRules: '+ metaCustomRules);
+				console.log('onAfterMega metaFormat.id: '+ metaFormat.id);
+				//for( const checkRule in metaCustomRules ) {
+				for( let rsItr=0; rsItr<metaCustomRules.length; ++rsItr ) {
+					//console.log('checkRule: ' + addRule);
+					console.log('checkRule: ' + metaCustomRules[rsItr]);
+					
+					let id = toId(metaCustomRules[rsItr]);
+					console.log('id: ' + id);
+					let ruleEffect = this.getEffect(id);
+
+					if(!ruleEffect) continue;
+					console.log('ruleEffect: '+ ruleEffect);
+
+					if(!ruleEffect.onAfterMega) continue;
+
+					console.log('run template: ');
+					ruleEffect.onAfterMega.call(this, pokemon);
+				}
+			}
+		},
+		determineMeta: function (set, teamHas) {
+			console.log("running determineMeta for: " + set.species || set.name);
+
+			// Calc set data
+			let template = this.getTemplate(set.species || set.name);
+			let isNativeMega = false;
+			let item = this.getItem(set.item);
+			if (set.item && item.megaStone && ( item.megaEvolves === template.baseSpecies)) {
+				let bstMega = 0;
+				template = this.getTemplate(item.megaStone);
+				isNativeMega = true;
+			}
+			let setTierEnum = DexCalculator.calcTierEnumeration(template.tier);
+
+			console.log("template.tier: " + template.tier);
+			console.log("setTierEnum: " + setTierEnum.toString());
+			let setBst = 0;
+			for (let stat in template.baseStats) {
+				// @ts-ignore
+				setBst += template.baseStats[stat];
+			}
+
+			// Load MxM mod functions
+			/**@type {{[k: string]: MixedMeta}} */
+			let MMCollection;
+			try {
+				MMCollection = require(MMCOLLECTION).MixedMetaCollection;
+			} catch (e) {
+				console.log('e.code: ' + e.code);
+				if (e.code !== 'MODULE_NOT_FOUND' && e.code !== 'ENOENT') {
+					throw e;
+				}
+				return undefined;
+			}
+
+			let MMCollectionLength = Object.keys(MMCollection).length;
+
+			// Do red flag checks first
+			for (const mixedMetaKey in MMCollection) {
+				console.log("Red flag check for mixedMetaKey: " + mixedMetaKey);
+				
+				let mixedMetaValue = MMCollection[mixedMetaKey];
+
+				if(undefined === mixedMetaValue.isSetRedFlag) continue;
+
+				if(mixedMetaValue.isSetRedFlag(set)) {
+					return MMCollection[mixedMetaKey].format;
+				}
+			}
+
+			// Use validator if we can't determine meta through red flags
+			var TeamValidator = require('../sim/team-validator');
+			var validator = TeamValidator();
+
+			for (const mixedMetaKey in MMCollection) {
+				console.log("mixedMetaKey: " + mixedMetaKey);
+				
+				let mixedMetaValue = MMCollection[mixedMetaKey];
+
+				// Regular validation problem for this OM
+				let metaFormat = this.getFormat(MMCollection[mixedMetaKey].format, true);
+				let metaRuleTable = this.getRuleTable(metaFormat);
+				let metaRestrictionTable = this.getRestrictionTable(metaFormat);
+
+				let validatorProblems = validator.validateSetInternal(set, teamHas, metaFormat, metaRuleTable, metaRestrictionTable, true) || [];
+				console.log("validatorProblems.length: " + validatorProblems.length.toString());
+				if(validatorProblems.length > 0) {
+					for(let probItr=0; probItr<validatorProblems.length; ++probItr) {
+						console.log("prob: " + validatorProblems[probItr]);
+					}
+					continue;
+				}
+				
+				// MxM weighting restrictions
+				// @ts-ignore
+				let metaTierEnum = DexCalculator.calcTierEnumeration(mixedMetaValue.weightTier);
+				console.log("mixedMetaValue.weightTier: " + mixedMetaValue.weightTier);
+				console.log("metaTierEnum: " + metaTierEnum.toString());
+				if( metaTierEnum > setTierEnum ) {
+					continue;
+				}
+
+				if(mixedMetaValue.bstLimit) {
+					console.log("mixedMetaValue.bstLimit: " + mixedMetaValue.bstLimit.toString());
+					if( ( mixedMetaValue.bstLimit >= 0 ) && ( setBst > mixedMetaValue.bstLimit ) ) {
+						continue;
+					}
+				}
+
+				return MMCollection[mixedMetaKey].format;
+			}
+
+			return undefined;
+		},
 	},
 	{
 		name: "[Gen 7] The Call of Pikacthulhu",
@@ -897,6 +1407,16 @@ let Formats = [
 		banlist: ['Groudon-Primal', 'Arena Trap', 'Huge Power', 'Illusion', 'Innards Out', 'Magnet Pull', 'Moody', 'Parental Bond', 'Protean', 'Psychic Surge', 'Pure Power', 'Shadow Tag', 'Stakeout', 'Water Bubble', 'Wonder Guard', 'Gengarite', 'Chatter', 'Comatose + Sleep Talk'],
 	},
 	{
+		name: "[Gen 7] Pure Hackmons",
+		desc: `Anything that can be hacked in-game and is usable in local battles is allowed.`,
+		threads: [
+		],
+
+		mod: 'gen7',
+		ruleset: ['Pokemon', 'Endless Battle Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod'],
+		banlist: [],
+	},
+	{
 		name: "[Gen 7] 1v1",
 		desc: `Bring three Pok&eacute;mon to Team Preview and choose one to battle.`,
 		threads: [
@@ -928,12 +1448,28 @@ let Formats = [
 		mod: 'mixandmega',
 		ruleset: ['Pokemon', 'Standard', 'Mega Rayquaza Clause', 'Team Preview'],
 		banlist: ['Shadow Tag', 'Gengarite', 'Baton Pass', 'Electrify'],
-		restrictedStones: ['Beedrillite', 'Blazikenite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite', 'Ultranecrozium Z'],
+		restrictedStones: [
+			'Beedrillite', 'Blazikenite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite', 'Ultranecrozium Z',
+		],
 		cannotMega: [
 			'Arceus', 'Deoxys', 'Deoxys-Attack', 'Deoxys-Speed', 'Dialga', 'Dragonite', 'Giratina', 'Groudon', 'Ho-Oh', 'Kyogre',
 			'Kyurem-Black', 'Kyurem-White', 'Lugia', 'Lunala', 'Marshadow', 'Mewtwo', 'Naganadel', 'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane',
 			'Palkia', 'Pheromosa', 'Rayquaza', 'Regigigas', 'Reshiram', 'Slaking', 'Solgaleo', 'Xerneas', 'Yveltal', 'Zekrom',
 		],
+		/*
+		restrictionlist: [
+			// Pokemon
+			'Arceus', 'Deoxys', 'Deoxys-Attack', 'Deoxys-Speed', 'Dialga', 'Dragonite', 'Giratina', 'Groudon', 'Ho-Oh', 'Kyogre',
+			'Kyurem-Black', 'Kyurem-White', 'Lugia', 'Lunala', 'Marshadow', 'Mewtwo', 'Naganadel', 'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane',
+			'Palkia', 'Pheromosa', 'Rayquaza', 'Regigigas', 'Reshiram', 'Slaking', 'Solgaleo', 'Xerneas', 'Yveltal', 'Zekrom',
+
+			// Stones
+			'Beedrillite', 'Blazikenite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite', 'Ultranecrozium Z',
+
+			// Abilities
+			'Power Construct',
+		],
+		*/
 		onValidateTeam: function (team) {
 			/**@type {{[k: string]: true}} */
 			let itemTable = {};
@@ -945,14 +1481,32 @@ let Formats = [
 				itemTable[item.id] = true;
 			}
 		},
-		onValidateSet: function (set, format) {
+		onValidateSet: function (set, format, setHas, teamHas, ruleTable, restrictionTable) {
 			let template = this.getTemplate(set.species || set.name);
 			let item = this.getItem(set.item);
-			if (!item.megaEvolves && !['blueorb', 'redorb', 'ultranecroziumz'].includes(item.id)) return;
+			if (!item.megaEvolves && !['blueorb', 'redorb', 'ultranecroziumz'].includes(item.id)) return; // Native mega-evos
 			if (template.baseSpecies === item.megaEvolves || (template.baseSpecies === 'Groudon' && item.id === 'redorb') || (template.baseSpecies === 'Kyogre' && item.id === 'blueorb') || (template.species.substr(0, 9) === 'Necrozma-' && item.id === 'ultranecroziumz')) return;
 			let uberStones = format.restrictedStones || [];
 			let uberPokemon = format.cannotMega || [];
 			if (uberPokemon.includes(template.name) || set.ability === 'Power Construct' || uberStones.includes(item.name)) return ["" + template.species + " is not allowed to hold " + item.name + "."];
+			
+			/**@type {string[]} */
+			/*
+			let problems = [];
+			let stoneTest = '-item:'+toId(set.item);
+			let pokemonTest = '-pokemon:'+toId(set.species);
+			let abilityTest = '-ability:'+toId(set.ability);
+			restrictionTable.forEach((v, restriction) => {
+				console.log("MnM restriction: " + restriction);
+				if( ( restriction === stoneTest ) ||
+					( restriction === pokemonTest ) ||
+					( restriction === abilityTest ) ) {
+					//console.log("MnM restriction IN ");
+					problems.push("" + template.species + " is not allowed to hold " + item.name + ".");
+				}
+			});
+			return problems;
+			*/
 		},
 		onBegin: function () {
 			for (const pokemon of this.p1.pokemon.concat(this.p2.pokemon)) {

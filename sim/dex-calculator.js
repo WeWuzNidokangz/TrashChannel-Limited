@@ -66,6 +66,61 @@ class DexCalculator {
 
 		return false;
 	}
+
+	/**
+	 * @param {number} length
+	 * @return {any[]}
+	 */
+	static createArray(length) {
+		var arr = new Array(length || 0),
+			i = length;
+	
+		if (arguments.length > 1) {
+			var args = Array.prototype.slice.call(arguments, 1);
+			while(i--) arr[length-1 - i] = DexCalculator.createArray.apply(this, args);
+		}
+	
+		return arr;
+	}
+
+	/**
+	 * @param {string} tier
+	 * @return {number}
+	 */
+	static calcTierEnumeration(tier) {
+		const tierEnums = {
+			'ag': 0,
+			'uber': 1,
+			'ou' : 2,
+			'uubl' : 3,
+			'uu' : 4,
+			'rubl' : 5,
+			'ru' : 6,
+			'nubl' : 7,
+			'nu' : 8,
+			'publ' : 9,
+			'pu' : 10,
+			'zubl' : 11,
+			'zu' : 12,
+			'nfe' : 13,
+			'lcuber' : 14,
+			'lc' : 15,
+		};
+
+		tier = toId(tier);
+
+		let tierEnum = (tier in tierEnums) ? tierEnums[tier] : 0;
+		return tierEnum;
+	}
+
+	/**
+	 * @param {string} tierA
+	 * @param {string} tierB
+	 * @return {boolean}
+	 */
+	static tierALessThanOrEqualToB(tierA, tierB) {
+		return (DexCalculator.calcTierEnumeration(tierA) < DexCalculator.calcTierEnumeration(tierB));
+	}
 }
 
 module.exports = DexCalculator;

@@ -11,6 +11,8 @@ let BattleScripts = {
 		}
 	},
 	canMegaEvo(pokemon) {
+		console.log("call canMegaEvo");
+
 		if (pokemon.template.isMega || pokemon.template.isPrimal) return null;
 
 		const item = pokemon.getItem();
@@ -24,6 +26,8 @@ let BattleScripts = {
 		}
 	},
 	runMegaEvo(pokemon) {
+		console.log("call runMegaEvo");
+
 		if (pokemon.template.isMega || pokemon.template.isPrimal) return false;
 
 		console.log("originalSpecies: " + pokemon.originalSpecies);
