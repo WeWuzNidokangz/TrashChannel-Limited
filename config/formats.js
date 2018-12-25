@@ -219,6 +219,10 @@ let Formats = [
 				}
 			}
 
+			if(ourFormat.modValueNumberA) {
+				descString += `<br><br>Meta clause limits you to <b>${ourFormat.modValueNumberA.toString()}</b> sets per meta on a single team.`;
+			}
+
 			return descString;
 		},
 		threads: [
@@ -256,22 +260,26 @@ let Formats = [
 			let perMetaUserCount = [];
 
 			for (const mixedMetaKey in MMCollection) {
-				console.log("mixedMetaKey: " + mixedMetaKey);
+				console.log("team mixedMetaKey: " + mixedMetaKey);
 				
-				//let mixedMetaValue = MMCollection[mixedMetaKey];
-
-				perMetaUserCount[mixedMetaKey] = 0;
+				perMetaUserCount['gen7'+mixedMetaKey] = 0; // FIXME: Better way to express this?
 			}
 
 			//determineMeta: function (set, teamHas)
 			for (const set of team) {
 				if(undefined === ourFormat.determineMeta) continue;
 				let setMetaKey = ourFormat.determineMeta.call(this, set, null);
+				let setMetaKeyId = toId(setMetaKey);
 
-				perMetaUserCount[setMetaKey]++;
+				console.log("setMetaKeyId: " + setMetaKeyId);
+
+				perMetaUserCount[setMetaKeyId]++;
+
+				console.log("team meta count: " + perMetaUserCount[setMetaKeyId]);
 
 				if(ourFormat.modValueNumberA) {
-					if(perMetaUserCount[setMetaKey] === (ourFormat.modValueNumberA+1) ) {
+					console.log("exists ");
+					if(perMetaUserCount[setMetaKeyId] === (ourFormat.modValueNumberA+1) ) {
 						problems.push(`Mix and Meta limits teams to ${ourFormat.modValueNumberA} users per meta, ` +
 						`but you seem to have ${ourFormat.modValueNumberA}+ Pokemon intended as ${setMetaKey} users.`);
 					}
@@ -1395,7 +1403,7 @@ let Formats = [
 	},
 	{
 		name: "[Gen 7] Balanced Hackmons",
-		desc: `Anything that can be hacked in-game and is usable in local battles is allowed.`,
+		desc: `Almost anything that can be hacked in-game and is usable in local battles is allowed.`,
 		threads: [
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3587475/">Balanced Hackmons</a>`,
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3588586/">BH Suspects and Bans Discussion</a>`,

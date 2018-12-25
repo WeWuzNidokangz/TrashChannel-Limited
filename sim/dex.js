@@ -1030,9 +1030,9 @@ class ModdedDex {
 			}
 			return rule.charAt(0) + this.validateBanRule(rule.slice(1));
 		default:
-			console.log('rule:' + rule );
+			//console.log('rule:' + rule );
 			let id = toId(rule);
-			console.log('id:' + id );
+			//console.log('id:' + id );
 			if (!this.data.Formats.hasOwnProperty(id)) {
 				throw new Error(`Unrecognized rule "${rule}"`);
 			}
