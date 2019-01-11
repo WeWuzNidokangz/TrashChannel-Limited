@@ -212,10 +212,24 @@ let Formats = [
 				
 				let mixedMetaValue = MMCollection[mixedMetaKey];
 				let metaFormat = Dex.getFormat(MMCollection[mixedMetaKey].format, true);
+				let metaBanned = (undefined !== mixedMetaValue.banReason );
 
-				descString += `<br><br><b>${metaFormat.name}</b> <br>Description: ${metaFormat.desc} <br>Tier limit: ${mixedMetaValue.weightTier}`;
+				if(metaBanned) descString += `<s>`;
+
+				descString += `<br><br><b>${metaFormat.name}</b>`;
+				if(metaBanned) {
+					descString += `</s>`;
+					descString += ` <font color="red">BANNED!!</font>`;
+					descString += `<s>`;
+				}
+				descString += `<br>Description: ${metaFormat.desc} <br>Tier limit: ${mixedMetaValue.weightTier}`;
 				if(mixedMetaValue.bstLimit) {
 					descString += `<br>BST Limit: ${mixedMetaValue.bstLimit.toString()}`;
+				}
+
+				if(metaBanned) {
+					descString += `</s>`;
+					descString += `<br>Ban Reasoning: ${mixedMetaValue.banReason}`;
 				}
 			}
 
@@ -234,7 +248,7 @@ let Formats = [
 		banlist: [
 		],
 		modValueNumberA: 2,
-		onValidateTeam: function (team) { // FIXME: Not working
+		onValidateTeam: function (team) {
 			let problems = [];
 
 			// Load MxM mod functions
@@ -357,6 +371,7 @@ let Formats = [
 				console.log("mixedMetaKey: " + mixedMetaKey);
 				
 				let mixedMetaValue = MMCollection[mixedMetaKey];
+				if(undefined !== mixedMetaValue.banReason ) continue;
 
 				// Check for red flags
 				metaIncurredRedFlagDict[mixedMetaKey] = undefined;
@@ -443,8 +458,6 @@ let Formats = [
 					}
 					return problems;
 				}
-
-
 			}
 
 			// Check if any meta has no problems and that we can therefore use it
@@ -452,6 +465,7 @@ let Formats = [
 				console.log("mixedMetaKey: " + mixedMetaKey);
 				
 				let mixedMetaValue = MMCollection[mixedMetaKey];
+				if(undefined !== mixedMetaValue.banReason ) continue;
 
 				let noProblemsIntersection = (0 === perMetaTotalProblemsCount[mixedMetaKey]);
 				if(noProblemsIntersection) { // Determined legal, exit
@@ -648,6 +662,7 @@ let Formats = [
 				console.log("Red flag check for mixedMetaKey: " + mixedMetaKey);
 				
 				let mixedMetaValue = MMCollection[mixedMetaKey];
+				if(undefined !== mixedMetaValue.banReason ) continue;
 
 				if(undefined === mixedMetaValue.isSetRedFlag) continue;
 
@@ -664,6 +679,7 @@ let Formats = [
 				console.log("mixedMetaKey: " + mixedMetaKey);
 				
 				let mixedMetaValue = MMCollection[mixedMetaKey];
+				if(undefined !== mixedMetaValue.banReason ) continue;
 
 				// Regular validation problem for this OM
 				let metaFormat = this.getFormat(MMCollection[mixedMetaKey].format, true);

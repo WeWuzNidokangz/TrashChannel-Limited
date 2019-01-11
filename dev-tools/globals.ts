@@ -996,4 +996,6 @@ interface MixedMeta {
 	// Implement to force the validator to treat this meta as the intended meta when true
 	// (e.g. Mix and Meta when there is a non-native megastone set)
 	isSetRedFlag?: (this: ModdedDex, pokemonSet: PokemonSet) => string | undefined
+	// Define to ban meta
+	banReason?: string
 }

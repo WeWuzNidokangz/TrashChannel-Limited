@@ -60,6 +60,7 @@ let MixedMetaCollection = {
 		format: "[Gen 7] Pure Hackmons",
 		weightTier: "PU",
 		bstLimit: 200,
+		banReason: "Magikarp 2 stronk ;_;"
 	},
 }
 
