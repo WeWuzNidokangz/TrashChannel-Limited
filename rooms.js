@@ -17,6 +17,8 @@ const REPORT_USER_STATS_INTERVAL = 10 * 60 * 1000;
 
 const CRASH_REPORT_THROTTLE = 60 * 60 * 1000;
 
+const LAST_BATTLE_WRITE_THROTTLE = 10;
+
 /** @type {null} */
 const RETRY_AFTER_LOGIN = null;
 
@@ -490,8 +492,12 @@ class GlobalRoom extends BasicRoom {
 		try {
 			lastBattle = FS('logs/lastbattle.txt').readSync('utf8');
 		} catch (e) {}
+		// TypeScript bug
 		/** @type {number} */
 		this.lastBattle = Number(lastBattle) || 0;
+		// TypeScript bug
+		/** @type {number} */
+		this.lastWrittenBattle = this.lastBattle;
 
 		// init users
 		this.users = Object.create(null);
@@ -524,9 +530,19 @@ class GlobalRoom extends BasicRoom {
 	}
 
 	writeNumRooms() {
-		FS('logs/lastbattle.txt').writeUpdate(() => (
-			`${this.lastBattle}`
-		), {throttle: 10 * 1000});
+		if (this.lockdown) {
+			if (this.lastBattle === this.lastWrittenBattle) return;
+			this.lastWrittenBattle = this.lastBattle;
+		} else {
+			// batch writes so we don't have to write them every new battle
+			// very probably premature optimization, considering by default we
+			// write significantly larger log files every new battle
+			if (this.lastBattle < this.lastWrittenBattle) return;
+			this.lastWrittenBattle = this.lastBattle + LAST_BATTLE_WRITE_THROTTLE;
+		}
+		FS('logs/lastbattle.txt').writeUpdate(() =>
+			`${this.lastWrittenBattle}`
+		);
 	}
 
 	reportUserStats() {
@@ -657,7 +673,8 @@ class GlobalRoom extends BasicRoom {
 				desc: room.desc,
 				userCount: room.userCount,
 			};
-			if (room.subRooms) roomData.subRooms = room.getSubRooms().map(room => room.title);
+			const subrooms = room.getSubRooms().map(room => room.title);
+			if (subrooms.length) roomData.subRooms = subrooms;
 
 			if (room.isOfficial) {
 				roomsData.official.push(roomData);
@@ -885,10 +902,10 @@ class GlobalRoom extends BasicRoom {
 		this.userCount--;
 	}
 	/**
-	 * @param {Error} err
+	 * @param {Error | null} err
 	 * @param {boolean} slow
 	 */
-	startLockdown(err, slow = false) {
+	startLockdown(err = null, slow = false) {
 		if (this.lockdown && err) return;
 		let devRoom = Rooms('development');
 		// @ts-ignore
@@ -922,6 +939,7 @@ class GlobalRoom extends BasicRoom {
 		}
 
 		this.lockdown = true;
+		this.writeNumRooms();
 		this.lastReportedCrash = Date.now();
 	}
 	automaticKillRequest() {
@@ -1601,6 +1619,23 @@ let Rooms = Object.assign(getRoom, {
 			if (p1) p1.popup("The server is restarting. Battles will be available again in a few minutes.");
 			if (p2) p2.popup("The server is restarting. Battles will be available again in a few minutes.");
 			return;
+		}
+
+		// @ts-ignore
+		if (p1 && p2 && (p1.specialNextBattle || p2.specialNextBattle)) {
+			// @ts-ignore
+			const p1special = p1.specialNextBattle, p2special = p2.specialNextBattle;
+			// @ts-ignore
+			p1.specialNextBattle = null;
+			// @ts-ignore
+			p2.specialNextBattle = null;
+
+			if (p1special !== p2special) {
+				p1.popup(`Your special battle settings don't match: "${p1special}" and "${p2special}"`);
+				p2.popup(`Your special battle settings don't match: "${p1special}" and "${p2special}"`);
+				return;
+			}
+			options.ratedMessage = p1special;
 		}
 
 		const roomid = Rooms.global.prepBattleRoom(formatid);

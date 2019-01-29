@@ -27,7 +27,9 @@ class Validator {
 	 * @return {string[]?}
 	 */
 	validateTeam(team, removeNicknames = false) {
-		if (this.format.validateTeam) return this.format.validateTeam.call(this, team, removeNicknames);
+		if (team && this.format.validateTeam) {
+			return this.format.validateTeam.call(this, team, removeNicknames) || null;
+		}
 		return this.baseValidateTeam(team, removeNicknames);
 	}
 
@@ -186,7 +188,7 @@ class Validator {
 		for (const [rule] of ruleTable) {
 			let subformat = dex.getFormat(rule);
 			if (subformat.onChangeSet && ruleTable.has(subformat.id)) {
-				problems = problems.concat(subformat.onChangeSet.call(dex, set, format) || []);
+				problems = problems.concat(subformat.onChangeSet.call(dex, set, format, setHas, teamHas) || []);
 			}
 		}
 		if (format.onChangeSet) {

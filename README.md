@@ -165,10 +165,12 @@ Major Contributors
 - Neil Rashbrook [urkerab] - Development
 - Quinton Lee [sirDonovan] - Development
 - [Ridaz] - Art (battle animations)
+- Tobias Mann [asgdf] - Development
+- William [MacChaeger] - Development
 
 Contributors
 
-- Alexander B. [mathfreak321] - Development
+- Alexander B. [mathfreak231] - Development
 - Andrew Goodsell [Zracknel] - Art (battle weather backdrops)
 - Austin Couturier [Austin] - Development
 - Avery Zimmer [Lyren, SolarisFox] - Development
@@ -183,7 +185,7 @@ Contributors
 - Leonard Craft III [DaWoblefet] - Research (game mechanics)
 - Luke Harmon-Vellotti [moo, CheeseMuffin] - Development
 - Robin Vandenbrande [Quinella] - Development
-- Tobias Mann [asgdf] - Development
+- Russell Jones [SadisticMystic] - Research (game mechanics)
 
 Special thanks
 

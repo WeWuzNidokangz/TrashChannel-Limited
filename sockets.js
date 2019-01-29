@@ -13,8 +13,11 @@
 
 'use strict';
 
+const MINUTES = 60 * 1000;
+
 const cluster = require('cluster');
 const fs = require('fs');
+const FS = require('./lib/fs');
 
 if (cluster.isMaster) {
 	cluster.setupMaster({
@@ -86,12 +89,12 @@ if (cluster.isMaster) {
 		worker.send = () => {};
 
 		let count = 0;
-		Users.connections.forEach(connection => {
+		for (const connection of Users.connections.values()) {
 			if (connection.worker === worker) {
 				Users.socketDisconnect(worker, worker.id, connection.socketid);
 				count++;
 			}
-		});
+		}
 		console.log(`${count} connections were lost.`);
 
 		// Attempt to recover.
@@ -139,12 +142,12 @@ if (cluster.isMaster) {
 	 */
 	exports.killWorker = function (worker) {
 		let count = 0;
-		Users.connections.forEach(connection => {
+		for (const connection of Users.connections.values()) {
 			if (connection.worker === worker) {
 				Users.socketDisconnect(worker, worker.id, connection.socketid);
 				count++;
 			}
-		});
+		}
 		console.log(`${count} connections were lost.`);
 
 		try {
@@ -189,9 +192,9 @@ if (cluster.isMaster) {
 	 * @param {string} message
 	 */
 	exports.channelBroadcast = function (channelid, message) {
-		workers.forEach(worker => {
+		for (const worker of workers.values()) {
 			worker.send(`#${channelid}\n${message}`);
-		});
+		}
 	};
 
 	/**
@@ -226,9 +229,9 @@ if (cluster.isMaster) {
 	 * @param {string} message
 	 */
 	exports.subchannelBroadcast = function (channelid, message) {
-		workers.forEach(worker => {
+		for (const worker of workers.values()) {
 			worker.send(`:${channelid}\n${message}`);
-		});
+		}
 	};
 
 	/**
@@ -239,6 +242,14 @@ if (cluster.isMaster) {
 	 */
 	exports.subchannelMove = function (worker, channelid, subchannelid, socketid) {
 		worker.send(`.${channelid}\n${subchannelid}\n${socketid}`);
+	};
+
+	/**
+	 * @param {cluster.Worker} worker
+	 * @param {string} query
+	 */
+	exports.eval = function (worker, query) {
+		worker.send(`$${query}`);
 	};
 } else {
 	// is worker
@@ -290,7 +301,7 @@ if (cluster.isMaster) {
 		let key;
 		try {
 			key = require('path').resolve(__dirname, Config.ssl.options.key);
-			if (!fs.lstatSync(key).isFile()) throw new Error();
+			if (!fs.statSync(key).isFile()) throw new Error();
 			try {
 				key = fs.readFileSync(key);
 			} catch (e) {
@@ -304,7 +315,7 @@ if (cluster.isMaster) {
 		let cert;
 		try {
 			cert = require('path').resolve(__dirname, Config.ssl.options.cert);
-			if (!fs.lstatSync(cert).isFile()) throw new Error();
+			if (!fs.statSync(cert).isFile()) throw new Error();
 			try {
 				cert = fs.readFileSync(cert);
 			} catch (e) {
@@ -326,47 +337,56 @@ if (cluster.isMaster) {
 	}
 
 	// Static server
-	const StaticServer = require('node-static').Server;
-	const roomidRegex = /^\/(?:[A-Za-z0-9][A-Za-z0-9-]*)\/?$/;
-	const cssServer = new StaticServer('./config');
-	const avatarServer = new StaticServer('./config/avatars');
-	const staticServer = new StaticServer('./static');
-	/**
-	 * @param {import('http').IncomingMessage} req
-	 * @param {import('http').ServerResponse} res
-	 */
-	const staticRequestHandler = (req, res) => {
-		// console.log(`static rq: ${req.socket.remoteAddress}:${req.socket.remotePort} -> ${req.socket.localAddress}:${req.socket.localPort} - ${req.method} ${req.url} ${req.httpVersion} - ${req.rawHeaders.join('|')}`);
-		req.resume();
-		req.addListener('end', () => {
-			if (Config.customhttpresponse &&
-					Config.customhttpresponse(req, res)) {
-				return;
-			}
-
-			let server = staticServer;
-			if (req.url) {
-				if (req.url === '/custom.css') {
-					server = cssServer;
-				} else if (req.url.startsWith('/avatars/')) {
-					req.url = req.url.substr(8);
-					server = avatarServer;
-				} else if (roomidRegex.test(req.url)) {
-					req.url = '/';
+	try {
+		if (Config.disablenodestatic) throw new Error("disablenodestatic");
+		const StaticServer = require('node-static').Server;
+		const roomidRegex = /^\/(?:[A-Za-z0-9][A-Za-z0-9-]*)\/?$/;
+		const cssServer = new StaticServer('./config');
+		const avatarServer = new StaticServer('./config/avatars');
+		const staticServer = new StaticServer('./static');
+		/**
+		 * @param {import('http').IncomingMessage} req
+		 * @param {import('http').ServerResponse} res
+		 */
+		const staticRequestHandler = (req, res) => {
+			// console.log(`static rq: ${req.socket.remoteAddress}:${req.socket.remotePort} -> ${req.socket.localAddress}:${req.socket.localPort} - ${req.method} ${req.url} ${req.httpVersion} - ${req.rawHeaders.join('|')}`);
+			req.resume();
+			req.addListener('end', () => {
+				if (Config.customhttpresponse &&
+						Config.customhttpresponse(req, res)) {
+					return;
 				}
-			}
 
-			server.serve(req, res, e => {
-				// @ts-ignore
-				if (e && e.status === 404) {
-					staticServer.serveFile('404.html', 404, {}, req, res);
+				let server = staticServer;
+				if (req.url) {
+					if (req.url === '/custom.css') {
+						server = cssServer;
+					} else if (req.url.startsWith('/avatars/')) {
+						req.url = req.url.substr(8);
+						server = avatarServer;
+					} else if (roomidRegex.test(req.url)) {
+						req.url = '/';
+					}
 				}
+
+				server.serve(req, res, e => {
+					// @ts-ignore
+					if (e && e.status === 404) {
+						staticServer.serveFile('404.html', 404, {}, req, res);
+					}
+				});
 			});
-		});
-	};
+		};
 
-	app.on('request', staticRequestHandler);
-	if (appssl) appssl.on('request', staticRequestHandler);
+		app.on('request', staticRequestHandler);
+		if (appssl) appssl.on('request', staticRequestHandler);
+	} catch (e) {
+		if (e.message === 'disablenodestatic') {
+			console.log('node-static is disabled');
+		} else {
+			console.log('Could not start node-static - try `npm install` if you want to use it');
+		}
+	}
 
 	// SockJS server
 
@@ -398,35 +418,36 @@ if (cluster.isMaster) {
 	}
 
 	const server = sockjs.createServer(options);
-	/** @type {Map<string, import('sockjs').Connection>} */
+	/**
+	 * socketid:Connection
+	 * @type {Map<string, import('sockjs').Connection>}
+	 */
 	const sockets = new Map();
-	/** @type {Map<string, Map<string, import('sockjs').Connection>>} */
+	/**
+	 * channelid:socketid:Connection
+	 * @type {Map<string, Map<string, import('sockjs').Connection>>}
+	 */
 	const channels = new Map();
-	/** @type {Map<string, Map<string, string>>} */
+	/**
+	 * channelid:socketid:subchannelid
+	 * @type {Map<string, Map<string, string>>}
+	 */
 	const subchannels = new Map();
+
+	/** @type {WriteStream} */
+	const logger = FS(`logs/sockets-${process.pid}`).createAppendStream();
 
 	// Deal with phantom connections.
 	const sweepSocketInterval = setInterval(() => {
-		sockets.forEach(socket => {
+		for (const socket of sockets.values()) {
 			// @ts-ignore
 			if (socket.protocol === 'xhr-streaming' && socket._session && socket._session.recv) {
+				logger.write('Found a ghost connection with protocol xhr-streaming\n');
 				// @ts-ignore
 				socket._session.recv.didClose();
 			}
-
-			// A ghost connection's `_session.to_tref._idlePrev` (and `_idleNext`) property is `null` while
-			// it is an object for normal users. Under normal circumstances, those properties should only be
-			// `null` when the timeout has already been called, but somehow it's not happening for some connections.
-			// Simply calling `_session.timeout_cb` (the function bound to the aformentioned timeout) manually
-			// on those connections kills those connections. For a bit of background, this timeout is the timeout
-			// that sockjs sets to wait for users to reconnect within that time to continue their session.
-			// @ts-ignore
-			if (socket._session && socket._session.to_tref && !socket._session.to_tref._idlePrev) {
-				// @ts-ignore
-				socket._session.timeout_cb();
-			}
-		});
-	}, 1000 * 60 * 10);
+		}
+	}, 10 * MINUTES);
 
 	process.on('message', data => {
 		// console.log('worker received: ' + data);
@@ -454,7 +475,15 @@ if (cluster.isMaster) {
 			if (!socket) return;
 			socket.destroy();
 			sockets.delete(socketid);
-			channels.forEach(channel => channel.delete(socketid));
+			for (const [channelid, channel] of channels) {
+				channel.delete(socketid);
+				subchannel = subchannels.get(channelid);
+				if (subchannel) subchannel.delete(socketid);
+				if (!channel.size) {
+					channels.delete(channelid);
+					if (subchannel) subchannels.delete(channelid);
+				}
+			}
 			break;
 
 		case '>':
@@ -476,7 +505,7 @@ if (cluster.isMaster) {
 			channel = channels.get(channelid);
 			if (!channel) return;
 			message = data.substr(nlLoc + 1);
-			channel.forEach(socket => socket.write(message));
+			for (const socket of channel.values()) socket.write(message);
 			break;
 
 		case '+':
@@ -545,7 +574,7 @@ if (cluster.isMaster) {
 			let messages = [null, null, null];
 			message = data.substr(nlLoc + 1);
 			subchannel = subchannels.get(channelid);
-			channel.forEach((socket, socketid) => {
+			for (const [socketid, socket] of channel) {
 				switch (subchannel ? subchannel.get(socketid) : '0') {
 				case '1':
 					if (!messages[1]) {
@@ -566,7 +595,7 @@ if (cluster.isMaster) {
 					socket.write(messages[0]);
 					break;
 				}
-			});
+			}
 			break;
 		}
 	});
@@ -577,11 +606,11 @@ if (cluster.isMaster) {
 	process.once('disconnect', () => {
 		clearInterval(sweepSocketInterval);
 
-		sockets.forEach(socket => {
+		for (const socket of sockets.values()) {
 			try {
 				socket.destroy();
 			} catch (e) {}
-		});
+		}
 		sockets.clear();
 		channels.clear();
 		subchannels.clear();
@@ -627,6 +656,24 @@ if (cluster.isMaster) {
 			}
 		}
 
+		// xhr-streamming connections sometimes end up becoming ghost
+		// connections. Since it already has keepalive set, we set a timeout
+		// instead and close the connection if it has been inactive for the
+		// configured SockJS heartbeat interval plus an extra second to account
+		// for any delay in receiving the SockJS heartbeat packet.
+		if (socket.protocol === 'xhr-streaming') {
+			// @ts-ignore
+			socket._session.recv.thingy.setTimeout(
+				// @ts-ignore
+				socket._session.recv.options.heartbeat_delay + 1000,
+				() => {
+					try {
+						socket.close();
+					} catch (e) {}
+				}
+			);
+		}
+
 		// @ts-ignore
 		process.send(`*${socketid}\n${socketip}\n${socket.protocol}`);
 
@@ -653,7 +700,7 @@ if (cluster.isMaster) {
 			// @ts-ignore
 			process.send(`!${socketid}`);
 			sockets.delete(socketid);
-			channels.forEach(channel => channel.delete(socketid));
+			for (const channel of channels.values()) channel.delete(socketid);
 		});
 	});
 	server.installHandlers(app, {});

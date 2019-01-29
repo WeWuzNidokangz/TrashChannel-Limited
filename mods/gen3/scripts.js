@@ -142,7 +142,7 @@ let BattleScripts = {
 		}
 
 		move.totalDamage = 0;
-		/**@type {number | false} */
+		/** @type {number | undefined | false} */
 		let damage = 0;
 		pokemon.lastDamage = 0;
 		if (move.multihit) {
@@ -157,7 +157,7 @@ let BattleScripts = {
 			}
 			hits = Math.floor(hits);
 			let nullDamage = true;
-			/**@type {number | false} */
+			/** @type {number | undefined | false} */
 			let moveDamage;
 			// There is no need to recursively check the ´sleepUsable´ flag as Sleep Talk can only be used while asleep.
 			let isSleepUsable = move.sleepUsable || this.getMove(move.sourceEffect).sleepUsable;

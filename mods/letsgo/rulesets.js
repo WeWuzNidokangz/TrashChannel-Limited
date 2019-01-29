@@ -8,9 +8,7 @@ let BattleFormats = {
 		onValidateTeam: function (team, format) {
 			let problems = [];
 			if (team.length > 6) problems.push('Your team has more than six Pok\u00E9mon.');
-			// ----------- legality line ------------------------------------------
-			if (!format || !this.getRuleTable(format).has('-illegal')) return problems;
-			// everything after this line only happens if we're doing legality enforcement
+			// Unlike Pokemon like Kyurem-B and Kyurem-W, the two Starter Pokemon cannot be hacked onto other games.
 			let hasStarter = 0;
 			for (const set of team) {
 				if (set.species === 'Pikachu-Starter' || set.species === 'Eevee-Starter') {
@@ -38,7 +36,7 @@ let BattleFormats = {
 					`(${set.species} is from Gen ${baseTemplate.gen === 1 ? 7 : baseTemplate.gen}.)`
 				);
 			}
-			if (template.forme && !['Alola', 'Mega', 'Mega-X', 'Mega-Y', 'Starter'].includes(template.forme)) {
+			if (template.forme && (!['Alola', 'Mega', 'Mega-X', 'Mega-Y', 'Starter'].includes(template.forme) || template.species === 'Pikachu-Alola')) {
 				problems.push(`${set.species}'s forme ${template.forme} is not available in Let's Go.`);
 			}
 			if (set.moves) {
@@ -70,7 +68,7 @@ let BattleFormats = {
 					// @ts-ignore
 					if (set.evs[k]) {
 						// @ts-ignore
-						problems.push(`${set.name || set.species} has ${set.evs[k]} AVs/EVs in ${statNames[k]}, but AVs and EVs not allowed in this format.`);
+						problems.push(`${set.name || set.species} has ${set.evs[k]} AVs/EVs in ${statNames[k]}, but AVs and EVs are not allowed in this format.`);
 						break;
 					}
 					// @ts-ignore
@@ -85,6 +83,10 @@ let BattleFormats = {
 				if (item.megaEvolves !== template.baseSpecies) {
 					problems.push(`Items aren't allowed in Let's Go.`);
 				}
+			}
+
+			if (!set.happiness || set.happiness !== 70) {
+				set.happiness = 70;
 			}
 
 			// ----------- legality line ------------------------------------------
@@ -159,11 +161,7 @@ let BattleFormats = {
 				}
 			}
 
-			// ----------- legality line ------------------------------------------
-			if (!this.getRuleTable(format).has('-illegal')) return problems;
-			// everything after this line only happens if we're doing legality enforcement
-
-			// Pokemon cannot have more than 200 Awakening Values in a stat
+			// Pokemon cannot have more than 200 Awakening Values in a stat. It is impossible to hack more than 200 AVs onto a stat, so legality doesn't matter.
 			for (let av in avs) {
 				let statNames = {hp: 'HP', atk: 'Attack', def: 'Defense', spa: 'Special Attack', spd: 'Special Defense', spe: 'Speed'};
 				if (avs[av] > 200) {

@@ -7,12 +7,6 @@ let BattleScripts = {
 		for (let i in this.data.Pokedex) {
 			this.modData('Pokedex', i).abilities = {0: 'No Ability'};
 		}
-		for (let i in this.data.FormatsData) {
-			let dataTemplate = this.modData('FormatsData', i);
-			if (this.data.FormatsData[i].requiredItem && this.getItem(this.data.FormatsData[i].requiredItem).megaStone) {
-				dataTemplate.requiredItem = '';
-			}
-		}
 	},
 	/**
 	 * Given a table of base stats and a pokemon set, return the actual stats.
@@ -47,7 +41,7 @@ let BattleScripts = {
 		if (nature.plus) stats[nature.plus] = Math.floor(stats[nature.plus] * 1.1);
 		// @ts-ignore
 		if (nature.minus) stats[nature.minus] = Math.floor(stats[nature.minus] * 0.9);
-		set.happiness = (set.happiness === 0 ? 0 : (set.happiness || 255));
+		set.happiness = 70;
 		let friendshipValue = Math.floor((set.happiness / 255 / 10 + 1) * 100);
 		for (const stat in stats) {
 			if (stat !== 'hp') {

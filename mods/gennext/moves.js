@@ -167,7 +167,7 @@ let BattleMovedex = {
 					return damage;
 				}
 				if (damage > target.volatiles['substitute'].hp) {
-					damage = target.volatiles['substitute'].hp;
+					damage = /** @type {number} */ (target.volatiles['substitute'].hp);
 				}
 				target.volatiles['substitute'].hp -= damage;
 				source.lastDamage = damage;
@@ -231,7 +231,7 @@ let BattleMovedex = {
 					}
 				}
 				if (move.flags['contact']) {
-					this.boost({atk: -2}, source, target, this.getMove("King's Shield"));
+					this.boost({atk: -2}, source, target, move);
 				}
 				return null;
 			},
@@ -346,7 +346,7 @@ let BattleMovedex = {
 				return;
 			}
 			this.add('-prepare', attacker, move.name, defender);
-			this.boost({def: 1, spd: 1, accuracy: 1}, attacker, attacker, this.getMove('skullbash'));
+			this.boost({def: 1, spd: 1, accuracy: 1}, attacker, attacker, move);
 			if (!this.runEvent('ChargeMove', attacker, defender, move)) {
 				return;
 			}
