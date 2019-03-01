@@ -17,6 +17,29 @@ const MMCOLLECTION = path.resolve(__dirname, '../mods/mixandmeta/mixedmetacollec
 /**@type {(FormatsData | {section: string, column?: number})[]} */
 let Formats = [
 
+	// Mashups Spotlight
+	///////////////////////////////////////////////////////////////////
+	{
+		section: "Mashups Spotlight",
+	},
+	{
+		name: "[Gen 7] CAAAmomons",
+		desc: `Pok&eacute;mon change type to match their first two moves, and can use any ability, barring the few that are restricted to their natural users.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3635904/#post-7802586">CAAAmomons Resources</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3598418/">Vanilla Camomons</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3587901/">Vanilla Almost Any Ability</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3595753/">Vanilla AAA Resources</a>`,
+		],
+		mod: 'gen7',
+		ruleset: ['[Gen 7] OU', 'Camomons Rule', 'Ignore Illegal Abilities', 'Ability Clause'],
+		banlist: [
+			'Kartana', 'Kyurem-Black', 'Shedinja', 'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Huge Power', 'Illusion', 'Imposter', 
+			'Innards Out', 'Parental Bond', 'Protean', 'Pure Power', 'Simple', 'Speed Boost', 'Stakeout', 'Water Bubble', 'Wonder Guard', 
+			'Archeops', 'Dragonite', 'Hoopa-Unbound', 'Keldeo', 'Regigigas', 'Shedinja', 'Slaking', 'Terrakion', 'Weavile'
+		],
+		unbanlist: ['Aegislash', 'Genesect', 'Landorus', 'Metagross-Mega', 'Naganadel'],
+	},
 	// Trash Channel Original Programming
 	///////////////////////////////////////////////////////////////////
 	{
@@ -732,9 +755,9 @@ let Formats = [
 	},
 	// US/UM Singles
 	///////////////////////////////////////////////////////////////////
-	{
+	/*{
 		section: "US/UM Singles",
-	},
+	},*/
 	{
 		name: "[Gen 7] Random Battle",
 		desc: `Randomized teams of level-balanced Pok&eacute;mon with sets that are generated to be competitively viable.`,
@@ -744,6 +767,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		searchShow: false,
 		team: 'random',
 		ruleset: ['PotD', 'Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
 	},
@@ -751,6 +775,7 @@ let Formats = [
 		name: "[Gen 7] Unrated Random Battle",
 
 		mod: 'gen7',
+		searchShow: false,
 		team: 'random',
 		challengeShow: false,
 		rated: false,
@@ -765,6 +790,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		searchShow: false,
 		ruleset: ['Pokemon', 'Standard', 'Team Preview'],
 		banlist: ['Uber', 'Arena Trap', 'Power Construct', 'Shadow Tag', 'Baton Pass'],
 	},
@@ -777,6 +803,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		searchShow: false,
 		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Mega Rayquaza Clause'],
 		banlist: ['Baton Pass'],
 	},
@@ -789,6 +816,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		searchShow: false,
 		ruleset: ['[Gen 7] OU'],
 		banlist: ['OU', 'UUBL', 'Drizzle', 'Drought', 'Kommonium Z', 'Mewnium Z'],
 	},
@@ -801,6 +829,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		searchShow: false,
 		ruleset: ['[Gen 7] UU'],
 		banlist: ['UU', 'RUBL', 'Aurora Veil'],
 		unbanlist: ['Drought'],
@@ -817,6 +846,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		searchShow: false,
 		ruleset: ['[Gen 7] RU'],
 		banlist: ['RU', 'NUBL', 'Drought'],
 	},
@@ -829,6 +859,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		searchShow: false,
 		ruleset: ['[Gen 7] NU'],
 		banlist: ['NU', 'PUBL'],
 	},
@@ -842,6 +873,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		searchShow: false,
 		maxLevel: 5,
 		ruleset: ['Pokemon', 'Standard', 'Swagger Clause', 'Team Preview', 'Little Cup'],
 		banlist: [
@@ -860,6 +892,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		searchShow: false,
 		ruleset: ['Pokemon', 'Standard', 'Swagger Clause', 'Same Type Clause', 'Team Preview'],
 		banlist: [
 			'Aegislash', 'Arceus', 'Blaziken', 'Darkrai', 'Deoxys-Base', 'Deoxys-Attack', 'Dialga', 'Genesect', 'Gengar-Mega', 'Giratina', 'Groudon',
@@ -877,6 +910,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		searchShow: false,
 		ruleset: ['Pokemon', 'Endless Battle Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod'],
 		banlist: ['Illegal', 'Unreleased'],
 	},
@@ -889,6 +923,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		searchShow: false,
 		ruleset: ['[Gen 7] OU', 'Allow CAP'],
 		banlist: ['Tomohawk + Earth Power', 'Tomohawk + Reflect'],
 	},
@@ -911,6 +946,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		searchShow: false,
 		maxForcedLevel: 50,
 		teamLength: {
 			validate: [3, 6],
@@ -924,6 +960,7 @@ let Formats = [
 		threads: [`&bullet; <a href="https://www.smogon.com/forums/threads/3645397/">Battle Spot Special 14</a>`],
 
 		mod: 'gen7',
+		searchShow: false,
 		forcedLevel: 50,
 		teamLength: {
 			validate: [3, 6],
@@ -942,6 +979,7 @@ let Formats = [
 		threads: [`&bullet; <a href="https://www.smogon.com/forums/threads/3645825/">Simple Symphony Discussion</a>`],
 
 		mod: 'gen7',
+		searchShow: false,
 		forcedLevel: 50,
 		teamLength: {
 			validate: [3, 6],
@@ -1240,20 +1278,6 @@ let Formats = [
 	{
 		section: "OM of the Month",
 		column: 2,
-	},
-	{
-		name: "[Gen 7 Let's Go] 1v1",
-		desc: `Bring three Pok&eacute;mon to Team Preview and choose one to battle.`,
-		threads: [`&bullet; <a href="https://www.smogon.com/forums/threads/3587523/">1v1</a>`],
-
-		mod: 'letsgo',
-		forcedLevel: 50,
-		teamLength: {
-			validate: [1, 3],
-			battle: 1,
-		},
-		ruleset: ['Pokemon', 'Species Clause', 'Nickname Clause', 'OHKO Clause', 'Evasion Moves Clause', 'Accuracy Moves Clause', 'Swagger Clause', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
-		banlist: ['Illegal', 'Unreleased', 'Charizard', 'Mewtwo', 'Hypnosis', 'Lovely Kiss', 'Sing', 'Sleep Powder'],
 	},
 	{
 		section: "Other Metagames",
@@ -2036,27 +2060,6 @@ let Formats = [
 			this.add('-start', pokemon, donorTemplate.species, '[silent]');
 		},
 	},
-	{
-		name: "[Gen 7 Let's Go] Hackmons",
-		desc: `Anything that can be hacked in-game and is usable in local battles is allowed.`,
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/posts/7973280/">Let's Go Hackmons</a>`,
-		],
-
-		mod: 'letsgo',
-		ruleset: ['Pokemon', 'Allow AVs', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod'],
-		onValidateSet: function (set) {
-			let availableMoves = ['Pound', 'Karate Chop', 'Double Slap', 'Comet Punch', 'Mega Punch', 'Pay Day', 'Fire Punch', 'Ice Punch', 'Thunder Punch', 'Scratch', 'Vice Grip', 'Guillotine', 'Razor Wind', 'Swords Dance', 'Cut', 'Gust', 'Wing Attack', 'Whirlwind', 'Fly', 'Bind', 'Slam', 'Vine Whip', 'Stomp', 'Double Kick', 'Mega Kick', 'Jump Kick', 'Rolling Kick', 'Sand Attack', 'Headbutt', 'Horn Attack', 'Fury Attack', 'Horn Drill', 'Tackle', 'Body Slam', 'Wrap', 'Take Down', 'Thrash', 'Double-Edge', 'Tail Whip', 'Poison Sting', 'Twineedle', 'Pin Missile', 'Leer', 'Bite', 'Growl', 'Roar', 'Sing', 'Supersonic', 'Sonic Boom', 'Disable', 'Acid', 'Ember', 'Flamethrower', 'Mist', 'Water Gun', 'Hydro Pump', 'Surf', 'Ice Beam', 'Blizzard', 'Psybeam', 'Bubble Beam', 'Aurora Beam', 'Hyper Beam', 'Peck', 'Drill Peck', 'Submission', 'Low Kick', 'Counter', 'Seismic Toss', 'Strength', 'Absorb', 'Mega Drain', 'Leech Seed', 'Growth', 'Razor Leaf', 'Solar Beam', 'Poison Powder', 'Stun Spore', 'Sleep Powder', 'Petal Dance', 'String Shot', 'Dragon Rage', 'Fire Spin', 'Thunder Shock', 'Thunderbolt', 'Thunder Wave', 'Thunder', 'Rock Throw', 'Earthquake', 'Fissure', 'Dig', 'Toxic', 'Confusion', 'Psychic', 'Hypnosis', 'Meditate', 'Agility', 'Quick Attack', 'Rage', 'Teleport', 'Night Shade', 'Mimic', 'Screech', 'Double Team', 'Recover', 'Harden', 'Minimize', 'Smokescreen', 'Confuse Ray', 'Withdraw', 'Defense Curl', 'Barrier', 'Light Screen', 'Haze', 'Reflect', 'Focus Energy', 'Bide', 'Metronome', 'Mirror Move', 'Self-Destruct', 'Egg Bomb', 'Lick', 'Smog', 'Sludge', 'Bone Club', 'Fire Blast', 'Waterfall', 'Clamp', 'Swift', 'Skull Bash', 'Spike Cannon', 'Constrict', 'Amnesia', 'Kinesis', 'Soft-Boiled', 'High Jump Kick', 'Glare', 'Dream Eater', 'Poison Gas', 'Barrage', 'Leech Life', 'Lovely Kiss', 'Sky Attack', 'Transform', 'Bubble', 'Dizzy Punch', 'Spore', 'Flash', 'Psywave', 'Splash', 'Acid Armor', 'Crabhammer', 'Explosion', 'Fury Swipes', 'Bonemerang', 'Rest', 'Rock Slide', 'Hyper Fang', 'Sharpen', 'Conversion', 'Tri Attack', 'Super Fang', 'Slash', 'Substitute', 'Protect', 'Sludge Bomb', 'Outrage', 'Megahorn', 'Encore', 'Iron Tail', 'Crunch', 'Mirror Coat', 'Shadow Ball', 'Fake Out', 'Heat Wave', 'Will-O-Wisp', 'Facade', 'Taunt', 'Helping Hand', 'Superpower', 'Brick Break', 'Yawn', 'Bulk Up', 'Calm Mind', 'Roost', 'Feint', 'U-turn', 'Sucker Punch', 'Flare Blitz', 'Poison Jab', 'Dark Pulse', 'Air Slash', 'X-Scissor', 'Bug Buzz', 'Dragon Pulse', 'Nasty Plot', 'Ice Shard', 'Flash Cannon', 'Power Whip', 'Stealth Rock', 'Aqua Jet', 'Quiver Dance', 'Foul Play', 'Clear Smog', 'Scald', 'Shell Smash', 'Dragon Tail', 'Drill Run', 'Play Rough', 'Moonblast', 'Dazzling Gleam'];
-			let problems = [];
-			if (set.moves) {
-				for (const moveId of set.moves) {
-					let move = this.getMove(moveId);
-					if (move.num < 729 && availableMoves.indexOf(move.name) < 0) problems.push(move.name + ' is not available in Let\'s Go.');
-				}
-			}
-			return problems;
-		},
-	},
 	// Let's Go!
 	///////////////////////////////////////////////////////////////////
 
@@ -2114,6 +2117,41 @@ let Formats = [
 		gameType: 'doubles',
 		ruleset: ['Pokemon', 'Allow AVs', 'Endless Battle Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod'],
 		banlist: ['Illegal', 'Unreleased'],
+	},
+	{
+		name: "[Gen 7 Let's Go] Hackmons",
+		desc: `Anything that can be hacked in-game and is usable in local battles is allowed.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/posts/7973280/">Let's Go Hackmons</a>`,
+		],
+
+		mod: 'letsgo',
+		ruleset: ['Pokemon', 'Allow AVs', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod'],
+		onValidateSet: function (set) {
+			let availableMoves = ['Pound', 'Karate Chop', 'Double Slap', 'Comet Punch', 'Mega Punch', 'Pay Day', 'Fire Punch', 'Ice Punch', 'Thunder Punch', 'Scratch', 'Vice Grip', 'Guillotine', 'Razor Wind', 'Swords Dance', 'Cut', 'Gust', 'Wing Attack', 'Whirlwind', 'Fly', 'Bind', 'Slam', 'Vine Whip', 'Stomp', 'Double Kick', 'Mega Kick', 'Jump Kick', 'Rolling Kick', 'Sand Attack', 'Headbutt', 'Horn Attack', 'Fury Attack', 'Horn Drill', 'Tackle', 'Body Slam', 'Wrap', 'Take Down', 'Thrash', 'Double-Edge', 'Tail Whip', 'Poison Sting', 'Twineedle', 'Pin Missile', 'Leer', 'Bite', 'Growl', 'Roar', 'Sing', 'Supersonic', 'Sonic Boom', 'Disable', 'Acid', 'Ember', 'Flamethrower', 'Mist', 'Water Gun', 'Hydro Pump', 'Surf', 'Ice Beam', 'Blizzard', 'Psybeam', 'Bubble Beam', 'Aurora Beam', 'Hyper Beam', 'Peck', 'Drill Peck', 'Submission', 'Low Kick', 'Counter', 'Seismic Toss', 'Strength', 'Absorb', 'Mega Drain', 'Leech Seed', 'Growth', 'Razor Leaf', 'Solar Beam', 'Poison Powder', 'Stun Spore', 'Sleep Powder', 'Petal Dance', 'String Shot', 'Dragon Rage', 'Fire Spin', 'Thunder Shock', 'Thunderbolt', 'Thunder Wave', 'Thunder', 'Rock Throw', 'Earthquake', 'Fissure', 'Dig', 'Toxic', 'Confusion', 'Psychic', 'Hypnosis', 'Meditate', 'Agility', 'Quick Attack', 'Rage', 'Teleport', 'Night Shade', 'Mimic', 'Screech', 'Double Team', 'Recover', 'Harden', 'Minimize', 'Smokescreen', 'Confuse Ray', 'Withdraw', 'Defense Curl', 'Barrier', 'Light Screen', 'Haze', 'Reflect', 'Focus Energy', 'Bide', 'Metronome', 'Mirror Move', 'Self-Destruct', 'Egg Bomb', 'Lick', 'Smog', 'Sludge', 'Bone Club', 'Fire Blast', 'Waterfall', 'Clamp', 'Swift', 'Skull Bash', 'Spike Cannon', 'Constrict', 'Amnesia', 'Kinesis', 'Soft-Boiled', 'High Jump Kick', 'Glare', 'Dream Eater', 'Poison Gas', 'Barrage', 'Leech Life', 'Lovely Kiss', 'Sky Attack', 'Transform', 'Bubble', 'Dizzy Punch', 'Spore', 'Flash', 'Psywave', 'Splash', 'Acid Armor', 'Crabhammer', 'Explosion', 'Fury Swipes', 'Bonemerang', 'Rest', 'Rock Slide', 'Hyper Fang', 'Sharpen', 'Conversion', 'Tri Attack', 'Super Fang', 'Slash', 'Substitute', 'Protect', 'Sludge Bomb', 'Outrage', 'Megahorn', 'Encore', 'Iron Tail', 'Crunch', 'Mirror Coat', 'Shadow Ball', 'Fake Out', 'Heat Wave', 'Will-O-Wisp', 'Facade', 'Taunt', 'Helping Hand', 'Superpower', 'Brick Break', 'Yawn', 'Bulk Up', 'Calm Mind', 'Roost', 'Feint', 'U-turn', 'Sucker Punch', 'Flare Blitz', 'Poison Jab', 'Dark Pulse', 'Air Slash', 'X-Scissor', 'Bug Buzz', 'Dragon Pulse', 'Nasty Plot', 'Ice Shard', 'Flash Cannon', 'Power Whip', 'Stealth Rock', 'Aqua Jet', 'Quiver Dance', 'Foul Play', 'Clear Smog', 'Scald', 'Shell Smash', 'Dragon Tail', 'Drill Run', 'Play Rough', 'Moonblast', 'Dazzling Gleam'];
+			let problems = [];
+			if (set.moves) {
+				for (const moveId of set.moves) {
+					let move = this.getMove(moveId);
+					if (move.num < 729 && availableMoves.indexOf(move.name) < 0) problems.push(move.name + ' is not available in Let\'s Go.');
+				}
+			}
+			return problems;
+		},
+	},
+	{
+		name: "[Gen 7 Let's Go] 1v1",
+		desc: `Bring three Pok&eacute;mon to Team Preview and choose one to battle.`,
+		threads: [`&bullet; <a href="https://www.smogon.com/forums/threads/3587523/">1v1</a>`],
+
+		mod: 'letsgo',
+		forcedLevel: 50,
+		teamLength: {
+			validate: [1, 3],
+			battle: 1,
+		},
+		ruleset: ['Pokemon', 'Species Clause', 'Nickname Clause', 'OHKO Clause', 'Evasion Moves Clause', 'Accuracy Moves Clause', 'Swagger Clause', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
+		banlist: ['Illegal', 'Unreleased', 'Charizard', 'Mewtwo', 'Hypnosis', 'Lovely Kiss', 'Sing', 'Sleep Powder'],
 	},
 
 	// Randomized Metas
