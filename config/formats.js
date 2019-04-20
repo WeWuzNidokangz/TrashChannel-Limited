@@ -37,7 +37,7 @@ let Formats = [
 	// US/UM Singles
 	///////////////////////////////////////////////////////////////////
 	{
-		section: "US/UM Singles",
+		section: "> Literally playing standard",
 	},
 	{
 		name: "[Gen 7] Random Battle",
@@ -55,6 +55,7 @@ let Formats = [
 		name: "[Gen 7] Unrated Random Battle",
 
 		mod: 'gen7',
+		searchShow: false,
 		team: 'random',
 		challengeShow: false,
 		rated: false,
@@ -69,6 +70,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		searchShow: false,
 		ruleset: ['Pokemon', 'Standard', 'Team Preview'],
 		banlist: ['Uber', 'Arena Trap', 'Power Construct', 'Shadow Tag', 'Baton Pass'],
 	},
@@ -81,6 +83,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		searchShow: false,
 		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Mega Rayquaza Clause'],
 		banlist: ['Baton Pass'],
 	},
@@ -93,6 +96,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		searchShow: false,
 		ruleset: ['[Gen 7] OU'],
 		banlist: ['OU', 'UUBL', 'Drizzle', 'Drought', 'Kommonium Z', 'Mewnium Z'],
 	},
@@ -105,6 +109,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		searchShow: false,
 		ruleset: ['[Gen 7] UU'],
 		banlist: ['UU', 'RUBL', 'Aurora Veil'],
 		unbanlist: ['Sceptile-Mega', 'Drought'],
@@ -118,6 +123,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		searchShow: false,
 		ruleset: ['[Gen 7] RU'],
 		banlist: ['RU', 'NUBL', 'Sceptile-Mega', 'Drought'],
 	},
@@ -130,6 +136,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		searchShow: false,
 		ruleset: ['[Gen 7] NU'],
 		banlist: ['NU', 'PUBL'],
 	},
@@ -143,6 +150,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		searchShow: false,
 		maxLevel: 5,
 		ruleset: ['Pokemon', 'Standard', 'Swagger Clause', 'Team Preview', 'Little Cup'],
 		banlist: [
@@ -161,6 +169,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		searchShow: false,
 		ruleset: ['Pokemon', 'Standard', 'Swagger Clause', 'Same Type Clause', 'Team Preview'],
 		banlist: [
 			'Aegislash', 'Arceus', 'Blaziken', 'Darkrai', 'Deoxys-Base', 'Deoxys-Attack', 'Dialga', 'Genesect', 'Gengar-Mega', 'Giratina', 'Groudon',
@@ -179,6 +188,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		searchShow: false,
 		ruleset: ['Pokemon', 'Endless Battle Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod'],
 		banlist: ['Illegal', 'Unreleased'],
 	},
@@ -192,6 +202,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		searchShow: false,
 		teamLength: {
 			validate: [1, 3],
 			battle: 1,
@@ -215,6 +226,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		searchShow: false,
 		ruleset: ['[Gen 7] PU'],
 		banlist: [
 			'PU', 'Carracosta', 'Crabominable', 'Exeggutor-Base', 'Gorebyss', 'Jynx', 'Musharna', 'Raticate-Alola',
@@ -230,6 +242,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+searchShow: false,
 		ruleset: ['[Gen 7] OU', 'Allow CAP'],
 		banlist: ['Crucibelle + Head Smash', 'Crucibelle + Low Kick', 'Tomohawk + Earth Power', 'Tomohawk + Reflect'],
 	},
@@ -252,6 +265,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		searchShow: false,
 		maxForcedLevel: 50,
 		teamLength: {
 			validate: [3, 6],
@@ -265,6 +279,7 @@ let Formats = [
 		threads: [`&bullet; <a href="https://www.smogon.com/forums/threads/3648618/">Battle Spot Special 15</a>`],
 
 		mod: 'gen7',
+		searchShow: false,
 		forcedLevel: 50,
 		teamLength: {
 			validate: [1, 6],
@@ -312,6 +327,7 @@ let Formats = [
 
 		mod: 'gen7',
 		gameType: 'doubles',
+		searchShow: false,
 		team: 'random',
 		ruleset: ['PotD', 'Pokemon', 'HP Percentage Mod', 'Cancel Mod'],
 	},
@@ -325,6 +341,7 @@ let Formats = [
 
 		mod: 'gen7',
 		gameType: 'doubles',
+		searchShow: false,
 		ruleset: ['Pokemon', 'Standard Doubles', 'Swagger Clause', 'Team Preview'],
 		banlist: ['DUber', 'Power Construct', 'Eevium Z', 'Dark Void', 'Gravity ++ Grass Whistle', 'Gravity ++ Hypnosis', 'Gravity ++ Lovely Kiss', 'Gravity ++ Sing', 'Gravity ++ Sleep Powder'],
 	},
@@ -333,6 +350,7 @@ let Formats = [
 
 		mod: 'gen7',
 		gameType: 'doubles',
+		searchShow: false,
 		ruleset: ['Pokemon', 'Standard Doubles', 'Team Preview'],
 		banlist: ['Dark Void'],
 	},
@@ -342,6 +360,7 @@ let Formats = [
 
 		mod: 'gen7',
 		gameType: 'doubles',
+		searchShow: false,
 		ruleset: ['[Gen 7] Doubles OU'],
 		banlist: ['DOU', 'DBL'],
 	},
@@ -416,6 +435,7 @@ let Formats = [
 
 		mod: 'gen7',
 		gameType: 'doubles',
+		searchShow: false,
 		forcedLevel: 50,
 		teamLength: {
 			validate: [4, 6],
@@ -445,6 +465,7 @@ let Formats = [
 
 		mod: 'gen7',
 		gameType: 'doubles',
+		searchShow: false,
 		forcedLevel: 50,
 		teamLength: {
 			validate: [4, 6],
@@ -489,6 +510,7 @@ let Formats = [
 
 		mod: 'gen7',
 		gameType: 'doubles',
+		searchShow: false,
 		maxForcedLevel: 50,
 		teamLength: {
 			validate: [4, 6],
@@ -956,6 +978,7 @@ let Formats = [
 		name: "[Gen 7 Let's Go] Random Battle",
 
 		mod: 'letsgo',
+		searchShow: false,
 		team: 'random',
 		ruleset: ['Pokemon', 'Allow AVs', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
 	},
@@ -966,6 +989,7 @@ let Formats = [
 		],
 
 		mod: 'letsgo',
+		searchShow: false,
 		forcedLevel: 50,
 		ruleset: ['Pokemon', 'Species Clause', 'Nickname Clause', 'Evasion Moves Clause', 'OHKO Clause', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 		banlist: ['Illegal', 'Unreleased', 'Uber'],
@@ -989,6 +1013,7 @@ let Formats = [
 
 		mod: 'letsgo',
 		gameType: 'doubles',
+		searchShow: false,
 		forcedLevel: 50,
 		ruleset: ['Pokemon', 'Species Clause', 'Nickname Clause', 'Evasion Moves Clause', 'OHKO Clause', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 		banlist: ['Illegal', 'Unreleased', 'Mewtwo'],
@@ -1019,6 +1044,7 @@ let Formats = [
 
 		mod: 'gen7',
 		team: 'randomFactory',
+		searchShow: false,
 		ruleset: ['Pokemon', 'Sleep Clause Mod', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Mega Rayquaza Clause'],
 	},
 	{
@@ -1034,6 +1060,7 @@ let Formats = [
 			validate: [3, 6],
 			battle: 3,
 		},
+		searchShow: false,
 		ruleset: ['Pokemon', 'Standard GBU'],
 	},
 	{
@@ -1041,6 +1068,7 @@ let Formats = [
 
 		mod: 'gen7',
 		team: 'random',
+		searchShow: false,
 		ruleset: ['Pokemon', 'Same Type Clause', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
 	},
 	{
@@ -1052,6 +1080,7 @@ let Formats = [
 
 		mod: 'ssb',
 		team: 'randomStaffBros',
+		searchShow: false,
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod'],
 		onBegin() {
 			this.add('raw|SUPER STAFF BROS <b>BRAWL</b>!!');
@@ -1083,6 +1112,7 @@ let Formats = [
 		teamLength: {
 			battle: 1,
 		},
+		searchShow: false,
 		ruleset: ['Pokemon', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 	},
 	{
@@ -1103,6 +1133,7 @@ let Formats = [
 
 		mod: 'gen7',
 		team: 'randomHC',
+		searchShow: false,
 		ruleset: ['Pokemon', 'HP Percentage Mod', 'Cancel Mod'],
 	},
 	{
@@ -1119,6 +1150,7 @@ let Formats = [
 
 		mod: 'gen6',
 		team: 'random',
+		searchShow: false,
 		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
 	},
 	{
@@ -1135,6 +1167,7 @@ let Formats = [
 
 		mod: 'gen5',
 		team: 'random',
+		searchShow: false,
 		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
 	},
 	{
@@ -1142,6 +1175,7 @@ let Formats = [
 
 		mod: 'gen4',
 		team: 'random',
+		searchShow: false,
 		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
 	},
 	{
@@ -1149,6 +1183,7 @@ let Formats = [
 
 		mod: 'gen3',
 		team: 'random',
+		searchShow: false,
 		ruleset: ['Pokemon', 'Standard'],
 	},
 	{
@@ -1156,6 +1191,7 @@ let Formats = [
 
 		mod: 'gen2',
 		team: 'random',
+		searchShow: false,
 		ruleset: ['Pokemon', 'Standard'],
 	},
 	{
@@ -1163,6 +1199,7 @@ let Formats = [
 
 		mod: 'gen1',
 		team: 'random',
+		searchShow: false,
 		ruleset: ['Pokemon', 'Standard'],
 	},
 	{
@@ -1190,7 +1227,7 @@ let Formats = [
 		],
 
 		mod: 'gen5',
-		// searchShow: false,
+		searchShow: false,
 		ruleset: ['Pokemon', 'Standard', 'Evasion Abilities Clause', 'Baton Pass Clause', 'Swagger Clause', 'Team Preview'],
 		banlist: ['Uber', 'OU', 'UUBL', 'Arena Trap', 'Drought', 'Sand Stream', 'Snow Warning'],
 	},
@@ -1201,7 +1238,7 @@ let Formats = [
 		],
 
 		mod: 'gen3',
-		// searchShow: false,
+		searchShow: false,
 		ruleset: ['[Gen 3] UU'],
 		banlist: ['UU'],
 	},
@@ -1213,6 +1250,7 @@ let Formats = [
 		],
 
 		mod: 'gen4',
+		searchShow: false,
 		ruleset: ['[Gen 4] OU', 'Same Type Clause'],
 		banlist: [],
 	},
@@ -1233,6 +1271,7 @@ let Formats = [
 		],
 
 		mod: 'gen6',
+		searchShow: false,
 		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Swagger Clause'],
 		banlist: ['Uber', 'Arena Trap', 'Shadow Tag', 'Soul Dew', 'Baton Pass'],
 	},
@@ -1244,6 +1283,7 @@ let Formats = [
 		],
 
 		mod: 'gen5',
+		searchShow: false,
 		ruleset: ['Pokemon', 'Standard', 'Evasion Abilities Clause', 'Baton Pass Clause', 'Swagger Clause', 'Team Preview'],
 		banlist: ['Uber', 'Arena Trap', 'Drizzle ++ Swift Swim', 'Drought ++ Chlorophyll', 'Sand Rush', 'Soul Dew'],
 	},
@@ -1255,6 +1295,7 @@ let Formats = [
 		],
 
 		mod: 'gen4',
+		searchShow: false,
 		ruleset: ['Pokemon', 'Standard', 'Baton Pass Clause'],
 		banlist: ['Uber', 'Sand Veil', 'Soul Dew'],
 	},
@@ -1266,6 +1307,7 @@ let Formats = [
 		],
 
 		mod: 'gen3',
+		searchShow: false,
 		ruleset: ['Pokemon', 'Standard'],
 		banlist: ['Uber', 'Smeargle + Ingrain'],
 	},
@@ -1277,6 +1319,7 @@ let Formats = [
 		],
 
 		mod: 'gen2',
+		searchShow: false,
 		ruleset: ['Pokemon', 'Standard'],
 		banlist: ['Uber'],
 	},
@@ -1288,6 +1331,7 @@ let Formats = [
 		],
 
 		mod: 'gen1',
+		searchShow: false,
 		ruleset: ['Pokemon', 'Standard'],
 		banlist: ['Uber'],
 	},
