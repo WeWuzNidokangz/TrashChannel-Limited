@@ -210,6 +210,11 @@ export class Pokemon {
 	// OMs
 	m: PokemonModData;
 
+// #region TrashChannel
+	// For camomonsrule: compatibility with Mix and Mega, etc
+	lockTypesArray: string[];
+// #endregion
+
 	constructor(set: string | AnyObject, side: Side) {
 		this.side = side;
 		this.battle = side.battle;
@@ -382,6 +387,10 @@ export class Pokemon {
 		 * An object for storing untyped data, for mods to use.
 		 */
 		this.m = {};
+
+// #region TrashChannel
+		this.lockTypesArray = [null, null];
+// #endregion
 	}
 
 	get moves(): readonly string[] {

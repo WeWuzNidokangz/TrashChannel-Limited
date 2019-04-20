@@ -889,6 +889,132 @@ let BattleFormats = {
 		desc: "Tells formats with the 'letsgo' mod to take Awakening Values into consideration when calculating stats",
 		// Implemented in mods/letsgo/rulesets.js
 	},
+// #region TrashChannel Rules
+	/////////////////////////////
+	// TrashChannel: New rules //
+	/////////////////////////////
+    r350cuprule: {
+		effectType: 'Rule',
+		name: 'R 350 Cup Rule',
+		desc: "The mod for 350 Cup: Pok&eacute;mon with a base stat total of 350 or lower get their stats doubled.",
+        onModifyTemplate: function (template, target, source, effect) {
+			console.log('r350cuprule: onModifyTemplate');
+            let bst = 0;
+            Object.values(template.baseStats).forEach(stat => {
+                bst += stat;
+            });
+			if (bst <= 350) {
+				let pokemon = this.deepClone(template);
+				for (let i in pokemon.baseStats) {
+					pokemon.baseStats[i] *= 2;
+				}
+				return pokemon;
+			}
+            return template;
+        },
+	},
+	averagemonsrule: {
+		effectType: 'Rule',
+		name: 'Averagemons Rule',
+		desc: "The mod for Averagemons: Every Pok&eacute;mon, including formes, has base 100 in every stat.",
+		onModifyTemplate: function (template, target, source, effect) {
+			if (!effect) return;
+			let pokemon = this.deepClone(template);
+			pokemon.baseStats = {hp: 100, atk: 100, def: 100, spa: 100, spd: 100, spe: 100};
+			return pokemon;
+		},
+	},
+	camomonsrule: {
+		effectType: 'Rule',
+		name: 'Camomons Rule',
+		desc: "The mod for Camomons: Pok&eacute;mon change type to match their first two moves.",
+		onModifyTemplate(template, target, source, effect) {
+			console.log('camomonsrule: onModifyTemplate');
+			if (!target) return; // Chat command
+			console.log('passed target');
+			if (effect && ['imposter', 'transform'].includes(effect.id)) return;
+			let types = [...new Set(target.baseMoveSlots.slice(0, 2).map(move => this.getMove(move.id).type))];
+			return Object.assign({}, template, {types: types});
+		},
+		onSwitchIn: function (pokemon) {
+			console.log('camomonsrule: onSwitchIn');
+			for( let nTypeItr=0; nTypeItr<2; ++nTypeItr) {
+				//console.log('nTypeItr: ' + nTypeItr.toString() + ' pokemon.types: ' + pokemon.types[nTypeItr].toString() );
+				if(null === pokemon.lockTypesArray[nTypeItr]) continue;
+				// @ts-ignore
+				pokemon.types[nTypeItr] = pokemon.lockTypesArray[nTypeItr];
+			}
+			this.add('-start', pokemon, 'typechange', pokemon.types.join('/'), '[silent]');
+		},
+		onAfterMega: function (pokemon) {
+			console.log('camomonsrule: onAfterMega');
+			for( let nTypeItr=0; nTypeItr<2; ++nTypeItr) {
+				//console.log('nTypeItr: ' + nTypeItr.toString() + ' pokemon.types: ' + pokemon.types[nTypeItr].toString() );
+				if(null === pokemon.lockTypesArray[nTypeItr]) continue;
+				// @ts-ignore
+				pokemon.types[nTypeItr] = pokemon.lockTypesArray[nTypeItr];
+			}
+			this.add('-start', pokemon, 'typechange', pokemon.types.join('/'), '[silent]');
+		},
+	},
+	reversedrule: {
+		effectType: 'Rule',
+		name: 'Reversed Rule',
+		desc: "The mod for Reversed: Every Pok&eacute;mon has its base Atk and Sp. Atk stat, as well as its base Def and Sp. Def stat, swapped.",
+		onModifyTemplate: function (template, target, source, effect) {
+			if (!effect) return;
+			let pokemon = this.deepClone(template);
+			const atk = pokemon.baseStats.atk;
+			const def = pokemon.baseStats.def;
+			pokemon.baseStats.atk = pokemon.baseStats.spa;
+			pokemon.baseStats.def = pokemon.baseStats.spd;
+			pokemon.baseStats.spa = atk;
+			pokemon.baseStats.spd = def;
+			return pokemon;
+		},
+	},
+	tiershiftrule: {
+		effectType: 'Rule',
+		name: 'Tier Shift Rule',
+		desc: "The mod for Tier Shift: Pokemon get a +10 boost to each stat per tier below OU they are in. UU gets +10, RU +20, NU +30, and PU +40.",
+        onModifyTemplate(template, target, source, effect) {
+			console.log('tiershiftrule: onModifyTemplate');
+			if (!effect) return;
+			if (!template.abilities) return false;
+			/** @type {{[tier: string]: number}} */
+			const boosts = {
+				'UU': 10,
+				'BL2': 10,
+				'RU': 20,
+				'BL3': 20,
+				'NU': 30,
+				'BL4': 30,
+				'PU': 40,
+				'NFE': 40,
+				'LC Uber': 40,
+				'LC': 40,
+			};
+			if (target.set.ability === 'Drizzle') return;
+			let pokemon = this.deepClone(template);
+			if (target.set.item) {
+				let item = this.getItem(target.set.item);
+				if (item.name === 'Kommonium Z' || item.name === 'Mewnium Z') return;
+				if (item.megaEvolves === pokemon.species) pokemon.tier = this.getTemplate(item.megaStone).tier;
+			}
+			if (pokemon.tier[0] === '(') pokemon.tier = pokemon.tier.slice(1, -1);
+			if (!(pokemon.tier in boosts)) return;
+			if (target.set.moves.includes('auroraveil')) pokemon.tier = 'UU';
+			if (target.set.ability === 'Drought') pokemon.tier = 'RU';
+
+			let boost = boosts[pokemon.tier];
+			for (let statName in pokemon.baseStats) {
+				if (statName === 'hp') continue;
+				pokemon.baseStats[statName] = this.clampIntRange(pokemon.baseStats[statName] + boost, 1, 255);
+			}
+			return pokemon;
+        },
+	},
+// #endregion TrashChannel Rules
 };
 
 exports.BattleFormats = BattleFormats;
