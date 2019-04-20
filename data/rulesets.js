@@ -929,15 +929,15 @@ let BattleFormats = {
 		name: 'Camomons Rule',
 		desc: "The mod for Camomons: Pok&eacute;mon change type to match their first two moves.",
 		onModifyTemplate(template, target, source, effect) {
-			console.log('camomonsrule: onModifyTemplate');
+			//console.log('camomonsrule: onModifyTemplate');
 			if (!target) return; // Chat command
-			console.log('passed target');
+			//console.log('passed target');
 			if (effect && ['imposter', 'transform'].includes(effect.id)) return;
 			let types = [...new Set(target.baseMoveSlots.slice(0, 2).map(move => this.getMove(move.id).type))];
 			return Object.assign({}, template, {types: types});
 		},
 		onSwitchIn: function (pokemon) {
-			console.log('camomonsrule: onSwitchIn');
+			//console.log('camomonsrule: onSwitchIn');
 			for( let nTypeItr=0; nTypeItr<2; ++nTypeItr) {
 				//console.log('nTypeItr: ' + nTypeItr.toString() + ' pokemon.types: ' + pokemon.types[nTypeItr].toString() );
 				if(null === pokemon.lockTypesArray[nTypeItr]) continue;
@@ -947,7 +947,7 @@ let BattleFormats = {
 			this.add('-start', pokemon, 'typechange', pokemon.types.join('/'), '[silent]');
 		},
 		onAfterMega: function (pokemon) {
-			console.log('camomonsrule: onAfterMega');
+			//console.log('camomonsrule: onAfterMega');
 			for( let nTypeItr=0; nTypeItr<2; ++nTypeItr) {
 				//console.log('nTypeItr: ' + nTypeItr.toString() + ' pokemon.types: ' + pokemon.types[nTypeItr].toString() );
 				if(null === pokemon.lockTypesArray[nTypeItr]) continue;

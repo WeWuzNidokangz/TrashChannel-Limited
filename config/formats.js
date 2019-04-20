@@ -5,6 +5,34 @@
 
 /**@type {(FormatsData | {section: string, column?: number})[]} */
 let Formats = [
+// #region TrashChannel: Mashups
+	// Mashups Spotlight
+	///////////////////////////////////////////////////////////////////
+	{
+		section: "Mashups Spotlight",
+	},
+	{
+		section: "Official Mashups",
+	},
+	{
+		name: "[Gen 7] CAAAmomons",
+		desc: `Pok&eacute;mon change type to match their first two moves, and can use any ability, barring the few that are restricted to their natural users.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3635904/#post-7802586">CAAAmomons Resources</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3598418/">Vanilla Camomons</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3587901/">Vanilla Almost Any Ability</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3595753/">Vanilla AAA Resources</a>`,
+		],
+		mod: 'gen7',
+		ruleset: ['[Gen 7] OU', 'Camomons Rule', 'Ignore Illegal Abilities', 'Ability Clause'],
+		banlist: [
+			'Kartana', 'Kyurem-Black', 'Shedinja', 'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Huge Power', 'Illusion', 'Imposter', 
+			'Innards Out', 'Parental Bond', 'Protean', 'Pure Power', 'Simple', 'Speed Boost', 'Stakeout', 'Water Bubble', 'Wonder Guard', 
+			'Archeops', 'Dragonite', 'Hoopa-Unbound', 'Keldeo', 'Regigigas', 'Shedinja', 'Slaking', 'Terrakion', 'Weavile'
+		],
+		unbanlist: ['Aegislash', 'Genesect', 'Landorus', 'Metagross-Mega', 'Naganadel'],
+	},
+// #endregion TrashChannel: Mashups
 
 	// US/UM Singles
 	///////////////////////////////////////////////////////////////////
