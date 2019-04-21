@@ -1473,6 +1473,17 @@ class ModdedDex {
 			if (dexes['base'].dataCache) dexes['base'].dataCache.Formats[id] = format;
 		}
 	}
+
+// #region TrashChannel
+	calcBST(stats: StatsTable): number {
+		/**@type {number} */
+		let bst = 0;
+        Object.values(stats).forEach(stat => {
+        	bst += stat;
+        });
+		return bst;
+	}
+// #endregion
 }
 
 dexes['base'] = new ModdedDex(undefined, true);

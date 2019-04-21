@@ -3,6 +3,8 @@
 
 'use strict';
 
+const DexCalculator = require('../trashchannel/dex-calculator');
+
 /**@type {{[k: string]: FormatsData}} */
 let BattleFormats = {
 
@@ -898,13 +900,14 @@ let BattleFormats = {
 		name: 'R 350 Cup Rule',
 		desc: "The mod for 350 Cup: Pok&eacute;mon with a base stat total of 350 or lower get their stats doubled.",
         onModifyTemplate: function (template, target, source, effect) {
-			console.log('r350cuprule: onModifyTemplate');
+			//console.log('r350cuprule: onModifyTemplate');
             let bst = 0;
             Object.values(template.baseStats).forEach(stat => {
                 bst += stat;
             });
 			if (bst <= 350) {
-				let pokemon = this.deepClone(template);
+				let dex = this && this.deepClone ? this : DexCalculator;
+				let pokemon = dex.deepClone(template);
 				for (let i in pokemon.baseStats) {
 					pokemon.baseStats[i] *= 2;
 				}
@@ -919,7 +922,8 @@ let BattleFormats = {
 		desc: "The mod for Averagemons: Every Pok&eacute;mon, including formes, has base 100 in every stat.",
 		onModifyTemplate: function (template, target, source, effect) {
 			if (!effect) return;
-			let pokemon = this.deepClone(template);
+			let dex = this && this.deepClone ? this : DexCalculator;
+			let pokemon = dex.deepClone(template);
 			pokemon.baseStats = {hp: 100, atk: 100, def: 100, spa: 100, spd: 100, spe: 100};
 			return pokemon;
 		},
@@ -963,7 +967,8 @@ let BattleFormats = {
 		desc: "The mod for Reversed: Every Pok&eacute;mon has its base Atk and Sp. Atk stat, as well as its base Def and Sp. Def stat, swapped.",
 		onModifyTemplate: function (template, target, source, effect) {
 			if (!effect) return;
-			let pokemon = this.deepClone(template);
+			let dex = this && this.deepClone ? this : DexCalculator;
+			let pokemon = dex.deepClone(template);
 			const atk = pokemon.baseStats.atk;
 			const def = pokemon.baseStats.def;
 			pokemon.baseStats.atk = pokemon.baseStats.spa;
@@ -978,7 +983,7 @@ let BattleFormats = {
 		name: 'Tier Shift Rule',
 		desc: "The mod for Tier Shift: Pokemon get a +10 boost to each stat per tier below OU they are in. UU gets +10, RU +20, NU +30, and PU +40.",
         onModifyTemplate(template, target, source, effect) {
-			console.log('tiershiftrule: onModifyTemplate');
+			//console.log('tiershiftrule: onModifyTemplate');
 			if (!effect) return;
 			if (!template.abilities) return false;
 			/** @type {{[tier: string]: number}} */
@@ -994,22 +999,29 @@ let BattleFormats = {
 				'LC Uber': 40,
 				'LC': 40,
 			};
-			if (target.set.ability === 'Drizzle') return;
-			let pokemon = this.deepClone(template);
-			if (target.set.item) {
-				let item = this.getItem(target.set.item);
-				if (item.name === 'Kommonium Z' || item.name === 'Mewnium Z') return;
-				if (item.megaEvolves === pokemon.species) pokemon.tier = this.getTemplate(item.megaStone).tier;
+			if (target) {
+				if (target.set.ability === 'Drizzle') return;
+			}
+			let dex = this && this.deepClone ? this : DexCalculator;
+			let pokemon = dex.deepClone(template);
+			if (target) {
+				if (target.set.item) {
+					let item = this.getItem(target.set.item);
+					if (item.name === 'Kommonium Z' || item.name === 'Mewnium Z') return;
+					if (item.megaEvolves === pokemon.species) pokemon.tier = this.getTemplate(item.megaStone).tier;
+				}
 			}
 			if (pokemon.tier[0] === '(') pokemon.tier = pokemon.tier.slice(1, -1);
 			if (!(pokemon.tier in boosts)) return;
-			if (target.set.moves.includes('auroraveil')) pokemon.tier = 'UU';
-			if (target.set.ability === 'Drought') pokemon.tier = 'RU';
+			if (target) {
+				if (target.set.moves.includes('auroraveil')) pokemon.tier = 'UU';
+				if (target.set.ability === 'Drought') pokemon.tier = 'RU';
+			}
 
 			let boost = boosts[pokemon.tier];
 			for (let statName in pokemon.baseStats) {
 				if (statName === 'hp') continue;
-				pokemon.baseStats[statName] = this.clampIntRange(pokemon.baseStats[statName] + boost, 1, 255);
+				pokemon.baseStats[statName] = dex.clampIntRange(pokemon.baseStats[statName] + boost, 1, 255);
 			}
 			return pokemon;
         },
