@@ -3,6 +3,14 @@
 // Note: This is the list of formats
 // The rules that formats use are stored in data/rulesets.js
 
+//#region TrashChannel: Includes
+const fs = require('fs');
+const path = require('path');
+
+// Bitch and Beggar includes
+const BITCHANDBEGGARMOD = path.resolve(__dirname, '../data/mods/bitchandbeggar/scripts');
+//#endregion
+
 /**@type {(FormatsData | {section: string, column?: number})[]} */
 let Formats = [
 //#region TrashChannel: Mashups
@@ -1232,7 +1240,6 @@ let Formats = [
 		team: 'randomCC',
 		challengeShow: false,
 		searchShow: false,
-		challengeShow: false,
 		ruleset: ['Pokemon', 'HP Percentage Mod', 'Cancel Mod'],
 	},
 
@@ -2542,6 +2549,174 @@ let Formats = [
 			if (!donorTemplate.exists) return;
 			// Place volatiles on the Pokémon to show the donor details.
 			this.add('-start', pokemon, donorTemplate.species, '[silent]');
+		},
+	},
+//#endregion
+
+//#region TrashChannel: Original Programming
+	// TrashChannel Original Programming
+	///////////////////////////////////////////////////////////////////
+
+	{
+		section: "TrashChannel Original Programming",
+		column: 3,
+	},
+	{
+		name: "[Gen 7] Bitch and Beggar",
+		onDesc() {
+			let bstLimitString = this.modValueNumberA ? " (<=" + this.modValueNumberA.toString() + ")" : "";
+			return "Pok&eacute;mon can 'Beggar-Evolve' using low" + bstLimitString + " BST Pok&eacute;mon as Stones.";
+		},
+		threads: [
+			``,
+		],
+
+		mod: 'bitchandbeggar',
+		ruleset: ['Pokemon', 'Standard', 'Bitch And Beggar Rule', 'Mega Rayquaza Clause', 'Team Preview'],
+		banlist: ['Shadow Tag', 'Baton Pass', 'Electrify'],
+		cannotMega: [
+			'Arceus', 'Deoxys', 'Deoxys-Attack', 'Deoxys-Speed', 'Dialga', 'Dragonite', 'Giratina', 'Groudon', 'Ho-Oh', 'Kyogre',
+			'Kyurem-Black', 'Kyurem-White', 'Lugia', 'Lunala', 'Marshadow', 'Mewtwo', 'Naganadel', 'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane',
+			'Palkia', 'Pheromosa', 'Rayquaza', 'Regigigas', 'Reshiram', 'Slaking', 'Solgaleo', 'Xerneas', 'Yveltal', 'Zekrom',
+		],
+		restrictionlist: [
+			'Huge Power', 'Pure Power', 'Wonder Guard', 
+		],
+		modValueNumberA: 300,
+		onValidateTeam(team) {
+			/**@type {{[k: string]: true}} */
+			let itemTable = {};
+			for (const set of team) {
+				let bitchTemplate = this.getTemplate(set.item);
+				if (!bitchTemplate.exists) continue;
+				if (itemTable[bitchTemplate.id]) return ["You are limited to one of each Bitch.", "(You have more than one " + bitchTemplate.name + ")"];
+				itemTable[bitchTemplate.id] = true;
+			}
+		},
+		onValidateSet(set, format, setHas, teamHas, ruleTable) {
+			//console.log('BnB: val ');
+			//console.log('format.modValueNumberA: '+format.modValueNumberA.toString());
+
+			let beggarTemplate = this.getTemplate(set.species || set.name);
+			let bitchTemplate = this.getTemplate(set.item);
+			//console.log('bitch: '+set.item);
+			if(!bitchTemplate.exists) return;
+
+			let problems = [];
+			let bitchBST = this.calcBST(bitchTemplate.baseStats);
+			//console.log('bitchBST: '+bitchBST.toString());
+			if(format.modValueNumberA) {
+				if(bitchBST > format.modValueNumberA) {
+					problems.push("Bitches are limited to " + format.modValueNumberA.toString() + " BST, but " + bitchTemplate.name + " has " + bitchBST.toString() + "!");
+				}
+			}
+			let uberBitches = format.restrictedStones || [];
+			let uberPokemon = format.cannotMega || [];
+			if (uberPokemon.includes(beggarTemplate.name) || set.ability === 'Power Construct' || uberBitches.includes(bitchTemplate.name)) return ["" + beggarTemplate.species + " is not allowed to hold " + bitchTemplate.name + "."];
+			
+			// Load BnB mod functions
+			/**@type {ModdedBattleScriptsData | null} */
+			let BnBMod = null;
+			try {
+				BnBMod = require(BITCHANDBEGGARMOD).BattleScripts;
+			} catch (e) {
+				console.log('e.code: ' + e.code);
+				if (e.code !== 'MODULE_NOT_FOUND' && e.code !== 'ENOENT') {
+					throw e;
+				}
+				problems.push("BnBMod not found!");
+			}
+
+			if(!BnBMod) {
+				return problems;
+			}
+
+			const mixedTemplate = BnBMod.getMixedTemplate(beggarTemplate.name, bitchTemplate.baseSpecies);
+			let oAbilitySlot = this.calcActiveAbilitySlot(beggarTemplate, set.ability);
+			//console.log("oAbilitySlot: " + oAbilitySlot);
+			// @ts-ignore
+			let postBeggarAbilityName = mixedTemplate.abilities[oAbilitySlot];
+			let postBeggarAbilityId = toId(postBeggarAbilityName);
+			//console.log("postBeggarAbilityId: " + postBeggarAbilityId);
+			let abilityTest = '-ability:'+postBeggarAbilityId;
+			//console.log("abilityTest: " + abilityTest);
+			ruleTable.forEach((v, rule) => {
+				//console.log("BnB rule: " + rule);
+				if( rule === abilityTest ) {
+					//console.log("BnB rule IN ");
+					problems.push("If "+set.name+" beggar-evolves with the ability "+ set.ability + ", it will gain the banned ability "
+						+ postBeggarAbilityName + " from its bitch "+ bitchTemplate.name + ".");
+				}
+			});
+			let restrictedAbilities = format.restrictedAbilities || [];
+			if (restrictedAbilities.includes(postBeggarAbilityId)) {
+				//console.log("BnB restriction IN ");
+				problems.push("If "+set.name+" beggar-evolves with the ability "+ set.ability + ", it will gain the restricted ability "
+					+ postBeggarAbilityName + " from its bitch "+ bitchTemplate.name + ".");
+			}
+			return problems;
+		},
+		onBegin() {
+			for (const pokemon of this.getAllPokemon()) {
+				pokemon.m.originalSpecies = pokemon.baseTemplate.species;
+			}
+		},
+		onSwitchIn(pokemon) {
+			// Take care of non-BnB case
+			let bitchTemplate = this.getTemplate(pokemon.item);
+			if(!bitchTemplate.exists) return;
+			if (null === pokemon.canMegaEvo) {
+				// Place volatiles on the Pokémon to show its beggar-evolved condition and details
+				let bitchSpecies = pokemon.item;
+				this.add('-start', pokemon, this.generateMegaStoneName(bitchSpecies), '[silent]');
+				let oTemplate = this.getTemplate(pokemon.m.originalSpecies);
+				if (oTemplate.types.length !== pokemon.template.types.length || oTemplate.types[1] !== pokemon.template.types[1]) {
+					this.add('-start', pokemon, 'typechange', pokemon.template.types.join('/'), '[silent]');
+				}
+			}
+		},
+		onSwitchOut(pokemon) {
+			// @ts-ignore
+			let oMegaTemplate = this.getTemplate(pokemon.template.originalMega);
+			if (oMegaTemplate.exists && pokemon.m.originalSpecies !== oMegaTemplate.baseSpecies) {
+				this.add('-end', pokemon, oMegaTemplate.requiredItem || oMegaTemplate.requiredMove, '[silent]');
+			}
+		},
+	},
+	{
+		name: "[Gen 7] Bitch and Beggar: Hackmons Cup",
+		desc: `Randomized teams of level-balanced Pok&eacute;mon with absolutely any ability, move, and bitch.`,
+		threads: [
+			``,
+		],
+		mod: 'bitchandbeggar',
+		ruleset: ['Pokemon', 'HP Percentage Mod', 'Cancel Mod'],
+		team: 'randomHCBnB',
+		onBegin() {
+			for (const pokemon of this.getAllPokemon()) {
+				pokemon.m.originalSpecies = pokemon.baseTemplate.species;
+			}
+		},
+		onSwitchIn(pokemon) {
+			// Take care of non-BnB case
+			let bitchTemplate = this.getTemplate(pokemon.item);
+			if(!bitchTemplate.exists) return;
+			if (null === pokemon.canMegaEvo) {
+				// Place volatiles on the Pokémon to show its beggar-evolved condition and details
+				let bitchSpecies = pokemon.item;
+				this.add('-start', pokemon, this.generateMegaStoneName(bitchSpecies), '[silent]');
+				let oTemplate = this.getTemplate(pokemon.m.originalSpecies);
+				if (oTemplate.types.length !== pokemon.template.types.length || oTemplate.types[1] !== pokemon.template.types[1]) {
+					this.add('-start', pokemon, 'typechange', pokemon.template.types.join('/'), '[silent]');
+				}
+			}
+		},
+		onSwitchOut(pokemon) {
+			// @ts-ignore
+			let oMegaTemplate = this.getTemplate(pokemon.template.originalMega);
+			if (oMegaTemplate.exists && pokemon.m.originalSpecies !== oMegaTemplate.baseSpecies) {
+				this.add('-end', pokemon, oMegaTemplate.requiredItem || oMegaTemplate.requiredMove, '[silent]');
+			}
 		},
 	},
 //#endregion

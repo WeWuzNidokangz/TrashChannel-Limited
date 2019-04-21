@@ -210,10 +210,10 @@ export class Pokemon {
 	// OMs
 	m: PokemonModData;
 
-// #region TrashChannel
+//#region TrashChannel
 	// For camomonsrule: compatibility with Mix and Mega, etc
 	lockTypesArray: string[];
-// #endregion
+//#endregion
 
 	constructor(set: string | AnyObject, side: Side) {
 		this.side = side;
@@ -388,9 +388,9 @@ export class Pokemon {
 		 */
 		this.m = {};
 
-// #region TrashChannel
+//#region TrashChannel
 		this.lockTypesArray = [null, null];
-// #endregion
+//#endregion
 	}
 
 	get moves(): readonly string[] {
@@ -1710,4 +1710,10 @@ export class Pokemon {
 		// @ts-ignore - readonly
 		this.side = null!;
 	}
+
+//#region TrashChannel
+	calcActiveAbilitySlot() {
+		return this.battle.calcActiveAbilitySlot(this.template, this.ability);
+	}
+//#endregion
 }

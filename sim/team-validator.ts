@@ -180,8 +180,18 @@ export class Validator {
 		if (!template.exists) {
 			return [`The Pokemon "${set.species}" does not exist.`];
 		}
-
-		if (item.id && !item.exists) {
+		//#region TrashChannel
+		// TrashChannel 18/10/28: Bitch and Beggar beggar evos use non-existent items
+		/** @type {Boolean} */
+		let bitchAndBeggarItemException = false;
+		if( ruleTable.has('bitchandbeggarrule') ) {
+			let bitchTemplate = dex.getTemplate(set.item);
+			if(bitchTemplate.exists) {
+				bitchAndBeggarItemException = true;
+			}
+		}
+		//#endregion
+		if (item.id && !item.exists && !bitchAndBeggarItemException) {
 			return [`"${set.item}" is an invalid item.`];
 		}
 		if (ability.id && !ability.exists) {
@@ -319,7 +329,20 @@ export class Validator {
 		for (const moveName of set.moves) {
 			if (!moveName) continue;
 			const move = dex.getMove(Dex.getString(moveName));
-			if (!move.exists) return [`"${move.name}" is an invalid move.`];
+
+			//#region TrashChannel
+			// TrashChannel 18/11/23: BEA5T M0D3 transformations use non-existent moves
+			/** @type {Boolean} */
+			let beastModeMoveException = false;
+			if( ruleTable.has('beastmoderule') ) {
+				let beastTemplate = dex.getTemplate(Dex.getString(moveName));
+				if(beastTemplate.exists) {
+					beastModeMoveException = true;
+				}
+			}
+			//#endregion
+
+			if (!move.exists && !beastModeMoveException) return [`"${move.name}" is an invalid move.`];
 			banReason = ruleTable.check('move:' + move.id, setHas);
 			if (banReason) {
 				problems.push(`${name}'s move ${move.name} is ${banReason}.`);
@@ -540,11 +563,11 @@ export class Validator {
 			if (rule.startsWith('!')) continue;
 			const subformat = dex.getFormat(rule);
 			if (subformat.onValidateSet && ruleTable.has(subformat.id)) {
-				problems = problems.concat(subformat.onValidateSet.call(dex, set, format, setHas, teamHas) || []);
+				problems = problems.concat(subformat.onValidateSet.call(dex, set, format, setHas, teamHas, ruleTable) || []);
 			}
 		}
 		if (format.onValidateSet) {
-			problems = problems.concat(format.onValidateSet.call(dex, set, format, setHas, teamHas) || []);
+			problems = problems.concat(format.onValidateSet.call(dex, set, format, setHas, teamHas, ruleTable) || []);
 		}
 
 		if (!problems.length) {

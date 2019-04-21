@@ -1483,6 +1483,87 @@ class ModdedDex {
         });
 		return bst;
 	}
+
+	public static isVowel(character: string): boolean {
+		switch(character) {
+			case 'a':
+			case 'e':
+			case 'i':
+			case 'o':
+			case 'u':
+				return true;
+		}
+
+		return false;
+	}
+
+	generateMegaStoneName(pokemonName: string): string {
+		let baseName = pokemonName;
+		let template = this.getTemplate(pokemonName);
+		if(!template.exists) return '???';
+		
+		/** @type {string | null} */
+		let stoneName = null;
+		baseName = template.name;
+		let baseTemplate = this.getTemplate(template.baseSpecies);
+		for(let item in this.data.Items) {
+			if( this.data.Items[item].megaEvolves === baseTemplate.name ) {
+				if(template.isMega) {
+					stoneName = 'Mega ' + this.data.Items[item].name;
+					let lastLetter = template.name.substr( template.name.length-2, template.name.length-1 );
+					if('a' !== lastLetter) { // X/Y split mega case
+						stoneName += ' ' + lastLetter;
+					}
+					return stoneName;
+				}
+				else {
+					return this.data.Items[item].name;
+				}
+			}
+		}
+
+		if(template.isPrimal) {
+			stoneName = 'Primal ' + baseTemplate.name; 
+		}
+
+		if(null === stoneName) {
+			stoneName = baseName;
+		}
+
+		// @ts-ignore
+		let lastLetter = stoneName.substr( stoneName.length-2, stoneName.length-1 );
+		let lastLetterIsVowel = ModdedDex.isVowel(lastLetter);
+		// @ts-ignore
+		let penultimateLetter = stoneName.substr( stoneName.length-3, stoneName.length-2 );
+		let penultimateLetterIsVowel = ModdedDex.isVowel(penultimateLetter);
+
+		// Decide and concatenate name
+		if(!lastLetterIsVowel) {
+			// @ts-ignore
+			return stoneName + 'ite';
+		}
+		if(!penultimateLetterIsVowel) {
+			// @ts-ignore
+			return stoneName.substr( 0, stoneName.length-2 ) + 'nite';
+		}
+		// @ts-ignore
+		return stoneName.substr( 0, stoneName.length-3 ) + 'ite';
+	}
+
+	calcActiveAbilitySlot(species: string | Template, ability: string): string {
+		let id = toId(species || '');
+		let template = this.getTemplate(id);
+		let abilityId = toId(ability || '');
+		let abilitySlot = '0'; // Fallback to standard ability slot if we're in a meta that allows illegal abilities
+		for (let abilityItr in template.abilities) {
+			//console.log("Ability slot: "+ abilityItr.toString() +" instance: "+this.ability.toString()+" template: "+toId(oTemplate.abilities[abilityItr]).toString());
+			// @ts-ignore
+			if(abilityId !== toId(template.abilities[abilityItr])) continue;
+			abilitySlot = abilityItr;
+			break;
+		}
+		return abilitySlot;
+	}
 // #endregion
 }
 

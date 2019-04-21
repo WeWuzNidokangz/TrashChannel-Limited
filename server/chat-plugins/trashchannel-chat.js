@@ -16,7 +16,7 @@ const DexCalculator = require('../../trashchannel/dex-calculator');
 const RULESETS = path.resolve(__dirname, '../../data/rulesets');
 const FORMATS = path.resolve(__dirname, '../../config/formats');
 
-const BITCHANDBEGGARMOD = path.resolve(__dirname, '../../mods/bitchandbeggar/scripts');
+const BITCHANDBEGGARMOD = path.resolve(__dirname, '../../data/mods/bitchandbeggar/scripts');
 
 const MAX_PROCESSES = 1;
 const RESULTS_MAX_LENGTH = 10;

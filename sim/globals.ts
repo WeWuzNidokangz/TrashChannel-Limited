@@ -849,6 +849,10 @@ interface MoveData extends EffectData, MoveEventMethods {
 	zMoveEffect?: string
 	zMoveBoost?: SparseBoostsTable
 	basePowerCallback?: (this: Battle, pokemon: Pokemon, target: Pokemon, move: ActiveMove) => number | false | null
+
+//#region TrashChannel
+	dontShowUseMoveMessage?: boolean
+//#endregion
 }
 
 interface ModdedMoveData extends Partial<MoveData>, ModdedEffectData {}
@@ -1050,12 +1054,21 @@ interface FormatsData extends EventMethods {
 	onChangeSet?: (this: ModdedDex, set: PokemonSet, format: Format, setHas?: AnyObject, teamHas?: AnyObject) => string[] | void
 	onModifyTemplate?: (this: Battle, template: Template, target: Pokemon, source: Pokemon, effect: Effect) => Template | void
 	onTeamPreview?: (this: Battle) => void
-	onValidateSet?: (this: ModdedDex, set: PokemonSet, format: Format, setHas: AnyObject, teamHas: AnyObject) => string[] | void
-	onValidateTeam?: (this: ModdedDex, team: PokemonSet[], format: Format, teamHas: AnyObject) => string[] | void
+	// TrashChannel: Added parameter for MxM complex validation
+	onValidateSet?: (this: ModdedDex, set: PokemonSet, format: Format, setHas: AnyObject, teamHas: AnyObject, ruleTable: RuleTable) => string[] | void
+	onValidateTeam?: (this: ModdedDex, team: PokemonSet[], format: Format, teamHas: AnyObject, ruleTable: RuleTable) => string[] | void
 	validateSet?: (this: Validator, set: PokemonSet, teamHas: AnyObject) => string[] | void
 	validateTeam?: (this: Validator, team: PokemonSet[], removeNicknames: boolean) => string[] | void,
 	section?: string,
 	column?: number
+
+//#region TrashChannel
+	onDesc?: (this: FormatsData) => string
+	restrictionlist?: string[]
+	modValueNumberA?: number
+	// Where a format includes multiple potential metas, determine which one a Pokemon set qualifies as
+	determineMeta?: (this: ModdedDex, set: PokemonSet, teamHas: AnyObject) => string | undefined
+//#endregion
 }
 
 interface ModdedFormatsData extends Partial<FormatsData> {
@@ -1167,6 +1180,10 @@ interface ModdedBattleScriptsData extends Partial<BattleScriptsData> {
 	doGetMixedTemplate?: (this: Battle, template: Template, deltas: AnyObject) => Template
 	getMegaDeltas?: (this: Battle, megaSpecies: Template) => AnyObject
 	getMixedTemplate?: (this: Battle, originalSpecies: string, megaSpecies: string) => Template
+
+//#region TrashChannel
+	getAbilityMapping?: (this: Battle, pokemon: Pokemon) => TemplateAbility
+//#endregion
 }
 
 interface TypeData {
@@ -1356,3 +1373,17 @@ interface PokemonModData {
 	originalSpecies?: string; // Mix and Mega
 	[key: string]: any;
 }
+
+//#region TrashChannel
+// 18/12/20 TrashChannel: For Mix and Meta
+interface MixedMeta {
+	format: string
+	weightTier: string
+	bstLimit?: number
+	// Implement to force the validator to treat this meta as the intended meta when true
+	// (e.g. Mix and Meta when there is a non-native megastone set)
+	isSetRedFlag?: (this: ModdedDex, pokemonSet: PokemonSet) => string | undefined
+	// Define to ban meta
+	banReason?: string
+}
+//#endregion
