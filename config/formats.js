@@ -5,7 +5,7 @@
 
 /**@type {(FormatsData | {section: string, column?: number})[]} */
 let Formats = [
-// #region TrashChannel: Mashups
+//#region TrashChannel: Mashups
 	// Mashups Spotlight
 	///////////////////////////////////////////////////////////////////
 	{
@@ -31,8 +31,24 @@ let Formats = [
 			'Archeops', 'Dragonite', 'Hoopa-Unbound', 'Keldeo', 'Regigigas', 'Shedinja', 'Slaking', 'Terrakion', 'Weavile'
 		],
 		unbanlist: ['Aegislash', 'Genesect', 'Landorus', 'Metagross-Mega', 'Naganadel'],
+		restrictedAbilities: [
+			'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Huge Power', 'Illusion', 'Imposter', 'Innards Out',
+			'Parental Bond', 'Protean', 'Pure Power', 'Simple', 'Speed Boost', 'Stakeout', 'Water Bubble', 'Wonder Guard',
+		],
+		onValidateSet(set, format) {
+			let restrictedAbilities = format.restrictedAbilities || [];
+			if (restrictedAbilities.includes(set.ability)) {
+				let template = this.getTemplate(set.species || set.name);
+				let legalAbility = false;
+				for (let i in template.abilities) {
+					// @ts-ignore
+					if (set.ability === template.abilities[i]) legalAbility = true;
+				}
+				if (!legalAbility) return ['The ability ' + set.ability + ' is banned on Pok\u00e9mon that do not naturally have it.'];
+			}
+		},
 	},
-// #endregion TrashChannel: Mashups
+//#endregion TrashChannel: Mashups
 
 	// US/UM Singles
 	///////////////////////////////////////////////////////////////////
@@ -70,6 +86,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Standard', 'Team Preview'],
 		banlist: ['Uber', 'Arena Trap', 'Power Construct', 'Shadow Tag', 'Baton Pass'],
@@ -83,6 +100,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Mega Rayquaza Clause'],
 		banlist: ['Baton Pass'],
@@ -96,6 +114,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 7] OU'],
 		banlist: ['OU', 'UUBL', 'Drizzle', 'Drought', 'Kommonium Z', 'Mewnium Z'],
@@ -109,6 +128,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 7] UU'],
 		banlist: ['UU', 'RUBL', 'Aurora Veil'],
@@ -123,6 +143,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 7] RU'],
 		banlist: ['RU', 'NUBL', 'Sceptile-Mega', 'Drought'],
@@ -136,6 +157,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 7] NU'],
 		banlist: ['NU', 'PUBL'],
@@ -150,6 +172,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		challengeShow: false,
 		searchShow: false,
 		maxLevel: 5,
 		ruleset: ['Pokemon', 'Standard', 'Swagger Clause', 'Team Preview', 'Little Cup'],
@@ -169,6 +192,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Standard', 'Swagger Clause', 'Same Type Clause', 'Team Preview'],
 		banlist: [
@@ -188,6 +212,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Endless Battle Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod'],
 		banlist: ['Illegal', 'Unreleased'],
@@ -202,6 +227,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		challengeShow: false,
 		searchShow: false,
 		teamLength: {
 			validate: [1, 3],
@@ -226,6 +252,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 7] PU'],
 		banlist: [
@@ -242,7 +269,8 @@ let Formats = [
 		],
 
 		mod: 'gen7',
-searchShow: false,
+		challengeShow: false,
+		searchShow: false,
 		ruleset: ['[Gen 7] OU', 'Allow CAP'],
 		banlist: ['Crucibelle + Head Smash', 'Crucibelle + Low Kick', 'Tomohawk + Earth Power', 'Tomohawk + Reflect'],
 	},
@@ -251,6 +279,7 @@ searchShow: false,
 		threads: [`&bullet; <a href="https://www.smogon.com/forums/threads/3599594/">CAP LC</a>`],
 
 		mod: 'gen7',
+		challengeShow: false,
 		searchShow: false,
 		maxLevel: 5,
 		ruleset: ['[Gen 7] LC', 'Allow CAP'],
@@ -265,6 +294,7 @@ searchShow: false,
 		],
 
 		mod: 'gen7',
+		challengeShow: false,
 		searchShow: false,
 		maxForcedLevel: 50,
 		teamLength: {
@@ -279,6 +309,7 @@ searchShow: false,
 		threads: [`&bullet; <a href="https://www.smogon.com/forums/threads/3648618/">Battle Spot Special 15</a>`],
 
 		mod: 'gen7',
+		challengeShow: false,
 		searchShow: false,
 		forcedLevel: 50,
 		teamLength: {
@@ -319,7 +350,7 @@ searchShow: false,
 	///////////////////////////////////////////////////////////////////
 
 	{
-		section: "US/UM Doubles",
+		section: "Test Doubles",
 	},
 	{
 		name: "[Gen 7] Random Doubles Battle",
@@ -327,6 +358,7 @@ searchShow: false,
 
 		mod: 'gen7',
 		gameType: 'doubles',
+		challengeShow: false,
 		searchShow: false,
 		team: 'random',
 		ruleset: ['PotD', 'Pokemon', 'HP Percentage Mod', 'Cancel Mod'],
@@ -341,6 +373,7 @@ searchShow: false,
 
 		mod: 'gen7',
 		gameType: 'doubles',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Standard Doubles', 'Swagger Clause', 'Team Preview'],
 		banlist: ['DUber', 'Power Construct', 'Eevium Z', 'Dark Void', 'Gravity ++ Grass Whistle', 'Gravity ++ Hypnosis', 'Gravity ++ Lovely Kiss', 'Gravity ++ Sing', 'Gravity ++ Sleep Powder'],
@@ -350,6 +383,7 @@ searchShow: false,
 
 		mod: 'gen7',
 		gameType: 'doubles',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Standard Doubles', 'Team Preview'],
 		banlist: ['Dark Void'],
@@ -360,6 +394,7 @@ searchShow: false,
 
 		mod: 'gen7',
 		gameType: 'doubles',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 7] Doubles OU'],
 		banlist: ['DOU', 'DBL'],
@@ -369,6 +404,7 @@ searchShow: false,
 
 		mod: 'gen7',
 		gameType: 'doubles',
+		challengeShow: false,
 		searchShow: false,
 		forcedLevel: 50,
 		teamLength: {
@@ -400,6 +436,7 @@ searchShow: false,
 
 		mod: 'gen7',
 		gameType: 'doubles',
+		challengeShow: false,
 		searchShow: false,
 		forcedLevel: 50,
 		teamLength: {
@@ -435,6 +472,7 @@ searchShow: false,
 
 		mod: 'gen7',
 		gameType: 'doubles',
+		challengeShow: false,
 		searchShow: false,
 		forcedLevel: 50,
 		teamLength: {
@@ -465,6 +503,7 @@ searchShow: false,
 
 		mod: 'gen7',
 		gameType: 'doubles',
+		challengeShow: false,
 		searchShow: false,
 		forcedLevel: 50,
 		teamLength: {
@@ -486,6 +525,7 @@ searchShow: false,
 
 		mod: 'vgc17',
 		gameType: 'doubles',
+		challengeShow: false,
 		searchShow: false,
 		forcedLevel: 50,
 		teamLength: {
@@ -510,6 +550,7 @@ searchShow: false,
 
 		mod: 'gen7',
 		gameType: 'doubles',
+		challengeShow: false,
 		searchShow: false,
 		maxForcedLevel: 50,
 		teamLength: {
@@ -528,6 +569,7 @@ searchShow: false,
 
 		mod: 'gen7',
 		gameType: 'doubles',
+		challengeShow: false,
 		searchShow: false,
 		teamLength: {
 			validate: [2, 4],
@@ -550,6 +592,7 @@ searchShow: false,
 
 		mod: 'gen7',
 		gameType: 'doubles',
+		challengeShow: false,
 		searchShow: false,
 		teamLength: {
 			validate: [2, 2],
@@ -809,7 +852,7 @@ searchShow: false,
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3598418/">Camomons</a>`,
 		],
 		mod: 'gen7',
-		searchShow: false,
+		// searchShow: false,
 		ruleset: ['[Gen 7] OU'],
 		banlist: ['Kartana', 'Kyurem-Black', 'Shedinja'],
 		onModifyTemplate(template, target, source, effect) {
@@ -840,50 +883,10 @@ searchShow: false,
 	},
 	{
 		name: "[Gen 7] Tier Shift",
-		desc: "Pok&eacute;mon below OU get all their stats boosted. UU/RUBL get +10, RU/NUBL get +20, NU/PUBL get +30, and PU or lower get +40.",
-		threads: [
-			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3610073/\">Tier Shift</a>",
-		],
-
-		mod: 'gen7',
-		// searchShow: false,
-		ruleset: ['[Gen 7] OU'],
+		ruleset: ['[Gen 7] OU', 'Tier Shift Rule'],
 		banlist: ['Damp Rock', 'Deep Sea Tooth', 'Eviolite'],
-		onModifyTemplate(template, target, source, effect) {
-			if (!effect) return;
-			if (!template.abilities) return false;
-			/** @type {{[tier: string]: number}} */
-			let boosts = {
-				'UU': 10,
-				'RUBL': 10,
-				'RU': 20,
-				'NUBL': 20,
-				'NU': 30,
-				'PUBL': 30,
-				'PU': 40,
-				'NFE': 40,
-				'LC Uber': 40,
-				'LC': 40,
-			};
-			if (target.set.ability === 'Drizzle') return;
-			let pokemon = this.deepClone(template);
-			if (target.set.item) {
-				let item = this.getItem(target.set.item);
-				if (item.name === 'Kommonium Z' || item.name === 'Mewnium Z') return;
-				if (item.megaEvolves === pokemon.species) pokemon.tier = this.getTemplate(item.megaStone).tier;
-			}
-			if (pokemon.tier[0] === '(') pokemon.tier = pokemon.tier.slice(1, -1);
-			if (!(pokemon.tier in boosts)) return;
-			if (target.set.moves.includes('auroraveil')) pokemon.tier = 'UU';
-			if (target.set.ability === 'Drought') pokemon.tier = 'RU';
-
-			let boost = boosts[pokemon.tier];
-			for (let statName in pokemon.baseStats) {
-				if (statName === 'hp') continue;
-				pokemon.baseStats[statName] = this.clampIntRange(pokemon.baseStats[statName] + boost, 1, 255);
-			}
-			return pokemon;
-		},
+		desc: '<a href="http://www.smogon.com/forums/threads/3610073/">Tier Shift</a>: Pokemon get a +10 boost to each stat per tier below OU they are in. UU gets +10, RU +20, NU +30, and PU +40.',
+		mod: 'gen7',
 	},
 	{
 		name: "[Gen 7] Partners in Crime",
@@ -894,7 +897,7 @@ searchShow: false,
 
 		mod: 'pic',
 		gameType: 'doubles',
-		searchShow: false,
+		// searchShow: false,
 		ruleset: ['[Gen 7] Doubles OU', 'Sleep Clause Mod'],
 		banlist: [
 			'Kangaskhanite', 'Mawilite', 'Medichamite',
@@ -978,6 +981,7 @@ searchShow: false,
 		name: "[Gen 7 Let's Go] Random Battle",
 
 		mod: 'letsgo',
+		challengeShow: false,
 		searchShow: false,
 		team: 'random',
 		ruleset: ['Pokemon', 'Allow AVs', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
@@ -989,6 +993,7 @@ searchShow: false,
 		],
 
 		mod: 'letsgo',
+		challengeShow: false,
 		searchShow: false,
 		forcedLevel: 50,
 		ruleset: ['Pokemon', 'Species Clause', 'Nickname Clause', 'Evasion Moves Clause', 'OHKO Clause', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
@@ -1001,6 +1006,7 @@ searchShow: false,
 		],
 
 		mod: 'letsgo',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Allow AVs', 'Endless Battle Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod'],
 		banlist: ['Illegal', 'Unreleased'],
@@ -1013,6 +1019,7 @@ searchShow: false,
 
 		mod: 'letsgo',
 		gameType: 'doubles',
+		challengeShow: false,
 		searchShow: false,
 		forcedLevel: 50,
 		ruleset: ['Pokemon', 'Species Clause', 'Nickname Clause', 'Evasion Moves Clause', 'OHKO Clause', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
@@ -1026,6 +1033,7 @@ searchShow: false,
 
 		mod: 'letsgo',
 		gameType: 'doubles',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Allow AVs', 'Endless Battle Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod'],
 		banlist: ['Illegal', 'Unreleased'],
@@ -1044,6 +1052,7 @@ searchShow: false,
 
 		mod: 'gen7',
 		team: 'randomFactory',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Sleep Clause Mod', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Mega Rayquaza Clause'],
 	},
@@ -1060,6 +1069,7 @@ searchShow: false,
 			validate: [3, 6],
 			battle: 3,
 		},
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Standard GBU'],
 	},
@@ -1068,6 +1078,7 @@ searchShow: false,
 
 		mod: 'gen7',
 		team: 'random',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Same Type Clause', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
 	},
@@ -1080,6 +1091,7 @@ searchShow: false,
 
 		mod: 'ssb',
 		team: 'randomStaffBros',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod'],
 		onBegin() {
@@ -1112,6 +1124,7 @@ searchShow: false,
 		teamLength: {
 			battle: 1,
 		},
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 	},
@@ -1124,6 +1137,7 @@ searchShow: false,
 		teamLength: {
 			battle: 2,
 		},
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
 	},
@@ -1133,6 +1147,7 @@ searchShow: false,
 
 		mod: 'gen7',
 		team: 'randomHC',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'HP Percentage Mod', 'Cancel Mod'],
 	},
@@ -1142,6 +1157,7 @@ searchShow: false,
 		mod: 'gen7',
 		gameType: 'doubles',
 		team: 'randomHC',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'HP Percentage Mod', 'Cancel Mod'],
 	},
@@ -1150,6 +1166,7 @@ searchShow: false,
 
 		mod: 'gen6',
 		team: 'random',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
 	},
@@ -1159,6 +1176,7 @@ searchShow: false,
 
 		mod: 'gen6',
 		team: 'randomFactory',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Sleep Clause Mod', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Mega Rayquaza Clause'],
 	},
@@ -1167,6 +1185,7 @@ searchShow: false,
 
 		mod: 'gen5',
 		team: 'random',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
 	},
@@ -1175,6 +1194,7 @@ searchShow: false,
 
 		mod: 'gen4',
 		team: 'random',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Sleep Clause Mod', 'HP Percentage Mod', 'Cancel Mod'],
 	},
@@ -1183,6 +1203,7 @@ searchShow: false,
 
 		mod: 'gen3',
 		team: 'random',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Standard'],
 	},
@@ -1191,6 +1212,7 @@ searchShow: false,
 
 		mod: 'gen2',
 		team: 'random',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Standard'],
 	},
@@ -1199,6 +1221,7 @@ searchShow: false,
 
 		mod: 'gen1',
 		team: 'random',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Standard'],
 	},
@@ -1207,6 +1230,7 @@ searchShow: false,
 
 		mod: 'gen1',
 		team: 'randomCC',
+		challengeShow: false,
 		searchShow: false,
 		challengeShow: false,
 		ruleset: ['Pokemon', 'HP Percentage Mod', 'Cancel Mod'],
@@ -1227,6 +1251,7 @@ searchShow: false,
 		],
 
 		mod: 'gen5',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Standard', 'Evasion Abilities Clause', 'Baton Pass Clause', 'Swagger Clause', 'Team Preview'],
 		banlist: ['Uber', 'OU', 'UUBL', 'Arena Trap', 'Drought', 'Sand Stream', 'Snow Warning'],
@@ -1238,6 +1263,7 @@ searchShow: false,
 		],
 
 		mod: 'gen3',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 3] UU'],
 		banlist: ['UU'],
@@ -1250,6 +1276,7 @@ searchShow: false,
 		],
 
 		mod: 'gen4',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 4] OU', 'Same Type Clause'],
 		banlist: [],
@@ -1271,6 +1298,7 @@ searchShow: false,
 		],
 
 		mod: 'gen6',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Swagger Clause'],
 		banlist: ['Uber', 'Arena Trap', 'Shadow Tag', 'Soul Dew', 'Baton Pass'],
@@ -1283,6 +1311,7 @@ searchShow: false,
 		],
 
 		mod: 'gen5',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Standard', 'Evasion Abilities Clause', 'Baton Pass Clause', 'Swagger Clause', 'Team Preview'],
 		banlist: ['Uber', 'Arena Trap', 'Drizzle ++ Swift Swim', 'Drought ++ Chlorophyll', 'Sand Rush', 'Soul Dew'],
@@ -1295,6 +1324,7 @@ searchShow: false,
 		],
 
 		mod: 'gen4',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Standard', 'Baton Pass Clause'],
 		banlist: ['Uber', 'Sand Veil', 'Soul Dew'],
@@ -1307,6 +1337,7 @@ searchShow: false,
 		],
 
 		mod: 'gen3',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Standard'],
 		banlist: ['Uber', 'Smeargle + Ingrain'],
@@ -1319,6 +1350,7 @@ searchShow: false,
 		],
 
 		mod: 'gen2',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Standard'],
 		banlist: ['Uber'],
@@ -1331,6 +1363,7 @@ searchShow: false,
 		],
 
 		mod: 'gen1',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Standard'],
 		banlist: ['Uber'],
@@ -1351,6 +1384,7 @@ searchShow: false,
 		],
 
 		mod: 'gen6',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Standard', 'Swagger Clause', 'Team Preview', 'Mega Rayquaza Clause'],
 	},
@@ -1362,6 +1396,7 @@ searchShow: false,
 		],
 
 		mod: 'gen6',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 6] OU'],
 		banlist: ['OU', 'UUBL', 'Drizzle', 'Drought'],
@@ -1374,6 +1409,7 @@ searchShow: false,
 		],
 
 		mod: 'gen6',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 6] UU'],
 		banlist: ['UU', 'RUBL'],
@@ -1386,6 +1422,7 @@ searchShow: false,
 		],
 
 		mod: 'gen6',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 6] RU'],
 		banlist: ['RU', 'NUBL'],
@@ -1398,6 +1435,7 @@ searchShow: false,
 		],
 
 		mod: 'gen6',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 6] NU'],
 		banlist: ['NU', 'PUBL', 'Chatter'],
@@ -1410,6 +1448,7 @@ searchShow: false,
 		],
 
 		mod: 'gen6',
+		challengeShow: false,
 		searchShow: false,
 		maxLevel: 5,
 		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Little Cup'],
@@ -1423,6 +1462,7 @@ searchShow: false,
 		],
 
 		mod: 'gen6',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Standard', 'Swagger Clause', 'Same Type Clause', 'Team Preview'],
 		banlist: [
@@ -1440,6 +1480,7 @@ searchShow: false,
 		],
 
 		mod: 'gen6',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Endless Battle Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod'],
 		banlist: ['Illegal', 'Unreleased'],
@@ -1449,6 +1490,7 @@ searchShow: false,
 		desc: `Bring three Pok&eacute;mon to Team Preview and choose one to battle.`,
 
 		mod: 'gen6',
+		challengeShow: false,
 		searchShow: false,
 		teamLength: {
 			validate: [1, 3],
@@ -1471,6 +1513,7 @@ searchShow: false,
 		],
 
 		mod: 'gen6',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 6] OU', 'Allow CAP'],
 	},
@@ -1482,6 +1525,7 @@ searchShow: false,
 		],
 
 		mod: 'gen6',
+		challengeShow: false,
 		searchShow: false,
 		maxForcedLevel: 50,
 		teamLength: {
@@ -1495,6 +1539,7 @@ searchShow: false,
 		name: "[Gen 6] Custom Game",
 
 		mod: 'gen6',
+		challengeShow: false,
 		searchShow: false,
 		canUseRandomTeam: true,
 		debug: true,
@@ -1520,6 +1565,7 @@ searchShow: false,
 
 		mod: 'gen6',
 		gameType: 'doubles',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Standard Doubles', 'Swagger Clause', 'Team Preview'],
 		banlist: ['DUber', 'Soul Dew', 'Dark Void', 'Gravity ++ Grass Whistle', 'Gravity ++ Hypnosis', 'Gravity ++ Lovely Kiss', 'Gravity ++ Sing', 'Gravity ++ Sleep Powder'],
@@ -1533,6 +1579,7 @@ searchShow: false,
 
 		mod: 'gen6',
 		gameType: 'doubles',
+		challengeShow: false,
 		searchShow: false,
 		maxForcedLevel: 50,
 		teamLength: {
@@ -1564,6 +1611,7 @@ searchShow: false,
 
 		mod: 'gen6',
 		gameType: 'doubles',
+		challengeShow: false,
 		searchShow: false,
 		maxForcedLevel: 50,
 		teamLength: {
@@ -1578,6 +1626,7 @@ searchShow: false,
 
 		mod: 'gen6',
 		gameType: 'doubles',
+		challengeShow: false,
 		searchShow: false,
 		canUseRandomTeam: true,
 		maxLevel: 9999,
@@ -1596,6 +1645,7 @@ searchShow: false,
 
 		mod: 'gen6',
 		gameType: 'triples',
+		challengeShow: false,
 		searchShow: false,
 		maxForcedLevel: 50,
 		teamLength: {
@@ -1609,6 +1659,7 @@ searchShow: false,
 
 		mod: 'gen6',
 		gameType: 'triples',
+		challengeShow: false,
 		searchShow: false,
 		canUseRandomTeam: true,
 		maxLevel: 9999,
@@ -1634,6 +1685,7 @@ searchShow: false,
 		],
 
 		mod: 'gen5',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Team Preview', 'Standard Ubers'],
 	},
@@ -1645,6 +1697,7 @@ searchShow: false,
 		],
 
 		mod: 'gen5',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 5] UU'],
 		banlist: ['UU', 'RUBL', 'Shell Smash + Baton Pass'],
@@ -1657,6 +1710,7 @@ searchShow: false,
 		],
 
 		mod: 'gen5',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 5] RU'],
 		banlist: ['RU', 'NUBL', 'Prankster + Assist'],
@@ -1669,6 +1723,7 @@ searchShow: false,
 		],
 
 		mod: 'gen5',
+		challengeShow: false,
 		searchShow: false,
 		maxLevel: 5,
 		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Little Cup'],
@@ -1682,6 +1737,7 @@ searchShow: false,
 		],
 
 		mod: 'gen5',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 5] OU', 'Same Type Clause'],
 	},
@@ -1689,6 +1745,7 @@ searchShow: false,
 		name: "[Gen 5] GBU Singles",
 
 		mod: 'gen5',
+		challengeShow: false,
 		searchShow: false,
 		maxForcedLevel: 50,
 		teamLength: {
@@ -1702,6 +1759,7 @@ searchShow: false,
 		name: "[Gen 5] Custom Game",
 
 		mod: 'gen5',
+		challengeShow: false,
 		searchShow: false,
 		canUseRandomTeam: true,
 		debug: true,
@@ -1728,6 +1786,7 @@ searchShow: false,
 
 		mod: 'gen5',
 		gameType: 'doubles',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Standard', 'Evasion Abilities Clause', 'Swagger Clause', 'Team Preview'],
 		banlist: ['DUber', 'Soul Dew', 'Dark Void', 'Sky Drop'],
@@ -1737,6 +1796,7 @@ searchShow: false,
 
 		mod: 'gen5',
 		gameType: 'doubles',
+		challengeShow: false,
 		searchShow: false,
 		maxForcedLevel: 50,
 		teamLength: {
@@ -1751,6 +1811,7 @@ searchShow: false,
 
 		mod: 'gen5',
 		gameType: 'doubles',
+		challengeShow: false,
 		searchShow: false,
 		canUseRandomTeam: true,
 		debug: true,
@@ -1776,6 +1837,7 @@ searchShow: false,
 		],
 
 		mod: 'gen4',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Standard'],
 		banlist: ['Arceus'],
@@ -1788,6 +1850,7 @@ searchShow: false,
 		],
 
 		mod: 'gen4',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 4] OU'],
 		banlist: ['OU', 'UUBL'],
@@ -1800,6 +1863,7 @@ searchShow: false,
 		],
 
 		mod: 'gen4',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 4] UU'],
 		banlist: ['UU', 'NUBL'],
@@ -1812,6 +1876,7 @@ searchShow: false,
 		],
 
 		mod: 'gen4',
+		challengeShow: false,
 		searchShow: false,
 		maxLevel: 5,
 		ruleset: ['Pokemon', 'Standard', 'Little Cup'],
@@ -1821,6 +1886,7 @@ searchShow: false,
 		name: "[Gen 4] Anything Goes",
 
 		mod: 'gen4',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Endless Battle Clause', 'HP Percentage Mod', 'Cancel Mod'],
 		banlist: ['Illegal', 'Unreleased'],
@@ -1829,6 +1895,7 @@ searchShow: false,
 		name: "[Gen 4] Custom Game",
 
 		mod: 'gen4',
+		challengeShow: false,
 		searchShow: false,
 		canUseRandomTeam: true,
 		debug: true,
@@ -1852,6 +1919,7 @@ searchShow: false,
 
 		mod: 'gen4',
 		gameType: 'doubles',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 4] OU'],
 		banlist: ['Explosion', 'Soul Dew'],
@@ -1862,6 +1930,7 @@ searchShow: false,
 
 		mod: 'gen4',
 		gameType: 'doubles',
+		challengeShow: false,
 		searchShow: false,
 		canUseRandomTeam: true,
 		debug: true,
@@ -1887,6 +1956,7 @@ searchShow: false,
 		],
 
 		mod: 'gen3',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Standard'],
 		banlist: ['Smeargle + Ingrain', 'Wobbuffet + Leftovers'],
@@ -1899,6 +1969,7 @@ searchShow: false,
 		],
 
 		mod: 'gen3',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 3] OU'],
 		banlist: ['OU', 'UUBL'],
@@ -1907,6 +1978,7 @@ searchShow: false,
 		name: "[Gen 3] Custom Game",
 
 		mod: 'gen3',
+		challengeShow: false,
 		searchShow: false,
 		debug: true,
 		ruleset: ['Pokemon', 'HP Percentage Mod', 'Cancel Mod'],
@@ -1916,6 +1988,7 @@ searchShow: false,
 
 		mod: 'gen3',
 		gameType: 'doubles',
+		challengeShow: false,
 		searchShow: false,
 		debug: true,
 		ruleset: ['Pokemon', 'HP Percentage Mod', 'Cancel Mod'],
@@ -1928,6 +2001,7 @@ searchShow: false,
 		],
 
 		mod: 'gen2',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Standard'],
 	},
@@ -1936,6 +2010,7 @@ searchShow: false,
 		threads: [`&bullet; <a href="https://www.smogon.com/forums/threads/3576710/">GSC UU</a>`],
 
 		mod: 'gen2',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 2] OU'],
 		banlist: ['OU', 'UUBL'],
@@ -1945,6 +2020,7 @@ searchShow: false,
 		threads: [`&bullet; <a href="https://www.smogon.com/forums/threads/3642565/">GSC NU</a>`],
 
 		mod: 'gen2',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 2] UU'],
 		banlist: ['UU'],
@@ -1953,6 +2029,7 @@ searchShow: false,
 		name: "[Gen 2] Custom Game",
 
 		mod: 'gen2',
+		challengeShow: false,
 		searchShow: false,
 		debug: true,
 		ruleset: ['Pokemon', 'HP Percentage Mod', 'Cancel Mod'],
@@ -1965,6 +2042,7 @@ searchShow: false,
 		],
 
 		mod: 'gen1',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Standard'],
 	},
@@ -1976,6 +2054,7 @@ searchShow: false,
 		],
 
 		mod: 'gen1',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 1] OU'],
 		banlist: ['OU', 'UUBL'],
@@ -1988,6 +2067,7 @@ searchShow: false,
 		],
 
 		mod: 'gen1',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Allow Tradeback', 'Sleep Clause Mod', 'Freeze Clause Mod', 'Species Clause', 'OHKO Clause', 'Evasion Moves Clause', 'HP Percentage Mod', 'Cancel Mod'],
 		banlist: ['Uber', 'Unreleased', 'Illegal',
@@ -1999,6 +2079,7 @@ searchShow: false,
 		name: "[Gen 1] Stadium OU",
 
 		mod: 'stadium',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Standard', 'Team Preview'],
 		banlist: ['Uber',
@@ -2010,10 +2091,460 @@ searchShow: false,
 		name: "[Gen 1] Custom Game",
 
 		mod: 'gen1',
+		challengeShow: false,
 		searchShow: false,
 		debug: true,
 		ruleset: ['Pokemon', 'HP Percentage Mod', 'Cancel Mod'],
 	},
+
+//#region TrashChannel: Ex-OMotM
+	// Expanded OMs
+	///////////////////////////////////////////////////////////////////
+
+	{
+		section: "Expanded OMs",
+		column: 2,
+	},
+	{
+		name: "[Gen 7] 350 Cup",
+		desc: "Pok&eacute;mon with a base stat total of 350 or lower get their stats doubled. &bullet; <a href=\"https://www.smogon.com/forums/threads/3589641/\">350 Cup</a>",
+		mod: 'gen7',
+		ruleset: ['[Gen 7] Ubers', 'R 350 Cup Rule'],
+		banlist: ['Deep Sea Tooth', 'Eevium Z', 'Eviolite', 'Light Ball'],
+	},
+	{
+		name: "[Gen 7] Inverse",
+		desc: "The effectiveness of each attack is inverted. &bullet; <a href=\"https://www.smogon.com/forums/threads/3590154/\">Inverse</a>",
+		mod: 'gen7',
+		ruleset: ['[Gen 7] OU', 'Inverse Mod'],
+		banlist: ['Hoopa-Unbound', 'Kyurem-Black', 'Serperior'],
+		unbanlist: ['Aegislash', 'Dialga', 'Giratina', 'Pheromosa', 'Solgaleo', 'Lucarionite'],
+	},
+	{
+		name: "[Gen 7] Sketchmons",
+		desc: `Pok&eacute;mon can learn one of any move they don't normally learn, barring the few that are banned.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3587743/">Sketchmons</a>`,
+		],
+
+		mod: 'gen7',
+		ruleset: ['[Gen 7] OU'],
+		banlist: ['Kartana', 'Porygon-Z', 'Battle Bond'],
+		restrictedMoves: [
+			'Belly Drum', 'Celebrate', 'Chatter', 'Conversion', 'Extreme Speed', "Forest's Curse", 'Geomancy', 'Happy Hour', 'Hold Hands',
+			'Lovely Kiss', 'Purify', 'Quiver Dance', 'Shell Smash', 'Shift Gear', 'Sketch', 'Spore', 'Sticky Web', 'Trick-or-Treat',
+		],
+		checkLearnset(move, template, lsetData, set) {
+			let problem = this.checkLearnset(move, template, lsetData, set);
+			if (!problem) return null;
+			const restrictedMoves = this.format.restrictedMoves || [];
+			if (move.isZ || restrictedMoves.includes(move.name)) return problem;
+			// @ts-ignore
+			if (set.sketchMove) return {type: 'oversketched', maxSketches: 1};
+			// @ts-ignore
+			set.sketchMove = move.id;
+			return null;
+		},
+		onValidateTeam(team, format, teamHas) {
+			let sketches = {};
+			for (const set of team) {
+				// @ts-ignore
+				if (set.sketchMove) {
+					// @ts-ignore
+					if (!sketches[set.sketchMove]) {
+						// @ts-ignore
+						sketches[set.sketchMove] = 1;
+					} else {
+						// @ts-ignore
+						sketches[set.sketchMove]++;
+					}
+				}
+			}
+			let overSketched = Object.keys(sketches).filter(move => sketches[move] > 1);
+			if (overSketched.length) return overSketched.map(move => `You are limited to 1 of ${this.getMove(move).name} by Sketch Clause. (You have sketched ${this.getMove(move).name} ${sketches[move]} times.)`);
+		},
+	},
+	{
+		name: "[Gen 7] Reversed",
+		desc: `Every Pok&eacute;mon has its base Atk and Sp. Atk stat, as well as its base Def and Sp. Def stat, swapped.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3623871/">Reversed</a>`,
+		],
+		mod: 'gen7',
+		ruleset: ['[Gen 7] OU', 'Reversed Rule'],
+		banlist: ['Kyurem-Black', 'Tapu Koko'],
+		unbanlist: ['Kyurem-White', 'Marshadow', 'Metagross-Mega', 'Naganadel', 'Reshiram'],
+	},
+	{
+		name: "[Gen 7] Gods and Followers",
+		desc: `The Pok&eacute;mon in the first slot is the God; the Followers must share a type with the God. If the God Pok&eacute;mon faints, the Followers are inflicted with Embargo.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3589187/">Gods and Followers</a>`,
+		],
+
+		mod: 'gen7',
+		ruleset: ['[Gen 7] Ubers'],
+		banlist: ['Baton Pass'],
+		onValidateTeam(team, format, teamHas) {
+			/*console.log("onvt: " + this.formatsCache);
+			for( let i=0; i<this.formatsCache.length; i++) {
+				console.console.log("i: " + this.formatsCache[i]);
+			}*/
+			let problemsArray = /** @type {string[]} */ ([]);
+			let types = /** @type {string[]} */ ([]);
+			for (const [i, set] of team.entries()) {
+				let item = this.getItem(set.item);
+				let template = this.getTemplate(set.species);
+				if (!template.exists) return [`The Pok\u00e9mon "${set.name || set.species}" does not exist.`];
+				if (i === 0) {
+					types = template.types;
+					if (template.species.substr(0, 9) === 'Necrozma-' && item.id === 'ultranecroziumz') types = ['Psychic'];
+					if (item.megaStone && template.species === item.megaEvolves) {
+						template = this.getTemplate(item.megaStone);
+						let baseTemplate = this.getTemplate(item.megaEvolves);
+						types = baseTemplate.types.filter(type => template.types.includes(type));
+					}
+					// 18/10/08: TrashChannel: Since this is already an ubers-based meta,
+					// we shouldn't need to check the gods for any additional bans
+				} else {
+					// 18/10/08: TrashChannel: Avoid using OU validator as it interferes with mashups
+					// followerbanlist: ['Uber', 'Arena Trap', 'Power Construct', 'Shadow Tag', 'Baton Pass'],
+					if ("Uber" == template.tier) { // Ban ubers
+						problemsArray.push("You can't use an Ubers pokemon as a follower!");
+					}
+					let followerBannedAbilities = ['Arena Trap', 'Power Construct', 'Shadow Tag'];
+					let ability = this.getAbility(set.ability);
+					let abilityName = ability.toString();
+					for (let nBanAbItr = 0; nBanAbItr < followerBannedAbilities.length; ++nBanAbItr) {
+						if (followerBannedAbilities[nBanAbItr] == abilityName) { // Ban OU banned abilities
+							problemsArray.push("Follower has the banned ability: " + followerBannedAbilities[nBanAbItr] + "!");
+						}
+					}
+					// Baton Pass is also banned on Ubers, so we move it to general banlist
+					let followerTypes = template.types;
+					if (item.megaStone && template.species === item.megaEvolves) {
+						template = this.getTemplate(item.megaStone);
+						let baseTemplate = this.getTemplate(item.megaEvolves);
+						if (baseTemplate.types.some(type => types.includes(type)) && template.types.some(type => types.includes(type))) {
+							followerTypes = baseTemplate.types.concat(template.types).filter(type => template.types.concat(baseTemplate.types).includes(type));
+						}
+					}
+				}
+			}
+		},
+	},
+	{
+		name: "[Gen 7] Fortemons",
+		desc: `Pok&eacute;mon have all of their moves inherit the properties of the move in their item slot.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3638520/">Fortemons</a>`,
+		],
+
+		mod: 'gen7',
+		ruleset: ['[Gen 7] OU'],
+		banlist: ['Serene Grace'],
+		restrictedMoves: ['Bide', 'Chatter', 'Dynamic Punch', 'Fake Out', 'Frustration', 'Inferno', 'Power Trip', 'Power-Up Punch', 'Pursuit', 'Return', 'Stored Power', 'Zap Cannon'],
+		validateSet(set, teamHas) {
+			const restrictedMoves = this.format.restrictedMoves || [];
+			let item = set.item;
+			let move = this.dex.getMove(set.item);
+			if (!move.exists || move.type === 'Status' || restrictedMoves.includes(move.name) || move.flags['charge'] || move.priority > 0) return this.validateSet(set, teamHas);
+			set.item = '';
+			let problems = this.validateSet(set, teamHas) || [];
+			set.item = item;
+			// @ts-ignore
+			if (this.format.checkLearnset.call(this, move, this.dex.getTemplate(set.species))) problems.push(`${set.species} can't learn ${move.name}.`);
+			// @ts-ignore
+			if (move.secondaries && move.secondaries.some(secondary => secondary.boosts && secondary.boosts.accuracy < 0)) problems.push(`${set.name || set.species}'s move ${move.name} can't be used as an item.`);
+			return problems.length ? problems : null;
+		},
+		checkLearnset(move, template, lsetData, set) {
+			if (move.id === 'beatup' || move.id === 'fakeout' || move.damageCallback || move.multihit) return {type: 'invalid'};
+			return this.checkLearnset(move, template, lsetData, set);
+		},
+		onValidateTeam(team, format) {
+			/**@type {{[k: string]: true}} */
+			let itemTable = {};
+			for (const set of team) {
+				let move = this.getMove(set.item);
+				if (!move.exists) continue;
+				if (itemTable[move.id]) {
+					return ["You are limited to one of each forte by Forte Clause.", "(You have more than one " + move.name + ")"];
+				}
+				itemTable[move.id] = true;
+			}
+		},
+		onBegin() {
+			for (const pokemon of this.p1.pokemon.concat(this.p2.pokemon)) {
+				let move = this.getActiveMove(pokemon.set.item);
+				if (move.exists && move.category !== 'Status') {
+					// @ts-ignore
+					pokemon.forte = move;
+					pokemon.item = 'ultranecroziumz';
+				}
+			}
+		},
+		onModifyPriority(priority, pokemon, target, move) {
+			// @ts-ignore
+			if (move.category !== 'Status' && pokemon && pokemon.forte) {
+				let ability = pokemon.getAbility();
+				// @ts-ignore
+				if (ability.id === 'triage' && pokemon.forte.flags['heal']) return priority + (move.flags['heal'] ? 0 : 3);
+				// @ts-ignore
+				return priority + pokemon.forte.priority;
+			}
+		},
+		onModifyMovePriority: 1,
+		onModifyMove(move, pokemon) {
+			// @ts-ignore
+			if (move.category !== 'Status' && pokemon.forte) {
+				// @ts-ignore
+				Object.assign(move.flags, pokemon.forte.flags);
+				// @ts-ignore
+				if (pokemon.forte.self) {
+					// @ts-ignore
+					if (pokemon.forte.self.onHit && move.self && move.self.onHit) {
+						// @ts-ignore
+						for (let i in pokemon.forte.self) {
+							if (i.startsWith('onHit')) continue;
+							// @ts-ignore
+							move.self[i] = pokemon.forte.self[i];
+						}
+					} else {
+						// @ts-ignore
+						move.self = Object.assign(move.self || {}, pokemon.forte.self);
+					}
+				}
+				// @ts-ignore
+				if (pokemon.forte.secondaries) move.secondaries = (move.secondaries || []).concat(pokemon.forte.secondaries);
+				// @ts-ignore
+				move.critRatio = (move.critRatio - 1) + (pokemon.forte.critRatio - 1) + 1;
+				for (let prop of ['basePowerCallback', 'breaksProtect', 'defensiveCategory', 'drain', 'forceSwitch', 'ignoreAbility', 'ignoreDefensive', 'ignoreEvasion', 'ignoreImmunity', 'pseudoWeather', 'recoil', 'selfSwitch', 'sleepUsable', 'stealsBoosts', 'thawsTarget', 'useTargetOffensive', 'volatileStatus', 'willCrit']) {
+					// @ts-ignore
+					if (pokemon.forte[prop]) {
+						// @ts-ignore
+						if (typeof pokemon.forte[prop] === 'number') {
+							// @ts-ignore
+							let num = move[prop] || 0;
+							// @ts-ignore
+							move[prop] = num + pokemon.forte[prop];
+						} else {
+							// @ts-ignore
+							move[prop] = pokemon.forte[prop];
+						}
+					}
+				}
+			}
+		},
+		// @ts-ignore
+		onHitPriority: 1,
+		onHit(target, source, move) {
+			// @ts-ignore
+			if (move && move.category !== 'Status' && source.forte) {
+				// @ts-ignore
+				if (source.forte.onHit) this.singleEvent('Hit', source.forte, {}, target, source, move);
+				// @ts-ignore
+				if (source.forte.self && source.forte.self.onHit) this.singleEvent('Hit', source.forte.self, {}, source, source, move);
+				// @ts-ignore
+				if (source.forte.onAfterHit) this.singleEvent('AfterHit', source.forte, {}, target, source, move);
+			}
+		},
+		// @ts-ignore
+		onAfterSubDamagePriority: 1,
+		onAfterSubDamage(damage, target, source, move) {
+			// @ts-ignore
+			if (move && move.category !== 'Status' && source.forte && source.forte.onAfterSubDamage) this.singleEvent('AfterSubDamage', source.forte, null, target, source, move);
+		},
+		onModifySecondaries(secondaries, target, source, move) {
+			if (secondaries.some(s => !!s.self)) move.selfDropped = false;
+		},
+		// @ts-ignore
+		onAfterMoveSecondarySelfPriority: 1,
+		onAfterMoveSecondarySelf(source, target, move) {
+			// @ts-ignore
+			if (move && move.category !== 'Status' && source.forte && source.forte.onAfterMoveSecondarySelf) this.singleEvent('AfterMoveSecondarySelf', source.forte, null, source, target, move);
+		},
+	},
+	{
+		name: "[Gen 7] Averagemons",
+		desc: `Every Pok&eacute;mon, including formes, has base 100 in every stat.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3590605/">Averagemons</a>`,
+		],
+
+		mod: 'gen7',
+		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Averagemons Rule'],
+		banlist: [
+			'Gengar-Mega', 'Mawile-Mega', 'Medicham-Mega', 'Smeargle',
+			'Arena Trap', 'Huge Power', 'Pure Power', 'Shadow Tag', 'Deep Sea Tooth', 'Eviolite', 'Light Ball', 'Thick Club', 'Baton Pass', 'Chatter',
+		],
+	},
+	{
+		name: "[Gen 7] Inheritance",
+		desc: `Pok&eacute;mon may use the ability and moves of another, as long as they forfeit their own learnset.`,
+		threads: [
+			`&bullet; <a href="http://www.smogon.com/forums/threads/3592844/">Inheritance</a>`,
+		],
+
+		mod: 'gen7',
+		ruleset: ['[Gen 7] OU'],
+		banlist: [
+			'Blacephalon', 'Cresselia', 'Hoopa-Unbound', 'Kartana', 'Kyurem-Black', 'Regigigas', 'Shedinja', 'Slaking', 'Gyaradosite', 'Smeargle',
+			'Huge Power', 'Imposter', 'Innards Out', 'Pure Power', 'Speed Boost', 'Water Bubble', 'Assist', 'Chatter', 'Shell Smash',
+		],
+		noChangeForme: true,
+		noChangeAbility: true,
+		// @ts-ignore
+		getEvoFamily: function (species) {
+			let template = Dex.getTemplate(species);
+			while (template.prevo) {
+				template = Dex.getTemplate(template.prevo);
+			}
+			return template.speciesid;
+		},
+		validateSet: function (set, teamHas) {
+			const ruleTable = this.ruleTable;
+
+			ruleTable.forEach((v, rule) => {
+				console.log("Inheritance rule: " + rule);
+			});
+
+			// @ts-ignore
+			if (!this.format.abilityMap) {
+				let abilityMap = Object.create(null);
+				for (let speciesid in Dex.data.Pokedex) {
+					let pokemon = Dex.data.Pokedex[speciesid];
+					if( ruleTable.has('-unreleased') ) {
+						if (pokemon.num < 1) continue;
+					}
+					if( ruleTable.has('-pokemon:smeargle') ) {
+						if (pokemon.species === 'Smeargle') continue;
+					}
+					if (Dex.data.FormatsData[speciesid].requiredItem || Dex.data.FormatsData[speciesid].requiredMove) continue;
+					for (let key in pokemon.abilities) {
+						// @ts-ignore
+						let abilityId = toId(pokemon.abilities[key]);
+						if (abilityMap[abilityId]) {
+							abilityMap[abilityId][pokemon.evos ? 'push' : 'unshift'](speciesid);
+						} else {
+							abilityMap[abilityId] = [speciesid];
+						}
+					}
+				}
+				// @ts-ignore
+				this.format.abilityMap = abilityMap;
+			}
+
+			this.format.noChangeForme = false;
+			// @ts-ignore
+			let problems = Dex.getFormat('Pokemon').onChangeSet.call(Dex, set, this.format) || [];
+			this.format.noChangeForme = true;
+
+			if (problems.length) return problems;
+
+			let species = toId(set.species);
+			let template = Dex.getTemplate(species);
+			if (!template.exists) return [`The Pokemon "${set.species}" does not exist.`];
+			if( ruleTable.has('-unreleased') ) {
+				if (template.isUnreleased) return [`${template.species} is unreleased.`];
+			}
+			let megaTemplate = Dex.getTemplate(Dex.getItem(set.item).megaStone);
+			if( ruleTable.has('-pokemontag:uber') ) {
+				if (template.tier === 'Uber' || megaTemplate.tier === 'Uber') return [`${megaTemplate.tier === 'Uber' ? megaTemplate.species : template.species} is banned.`];
+			}
+			if( ruleTable.has('-pokemon:'+toId(template.species) ) ) {
+				return [`${template.species} + 'is banned.`];
+			}
+
+			let name = set.name;
+
+			let abilityId = toId(set.ability);
+
+			if (!abilityId || !(abilityId in Dex.data.Abilities)) return [`${name} needs to have a valid ability.`];
+			// @ts-ignore
+			let pokemonWithAbility = this.format.abilityMap[abilityId];
+			if (!pokemonWithAbility) return [`"${set.ability}" is not available on a legal Pokemon.`];
+
+			let canonicalSource = ''; // Specific for the basic implementation of Donor Clause (see onValidateTeam).
+			// @ts-ignore
+			let validSources = set.abilitySources = []; // Evolution families
+			for (const donor of pokemonWithAbility) {
+				let donorTemplate = Dex.getTemplate(donor);
+				// @ts-ignore
+				let evoFamily = this.format.getEvoFamily(donorTemplate);
+
+				if (validSources.indexOf(evoFamily) >= 0) continue;
+
+				if (set.name === set.species) delete set.name;
+				set.species = donorTemplate.species;
+				problems = this.validateSet(set, teamHas) || [];
+
+				if (!problems.length) {
+					canonicalSource = donorTemplate.species;
+					validSources.push(evoFamily);
+				}
+				if (validSources.length > 1) {
+					// Specific for the basic implementation of Donor Clause (see onValidateTeam).
+					break;
+				}
+			}
+
+			set.species = template.species;
+			if (!validSources.length && pokemonWithAbility.length > 1) {
+				return [`${template.species}'s set is illegal.`];
+			}
+			if (!validSources.length) {
+				problems.unshift(`${template.species} has an illegal set with an ability from ${Dex.getTemplate(pokemonWithAbility[0]).name}.`);
+				return problems;
+			}
+
+			// Protocol: Include the data of the donor species in the `ability` data slot.
+			// Afterwards, we are going to reset the name to what the user intended. :]
+			set.ability = `${set.ability}0${canonicalSource}`;
+		},
+		onValidateTeam: function (team, format) {
+			// Donor Clause
+			let evoFamilyLists = [];
+			for (const set of team) {
+				// @ts-ignore
+				if (!set.abilitySources) continue;
+				// @ts-ignore
+				evoFamilyLists.push(set.abilitySources.map(format.getEvoFamily));
+			}
+
+			// Checking actual full incompatibility would require expensive algebra.
+			// Instead, we only check the trivial case of multiple Pokémon only legal for exactly one family. FIXME?
+			let requiredFamilies = Object.create(null);
+			for (const evoFamilies of evoFamilyLists) {
+				if (evoFamilies.length !== 1) continue;
+				let [familyId] = evoFamilies;
+				if (!(familyId in requiredFamilies)) requiredFamilies[familyId] = 1;
+				requiredFamilies[familyId]++;
+				if (requiredFamilies[familyId] > 2) return [`You are limited to up to two inheritances from each evolution family by the Donor Clause.`, `(You inherit more than twice from ${this.getTemplate(familyId).species}).`];
+			}
+		},
+		onBegin: function () {
+			for (const pokemon of this.p1.pokemon.concat(this.p2.pokemon)) {
+				if (pokemon.baseAbility.includes('0')) {
+					let donor = pokemon.baseAbility.split('0')[1];
+					// @ts-ignore
+					pokemon.donor = toId(donor);
+					pokemon.baseAbility = pokemon.baseAbility.split('0')[0];
+					pokemon.ability = pokemon.baseAbility;
+				}
+			}
+		},
+		onSwitchIn: function (pokemon) {
+			// @ts-ignore
+			if (!pokemon.donor) return;
+			// @ts-ignore
+			let donorTemplate = this.getTemplate(pokemon.donor);
+			if (!donorTemplate.exists) return;
+			// Place volatiles on the Pokémon to show the donor details.
+			this.add('-start', pokemon, donorTemplate.species, '[silent]');
+		},
+	},
+//#endregion
 ];
 
 exports.Formats = Formats;
