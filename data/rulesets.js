@@ -989,11 +989,11 @@ let BattleFormats = {
 			/** @type {{[tier: string]: number}} */
 			const boosts = {
 				'UU': 10,
-				'BL2': 10,
+				'RUBL': 10,
 				'RU': 20,
-				'BL3': 20,
+				'NUBL': 20,
 				'NU': 30,
-				'BL4': 30,
+				'PUBL': 30,
 				'PU': 40,
 				'NFE': 40,
 				'LC Uber': 40,

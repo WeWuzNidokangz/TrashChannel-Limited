@@ -12,6 +12,7 @@ const fs = require('fs');
 const path = require('path');
 
 const DexCalculator = require('../../trashchannel/dex-calculator');
+const TrashChannelChatSupport = require('../../trashchannel/trashchannel-chatsupport');
 
 const RULESETS = path.resolve(__dirname, '../../data/rulesets');
 const FORMATS = path.resolve(__dirname, '../../config/formats');
@@ -121,16 +122,47 @@ const commands = {
 		}
 
 		// Deepclone template to avoid permanently altering the original
-		let cloneTemplate = DexCalculator.deepClone(template) 
+		let cloneTemplate = DexCalculator.deepClone(template);
 
 		cloneTemplate = Rulesets['r350cuprule'].onModifyTemplate(cloneTemplate, null);
-		if(!cloneTemplate) this.errorReply(`r350cuprule.onModifyTemplate failed on this Pokemon.`);
+		if(!cloneTemplate) return this.errorReply(`r350cuprule.onModifyTemplate failed on this Pokemon.`);
 		cloneTemplate = Rulesets['tiershiftrule'].onModifyTemplate(cloneTemplate, null, null, 'dummy'); // Set dummy effect to bypass internal validation
-		if(!cloneTemplate) this.errorReply(`tiershiftrule.onModifyTemplate failed on this Pokemon.`);
+		if(!cloneTemplate) return this.errorReply(`tiershiftrule.onModifyTemplate failed on this Pokemon.`);
 
 		this.sendReply(`|html|${Chat.getDataPokemonHTML(cloneTemplate)}`);
 	},
 	'350cuptiershifthelp': [`/350ts OR /350tiershift OR /350tiershift <pokemon> - Shows the base stats that a Pokemon would have in a mashup including 350 Cup and Tier Shift.`],
+
+	'!mixandmegatiershift': true,
+	tiershiftmixandmega: 'mixandmegatiershift',
+	mnmts: 'mixandmegatiershift',
+	tsmnm: 'mixandmegatiershift',
+	mixandmegatiershift(target, room, user) {
+		if (!this.runBroadcast()) return;
+		if (!toId(target) || !target.includes('@')) return this.parse('/help mixandmegatiershift');
+		let sep = target.split('@');
+		let template = Dex.getTemplate(sep[0]);
+
+		// Load rulesets
+		/**@type {{[k: string]: FormatsData}} */
+		let Rulesets;
+		try {
+			Rulesets = require(RULESETS).BattleFormats;
+		} catch (e) {
+			console.log('e.code: ' + e.code);
+			if (e.code !== 'MODULE_NOT_FOUND' && e.code !== 'ENOENT') {
+				throw e;
+			}
+		}
+
+		let cloneTemplate = DexCalculator.deepClone(template);
+		cloneTemplate = Rulesets['tiershiftrule'].onModifyTemplate(cloneTemplate, null, null, 'dummy'); // Set dummy effect to bypass internal validation
+		if(!cloneTemplate) return this.errorReply(`tiershiftrule.onModifyTemplate failed on this Pokemon.`);
+
+		TrashChannelChatSupport.mixandmegainternal(this, cloneTemplate, sep[1], "TS");
+	},
+	mixandmegatiershifthelp: [`/mnmts <pokemon> @ <mega stone> - Shows the Tier Shifted Mix and Mega evolved Pokemon's type and stats.`],
+
 
 	'!bitchandbeggar': true,
 	bnb: 'bitchandbeggar',
