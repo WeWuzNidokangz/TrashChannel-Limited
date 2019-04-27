@@ -2719,6 +2719,21 @@ let Formats = [
 			}
 		},
 	},
+	{
+		name: "[Gen 7] BEA5T M0D3",
+		desc: `Pok&eacute;mon in this ZU-based meta can set other species as moves (including Ubers and Mega formes) to transform into them.`,
+		threads: [
+			``,
+		],
+
+		mod: 'beastmode',
+		ruleset: ['Pokemon', 'Standard', 'Beast Mode Rule', 'Team Preview'],
+		banlist: [
+			'Uber', 'OU', 'UUBL', 'UU', 'RUBL', 'RU', 'NUBL', 'NU', 'PU',
+			'Carracosta', 'Crabominable', 'Exeggutor-Base', 'Gorebyss', 'Jynx', 'Musharna', 'Raticate-Alola',
+			'Raticate-Alola-Totem', 'Throh', 'Turtonator', 'Type: Null', 'Ursaring', 'Victreebel', 'Zangoose',
+		],
+	},
 //#endregion
 ];
 

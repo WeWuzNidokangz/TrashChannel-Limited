@@ -871,7 +871,16 @@ class ModdedDex {
 			let table;
 			switch (matchType) {
 			case 'pokemon': table = this.data.Pokedex; break;
-			case 'move': table = this.data.Movedex; break;
+			case 'move':
+				//#region TrashChannel
+				// 18/11/24 TrashChannel: Needed to avoid dupes from Pokemon names used as moves in Beast Mode
+				const template: Template = this.getTemplate(id) as Template;
+				if(undefined !== template) {
+					if(template.exists) continue;
+				}
+				table = this.data.Movedex;
+				//#endregion
+				break;
 			case 'item': table = this.data.Items; break;
 			case 'ability': table = this.data.Abilities; break;
 			case 'pokemontag':

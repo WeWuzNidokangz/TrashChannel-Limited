@@ -362,10 +362,12 @@ export class Validator {
 
 			if (ruleTable.has('-illegal')) {
 				const checkLearnset = (ruleTable.checkLearnset && ruleTable.checkLearnset[0] || this.checkLearnset);
-				lsetProblem = checkLearnset.call(this, move, template, lsetData, set);
-				if (lsetProblem) {
-					lsetProblem.moveName = move.name;
-					break;
+				if(!beastModeMoveException || move.isNonstandard) {
+					lsetProblem = checkLearnset.call(this, move, template, lsetData, set);
+					if (lsetProblem) {
+						lsetProblem.moveName = move.name;
+						break;
+					}
 				}
 			}
 		}
