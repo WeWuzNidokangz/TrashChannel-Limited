@@ -12,6 +12,13 @@ import {Pokemon} from './pokemon';
 import {PRNG, PRNGSeed} from './prng';
 import {Side} from './side';
 
+//#region TrashChannel
+import * as fs from 'fs';
+import * as path from 'path';
+
+const RULESETS = path.resolve(__dirname, '../data/rulesets');
+//#endregion
+
 /** A Pokemon that has fainted. */
 interface FaintedPokemon {
 	target: Pokemon;
@@ -187,6 +194,20 @@ export class Battle extends Dex.ModdedDex {
 		}
 		this.inputLog.push(`>start ` + JSON.stringify(inputOptions));
 
+		//#region TrashChannel
+		// Load rulesets
+		/**@type {{[k: string]: FormatsData}} */
+		let Rulesets;
+		try {
+			Rulesets = require(RULESETS).BattleFormats;
+		} catch (e) {
+			console.log('e.code: ' + e.code);
+			if (e.code !== 'MODULE_NOT_FOUND' && e.code !== 'ENOENT') {
+				throw e;
+			}
+		}
+		//#endregion
+
 		for (const rule of this.getRuleTable(format).keys()) {
 			if (rule.startsWith('+') || rule.startsWith('-') || rule.startsWith('!')) continue;
 			const subFormat = this.getFormat(rule);
@@ -196,6 +217,16 @@ export class Battle extends Dex.ModdedDex {
 				);
 				if (hasEventHandler) this.field.addPseudoWeather(rule);
 			}
+
+			//#region TrashChannel
+			const eventRule = Rulesets[rule];
+			if(eventRule) {
+				const hasEventHandler = Object.keys(eventRule).some(val =>
+					val.startsWith('on') && !['onBegin', 'onValidateTeam', 'onChangeSet', 'onValidateSet'].includes(val)
+				);
+				if (hasEventHandler) this.field.addPseudoWeather(rule);
+			}
+			//#endregion
 		}
 		const sides: SideID[] = ['p1', 'p2', 'p3', 'p4'];
 		for (const side of sides) {

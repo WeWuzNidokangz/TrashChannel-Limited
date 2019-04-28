@@ -101,7 +101,18 @@ export class Validator {
 	}
 
 	validateSet(set: PokemonSet, teamHas: AnyObject): string[] | null {
-		const format = this.format;
+		let format = this.format;
+		const ruleTable = this.ruleTable;
+		return this.validateSetInternal(set, teamHas, format, ruleTable, false);
+	}
+
+	validateSetInternal(
+		set: PokemonSet,
+		teamHas: AnyObject,
+		format: Format,
+		ruleTable: RuleTable,
+		ignoreNonCriticalProblems: boolean): string[] | null
+	{
 		const dex = this.dex;
 
 		let problems: string[] = [];
@@ -150,7 +161,6 @@ export class Validator {
 		const lsetData: PokemonSources = {sources: [], sourcesBefore: dex.gen};
 
 		const setHas: {[k: string]: true} = {};
-		const ruleTable = this.ruleTable;
 
 		for (const [rule] of ruleTable) {
 			const subformat = dex.getFormat(rule);
@@ -439,17 +449,19 @@ export class Validator {
 				}
 			}
 		}
-		if (dex.gen <= 2 || dex.gen !== 6 && (format.id.endsWith('hackmons') || format.name.includes('BH'))) {
-			if (!set.evs) set.evs = Validator.fillStats(null, 252);
-			const evTotal = (set.evs.hp || 0) + (set.evs.atk || 0) + (set.evs.def || 0) +
-				(set.evs.spa || 0) + (set.evs.spd || 0) + (set.evs.spe || 0);
-			if (evTotal === 508 || evTotal === 510) {
-				problems.push(`${name} has exactly 510 EVs, but this format does not restrict you to 510 EVs: you can max out every EV (If this was intentional, add exactly 1 to one of your EVs, which won't change its stats but will tell us that it wasn't a mistake).`);
+		if(!ignoreNonCriticalProblems) {
+			if (dex.gen <= 2 || dex.gen !== 6 && (format.id.endsWith('hackmons') || format.name.includes('BH'))) {
+				if (!set.evs) set.evs = Validator.fillStats(null, 252);
+				const evTotal = (set.evs.hp || 0) + (set.evs.atk || 0) + (set.evs.def || 0) +
+					(set.evs.spa || 0) + (set.evs.spd || 0) + (set.evs.spe || 0);
+				if (evTotal === 508 || evTotal === 510) {
+					problems.push(`${name} has exactly 510 EVs, but this format does not restrict you to 510 EVs: you can max out every EV (If this was intentional, add exactly 1 to one of your EVs, which won't change its stats but will tell us that it wasn't a mistake).`);
+				}
 			}
-		}
-		const noEVs = (!set.evs || !Object.values(set.evs).some(value => value > 0));
-		if (noEVs && !format.debug && !format.id.includes('letsgo')) {
-			problems.push(`${name} has exactly 0 EVs - did you forget to EV it? (If this was intentional, add exactly 1 to one of your EVs, which won't change its stats but will tell us that it wasn't a mistake).`);
+			const noEVs = (!set.evs || !Object.values(set.evs).some(value => value > 0));
+			if (noEVs && !format.debug && !format.id.includes('letsgo')) {
+				problems.push(`${name} has exactly 0 EVs - did you forget to EV it? (If this was intentional, add exactly 1 to one of your EVs, which won't change its stats but will tell us that it wasn't a mistake).`);
+			}
 		}
 
 		lsetData.isHidden = isHidden;

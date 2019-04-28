@@ -213,6 +213,10 @@ export class Pokemon {
 //#region TrashChannel
 	// For camomonsrule: compatibility with Mix and Mega, etc
 	lockTypesArray: string[];
+
+	// For Mix and Meta
+	/**@type {string | undefined} */
+	meta = undefined;
 //#endregion
 
 	constructor(set: string | AnyObject, side: Side) {
