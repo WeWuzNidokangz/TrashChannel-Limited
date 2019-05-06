@@ -79,9 +79,9 @@ let Formats = [
 		desc: `Pok&eacute;mon can use any ability, barring the few that are restricted to their natural users, in an Ubers environment.`,
 		threads: [
 			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3635904/#post-7802586">AAA Ubers Resources</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/np-ubers-stage-1-into-the-unknown.3637068/">Vanilla Ubers</a>`,
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3587901/">Vanilla Almost Any Ability</a>`,
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3595753/">Vanilla AAA Resources</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/np-ubers-stage-1-into-the-unknown.3637068/">Vanilla Ubers</a>`,
 		],
 
 		mod: 'gen7',
@@ -120,8 +120,8 @@ let Formats = [
 		desc: `Pok&eacute;mon can use any move of their typing, in addition to the moves they can normally learn, in an Ubers environment.`,
 		threads: [
 			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3635904/#post-7802586">STABmons Ubers Resources</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/np-ubers-stage-1-into-the-unknown.3637068/">Vanilla Ubers</a>`,
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3587949/">Vanilla STABmons</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/np-ubers-stage-1-into-the-unknown.3637068/">Vanilla Ubers</a>`,
 		],
 
 		mod: 'gen7',
@@ -256,6 +256,89 @@ let Formats = [
 			'Drizzle', 'Komala', 'Shedinja', 'Silvally', // STABmons Doubles
 		],
 		restrictedMoves: ['Chatter', 'Diamond Storm', 'Geomancy', 'Shell Smash', 'Shift Gear', 'Thousand Arrows'],
+	},
+	{
+		section: "Official OM Mashups (Little Cup)",
+	},
+	{
+		name: "[Gen 7] Balanced Hackmons LC",
+		desc: `Anything that can be hacked in-game and is usable in local battles is allowed, in a Little Cup setting.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3635904/#post-7802590">Balanced Hackmons LC Resources</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3587475/">Vanilla Balanced Hackmons</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3593766/">Vanilla BH Resources</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3587196/">Vanilla LC Metagame Discussion</a>`,
+		],
+
+		mod: 'gen7',
+		maxLevel: 5,
+		ruleset: ['Pokemon', 'Ability Clause', 'OHKO Clause', 'Evasion Moves Clause', 'CFZ Clause', 'Sleep Clause Mod', 'Endless Battle Clause', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Little Cup'],
+		banlist: [
+			'Eevium Z', 'Baton Pass', 'Dragon Rage', 'Sonic Boom', // LC
+			'Arena Trap', 'Huge Power', 'Illusion', 'Innards Out', 'Magnet Pull', 'Moody', 'Parental Bond', 'Protean', 'Psychic Surge', 'Pure Power', 'Shadow Tag', 'Stakeout', 'Water Bubble', 'Wonder Guard', 'Chatter', 'Comatose + Sleep Talk',  // Balanced Hackmons
+			'Gligar', 'Scyther', 'Sneasel', 'Type: Null', // Balanced Hackmons LC
+		],
+	},
+	{
+		name: "[Gen 7] Almost Any Ability LC",
+		desc: `Pok&eacute;mon can use any ability, barring the few that are restricted to their natural users, in a Little Cup setting.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3635904/#post-7802590">Almost Any Ability LC Resources</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3587901/">Vanilla Almost Any Ability</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3595753/">Vanilla AAA Resources</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3587196/">Vanilla LC Metagame Discussion</a>`,
+		],
+
+		mod: 'gen7',
+		maxLevel: 5,
+		ruleset: ['Pokemon', 'Standard', 'Swagger Clause', 'Team Preview', 'Little Cup', 'AAA Standard Package'],
+		banlist: [
+			'Aipom', 'Cutiefly', 'Gligar', 'Meditite', 'Misdreavus', 'Murkrow', 'Porygon',
+			'Scyther', 'Sneasel', 'Tangela', 'Yanma',
+			'Eevium Z', 'Baton Pass', 'Dragon Rage', 'Sonic Boom', // LC
+			'Archen', // Almost Any Ability LC
+		],
+		restrictedAbilities: [
+			'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Huge Power', 'Illusion', 'Imposter', 'Innards Out',
+			'Parental Bond', 'Protean', 'Pure Power', 'Simple', 'Speed Boost', 'Stakeout', 'Water Bubble', 'Wonder Guard', // AAA
+			'Arena Trap', 'Shadow Tag', // Almost Any Ability LC
+		],
+	},
+	{
+		name: "[Gen 7] STABmons LC",
+		desc: `Pok&eacute;mon can use any move of their typing, in addition to the moves they can normally learn, in a Little Cup environment.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3635904/#post-7802590">STABmons LC Resources</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3587949/">Vanilla STABmons</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3587196/">Vanilla LC Metagame Discussion</a>`,
+		],
+
+		mod: 'gen7',
+		maxLevel: 5,
+		ruleset: ['Pokemon', 'Standard', 'Swagger Clause', 'Team Preview', 'Little Cup', 'AAA Standard Package'],
+		banlist: [
+			'Aipom', 'Cutiefly', 'Drifloon', 'Gligar', 'Meditite', 'Misdreavus', 'Murkrow', 'Porygon',
+			'Scyther', 'Sneasel', 'Swirlix', 'Tangela', 'Torchic', 'Vulpix-Base', 'Yanma',
+			'Eevium Z', 'Baton Pass', 'Dragon Rage', 'Sonic Boom', // LC
+			'Shadow Tag', // STABmons LC
+		],
+		restrictedMoves: ['Acupressure', 'Belly Drum', 'Chatter', 'Extreme Speed', 'Geomancy', 'Lovely Kiss', 'Shell Smash', 'Shift Gear', 'Spore', 'Thousand Arrows'],
+	},
+	{
+		name: "[Gen 7] Mix and Mega LC",
+		desc: `Mega Stones and Primal Orbs can be used on almost any Pok&eacute;mon with no Mega Evolution limit.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3635904/">OM Mashup Megathread</a>`,
+		],
+
+		mod: 'mixandmega',
+		maxLevel: 5,
+		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Little Cup', 'Mix and Mega Standard Package'],
+		banlist: ['Eevium Z', 'Baton Pass', 'Dragon Rage', 'Electrify', 'Sonic Boom'],
+		restrictedStones: ['Beedrillite', 'Blazikenite', 'Gengarite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite', 'Ultranecrozium Z'],
+		cannotMega: [
+			'Gligar', 'Misdreavus', 'Murkrow', 'Scyther', 'Sneasel', 'Tangela', 'Vulpix',
+		],
 	},
 	{
 		section: "Other Mashups",
@@ -989,65 +1072,6 @@ let Formats = [
 			// @ts-ignore
 			pokemon.baseStats[stat] = this.getTemplate(uber.species).baseStats[stat];
 			return pokemon;
-		},
-	},
-	{
-		name: "[Gen 7] Mix and Mega LC",
-		desc: `Mega Stones and Primal Orbs can be used on almost any Pok&eacute;mon with no Mega Evolution limit.`,
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3635904/">OM Mashup Megathread</a>`,
-		],
-
-		mod: 'mixandmega',
-		maxLevel: 5,
-		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Little Cup'],
-		banlist: ['Eevium Z', 'Baton Pass', 'Dragon Rage', 'Electrify', 'Sonic Boom'],
-		restrictedStones: ['Beedrillite', 'Blazikenite', 'Gengarite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite', 'Ultranecrozium Z'],
-		cannotMega: [
-			'Gligar', 'Misdreavus', 'Murkrow', 'Scyther', 'Sneasel', 'Tangela', 'Vulpix',
-		],
-		onValidateTeam(team) {
-			/**@type {{[k: string]: true}} */
-			let itemTable = {};
-			for (const set of team) {
-				let item = this.getItem(set.item);
-				if (!item) continue;
-				if (itemTable[item.id] && item.megaStone) return ["You are limited to one of each Mega Stone.", "(You have more than one " + this.getItem(item).name + ")"];
-				if (itemTable[item.id] && ['blueorb', 'redorb'].includes(item.id)) return ["You are limited to one of each Primal Orb.", "(You have more than one " + this.getItem(item).name + ")"];
-				itemTable[item.id] = true;
-			}
-		},
-		onValidateSet(set, format) {
-			let template = this.getTemplate(set.species || set.name);
-			let item = this.getItem(set.item);
-			if (!item.megaEvolves && !['blueorb', 'redorb'].includes(item.id)) return;
-			let uberStones = format.restrictedStones || [];
-			let uberPokemon = format.cannotMega || [];
-			if (uberPokemon.includes(template.name) || uberStones.includes(item.name)) return ["" + template.species + " is not allowed to hold " + item.name + "."];
-		},
-		onBegin() {
-			for (const pokemon of this.getAllPokemon()) {
-				pokemon.m.originalSpecies = pokemon.baseTemplate.species;
-			}
-		},
-		onSwitchIn(pokemon) {
-			// @ts-ignore
-			let oMegaTemplate = this.getTemplate(pokemon.template.originalMega);
-			if (oMegaTemplate.exists && pokemon.m.originalSpecies !== oMegaTemplate.baseSpecies) {
-				// Place volatiles on the Pokémon to show its mega-evolved condition and details
-				this.add('-start', pokemon, oMegaTemplate.requiredItem || oMegaTemplate.requiredMove, '[silent]');
-				let oTemplate = this.getTemplate(pokemon.m.originalSpecies);
-				if (oTemplate.types.length !== pokemon.template.types.length || oTemplate.types[1] !== pokemon.template.types[1]) {
-					this.add('-start', pokemon, 'typechange', pokemon.template.types.join('/'), '[silent]');
-				}
-			}
-		},
-		onSwitchOut(pokemon) {
-			// @ts-ignore
-			let oMegaTemplate = this.getTemplate(pokemon.template.originalMega);
-			if (oMegaTemplate.exists && pokemon.m.originalSpecies !== oMegaTemplate.baseSpecies) {
-				this.add('-end', pokemon, oMegaTemplate.requiredItem || oMegaTemplate.requiredMove, '[silent]');
-			}
 		},
 	},
 	{
