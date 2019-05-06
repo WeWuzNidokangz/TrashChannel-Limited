@@ -115,10 +115,36 @@ let BattleScripts = {
 			}
 		}
 
-		let genericScript = require(GENERIC_SCRIPTS).BattleScripts;
-		if(undefined !== genericScript.runMegaEvo) {
-			return genericScript.runMegaEvo.call(this, pokemon);
+		// 19/05/06: Re-implement standard runMegaEvo, but prevent MnM megas from being disabled by regular single megaevo usage
+		const templateid = pokemon.canMegaEvo || pokemon.canUltraBurst;
+		if (!templateid) return false;
+		const side = pokemon.side;
+
+		// Pokémon affected by Sky Drop cannot mega evolve. Enforce it here for now.
+		for (const foeActive of side.foe.active) {
+			if (foeActive.volatiles['skydrop'] && foeActive.volatiles['skydrop'].source === pokemon) {
+				return false;
+			}
 		}
+
+		pokemon.formeChange(templateid, pokemon.getItem(), true);
+
+		// Limit one mega evolution
+		let wasMega = pokemon.canMegaEvo;
+		for (const ally of side.pokemon) {
+			//console.log("ally meta: " + toId(ally.meta));
+			let allyIsMnM = ('gen7mixandmega' === toId(ally.meta)); // MnM mons can still mega
+			if(allyIsMnM) continue;
+
+			if (wasMega) {
+				ally.canMegaEvo = null;
+			} else {
+				ally.canUltraBurst = null;
+			}
+		}
+
+		this.runEvent('AfterMega', pokemon);
+		return true;
 	},
 	getMixedTemplate(originalSpecies, megaSpecies) { // Can only enter from MnM (for now)
 		// Load MnM script functions
