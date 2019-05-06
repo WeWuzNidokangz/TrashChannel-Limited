@@ -127,7 +127,7 @@ class HelpTicket extends Rooms.RoomGame {
 			tickets[this.ticket.userid] = this.ticket;
 			writeTickets();
 		} else {
-			let index = this.claimQueue.map(toId).indexOf(user.userid);
+			let index = this.claimQueue.map(toId).indexOf(/** @type {ID} */(user.userid));
 			if (index > -1) this.claimQueue.splice(index, 1);
 		}
 	}
@@ -149,11 +149,12 @@ class HelpTicket extends Rooms.RoomGame {
 	 * @param {User} user
 	 */
 	onLogMessage(message, user) {
+		if (this.ticket.active) return;
 		const blockedMessages = [
 			'hi', 'hello', 'hullo', 'hey', 'yo',
 			'hesrude', 'shesrude', 'hesinappropriate', 'shesinappropriate', 'heswore', 'sheswore',
 		];
-		if (blockedMessages.includes(toId(message))) {
+		if (!user.isStaff && blockedMessages.includes(toId(message))) {
 			this.room.add(`|c|~Staff|Hello! The global staff team would be happy to help you, but you need to explain what's going on first.`);
 			this.room.add(`|c|~Staff|Please post the information I requested above so a global staff member can come to help.`);
 			this.room.update();
@@ -979,7 +980,9 @@ let commands = {
 
 			let ticket = tickets[toId(this.targetUsername)];
 			let ticketBan = ticketBans[toId(this.targetUsername)];
-			if (!targetUser && !Punishments.search(toId(this.targetUsername))[0].length && !ticket && !ticketBan) return this.errorReply(`User '${this.targetUsername}' not found.`);
+			if (!targetUser && !Punishments.search(toId(this.targetUsername)).length && !ticket && !ticketBan) {
+				return this.errorReply(`User '${this.targetUsername}' not found.`);
+			}
 			if (target.length > 300) {
 				return this.errorReply(`The reason is too long. It cannot exceed 300 characters.`);
 			}
@@ -1019,7 +1022,7 @@ let commands = {
 				affected.push(targetUser);
 				affected.concat(targetUser.getAltUsers(false, true));
 			} else {
-				let foundKeys = Punishments.search(userid)[0].map(key => key.split(':')[0]);
+				let foundKeys = Punishments.search(userid).map(([key]) => key);
 				let userids = new Set([userid]);
 				let ips = new Set();
 				for (let key of foundKeys) {

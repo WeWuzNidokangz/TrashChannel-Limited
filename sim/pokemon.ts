@@ -5,9 +5,11 @@
  * @license MIT license
  */
 
+import {State} from './state';
+
  /** A Pokemon's move slot. */
 interface MoveSlot {
-	id: string;
+	id: ID;
 	move: string;
 	pp: number;
 	maxpp: number;
@@ -27,7 +29,7 @@ export class Pokemon {
 	readonly fullname: string;
 	readonly id: string; // shouldn't really be used anywhere
 	readonly species: string;
-	readonly speciesid: string;
+	readonly speciesid: ID;
 	readonly level: number;
 	readonly gender: GenderName;
 	readonly happiness: number;
@@ -50,10 +52,10 @@ export class Pokemon {
 	template: Template;
 	speciesData: AnyObject;
 
-	status: string;
+	status: ID;
 	statusData: AnyObject;
 	volatiles: AnyObject;
-	showCure: boolean;
+	showCure?: boolean;
 
 	/**
 	 * These are the basic stats that appear on the in-game stats screen:
@@ -80,13 +82,13 @@ export class Pokemon {
 	storedStats: StatsExceptHPTable;
 	boosts: BoostsTable;
 
-	baseAbility: string;
-	ability: string;
+	baseAbility: ID;
+	ability: ID;
 	abilityData: {[k: string]: string | Pokemon};
 
-	item: string;
+	item: ID;
 	itemData: {[k: string]: string | Pokemon};
-	lastItem: string;
+	lastItem: ID;
 	usedItemThisTurn: boolean;
 	ateBerry: boolean;
 
@@ -181,7 +183,7 @@ export class Pokemon {
 	/** used for Assurance check */
 	hurtThisTurn: boolean;
 	lastDamage: number;
-	attackedBy: {source: Pokemon, damage: number, thisTurn: boolean, move?: string}[];
+	attackedBy: {source: Pokemon, damage: number, thisTurn: boolean, move?: ID}[];
 
 	isActive: boolean;
 	activeTurns: number;
@@ -397,6 +399,10 @@ export class Pokemon {
 //#endregion
 	}
 
+	toJSON(): AnyObject {
+		return State.serializePokemon(this);
+	}
+
 	get moves(): readonly string[] {
 		return this.moveSlots.map(moveSlot => moveSlot.id);
 	}
@@ -416,13 +422,15 @@ export class Pokemon {
 		return this.isActive ? this.getSlot() + fullname.slice(2) : fullname;
 	}
 
-	getDetails = (side: 0 | 1 | boolean) => {
+	getDetails = () => {
+		const health = this.getHealth();
+		let details = this.details;
 		if (this.illusion) {
 			const illusionDetails = this.illusion.template.species + (this.level === 100 ? '' : ', L' + this.level) +
 				(this.illusion.gender === '' ? '' : ', ' + this.illusion.gender) + (this.illusion.set.shiny ? ', shiny' : '');
-			return illusionDetails + '|' + this.getHealth(side);
+			details = illusionDetails;
 		}
-		return this.details + '|' + this.getHealth(side);
+		return {side: health.side, secret: `${details}|${health.secret}`, shared: `${details}|${health.shared}`};
 	};
 
 	updateSpeed() {
@@ -881,7 +889,7 @@ export class Pokemon {
 		this.clearVolatile();
 		this.boosts = pokemon.boosts;
 		for (const i in pokemon.volatiles) {
-			if (this.battle.getEffect(i).noCopy) continue;
+			if (this.battle.getEffectByID(i as ID).noCopy) continue;
 			// shallow clones
 			this.volatiles[i] = Object.assign({}, pokemon.volatiles[i]);
 			if (this.volatiles[i].linkedPokemon) {
@@ -1079,8 +1087,8 @@ export class Pokemon {
 			evasion: 0,
 		};
 
-		if (this.battle.gen === 1 && this.baseMoves.includes('mimic') && !this.transformed) {
-			const moveslot = this.baseMoves.indexOf('mimic');
+		if (this.battle.gen === 1 && this.baseMoves.includes('mimic' as ID) && !this.transformed) {
+			const moveslot = this.baseMoves.indexOf('mimic' as ID);
 			const mimicPP = this.moveSlots[moveslot] ? this.moveSlots[moveslot].pp : 16;
 			this.moveSlots = this.baseMoveSlots.slice();
 			this.moveSlots[moveslot].pp = mimicPP;
@@ -1311,7 +1319,7 @@ export class Pokemon {
 	}
 
 	getStatus() {
-		return this.battle.getEffect(this.status);
+		return this.battle.getEffectByID(this.status);
 	}
 
 	eatItem(source?: Pokemon, sourceEffect?: Effect) {
@@ -1555,34 +1563,35 @@ export class Pokemon {
 		}
 	}
 
-	getHealth = (side: 0 | 1 | boolean) => {
-		if (!this.hp) return '0 fnt';
-		let hpstring;
-		// side === true in replays
-		if (side === true || side === this.side.n % 2) {
-			hpstring = `${this.hp}/${this.maxhp}`;
+	getHealth = () => {
+		if (!this.hp) return {side: this.side.id, secret: '0 fnt', shared: '0 fnt'};
+		let secret = `${this.hp}/${this.maxhp}`;
+		let shared;
+		const ratio = this.hp / this.maxhp;
+		if (this.battle.reportExactHP) {
+			shared = secret;
+		} else if (this.battle.reportPercentages) {
+			// HP Percentage Mod mechanics
+			let percentage = Math.ceil(ratio * 100);
+			if ((percentage === 100) && (ratio < 1.0)) {
+				percentage = 99;
+			}
+			shared = `${percentage}/100`;
 		} else {
-			const ratio = this.hp / this.maxhp;
-			if (this.battle.reportPercentages) {
-				// HP Percentage Mod mechanics
-				let percentage = Math.ceil(ratio * 100);
-				if ((percentage === 100) && (ratio < 1.0)) {
-					percentage = 99;
-				}
-				hpstring = `${percentage}/100`;
-			} else {
-				// In-game accurate pixel health mechanics
-				const pixels = Math.floor(ratio * 48) || 1;
-				hpstring = `${pixels}/48`;
-				if ((pixels === 9) && (ratio > 0.2)) {
-					hpstring += 'y'; // force yellow HP bar
-				} else if ((pixels === 24) && (ratio > 0.5)) {
-					hpstring += 'g'; // force green HP bar
-				}
+			// In-game accurate pixel health mechanics
+			const pixels = Math.floor(ratio * 48) || 1;
+			shared = `${pixels}/48`;
+			if ((pixels === 9) && (ratio > 0.2)) {
+				shared += 'y'; // force yellow HP bar
+			} else if ((pixels === 24) && (ratio > 0.5)) {
+				shared += 'g'; // force green HP bar
 			}
 		}
-		if (this.status) hpstring += ' ' + this.status;
-		return hpstring;
+		if (this.status) {
+			secret += ` ${this.status}`;
+			shared += ` ${this.status}`;
+		}
+		return {side: this.side.id, secret, shared};
 	};
 
 	/**

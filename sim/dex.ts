@@ -139,14 +139,14 @@ class ModdedDex {
 	readonly isBase: boolean;
 	readonly currentMod: string;
 
-	readonly getId: (text: any) => string;
+	readonly getId: (text: any) => ID;
 	readonly getString: (str: any) => string;
 
-	readonly abilityCache: Map<string, Ability>;
-	readonly effectCache: Map<string, Effect | Move>;
-	readonly itemCache: Map<string, Item>;
-	readonly moveCache: Map<string, Move>;
-	readonly templateCache: Map<string, Template>;
+	readonly abilityCache: Map<ID, Ability>;
+	readonly effectCache: Map<ID, Effect | Move>;
+	readonly itemCache: Map<ID, Item>;
+	readonly moveCache: Map<ID, Move>;
+	readonly templateCache: Map<ID, Template>;
 	readonly typeCache: Map<string, TypeInfo>;
 
 	gen: number;
@@ -340,9 +340,9 @@ class ModdedDex {
 		name = (name || '').trim();
 		let id = toId(name);
 		if (id === 'nidoran' && name.slice(-1) === '♀') {
-			id = 'nidoranf';
+			id = 'nidoranf' as ID;
 		} else if (id === 'nidoran' && name.slice(-1) === '♂') {
-			id = 'nidoranm';
+			id = 'nidoranm' as ID;
 		}
 		let template: any = this.templateCache.get(id);
 		if (template) return template;
@@ -407,7 +407,7 @@ class ModdedDex {
 			if (!template.tier) template.tier = 'Illegal';
 			if (!template.doublesTier) template.doublesTier = template.tier;
 		} else {
-			template = new Data.Template({name, exists: false});
+			template = new Data.Template({id, name, exists: false});
 		}
 		if (template.exists) this.templateCache.set(id, template);
 		return template;
@@ -434,12 +434,12 @@ class ModdedDex {
 			return move;
 		}
 		if (id.substr(0, 11) === 'hiddenpower') {
-			id = /([a-z]*)([0-9]*)/.exec(id)![1];
+			id = /([a-z]*)([0-9]*)/.exec(id)![1] as ID;
 		}
 		if (id && this.data.Movedex.hasOwnProperty(id)) {
 			move = new Data.Move({name}, this.data.Movedex[id]);
 		} else {
-			move = new Data.Move({name, exists: false});
+			move = new Data.Move({id, name, exists: false});
 		}
 		if (move.exists) this.moveCache.set(id, move);
 		return move;
@@ -486,22 +486,30 @@ class ModdedDex {
 			// @ts-ignore
 			return effect;
 		}
+		return this.getEffectByID(id, effect);
+	}
+
+	getEffectByID(id: ID, effect?: Effect | Move): PureEffect {
+		if (!id) return nullEffect;
+
+		if (!effect) effect = this.effectCache.get(id);
+		if (effect) return effect as PureEffect;
 
 		let found;
 		if (this.data.Formats.hasOwnProperty(id)) {
-			effect = new Data.Format({name}, this.data.Formats[id]);
+			effect = new Data.Format({name: id}, this.data.Formats[id]);
 		} else if (this.data.Statuses.hasOwnProperty(id)) {
-			effect = new Data.PureEffect({name}, this.data.Statuses[id]);
+			effect = new Data.PureEffect({name: id}, this.data.Statuses[id]);
 		} else if ((this.data.Movedex.hasOwnProperty(id) && (found = this.data.Movedex[id]).effect) ||
 							 (this.data.Abilities.hasOwnProperty(id) && (found = this.data.Abilities[id]).effect) ||
 							 (this.data.Items.hasOwnProperty(id) && (found = this.data.Items[id]).effect)) {
-			effect = new Data.PureEffect({name: found.name || name}, found.effect!);
+			effect = new Data.PureEffect({name: found.name || id}, found.effect!);
 		} else if (id === 'recoil') {
-			effect = new Data.PureEffect({name: 'Recoil', effectType: 'Recoil'});
+			effect = new Data.PureEffect({id, name: 'Recoil', effectType: 'Recoil'});
 		} else if (id === 'drain') {
-			effect = new Data.PureEffect({name: 'Drain', effectType: 'Drain'});
+			effect = new Data.PureEffect({id, name: 'Drain', effectType: 'Drain'});
 		} else {
-			effect = new Data.PureEffect({name, exists: false});
+			effect = new Data.PureEffect({id, name: id, exists: false});
 		}
 
 		this.effectCache.set(id, effect);
@@ -539,7 +547,7 @@ class ModdedDex {
 			id = toId(name);
 		}
 		if (this.data.Formats.hasOwnProperty('gen7' + id)) {
-			id = 'gen7' + id;
+			id = ('gen7' + id) as ID;
 		}
 		let supplementaryAttributes: AnyObject | null = null;
 		if (name.includes('@@@')) {
@@ -563,7 +571,7 @@ class ModdedDex {
 		if (this.data.Formats.hasOwnProperty(id)) {
 			effect = new Data.Format({name}, this.data.Formats[id], supplementaryAttributes);
 		} else {
-			effect = new Data.Format({name, exists: false});
+			effect = new Data.Format({id, name, exists: false});
 		}
 		return effect;
 	}
@@ -590,7 +598,7 @@ class ModdedDex {
 		if (id && this.data.Items.hasOwnProperty(id)) {
 			item = new Data.Item({name}, this.data.Items[id]);
 		} else {
-			item = new Data.Item({name, exists: false});
+			item = new Data.Item({id, name, exists: false});
 		}
 
 		if (item.exists) this.itemCache.set(id, item);
@@ -613,7 +621,7 @@ class ModdedDex {
 		if (id && this.data.Abilities.hasOwnProperty(id)) {
 			ability = new Data.Ability({name}, this.data.Abilities[id]);
 		} else {
-			ability = new Data.Ability({name, exists: false});
+			ability = new Data.Ability({id, name, exists: false});
 		}
 
 		if (ability.exists) this.abilityCache.set(id, ability);
@@ -623,14 +631,14 @@ class ModdedDex {
 	getType(name: string | TypeInfo): TypeInfo {
 		if (name && typeof name !== 'string') return name;
 
-		let id = toId(name);
-		id = id.charAt(0).toUpperCase() + id.substr(1);
-		let type = this.typeCache.get(id);
+		const id = toId(name);
+		const typeName = id.charAt(0).toUpperCase() + id.substr(1);
+		let type = this.typeCache.get(typeName);
 		if (type) return type;
-		if (id && this.data.TypeChart.hasOwnProperty(id)) {
-			type = new Data.TypeInfo({id}, this.data.TypeChart[id]);
+		if (typeName && this.data.TypeChart.hasOwnProperty(typeName)) {
+			type = new Data.TypeInfo({id}, this.data.TypeChart[typeName]);
 		} else {
-			type = new Data.TypeInfo({name, exists: false, effectType: 'EffectType'});
+			type = new Data.TypeInfo({id, name, exists: false, effectType: 'EffectType'});
 		}
 
 		if (type.exists) this.typeCache.set(id, type);
@@ -861,7 +869,7 @@ class ModdedDex {
 		for (const matchType of matchTypes) {
 			if (rule.slice(0, 1 + matchType.length) === matchType + ':') {
 				matchTypes = [matchType];
-				id = id.slice(matchType.length);
+				id = id.slice(matchType.length) as ID;
 				break;
 			}
 		}
@@ -908,7 +916,7 @@ class ModdedDex {
 				}
 				matches.push(matchType + ':' + id);
 			} else if (matchType === 'pokemon' && id.slice(-4) === 'base') {
-				id = id.slice(0, -4);
+				id = id.slice(0, -4) as ID;
 				if (table.hasOwnProperty(id)) {
 					matches.push('pokemon:' + id);
 				}

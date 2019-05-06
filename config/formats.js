@@ -527,7 +527,7 @@ let Formats = [
 		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 7] UU'],
-		banlist: ['UU', 'RUBL', 'Aurora Veil'],
+		banlist: ['UU', 'RUBL', 'Sableye-Mega', 'Aurora Veil'],
 		unbanlist: ['Sceptile-Mega', 'Drought'],
 	},
 	{
@@ -542,7 +542,8 @@ let Formats = [
 		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 7] RU'],
-		banlist: ['RU', 'NUBL', 'Sceptile-Mega', 'Drought'],
+		banlist: ['RU', 'NUBL', 'Drought'],
+		unbanlist: ['Camerupt-Mega'],
 	},
 	{
 		name: "[Gen 7] PU",
@@ -556,7 +557,7 @@ let Formats = [
 		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 7] NU'],
-		banlist: ['NU', 'PUBL'],
+		banlist: ['NU', 'PUBL', 'Camerupt-Mega'],
 	},
 	{
 		name: "[Gen 7] LC",
@@ -732,7 +733,7 @@ let Formats = [
 		canUseRandomTeam: true,
 		debug: true,
 		maxLevel: 9999,
-		onBegin() { this.trunc = n => Math.trunc(n); },
+		trunc(n) { return Math.trunc(n); },
 		defaultLevel: 100,
 		teamLength: {
 			validate: [1, 24],
@@ -1050,6 +1051,80 @@ let Formats = [
 	{
 		section: "OM of the Month",
 		column: 2,
+	},
+	{
+		name: "[Gen 7] Trademarked",
+		desc: `Pok&eacute;mon may use any Status move as an Ability, excluding those that are banned.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3647897/">Trademarked</a>`,
+		],
+
+		mod: 'gen7',
+		ruleset: ['[Gen 7] OU'],
+		banlist: ['Slaking', 'Regigigas'],
+		restrictedMoves: ['Assist', 'Baneful Bunker', 'Block', 'Copycat', 'Destiny Bond', 'Detect', 'Mat Block', 'Mean Look', 'Nature Power', 'Parting Shot', 'Protect', 'Roar', 'Skill Swap', 'Spider Web', 'Spiky Shield', 'Whirlwind'],
+		onValidateTeam(team, format, teamHas) {
+			for (let trademark in teamHas.trademarks) {
+				if (teamHas.trademarks[trademark] > 1) return [`You are limited to 1 of each Trademark. (You have ${teamHas.trademarks[trademark]} of ${trademark}).`];
+			}
+		},
+		validateSet(set, teamHas) {
+			const restrictedMoves = this.format.restrictedMoves || [];
+			let move = this.dex.getMove(set.ability);
+			if (move.category !== 'Status' || move.status === 'slp' || restrictedMoves.includes(move.name) || set.moves.map(toId).includes(move.id)) return this.validateSet(set, teamHas);
+			let TeamValidator = /** @type {new(format: string | Format) => Validator} */ (this.constructor);
+			let validator = new TeamValidator(Dex.getFormat(this.format.id + '@@@ignoreillegalabilities'));
+			let moves = set.moves;
+			set.moves = [set.ability];
+			set.ability = '';
+			let problems = validator.validateSet(set, {}) || [];
+			set.moves = moves;
+			set.ability = '';
+			problems = problems.concat(validator.validateSet(set, teamHas) || []);
+			set.ability = move.id;
+			if (!teamHas.trademarks) teamHas.trademarks = {};
+			teamHas.trademarks[move.name] = (teamHas.trademarks[move.name] || 0) + 1;
+			return problems.length ? problems : null;
+		},
+		battle: {
+			getAbility(name) {
+				let move = this.getMove(toId(name));
+				if (!move.exists) return Object.getPrototypeOf(this).getAbility.call(this, name);
+				return {
+					id: move.id,
+					name: move.name,
+					onStart(pokemon) {
+						this.add('-activate', pokemon, 'ability: ' + move.name);
+						this.useMove(move.id, pokemon);
+					},
+					toString() {
+						return ""; // for useMove
+					},
+				};
+			},
+		},
+	},
+	{
+		name: "[Gen 7] Ultimate Z",
+		desc: `Use any type of Z-Crystal on any move and as many times per battle as desired.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3609393/">Ultimate Z</a>`,
+		],
+
+		mod: 'ultimatez',
+		ruleset: ['[Gen 7] OU'],
+		banlist: ['Kyurem-Black', 'Celebrate', 'Conversion', 'Happy Hour', 'Hold Hands'],
+		onValidateSet(set) {
+			let problems = [];
+			if (this.getItem(set.item).zMove && set.moves) {
+				for (const moveId of set.moves) {
+					let move = this.getMove(moveId);
+					if (!move.zMoveBoost) continue;
+					if (move.zMoveBoost.evasion) problems.push(move.name + ' is banned in combination with a Z-Crystal.');
+				}
+			}
+			return problems;
+		},
 	},
 	{
 		section: "Other Metagames",
@@ -1421,7 +1496,7 @@ let Formats = [
 				// that a pokemon is on a team through the onStart even triggering
 				// at the start of a match, users with pokemon names will need their
 				// statuse's to end in "user".
-				name += 'user';
+				name = /** @type {ID} */(name + 'user');
 			}
 			// Add the mon's status effect to it as a volatile.
 			let status = this.getEffect(name);
@@ -1557,10 +1632,10 @@ let Formats = [
 		column: 3,
 	},
 	{
-		name: "[Gen 5] UU",
+		name: "[Gen 6] UU",
 		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3474024/">BW2 UU Viability Ranking</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/posts/6431094/">BW2 Sample Teams</a>`,
+			`&bullet; <a href="https://www.smogon.com/dex/xy/tags/uu/">ORAS UU Banlist</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3598164/">ORAS UU Viability Rankings</a>`,
 		],
 
 		mod: 'gen5',
@@ -1570,9 +1645,10 @@ let Formats = [
 		banlist: ['Uber', 'OU', 'UUBL', 'Arena Trap', 'Drought', 'Sand Stream', 'Snow Warning'],
 	},
 	{
-		name: "[Gen 3] NU",
+		name: "[Gen 5] 1v1",
+		desc: `Bring three Pok&eacute;mon to Team Preview and choose one to battle.`,
 		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3503540/">ADV NU Viability Rankings</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/posts/8031457/">BW 1v1</a>`,
 		],
 
 		mod: 'gen3',
@@ -1582,11 +1658,8 @@ let Formats = [
 		banlist: ['UU'],
 	},
 	{
-		name: "[Gen 4] Monotype",
-		desc: `All the Pok&eacute;mon on a team must share a type.`,
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/posts/7421335/">DPP Monotype</a>`,
-		],
+		name: "[Gen 5] Balanced Hackmons",
+		desc: `Anything that can be hacked in-game and is usable in local battles is allowed.`,
 
 		mod: 'gen4',
 		challengeShow: false,
@@ -1765,7 +1838,7 @@ let Formats = [
 		searchShow: false,
 		maxLevel: 5,
 		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Little Cup'],
-		banlist: ['LC Uber', 'Gligar', 'Misdreavus', 'Scyther', 'Sneasel', 'Tangela', 'Dragon Rage', 'Sonic Boom', 'Swagger'],
+		banlist: ['LC Uber', 'Gligar', 'Misdreavus', 'Scyther', 'Sneasel', 'Tangela', 'Baton Pass', 'Dragon Rage', 'Sonic Boom', 'Swagger'],
 	},
 	{
 		name: "[Gen 6] Monotype",
@@ -1801,6 +1874,9 @@ let Formats = [
 	{
 		name: "[Gen 6] 1v1",
 		desc: `Bring three Pok&eacute;mon to Team Preview and choose one to battle.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/posts/8031456/">ORAS 1v1</a>`,
+		],
 
 		mod: 'gen6',
 		challengeShow: false,
@@ -1857,7 +1933,7 @@ let Formats = [
 		canUseRandomTeam: true,
 		debug: true,
 		maxLevel: 9999,
-		onBegin() { this.trunc = n => Math.trunc(n); },
+		trunc(n) { return Math.trunc(n); },
 		defaultLevel: 100,
 		// no restrictions, for serious (other than team preview)
 		ruleset: ['Team Preview', 'Cancel Mod'],
@@ -1943,7 +2019,7 @@ let Formats = [
 		searchShow: false,
 		canUseRandomTeam: true,
 		maxLevel: 9999,
-		onBegin() { this.trunc = n => Math.trunc(n); },
+		trunc(n) { return Math.trunc(n); },
 		defaultLevel: 100,
 		debug: true,
 		// no restrictions, for serious (other than team preview)
@@ -1976,7 +2052,7 @@ let Formats = [
 		searchShow: false,
 		canUseRandomTeam: true,
 		maxLevel: 9999,
-		onBegin() { this.trunc = n => Math.trunc(n); },
+		trunc(n) { return Math.trunc(n); },
 		defaultLevel: 100,
 		debug: true,
 		// no restrictions, for serious (other than team preview)
@@ -2001,6 +2077,18 @@ let Formats = [
 		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Team Preview', 'Standard Ubers'],
+	},
+	{
+		name: "[Gen 5] UU",
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3474024/">BW2 UU Viability Ranking</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/posts/6431094/">BW2 Sample Teams</a>`,
+		],
+
+		mod: 'gen5',
+		searchShow: false,
+		ruleset: ['Pokemon', 'Standard', 'Evasion Abilities Clause', 'Baton Pass Clause', 'Swagger Clause', 'Team Preview'],
+		banlist: ['Uber', 'OU', 'UUBL', 'Arena Trap', 'Drought', 'Sand Stream', 'Snow Warning'],
 	},
 	{
 		name: "[Gen 5] RU",
@@ -2077,7 +2165,7 @@ let Formats = [
 		canUseRandomTeam: true,
 		debug: true,
 		maxLevel: 9999,
-		onBegin() { this.trunc = n => Math.trunc(n); },
+		trunc(n) { return Math.trunc(n); },
 		defaultLevel: 100,
 		// no restrictions, for serious (other than team preview)
 		ruleset: ['Team Preview', 'Cancel Mod'],
@@ -2129,7 +2217,7 @@ let Formats = [
 		canUseRandomTeam: true,
 		debug: true,
 		maxLevel: 9999,
-		onBegin() { this.trunc = n => Math.trunc(n); },
+		trunc(n) { return Math.trunc(n); },
 		defaultLevel: 100,
 		// no restrictions, for serious (other than team preview)
 		ruleset: ['Team Preview', 'Cancel Mod'],
@@ -2180,6 +2268,7 @@ let Formats = [
 		searchShow: false,
 		ruleset: ['[Gen 4] UU'],
 		banlist: ['UU', 'NUBL'],
+		unbanlist: ['Sand Veil'],
 	},
 	{
 		name: "[Gen 4] LC",
@@ -2213,7 +2302,7 @@ let Formats = [
 		canUseRandomTeam: true,
 		debug: true,
 		maxLevel: 9999,
-		onBegin() { this.trunc = n => Math.trunc(n); },
+		trunc(n) { return Math.trunc(n); },
 		defaultLevel: 100,
 		// no restrictions
 		ruleset: ['Cancel Mod'],
@@ -2248,7 +2337,7 @@ let Formats = [
 		canUseRandomTeam: true,
 		debug: true,
 		maxLevel: 9999,
-		onBegin() { this.trunc = n => Math.trunc(n); },
+		trunc(n) { return Math.trunc(n); },
 		defaultLevel: 100,
 		// no restrictions
 		ruleset: ['Cancel Mod'],
@@ -2288,13 +2377,24 @@ let Formats = [
 		banlist: ['OU', 'UUBL'],
 	},
 	{
+		name: "[Gen 3] NU",
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3503540/">ADV NU Viability Rankings</a>`,
+		],
+
+		mod: 'gen3',
+		searchShow: false,
+		ruleset: ['[Gen 3] UU'],
+		banlist: ['UU'],
+	},
+	{
 		name: "[Gen 3] Custom Game",
 
 		mod: 'gen3',
 		challengeShow: false,
 		searchShow: false,
 		debug: true,
-		ruleset: ['Pokemon', 'HP Percentage Mod', 'Cancel Mod'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod'],
 	},
 	{
 		name: "[Gen 3] Doubles Custom Game",
@@ -2345,7 +2445,7 @@ let Formats = [
 		challengeShow: false,
 		searchShow: false,
 		debug: true,
-		ruleset: ['Pokemon', 'HP Percentage Mod', 'Cancel Mod'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod'],
 	},
 	{
 		name: "[Gen 1] Ubers",
@@ -2407,7 +2507,7 @@ let Formats = [
 		challengeShow: false,
 		searchShow: false,
 		debug: true,
-		ruleset: ['Pokemon', 'HP Percentage Mod', 'Cancel Mod'],
+		ruleset: ['HP Percentage Mod', 'Cancel Mod'],
 	},
 
 //#region TrashChannel: Ex-OMotM

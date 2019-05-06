@@ -11,6 +11,7 @@ import {Field} from './field';
 import {Pokemon} from './pokemon';
 import {PRNG, PRNGSeed} from './prng';
 import {Side} from './side';
+import {State} from './state';
 
 //#region TrashChannel
 import * as fs from 'fs';
@@ -27,7 +28,7 @@ interface FaintedPokemon {
 }
 
 interface BattleOptions {
-	formatid: string; // Format ID
+	formatid: ID; // Format ID
 	send?: (type: string, data: string | string[]) => void; // Output callback
 	prng?: PRNG; // PRNG override (you usually don't need this, just pass a seed)
 	seed?: PRNGSeed; // PRNG seed
@@ -37,8 +38,11 @@ interface BattleOptions {
 	p3?: PlayerOptions; // Player 3 data
 	p4?: PlayerOptions; // Player 4 data
 	debug?: boolean; // show debug mode option
+	deserialized?: boolean;
 	strictChoices?: boolean; // whether invalid choices should throw
 }
+
+type Part = string | number | boolean | AnyObject | null | undefined;
 
 // The current request state of the Battle:
 //
@@ -51,8 +55,9 @@ interface BattleOptions {
 export type RequestState = 'teampreview' | 'move' | 'switch' | '';
 
 export class Battle extends Dex.ModdedDex {
-	readonly id: '';
+	readonly id: ID;
 	readonly debugMode: boolean;
+	readonly deserialized: boolean;
 	readonly strictChoices: boolean;
 	readonly format: string;
 	readonly formatData: AnyObject;
@@ -120,9 +125,11 @@ export class Battle extends Dex.ModdedDex {
 
 		this.zMoveTable = {};
 		Object.assign(this, this.data.Scripts);
+		if (format.battle) Object.assign(this, format.battle);
 
 		this.id = '';
 		this.debugMode = format.debug || !!options.debug;
+		this.deserialized = !!options.deserialized;
 		this.strictChoices = !!options.strictChoices;
 		this.format = format.id;
 		this.formatData = {id: format.id};
@@ -185,7 +192,7 @@ export class Battle extends Dex.ModdedDex {
 		// (so speedSort doesn't need to bind before use)
 		this.comparePriority = this.comparePriority.bind(this);
 
-		const inputOptions: {formatid: string, seed: PRNGSeed, rated?: string | true} = {
+		const inputOptions: {formatid: ID, seed: PRNGSeed, rated?: string | true} = {
 			formatid: options.formatid, seed: this.prng.seed,
 		};
 		if (this.rated) inputOptions.rated = this.rated;
@@ -234,6 +241,14 @@ export class Battle extends Dex.ModdedDex {
 				this.setPlayer(side, options[side]!);
 			}
 		}
+	}
+
+	toJSON(): AnyObject {
+		return State.serializeBattle(this);
+	}
+
+	static fromJSON(serialized: string | AnyObject): Battle {
+		return State.deserializeBattle(serialized);
 	}
 
 	get p1() {
@@ -1049,11 +1064,33 @@ export class Battle extends Dex.ModdedDex {
 			type = this.requestState;
 		}
 
-		// default to no request
-		const requests: any[] = Array(this.sides.length).fill(null);
 		for (const side of this.sides) {
 			side.activeRequest = null;
 		}
+
+		const maxTeamSize = this.getMaxTeamSize();
+		if (type === 'teampreview') {
+			this.add('teampreview' + (maxTeamSize !== 6 ? '|' + maxTeamSize : ''));
+		}
+
+		const requests = this.getRequests(type, maxTeamSize);
+		for (let i = 0; i < this.sides.length; i++) {
+			this.sides[i].emitRequest(requests[i]);
+		}
+
+		if (this.sides.every(side => side.isChoiceDone())) {
+			throw new Error(`Choices are done immediately after a request`);
+		}
+	}
+
+	getMaxTeamSize() {
+		const teamLengthData = this.getFormat().teamLength;
+		return (teamLengthData && teamLengthData.battle) || 6;
+	}
+
+	getRequests(type: RequestState, maxTeamSize: number) {
+		// default to no request
+		const requests: any[] = Array(this.sides.length).fill(null);
 
 		switch (type) {
 		case 'switch': {
@@ -1071,10 +1108,6 @@ export class Battle extends Dex.ModdedDex {
 		}
 
 		case 'teampreview':
-			const teamLengthData = this.getFormat().teamLength;
-			let maxTeamSize = teamLengthData && teamLengthData.battle;
-			this.add('teampreview' + (maxTeamSize ? '|' + maxTeamSize : ''));
-			if (!maxTeamSize) maxTeamSize = 6;
 			for (let i = 0; i < this.sides.length; i++) {
 				const side = this.sides[i];
 				side.maxTeamSize = maxTeamSize;
@@ -1094,19 +1127,14 @@ export class Battle extends Dex.ModdedDex {
 
 		const allRequestsMade = requests.every(request => request);
 		for (let i = 0; i < this.sides.length; i++) {
-			const side = this.sides[i];
-			const request = requests[i];
-			if (request) {
-				if (!this.supportCancel || !allRequestsMade) request.noCancel = true;
-				side.emitRequest(request);
+			if (requests[i]) {
+				if (!this.supportCancel || !allRequestsMade) requests[i].noCancel = true;
 			} else {
-				side.emitRequest({wait: true, side: side.getRequestData()});
+				requests[i] = {wait: true, side: this.sides[i].getRequestData()};
 			}
 		}
 
-		if (this.sides.every(side => side.isChoiceDone())) {
-			throw new Error(`Choices are done immediately after a request`);
-		}
+		return requests;
 	}
 
 	tiebreak() {
@@ -1573,6 +1601,8 @@ export class Battle extends Dex.ModdedDex {
 	}
 
 	start() {
+		// deserialized should use restart instead
+		if (this.deserialized) return;
 		// need all players to start
 		if (!this.sides.every(side => !!side)) return;
 
@@ -1597,9 +1627,8 @@ export class Battle extends Dex.ModdedDex {
 			this.add('rated', typeof this.rated === 'string' ? this.rated : '');
 		}
 
-		if (format.onBegin) {
-			format.onBegin.call(this);
-		}
+		if (format.onBegin) format.onBegin.call(this);
+		if (format.trunc) this.trunc = format.trunc;
 		for (const rule of this.getRuleTable(format).keys()) {
 			if (rule.startsWith('+') || rule.startsWith('-') || rule.startsWith('!')) continue;
 			const subFormat = this.getFormat(rule);
@@ -1617,6 +1646,16 @@ export class Battle extends Dex.ModdedDex {
 		this.addToQueue({choice: 'start'});
 		this.midTurn = true;
 		if (!this.requestState) this.go();
+	}
+
+	restart(send?: (type: string, data: string | string[]) => void) {
+		if (!this.deserialized) throw new Error('Attempt to restart a battle which has not been deserialized');
+
+		const format = this.getFormat();
+		if (format.trunc) this.trunc = format.trunc;
+
+		// @ts-ignore - readonly
+		this.send = send;
 	}
 
 	boost(
@@ -1858,7 +1897,7 @@ export class Battle extends Dex.ModdedDex {
 			if (!source) source = this.event.source;
 			if (!effect) effect = this.effect;
 		}
-		if (effect === 'drain') effect = this.getEffect(effect);
+		if (effect === 'drain') effect = this.getEffectByID(effect as ID);
 		if (damage && damage <= 1) damage = 1;
 		damage = this.trunc(damage);
 		// for things like Liquid Ooze, the Heal event still happens when nothing is healed.
@@ -2278,7 +2317,7 @@ export class Battle extends Dex.ModdedDex {
 		for (const side of this.sides) {
 			for (const pokemon of side.active) {
 				if (pokemon.fainted) {
-					pokemon.status = 'fnt';
+					pokemon.status = 'fnt' as ID;
 					pokemon.switchFlag = true;
 				}
 			}
@@ -2581,7 +2620,7 @@ export class Battle extends Dex.ModdedDex {
 				}
 			}
 			for (const pokemon of this.getAllPokemon()) {
-				this.singleEvent('Start', this.getEffect(pokemon.species), pokemon.speciesData, pokemon);
+				this.singleEvent('Start', this.getEffectByID(pokemon.speciesid), pokemon.speciesData, pokemon);
 			}
 			this.midTurn = true;
 			break;
@@ -2696,7 +2735,7 @@ export class Battle extends Dex.ModdedDex {
 					foeActive.removeVolatile('substitutebroken');
 				}
 			}
-			delete action.pokemon.draggedIn;
+			action.pokemon.draggedIn = null;
 			break;
 		case 'runPrimal':
 			if (!action.pokemon.transformed) {
@@ -2921,14 +2960,7 @@ export class Battle extends Dex.ModdedDex {
 		if (this.hints.has(hint)) return;
 
 		if (side) {
-			this.add('split');
-			for (const line of [false, 0, 1, true]) {
-				if (line === true || line === side.n % 2) {
-					this.add('-hint', hint);
-				} else {
-					this.log.push('');
-				}
-			}
+			this.addSplit(side.id, ['-hint', hint]);
 		} else {
 			this.add('-hint', hint);
 		}
@@ -2936,26 +2968,38 @@ export class Battle extends Dex.ModdedDex {
 		if (once) this.hints.add(hint);
 	}
 
-	add(...parts: (string | number | boolean | ((side: 0 | 1 | boolean) => string) | AnyObject | null | undefined)[]) {
+	addSplit(side: SideID, secret: Part[], shared?: Part[]) {
+		this.log.push(`|split|${side}`);
+		this.add(...secret);
+		if (shared) {
+			this.add(...shared);
+		} else {
+			this.log.push('');
+		}
+	}
+
+	add(...parts: (Part | (() => {side: SideID, secret: string, shared: string}))[]) {
 		if (!parts.some(part => typeof part === 'function')) {
 			this.log.push(`|${parts.join('|')}`);
 			return;
 		}
-		if (this.reportExactHP) {
-			parts = parts.map(part =>
-				typeof part !== 'function' ? part : part(true)
-			);
-			this.log.push(`|${parts.join('|')}`);
-			return;
+
+		let side: SideID | null = null;
+		const secret = [];
+		const shared = [];
+		for (const part of parts) {
+			if (typeof part === 'function') {
+				const split = part();
+				if (side && side !== split.side) throw new Error("Multiple sides passed to add");
+				side = split.side;
+				secret.push(split.secret);
+				shared.push(split.shared);
+			} else {
+				secret.push(part);
+				shared.push(part);
+			}
 		}
-		this.log.push('|split');
-		const sides: (0 | 1 | boolean)[] = [false, 0, 1, true];
-		for (const side of sides) {
-			const sideUpdate = '|' + parts.map(part =>
-				typeof part !== 'function' ? part : part(side)
-			).join('|');
-			this.log.push(sideUpdate);
-		}
+		this.addSplit(side!, secret, shared);
 	}
 
 	// tslint:disable-next-line:ban-types
@@ -2995,8 +3039,27 @@ export class Battle extends Dex.ModdedDex {
 		}
 	}
 
+	static extractUpdateForSide(data: string, side: SideID | 'spectator' | 'omniscient' = 'spectator') {
+		if (side === 'omniscient') {
+			// Grab all secret data
+			return data.replace(/\n\|split\|p[1234]\n([^\n]*)\n(?:[^\n]*)/g, '\n$1');
+		}
+
+		// Grab secret data side has access to
+		switch (side) {
+		case 'p1': data = data.replace(/\n\|split\|p1\n([^\n]*)\n(?:[^\n]*)/g, '\n$1'); break;
+		case 'p2': data = data.replace(/\n\|split\|p2\n([^\n]*)\n(?:[^\n]*)/g, '\n$1'); break;
+		case 'p3': data = data.replace(/\n\|split\|p3\n([^\n]*)\n(?:[^\n]*)/g, '\n$1'); break;
+		case 'p4': data = data.replace(/\n\|split\|p4\n([^\n]*)\n(?:[^\n]*)/g, '\n$1'); break;
+		}
+
+		// Discard remaining secret data
+		// Note: the last \n? is for secret data that are empty when shared
+		return data.replace(/\n\|split\|(?:[^\n]*)\n(?:[^\n]*)\n\n?/g, '\n');
+	}
+
 	getDebugLog() {
-		return this.log.join('\n').replace(/\|split\n.*\n.*\n.*\n/g, '');
+		return Battle.extractUpdateForSide(this.log.join('\n'), 'omniscient');
 	}
 
 	debugError(activity: string) {
@@ -3009,7 +3072,7 @@ export class Battle extends Dex.ModdedDex {
 		const format = this.getFormat();
 		let team = options.team;
 		if (typeof team === 'string') team = Dex.fastUnpackTeam(team);
-		if (!format.team && team) return team;
+		if ((!format.team || this.deserialized) && team) return team;
 
 		if (!options.seed) {
 			options.seed = PRNG.generateSeed();

@@ -50,8 +50,10 @@ class Tournament extends Rooms.RoomGame {
 		this.playerCount = 0;
 		this.playerCap = (playerCap ? parseInt(playerCap) : Config.tourdefaultplayercap) || 0;
 
+		/** @type {string} */
 		this.format = formatId;
 		this.originalFormat = formatId;
+		/** @type {string} */
 		this.teambuilderFormat = formatId;
 		/** @type {string[]} */
 		this.customRules = [];
@@ -1508,7 +1510,7 @@ const commands = {
 			/** @type {[string, string, number, string]} */
 			const punishment = ['TOURBAN', targetUserid, Date.now() + TOURBAN_DURATION, reason];
 			if (online) {
-				Punishments.roomPunish(this.room, /** @type {User} */(targetUser), punishment, null);
+				Punishments.roomPunish(this.room, /** @type {User} */(targetUser), punishment);
 			} else {
 				Punishments.roomPunishName(this.room, /** @type {string} */(targetUser), punishment);
 			}
