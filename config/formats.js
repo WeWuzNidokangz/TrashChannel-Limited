@@ -2947,6 +2947,35 @@ let Formats = [
 		},
 	},
 	{
+		name: "[Gen 7] Pokebilities",
+		desc: `Pok&eacute;mon have all of their released Abilities simultaneously.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3588652/">Pok&eacute;bilities</a>`,
+		],
+
+		mod: 'pokebilities',
+		ruleset: ['[Gen 7] OU'],
+		banlist: ['Bibarel', 'Bidoof', 'Diglett', 'Dugtrio', 'Excadrill', 'Glalie', 'Gothita', 'Gothitelle', 'Gothorita', 'Octillery', 'Porygon-Z', 'Remoraid', 'Smeargle', 'Snorunt', 'Trapinch', 'Wobbuffet', 'Wynaut'],
+		onBegin() {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let pokemon of allPokemon) {
+				if (pokemon.ability === toId(pokemon.template.abilities['S'])) {
+					continue;
+				}
+				// @ts-ignore
+				pokemon.innates = Object.keys(pokemon.template.abilities).filter(key => key !== 'S' && (key !== 'H' || !pokemon.template.unreleasedHidden)).map(key => toId(pokemon.template.abilities[key])).filter(ability => ability !== pokemon.ability);
+			}
+		},
+		onSwitchInPriority: 2,
+		onSwitchIn(pokemon) {
+			if (pokemon.innates) pokemon.innates.forEach(innate => pokemon.addVolatile("ability" + innate, pokemon));
+		},
+		onAfterMega(pokemon) {
+			Object.keys(pokemon.volatiles).filter(innate => innate.startsWith('ability')).forEach(innate => pokemon.removeVolatile(innate));
+			pokemon.innates = undefined;
+		},
+	},
+	{
 		name: "[Gen 7] Godly Gift",
 		desc: `Each Pok&eacute;mon receives one base stat from your God depending on its position in your team.`,
 		threads: [
