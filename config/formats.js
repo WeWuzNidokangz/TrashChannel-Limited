@@ -1073,7 +1073,16 @@ let Formats = [
 			let move = this.dex.getMove(set.ability);
 			if (move.category !== 'Status' || move.status === 'slp' || restrictedMoves.includes(move.name) || set.moves.map(toId).includes(move.id)) return this.validateSet(set, teamHas);
 			let TeamValidator = /** @type {new(format: string | Format) => Validator} */ (this.constructor);
-			let validator = new TeamValidator(Dex.getFormat(this.format.id + '@@@ignoreillegalabilities'));
+			// 19/05/06 TrashChannel: Include add-on rules
+			const ruleTable = this.ruleTable;
+			let sAddOnRulesString = '';
+			if(ruleTable) {
+				ruleTable.forEach((v, rule) => {
+					//console.log("Trademarked rule: " + rule);
+					sAddOnRulesString += ','+rule;
+				});
+			}
+			let validator = new TeamValidator(Dex.getFormat(this.format.id + '@@@ignoreillegalabilities'+sAddOnRulesString));
 			let moves = set.moves;
 			set.moves = [set.ability];
 			set.ability = '';
@@ -2606,10 +2615,10 @@ let Formats = [
 						let baseTemplate = this.getTemplate(item.megaEvolves);
 						types = baseTemplate.types.filter(type => template.types.includes(type));
 					}
-					// 18/10/08: TrashChannel: Since this is already an ubers-based meta,
+					// 18/10/08 TrashChannel: Since this is already an ubers-based meta,
 					// we shouldn't need to check the gods for any additional bans
 				} else {
-					// 18/10/08: TrashChannel: Avoid using OU validator as it interferes with mashups
+					// 18/10/08 TrashChannel: Avoid using OU validator as it interferes with mashups
 					// followerbanlist: ['Uber', 'Arena Trap', 'Power Construct', 'Shadow Tag', 'Baton Pass'],
 					if ("Uber" == template.tier) { // Ban ubers
 						problemsArray.push("You can't use an Ubers pokemon as a follower!");
