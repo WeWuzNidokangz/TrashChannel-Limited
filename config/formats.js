@@ -444,6 +444,31 @@ let Formats = [
 			}
 		},
 	},
+	{
+		name: "[Gen 7] Trademarked: Hackmons Cup",
+		desc: `Randomized teams of level-balanced Pok&eacute;mon with random trademarks.`,
+
+		mod: 'gen7',
+		team: 'randomHCTM',
+		ruleset: ['Pokemon', 'HP Percentage Mod', 'Cancel Mod'],
+		battle: {
+			getAbility(name) {
+				let move = this.getMove(toId(name));
+				if (!move.exists) return Object.getPrototypeOf(this).getAbility.call(this, name);
+				return {
+					id: move.id,
+					name: move.name,
+					onStart(pokemon) {
+						this.add('-activate', pokemon, 'ability: ' + move.name);
+						this.useMove(move.id, pokemon);
+					},
+					toString() {
+						return ""; // for useMove
+					},
+				};
+			},
+		},
+	},
 //#endregion TrashChannel: Mashups
 
 	// US/UM Singles

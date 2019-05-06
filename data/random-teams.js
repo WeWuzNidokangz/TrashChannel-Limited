@@ -2365,6 +2365,30 @@ class RandomTeams extends Dex.ModdedDex {
 
 		return pokemon;
 	}
+
+//#region TrashChannel
+	randomHCTMTeam() { // Team for Trademarked: Hackmons Cup
+		let team = this.randomHCTeam();
+
+		let movePool = Object.keys(this.data.Movedex);
+
+		let trademarkPool = [];
+		for (const moveid of movePool) {
+			let move = this.getMove(moveid);
+			if (move.category !== 'Status') continue;
+			trademarkPool.push(moveid);
+		}
+
+		/**@type {number} */
+		let nTrademarkIndex;
+		for (let i = 0; i < 6; i++) {
+			nTrademarkIndex = this.random(trademarkPool.length);
+			team[i]['ability'] = trademarkPool[nTrademarkIndex];
+		}
+
+		return team;
+	}
+//#endregion TrashChannel
 }
 
 module.exports = RandomTeams;
