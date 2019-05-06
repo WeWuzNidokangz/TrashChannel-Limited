@@ -337,7 +337,7 @@ let Formats = [
 		banlist: ['Eevium Z', 'Baton Pass', 'Dragon Rage', 'Electrify', 'Sonic Boom'],
 		restrictedStones: ['Beedrillite', 'Blazikenite', 'Gengarite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite', 'Ultranecrozium Z'],
 		cannotMega: [
-			'Gligar', 'Misdreavus', 'Murkrow', 'Scyther', 'Sneasel', 'Tangela', 'Vulpix',
+			'Dratini', 'Gligar', 'Misdreavus', 'Murkrow', 'Scyther', 'Sneasel', 'Tangela', 'Vulpix',
 		],
 	},
 	{
@@ -1050,29 +1050,6 @@ let Formats = [
 	{
 		section: "OM of the Month",
 		column: 2,
-	},
-	{
-		name: "[Gen 7] Godly Gift",
-		desc: `Each Pok&eacute;mon receives one base stat from your God depending on its position in your team.`,
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3597618/">Godly Gift</a>`,
-		],
-
-		mod: 'gen7',
-		ruleset: ['[Gen 7] Ubers'],
-		banlist: ['Uber > 1', 'Uber ++ Arena Trap', 'Uber ++ Power Construct', 'Blissey', 'Chansey', 'Deoxys-Attack', 'Gengar-Mega', 'Mawile-Mega', 'Medicham-Mega', 'Sableye-Mega', 'Toxapex', 'Huge Power', 'Pure Power', 'Shadow Tag', 'Baton Pass'],
-		onModifyTemplate(template, target, source, effect) {
-			if (source || !target || !target.side) return;
-			let uber = target.side.team.find(set => {
-				let item = this.getItem(set.item);
-				return set.ability === 'Arena Trap' || set.ability === 'Power Construct' || this.getTemplate(item.megaEvolves === set.species ? item.megaStone : set.species).tier === 'Uber';
-			}) || target.side.team[0];
-			let stat = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'][target.side.team.indexOf(target.set)];
-			let pokemon = this.deepClone(template);
-			// @ts-ignore
-			pokemon.baseStats[stat] = this.getTemplate(uber.species).baseStats[stat];
-			return pokemon;
-		},
 	},
 	{
 		section: "Other Metagames",
@@ -2878,6 +2855,29 @@ let Formats = [
 			if (!donorTemplate.exists) return;
 			// Place volatiles on the Pokémon to show the donor details.
 			this.add('-start', pokemon, donorTemplate.species, '[silent]');
+		},
+	},
+	{
+		name: "[Gen 7] Godly Gift",
+		desc: `Each Pok&eacute;mon receives one base stat from your God depending on its position in your team.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3597618/">Godly Gift</a>`,
+		],
+
+		mod: 'gen7',
+		ruleset: ['[Gen 7] Ubers'],
+		banlist: ['Uber > 1', 'Uber ++ Arena Trap', 'Uber ++ Power Construct', 'Blissey', 'Chansey', 'Deoxys-Attack', 'Gengar-Mega', 'Mawile-Mega', 'Medicham-Mega', 'Sableye-Mega', 'Toxapex', 'Huge Power', 'Pure Power', 'Shadow Tag', 'Baton Pass'],
+		onModifyTemplate(template, target, source, effect) {
+			if (source || !target || !target.side) return;
+			let uber = target.side.team.find(set => {
+				let item = this.getItem(set.item);
+				return set.ability === 'Arena Trap' || set.ability === 'Power Construct' || this.getTemplate(item.megaEvolves === set.species ? item.megaStone : set.species).tier === 'Uber';
+			}) || target.side.team[0];
+			let stat = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'][target.side.team.indexOf(target.set)];
+			let pokemon = this.deepClone(template);
+			// @ts-ignore
+			pokemon.baseStats[stat] = this.getTemplate(uber.species).baseStats[stat];
+			return pokemon;
 		},
 	},
 //#endregion
