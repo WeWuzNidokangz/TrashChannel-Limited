@@ -2976,14 +2976,17 @@ let Formats = [
 
 			// @ts-ignore
 			let perMetaUserCount = [];
+			let perMetaMadeOnValidateTeamCheck = [];
+			let perMetaIdToMixedMetaKey = [];
 
 			for (const mixedMetaKey in MMCollection) {
 				console.log("team mixedMetaKey: " + mixedMetaKey);
 				
-				perMetaUserCount['gen7'+mixedMetaKey] = 0; // FIXME: Better way to express this?
+				const id = 'gen7'+mixedMetaKey;
+				perMetaUserCount[id] = 0;
+				perMetaIdToMixedMetaKey[id] = mixedMetaKey;
 			}
 
-			//determineMeta(set, teamHas)
 			for (const set of team) {
 				if(undefined === ourFormat.determineMeta) continue;
 				let setMetaKey = ourFormat.determineMeta.call(this, set, null);
@@ -3001,6 +3004,24 @@ let Formats = [
 						problems.push(`Mix and Meta limits teams to ${ourFormat.modValueNumberA} users per meta, ` +
 						`but you seem to have ${ourFormat.modValueNumberA}+ Pokemon intended as ${setMetaKey} users.`);
 					}
+				}
+
+				// Check if we have already checked a Pokemon with this meta on the team
+				if(!(setMetaKeyId in perMetaMadeOnValidateTeamCheck)) {
+					let mixedMetaKey = perMetaIdToMixedMetaKey[setMetaKeyId];
+					let metaFormat = Dex.getFormat(MMCollection[mixedMetaKey].format, true);
+					if(metaFormat.onValidateTeam) { // Validate whole team by member's meta's onValidateTeam
+						let metaTeamProblems = metaFormat.onValidateTeam.call(this, team);
+						if(metaTeamProblems && metaTeamProblems.length > 0) {
+							problems.push(`By including a Pokemon from ${MMCollection[mixedMetaKey].format} on your team, ` +
+							`you subjected your whole team to its team validation, which found the following problems:-`);
+
+							for(let nMtpItr=0; nMtpItr<metaTeamProblems.length; ++nMtpItr) {
+								problems.push(metaTeamProblems[nMtpItr]);
+							}
+						}
+					}
+					perMetaMadeOnValidateTeamCheck[setMetaKeyId] = true;
 				}
 			}
 			return problems;
