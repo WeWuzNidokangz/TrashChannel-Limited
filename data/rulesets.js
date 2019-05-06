@@ -1045,6 +1045,29 @@ let BattleFormats = {
 		desc: "Standard package of rulesets for Mix and Mega (insufficient to run MnM without mod, crashes when called though Mix and Meta).",
 		ruleset: ['Mix and Mega Standard Validation', 'Mix and Mega Battle Effects'],
 	},
+	pokebilitiesliterule: {
+		effectType: 'Rule',
+		name: 'Pokebilities Lite Rule',
+		desc: "Basic Pokebilities functionality (does not override broken abilities like Trace).",
+		onBegin() {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let pokemon of allPokemon) {
+				if (pokemon.ability === toId(pokemon.template.abilities['S'])) {
+					continue;
+				}
+				// @ts-ignore
+				pokemon.innates = Object.keys(pokemon.template.abilities).filter(key => key !== 'S' && (key !== 'H' || !pokemon.template.unreleasedHidden)).map(key => toId(pokemon.template.abilities[key])).filter(ability => ability !== pokemon.ability);
+			}
+		},
+		onSwitchInPriority: 2,
+		onSwitchIn(pokemon) {
+			if (pokemon.innates) pokemon.innates.forEach(innate => pokemon.addVolatile("ability" + innate, pokemon));
+		},
+		onAfterMega(pokemon) {
+			Object.keys(pokemon.volatiles).filter(innate => innate.startsWith('ability')).forEach(innate => pokemon.removeVolatile(innate));
+			pokemon.innates = undefined;
+		},
+	},
 	reversedrule: {
 		effectType: 'Rule',
 		name: 'Reversed Rule',
