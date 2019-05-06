@@ -488,8 +488,10 @@ export class Side {
 		if (mega && !pokemon.canMegaEvo) {
 			return this.emitChoiceError(`Can't move: ${pokemon.name} can't mega evolve`);
 		}
-		if (mega && this.choice.mega) {
-			return this.emitChoiceError(`Can't move: You can only mega-evolve once per battle`);
+		if ('mixandmega' !== this.battle.currentMod) { // 19/05/06 TrashChannel: Exception for multiple megaevos in single turn for MnM Doubles formats
+			if (mega && this.choice.mega) {
+				return this.emitChoiceError(`Can't move: You can only mega-evolve once per battle`);
+			}
 		}
 		const ultra = (megaOrZ === 'ultra');
 		if (ultra && !pokemon.canUltraBurst) {

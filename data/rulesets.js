@@ -933,6 +933,12 @@ let BattleFormats = {
 			}
 		},
 	},
+	aaastandardpackage: {
+		effectType: 'ValidatorRule',
+		name: 'AAA Standard Package',
+		desc: "Standard package of rulesets for Almost Any Ability.",
+		ruleset: ['Ability Clause', 'Ignore Illegal Abilities', 'AAA Restrictions Validation'],
+	},
 	averagemonsrule: {
 		effectType: 'Rule',
 		name: 'Averagemons Rule',
