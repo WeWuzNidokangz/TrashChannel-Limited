@@ -188,7 +188,7 @@ const commands = {
 		let gameRooms = [];
 		for (const room of Rooms.rooms.values()) {
 			if (!room.game) continue;
-			if ((targetUser.userid in room.game.players && !targetUser.inRooms.has(room.id)) ||
+			if ((targetUser.userid in room.game.playerTable && !targetUser.inRooms.has(room.id)) ||
 				room.auth[targetUser.userid] === Users.PLAYER_SYMBOL) {
 				if (room.isPrivate && !canViewAlts) {
 					continue;
@@ -732,12 +732,12 @@ const commands = {
 		} else {
 			let types = [];
 			if (type1.exists) {
-				types.push(type1.id);
+				types.push(type1.name);
 				if (type2.exists && type2 !== type1) {
-					types.push(type2.id);
+					types.push(type2.name);
 				}
 				if (type3.exists && type3 !== type1 && type3 !== type2) {
-					types.push(type3.id);
+					types.push(type3.name);
 				}
 			}
 

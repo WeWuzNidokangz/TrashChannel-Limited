@@ -553,12 +553,12 @@ let Formats = [
 		searchShow: false,
 		ruleset: ['[Gen 7] UU'],
 		banlist: ['UU', 'RUBL', 'Sableye-Mega', 'Aurora Veil'],
-		unbanlist: ['Sceptile-Mega', 'Drought'],
+		unbanlist: ['Reuniclus', 'Drought'],
 	},
 	{
 		name: "[Gen 7] NU",
 		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3648821/">NU Metagame Discussion</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3650028/">NU Metagame Discussion</a>`,
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3645166/">NU Viability Rankings</a>`,
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3632667/">NU Sample Teams</a>`,
 		],
@@ -567,7 +567,7 @@ let Formats = [
 		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 7] RU'],
-		banlist: ['RU', 'NUBL', 'Drought'],
+		banlist: ['RU', 'NUBL', 'Reuniclus', 'Drought'],
 		unbanlist: ['Camerupt-Mega'],
 	},
 	{
@@ -1086,8 +1086,8 @@ let Formats = [
 
 		mod: 'gen7',
 		ruleset: ['[Gen 7] OU'],
-		banlist: ['Slaking', 'Regigigas'],
-		restrictedMoves: ['Assist', 'Baneful Bunker', 'Block', 'Copycat', 'Destiny Bond', 'Detect', 'Mat Block', 'Mean Look', 'Nature Power', 'Parting Shot', 'Protect', 'Roar', 'Skill Swap', 'Spider Web', 'Spiky Shield', 'Whirlwind'],
+		banlist: ['Hoopa-Unbound', 'Slaking', 'Regigigas'],
+        restrictedMoves: ['Assist', 'Baneful Bunker', 'Block', 'Copycat', 'Destiny Bond', 'Detect', 'Ingrain', 'King\'s Shield', 'Mat Block', 'Mean Look', 'Metronome', 'Nature Power', 'Parting Shot', 'Protect', 'Roar', 'Skill Swap', 'Spider Web', 'Spiky Shield', 'Whirlwind'],
 		onValidateTeam(team, format, teamHas) {
 			for (let trademark in teamHas.trademarks) {
 				if (teamHas.trademarks[trademark] > 1) return [`You are limited to 1 of each Trademark. (You have ${teamHas.trademarks[trademark]} of ${trademark}).`];
@@ -2419,7 +2419,11 @@ let Formats = [
 		mod: 'gen3',
 		challengeShow: false,
 		searchShow: false,
+		canUseRandomTeam: true,
 		debug: true,
+		maxLevel: 9999,
+		trunc(n) { return Math.trunc(n); },
+		defaultLevel: 100,
 		ruleset: ['HP Percentage Mod', 'Cancel Mod'],
 	},
 	{
@@ -2470,7 +2474,11 @@ let Formats = [
 		mod: 'gen2',
 		challengeShow: false,
 		searchShow: false,
+		canUseRandomTeam: true,
 		debug: true,
+		maxLevel: 9999,
+		trunc(n) { return Math.trunc(n); },
+		defaultLevel: 100,
 		ruleset: ['HP Percentage Mod', 'Cancel Mod'],
 	},
 	{
@@ -2532,7 +2540,11 @@ let Formats = [
 		mod: 'gen1',
 		challengeShow: false,
 		searchShow: false,
+		canUseRandomTeam: true,
 		debug: true,
+		maxLevel: 9999,
+		trunc(n) { return Math.trunc(n); },
+		defaultLevel: 100,
 		ruleset: ['HP Percentage Mod', 'Cancel Mod'],
 	},
 

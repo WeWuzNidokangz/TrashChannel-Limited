@@ -5598,12 +5598,15 @@ let BattleMovedex = {
 		pp: 10,
 		priority: 0,
 		flags: {protect: 1, reflectable: 1, heal: 1, mystery: 1},
-		onHit(target) {
+		onHit(target, source) {
 			let success = false;
 			if (this.field.isTerrain('grassyterrain')) {
 				success = !!this.heal(this.modify(target.maxhp, 0.667)); // TODO: find out the real value
 			} else {
 				success = !!this.heal(Math.ceil(target.maxhp * 0.5));
+			}
+			if (success && target.side.id !== source.side.id) {
+				target.staleness = 'external';
 			}
 			return success;
 		},
@@ -7355,6 +7358,9 @@ let BattleMovedex = {
 				success = !!this.heal(this.modify(target.maxhp, 0.75));
 			} else {
 				success = !!this.heal(Math.ceil(target.maxhp * 0.5));
+			}
+			if (success && target.side.id !== source.side.id) {
+				target.staleness = 'external';
 			}
 			return success;
 		},
@@ -13438,12 +13444,11 @@ let BattleMovedex = {
 			this.add('-fail', pokemon);
 			return null;
 		},
-		onHit(target) {
-			if (!target.setStatus('slp')) return false;
+		onHit(target, source, move) {
+			if (!target.setStatus('slp', source, move)) return false;
 			target.statusData.time = 3;
 			target.statusData.startTime = 3;
-			this.heal(target.maxhp); //Aeshetic only as the healing happens after you fall asleep in-game
-			this.add('-status', target, 'slp', '[from] move: Rest');
+			this.heal(target.maxhp); // Aesthetic only as the healing happens after you fall asleep in-game
 		},
 		secondary: null,
 		target: "self",
@@ -18260,7 +18265,7 @@ let BattleMovedex = {
 		basePowerCallback(source, target, move) {
 			const callerMoveId = move.sourceEffect || move.id;
 			const moveSlot = callerMoveId === 'instruct' ? source.getMoveData(move.id) : source.getMoveData(callerMoveId);
-			// @ts-ignore
+			if (!moveSlot) return 40;
 			switch (moveSlot.pp) {
 			case 0:
 				return 200;
