@@ -56,3 +56,6 @@ local_settings.py
 .svn
 
 pip-log.txt
+
+# TrashChannel
+!/config/roomintro.html

@@ -24,6 +24,8 @@ const RETRY_AFTER_LOGIN = null;
 
 /** @type {typeof import('../lib/fs').FS} */
 const FS = require(/** @type {any} */('../.lib-dist/fs')).FS;
+const fs = require('fs');
+const path = require('path');
 const Roomlogs = require('./roomlogs');
 
 /*********************************************************
@@ -1053,7 +1055,7 @@ class BasicChatRoom extends BasicRoom {
 		this.filterCaps = false;
 		/** @type {false | number} */
 		this.slowchat = false;
-		this.introMessage = '';
+		this.introMessage = fs.readFileSync(path.resolve(__dirname, '../config/roomintro.html'), 'utf8');
 		this.staffMessage = '';
 		this.autojoin = false;
 		this.staffAutojoin = /** @type {string | boolean} */ (false);
