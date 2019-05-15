@@ -11,7 +11,7 @@ const commands = {
 	om: 'othermetas',
 	othermetas(target, room, user) {
 		if (!this.runBroadcast()) return;
-		target = toId(target);
+		target = toID(target);
 		let buffer = ``;
 
 		if (target === 'all' && this.broadcasting) {
@@ -48,7 +48,7 @@ const commands = {
 	mnm: 'mixandmega',
 	mixandmega(target, room, user) {
 		if (!this.runBroadcast()) return;
-		if (!toId(target) || !target.includes('@')) return this.parse('/help mixandmega');
+		if (!toID(target) || !target.includes('@')) return this.parse('/help mixandmega');
 		let sep = target.split('@');
 		let template = Dex.getTemplate(sep[0]);
 		TrashChannelChatSupport.mixandmegainternal(this, template, sep[1], "");
@@ -60,7 +60,7 @@ const commands = {
 	megastone: 'stone',
 	stone(target) {
 		if (!this.runBroadcast()) return;
-		let targetid = toId(target);
+		let targetid = toID(target);
 		if (!targetid) return this.parse('/help stone');
 		let stone = TrashChannelChatSupport.getMegaStone(targetid);
 		if (!stone.exists) return this.errorReply(`Error: Mega Stone not found.`);
@@ -159,7 +159,7 @@ const commands = {
 	'350': '350cup',
 	'350cup'(target, room, user) {
 		if (!this.runBroadcast()) return;
-		if (!toId(target)) return this.parse('/help 350cup');
+		if (!toID(target)) return this.parse('/help 350cup');
 		let template = Dex.deepClone(Dex.getTemplate(target));
 		if (!template.exists) return this.errorReply("Error: Pokemon not found.");
 		let bst = 0;
@@ -177,7 +177,7 @@ const commands = {
 	ts: 'tiershift',
 	tiershift(target, room, user) {
 		if (!this.runBroadcast()) return;
-		if (!toId(target)) return this.parse('/help tiershift');
+		if (!toID(target)) return this.parse('/help tiershift');
 		let template = Dex.deepClone(Dex.getTemplate(target));
 		if (!template.exists) return this.errorReply("Error: Pokemon not found.");
 		/** @type {{[k: string]: number}} */
@@ -209,7 +209,7 @@ const commands = {
 	scale: 'scalemons',
 	scalemons(target, room, user) {
 		if (!this.runBroadcast()) return;
-		if (!toId(target)) return this.parse(`/help scalemons`);
+		if (!toID(target)) return this.parse(`/help scalemons`);
 		let template = Dex.deepClone(Dex.getTemplate(target));
 		if (!template.exists) return this.errorReply(`Error: Pokemon ${target} not found.`);
 		let stats = ['atk', 'def', 'spa', 'spd', 'spe'];

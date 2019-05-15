@@ -47,7 +47,7 @@ let BattleFormats = {
 			'Cosmog', 'Cosmoem', 'Solgaleo', 'Lunala', 'Necrozma', 'Magearna', 'Marshadow', 'Zeraora',
 		],
 		onValidateSet(set, format) {
-			if (this.gen < 7 && toId(set.item) === 'souldew') {
+			if (this.gen < 7 && toID(set.item) === 'souldew') {
 				return [`${set.name || set.species} has Soul Dew, which is banned in ${format.name}.`];
 			}
 		},
@@ -67,7 +67,7 @@ let BattleFormats = {
 			'Magearna', 'Marshadow', 'Zeraora',
 		],
 		onValidateSet(set, format) {
-			if (this.gen < 7 && toId(set.item) === 'souldew') {
+			if (this.gen < 7 && toID(set.item) === 'souldew') {
 				return [`${set.name || set.species} has Soul Dew, which is banned in ${format.name}.`];
 			}
 		},
@@ -260,7 +260,7 @@ let BattleFormats = {
 						problems.push(`${template.species} transforms in-battle with ${Chat.plural(template.requiredItems.length, "either ") + template.requiredItems.join(" or ")}.`); // Mega or Primal
 					}
 				}
-				if (template.requiredMove && set.moves.indexOf(toId(template.requiredMove)) < 0) {
+				if (template.requiredMove && set.moves.indexOf(toID(template.requiredMove)) < 0) {
 					problems.push(`${template.species} transforms in-battle with ${template.requiredMove}.`); // Meloetta-Pirouette, Rayquaza-Mega
 				}
 				if (!format.noChangeForme) set.species = template.baseSpecies; // Fix battle-only forme
@@ -271,7 +271,7 @@ let BattleFormats = {
 				if (template.requiredItems && !template.requiredItems.includes(item.name)) {
 					problems.push(`${(set.name || set.species)} needs to hold ${Chat.plural(template.requiredItems.length, "either ") + template.requiredItems.join(" or ")}.`); // Memory/Drive/Griseous Orb/Plate/Z-Crystal - Forme mismatch
 				}
-				if (template.requiredMove && set.moves.indexOf(toId(template.requiredMove)) < 0) {
+				if (template.requiredMove && set.moves.indexOf(toID(template.requiredMove)) < 0) {
 					problems.push(`${(set.name || set.species)} needs to have the move ${template.requiredMove}.`); // Keldeo-Resolute
 				}
 
@@ -468,7 +468,7 @@ let BattleFormats = {
 			/**@type {{[k: string]: true}} */
 			let itemTable = {};
 			for (const set of team) {
-				let item = toId(set.item);
+				let item = toID(set.item);
 				if (!item) continue;
 				if (itemTable[item]) {
 					return ["You are limited to one of each item by Item Clause.", "(You have more than one " + this.getItem(item).name + ")"];
@@ -504,7 +504,7 @@ let BattleFormats = {
 				turboblaze: 'moldbreaker',
 			};
 			for (const set of team) {
-				let ability = toId(set.ability);
+				let ability = toID(set.ability);
 				if (!ability) continue;
 				if (ability in base) ability = /** @type {ID} */(base[ability]);
 				if (ability in abilityTable) {
@@ -567,7 +567,7 @@ let BattleFormats = {
 		effectType: 'Rule',
 		name: 'Endless Battle Clause',
 		desc: "Prevents players from forcing a battle which their opponent cannot end except by forfeit",
-		// implemented in sim/battle.js, see https://pokemonshowdown.com/pages/ebc for the specification.
+		// implemented in sim/battle.js, see https://dex.pokemonshowdown.com/articles/battlerules#endlessbattleclause for the specification.
 		onBegin() {
 			this.add('rule', 'Endless Battle Clause: Forcing endless battles is banned');
 		},
@@ -602,7 +602,7 @@ let BattleFormats = {
 			if (!('move:batonpass' in setHas)) return;
 
 			let item = this.getItem(set.item);
-			let ability = toId(set.ability);
+			let ability = toID(set.ability);
 			/**@type {boolean | string} */
 			let speedBoosted = false;
 			/**@type {boolean | string} */
@@ -1029,11 +1029,11 @@ let BattleFormats = {
 		onBegin() {
 			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
 			for (let pokemon of allPokemon) {
-				if (pokemon.ability === toId(pokemon.template.abilities['S'])) {
+				if (pokemon.ability === toID(pokemon.template.abilities['S'])) {
 					continue;
 				}
 				// @ts-ignore
-				pokemon.innates = Object.keys(pokemon.template.abilities).filter(key => key !== 'S' && (key !== 'H' || !pokemon.template.unreleasedHidden)).map(key => toId(pokemon.template.abilities[key])).filter(ability => ability !== pokemon.ability);
+				pokemon.innates = Object.keys(pokemon.template.abilities).filter(key => key !== 'S' && (key !== 'H' || !pokemon.template.unreleasedHidden)).map(key => toID(pokemon.template.abilities[key])).filter(ability => ability !== pokemon.ability);
 			}
 		},
 		onSwitchInPriority: 2,
@@ -1096,7 +1096,7 @@ let BattleFormats = {
 				}
 			}
 			if (pokemon.tier[0] === '(') pokemon.tier = pokemon.tier.slice(1, -1);
-			if (!(pokemon.tier in boosts)) return;
+			if (!(pokemon.tier in boosts)) return pokemon;
 			if (target) {
 				if (target.set.moves.includes('auroraveil')) pokemon.tier = 'UU';
 				if (target.set.ability === 'Drought') pokemon.tier = 'RU';

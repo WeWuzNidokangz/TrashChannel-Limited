@@ -6187,11 +6187,9 @@ let BattleMovedex = {
 		priority: 0,
 		flags: {protect: 1, mirror: 1},
 		onBasePower(basePower, pokemon) {
-			for (const active of pokemon.side.active) {
-				if (active && active.moveThisTurn === 'fusionflare') {
-					this.debug('double power');
-					return this.chainModify(2);
-				}
+			if (this.lastMoveThisTurn && this.lastMoveThisTurn.id === 'fusionflare') {
+				this.debug('double power');
+				return this.chainModify(2);
 			}
 		},
 		secondary: null,
@@ -6214,11 +6212,9 @@ let BattleMovedex = {
 		priority: 0,
 		flags: {protect: 1, mirror: 1, defrost: 1},
 		onBasePower(basePower, pokemon) {
-			for (const active of pokemon.side.active) {
-				if (active && active.moveThisTurn === 'fusionbolt') {
-					this.debug('double power');
-					return this.chainModify(2);
-				}
+			if (this.lastMoveThisTurn && this.lastMoveThisTurn.id === 'fusionbolt') {
+				this.debug('double power');
+				return this.chainModify(2);
 			}
 		},
 		secondary: null,
@@ -15030,8 +15026,8 @@ let BattleMovedex = {
 			if (targetAbility.id !== sourceAbility.id) {
 				source.ability = targetAbility.id;
 				target.ability = sourceAbility.id;
-				source.abilityData = {id: toId(source.ability), target: source};
-				target.abilityData = {id: toId(target.ability), target: target};
+				source.abilityData = {id: toID(source.ability), target: source};
+				target.abilityData = {id: toID(target.ability), target: target};
 			}
 			this.singleEvent('Start', targetAbility, source.abilityData, source);
 			this.singleEvent('Start', sourceAbility, target.abilityData, target);

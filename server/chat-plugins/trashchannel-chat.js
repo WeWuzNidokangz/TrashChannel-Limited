@@ -103,7 +103,7 @@ const commands = {
 	'350ts': '350cuptiershift',
 	'350cuptiershift': function (target, room, user) {
 		if (!this.runBroadcast()) return;
-		if (!toId(target)) return this.parse('/help 350tiershift');
+		if (!toID(target)) return this.parse('/help 350tiershift');
 		let template = Object.assign({}, Dex.getTemplate(target));
 		if (!template.exists) return this.errorReply("Error: Pokemon not found.");
 
@@ -139,7 +139,7 @@ const commands = {
 	tsmnm: 'mixandmegatiershift',
 	mixandmegatiershift(target, room, user) {
 		if (!this.runBroadcast()) return;
-		if (!toId(target) || !target.includes('@')) return this.parse('/help mixandmegatiershift');
+		if (!toID(target) || !target.includes('@')) return this.parse('/help mixandmegatiershift');
 		let sep = target.split('@');
 		let template = Dex.getTemplate(sep[0]);
 
@@ -168,7 +168,7 @@ const commands = {
 	bnb: 'bitchandbeggar',
 	bitchandbeggar: function (target, room, user) {
 		if (!this.runBroadcast()) return;
-		if (!toId(target) || !target.includes('@')) return this.parse('/help bitchandbeggar');
+		if (!toID(target) || !target.includes('@')) return this.parse('/help bitchandbeggar');
 		let sep = target.split('@');
 		let bitchTemplate = Dex.getTemplate(sep[1]);
 		let beggarTemplate = Object.assign({}, Dex.getTemplate(sep[0]));

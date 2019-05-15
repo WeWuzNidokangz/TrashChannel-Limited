@@ -5,7 +5,7 @@
  * @license MIT
  */
 import Dex = require('./dex');
-global.toId = Dex.getId;
+global.toID = Dex.getId;
 import * as Data from './dex-data';
 import {Field} from './field';
 import {Pokemon} from './pokemon';
@@ -100,6 +100,7 @@ export class Battle extends Dex.ModdedDex {
 	activeTarget: Pokemon | null;
 
 	lastMove: Move | null;
+	lastMoveThisTurn: Move | null;
 	lastMoveLine: number;
 	lastDamage: number;
 	abilityOrder: number;
@@ -172,6 +173,7 @@ export class Battle extends Dex.ModdedDex {
 
 		this.lastMove = null;
 		this.lastMoveLine = -1;
+		this.lastMoveThisTurn = null;
 		this.lastDamage = 0;
 		this.abilityOrder = 0;
 
@@ -292,7 +294,11 @@ export class Battle extends Dex.ModdedDex {
 
 	clearActiveMove(failed?: boolean) {
 		if (this.activeMove) {
-			if (!failed) this.lastMove = this.activeMove;
+			this.lastMoveThisTurn = null;
+			if (!failed) {
+				this.lastMove = this.activeMove;
+				this.lastMoveThisTurn = this.activeMove;
+			}
 			this.activeMove = null;
 			this.activePokemon = null;
 			this.activeTarget = null;
@@ -1350,6 +1356,7 @@ export class Battle extends Dex.ModdedDex {
 
 	nextTurn() {
 		this.turn++;
+		this.lastMoveThisTurn = null;
 		const trappedBySide: boolean[] = [];
 		const stalenessBySide: ('internal' | 'external' | undefined)[] = [];
 		for (const side of this.sides) {
@@ -1501,9 +1508,9 @@ export class Battle extends Dex.ModdedDex {
 			let leppa = false; // Leppa Berry
 			let cycle = false; // Harvest or Recycle
 			for (const pokemon of side.pokemon) {
-				if (toId(pokemon.set.item) === 'leppaberry') leppa = true;
-				if (['harvest', 'pickup'].includes(toId(pokemon.set.ability)) ||
-					pokemon.set.moves.map(toId).includes('recycle' as ID)) {
+				if (toID(pokemon.set.item) === 'leppaberry') leppa = true;
+				if (['harvest', 'pickup'].includes(toID(pokemon.set.ability)) ||
+					pokemon.set.moves.map(toID).includes('recycle' as ID)) {
 					cycle = true;
 				}
 				if (leppa && cycle) break;

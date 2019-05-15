@@ -107,7 +107,7 @@ class DexCalculator {
 			'lc' : 15,
 		};
 
-		tier = toId(tier);
+		tier = toID(tier);
 
 		let tierEnum = (tier in tierEnums) ? tierEnums[tier] : 0;
 		return tierEnum;

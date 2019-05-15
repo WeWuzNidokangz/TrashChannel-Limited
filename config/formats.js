@@ -453,7 +453,7 @@ let Formats = [
 		ruleset: ['Pokemon', 'HP Percentage Mod', 'Cancel Mod'],
 		battle: {
 			getAbility(name) {
-				let move = this.getMove(toId(name));
+				let move = this.getMove(toID(name));
 				if (!move.exists) return Object.getPrototypeOf(this).getAbility.call(this, name);
 				return {
 					id: move.id,
@@ -552,7 +552,7 @@ let Formats = [
 		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 7] UU'],
-		banlist: ['UU', 'RUBL', 'Sableye-Mega', 'Aurora Veil'],
+		banlist: ['UU', 'RUBL', 'Aurora Veil'],
 		unbanlist: ['Reuniclus', 'Drought'],
 	},
 	{
@@ -1098,7 +1098,7 @@ let Formats = [
 			// 19/05/06 TrashChannel: Include add-on rules
 			const ruleTable = this.ruleTable;
 			let move = this.dex.getMove(set.ability);
-			if (move.category !== 'Status' || move.status === 'slp' || set.moves.map(toId).includes(move.id)) return this.validateSet(set, teamHas);
+			if (move.category !== 'Status' || move.status === 'slp' || set.moves.map(toID).includes(move.id)) return this.validateSet(set, teamHas);
 			if( ruleTable.has('-illegal') ) {
 				if (restrictedMoves.includes(move.name)) return this.validateSet(set, teamHas);
 			}
@@ -1124,22 +1124,22 @@ let Formats = [
 			return problems.length ? problems : null;
 		},
 		battle: {
-			getAbility(name) {
-				let move = this.getMove(toId(name));
-				if (!move.exists) return Object.getPrototypeOf(this).getAbility.call(this, name);
-				return {
-					id: move.id,
-					name: move.name,
-					onStart(pokemon) {
-						this.add('-activate', pokemon, 'ability: ' + move.name);
-						this.useMove(move.id, pokemon);
-					},
-					toString() {
-						return ""; // for useMove
-					},
-				};
-			},
-		},
+            getAbility(name) {
+                let move = this.getMove(toID(name));
+                if (!move.exists) return Object.getPrototypeOf(this).getAbility.call(this, name);
+                return {
+                    id: move.id,
+                    name: move.name,
+                    onStart(pokemon) {
+                        this.add('-activate', pokemon, 'ability: ' + move.name);
+                        this.useMove(move.id, pokemon);
+                    },
+                    toString() {
+                        return ""; // for useMove
+                    },
+                };
+            },
+        },
 	},
 	{
 		name: "[Gen 7] Ultimate Z",
@@ -1526,7 +1526,7 @@ let Formats = [
 			this.add(`raw|<div class='broadcast-green'><b>Wondering what all these custom moves, abilities, and items do?<br />Check out the <a href="https://www.smogon.com/articles/super-staff-bros-brawl" target="_blank">Super Staff Bros Brawl Guide</a> and find out!</b></div>`);
 		},
 		onSwitchIn(pokemon) {
-			let name = toId(pokemon.illusion ? pokemon.illusion.name : pokemon.name);
+			let name = toID(pokemon.illusion ? pokemon.illusion.name : pokemon.name);
 			if (this.getTemplate(name).exists) {
 				// Certain pokemon have volatiles named after their speciesid
 				// To prevent overwriting those, and to prevent accidentaly leaking
@@ -2874,7 +2874,7 @@ let Formats = [
 					if (Dex.data.FormatsData[speciesid].requiredItem || Dex.data.FormatsData[speciesid].requiredMove) continue;
 					for (let key in pokemon.abilities) {
 						// @ts-ignore
-						let abilityId = toId(pokemon.abilities[key]);
+						let abilityId = toID(pokemon.abilities[key]);
 						if (abilityMap[abilityId]) {
 							abilityMap[abilityId][pokemon.evos ? 'push' : 'unshift'](speciesid);
 						} else {
@@ -2893,7 +2893,7 @@ let Formats = [
 
 			if (problems.length) return problems;
 
-			let species = toId(set.species);
+			let species = toID(set.species);
 			let template = Dex.getTemplate(species);
 			if (!template.exists) return [`The Pokemon "${set.species}" does not exist.`];
 			if( ruleTable.has('-unreleased') ) {
@@ -2903,13 +2903,13 @@ let Formats = [
 			if( ruleTable.has('-pokemontag:uber') ) {
 				if (template.tier === 'Uber' || megaTemplate.tier === 'Uber') return [`${megaTemplate.tier === 'Uber' ? megaTemplate.species : template.species} is banned.`];
 			}
-			if( ruleTable.has('-pokemon:'+toId(template.species) ) ) {
+			if( ruleTable.has('-pokemon:'+toID(template.species) ) ) {
 				return [`${template.species} + 'is banned.`];
 			}
 
 			let name = set.name;
 
-			let abilityId = toId(set.ability);
+			let abilityId = toID(set.ability);
 
 			if (!abilityId || !(abilityId in Dex.data.Abilities)) return [`${name} needs to have a valid ability.`];
 			// @ts-ignore
@@ -2979,7 +2979,7 @@ let Formats = [
 				if (pokemon.baseAbility.includes('0')) {
 					let donor = pokemon.baseAbility.split('0')[1];
 					// @ts-ignore
-					pokemon.donor = toId(donor);
+					pokemon.donor = toID(donor);
 					pokemon.baseAbility = pokemon.baseAbility.split('0')[0];
 					pokemon.ability = pokemon.baseAbility;
 				}
@@ -3008,11 +3008,11 @@ let Formats = [
 		onBegin() {
 			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
 			for (let pokemon of allPokemon) {
-				if (pokemon.ability === toId(pokemon.template.abilities['S'])) {
+				if (pokemon.ability === toID(pokemon.template.abilities['S'])) {
 					continue;
 				}
 				// @ts-ignore
-				pokemon.innates = Object.keys(pokemon.template.abilities).filter(key => key !== 'S' && (key !== 'H' || !pokemon.template.unreleasedHidden)).map(key => toId(pokemon.template.abilities[key])).filter(ability => ability !== pokemon.ability);
+				pokemon.innates = Object.keys(pokemon.template.abilities).filter(key => key !== 'S' && (key !== 'H' || !pokemon.template.unreleasedHidden)).map(key => toID(pokemon.template.abilities[key])).filter(ability => ability !== pokemon.ability);
 			}
 		},
 		onSwitchInPriority: 2,
@@ -3157,7 +3157,7 @@ let Formats = [
 			for (const set of team) {
 				if(undefined === ourFormat.determineMeta) continue;
 				let setMetaKey = ourFormat.determineMeta.call(this, set, null);
-				let setMetaKeyId = toId(setMetaKey);
+				let setMetaKeyId = toID(setMetaKey);
 
 				console.log("setMetaKeyId: " + setMetaKeyId);
 
@@ -3418,7 +3418,7 @@ let Formats = [
 		onSwitchIn(pokemon) {
 			if(pokemon.meta) {
 				// Place volatiles on the Pokémon to show its meta if defined
-				this.add('-start', pokemon, toId(pokemon.meta), '[silent]');
+				this.add('-start', pokemon, toID(pokemon.meta), '[silent]');
 
 				let metaFormat = this.getFormat(pokemon.meta);
 				if(metaFormat.onSwitchIn) {
@@ -3616,7 +3616,7 @@ let Formats = [
 			//console.log("oAbilitySlot: " + oAbilitySlot);
 			// @ts-ignore
 			let postBeggarAbilityName = mixedTemplate.abilities[oAbilitySlot];
-			let postBeggarAbilityId = toId(postBeggarAbilityName);
+			let postBeggarAbilityId = toID(postBeggarAbilityName);
 			//console.log("postBeggarAbilityId: " + postBeggarAbilityId);
 			let abilityTest = '-ability:'+postBeggarAbilityId;
 			//console.log("abilityTest: " + abilityTest);

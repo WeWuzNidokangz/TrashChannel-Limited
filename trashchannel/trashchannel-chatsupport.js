@@ -26,7 +26,7 @@ class TrashChannelChatSupport {
 	static getMegaStone(stone) {
 		let item = Dex.getItem(stone);
 		if (!item.exists) {
-			if (toId(stone) === 'dragonascent') {
+			if (toID(stone) === 'dragonascent') {
 				let move = Dex.getMove(stone);
 				return {
 					id: move.id,
@@ -76,7 +76,7 @@ class TrashChannelChatSupport {
 		if (stone.isUnreleased) {
 			commandContext.errorReply(`Warning: ${stone.name} is unreleased and is not usable in current Mix and Mega.`);
 		}
-		if (toId(stoneName) === 'dragonascent' && !['smeargle', 'rayquaza', 'rayquazamega'].includes(toId(template.name))) {
+		if (toID(stoneName) === 'dragonascent' && !['smeargle', 'rayquaza', 'rayquazamega'].includes(toID(template.name))) {
 			commandContext.errorReply(`Warning: Only Pokemon with access to Dragon Ascent can mega evolve with Mega Rayquaza's traits.`);
 		}
 		// Fake Pokemon and Mega Stones

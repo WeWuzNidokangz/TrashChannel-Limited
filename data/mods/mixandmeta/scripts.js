@@ -132,8 +132,8 @@ let BattleScripts = {
 		// Limit one mega evolution
 		let wasMega = pokemon.canMegaEvo;
 		for (const ally of side.pokemon) {
-			//console.log("ally meta: " + toId(ally.meta));
-			let allyIsMnM = ('gen7mixandmega' === toId(ally.meta)); // MnM mons can still mega
+			//console.log("ally meta: " + toID(ally.meta));
+			let allyIsMnM = ('gen7mixandmega' === toID(ally.meta)); // MnM mons can still mega
 			if(allyIsMnM) continue;
 
 			if (wasMega) {
