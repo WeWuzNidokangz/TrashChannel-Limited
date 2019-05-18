@@ -1110,6 +1110,11 @@ let BattleFormats = {
 			return pokemon;
         },
 	},
+	suicidecuprule: {
+		effectType: 'Rule',
+		name: 'Suicide Cup Rule',
+		desc: "The mod for Suicide Cup: Victory is obtained when all of your Pok&eacute;mon have fainted.",
+	},
 	// Original Metas
 	bitchandbeggarrule: {
 		effectType: 'Rule',
