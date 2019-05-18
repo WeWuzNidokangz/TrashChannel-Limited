@@ -912,7 +912,7 @@ let BattleFormats = {
 		},
 	},
 	aaastandardpackage: {
-		effectType: 'ValidatorRule',
+		effectType: 'Rule',
 		name: 'AAA Standard Package',
 		desc: "Standard package of rulesets for Almost Any Ability.",
 		ruleset: ['Ability Clause', 'Ignore Illegal Abilities', 'AAA Restrictions Validation'],
@@ -963,7 +963,7 @@ let BattleFormats = {
 		},
 	},
 	mixandmegastandardvalidation: {
-		effectType: 'Rule',
+		effectType: 'ValidatorRule',
 		name: 'Mix and Mega Standard Validation',
 		desc: "Standard validation for Mix and Mega.",
 		onValidateTeam(team) {
@@ -1017,7 +1017,7 @@ let BattleFormats = {
 		},
 	},
 	mixandmegastandardpackage: {
-		effectType: 'ValidatorRule',
+		effectType: 'Rule',
 		name: 'Mix and Mega Standard Package',
 		desc: "Standard package of rulesets for Mix and Mega (insufficient to run MnM without mod, crashes when called though Mix and Meta).",
 		ruleset: ['Mix and Mega Standard Validation', 'Mix and Mega Battle Effects'],
@@ -1110,10 +1110,64 @@ let BattleFormats = {
 			return pokemon;
         },
 	},
-	suicidecuprule: {
+	suicidecupbattleeffects: {
 		effectType: 'Rule',
-		name: 'Suicide Cup Rule',
+		name: 'Suicide Cup Battle Effects',
 		desc: "The mod for Suicide Cup: Victory is obtained when all of your Pok&eacute;mon have fainted.",
+	},
+	suicidecupstandardteamvalidation: {
+		effectType: 'ValidatorRule',
+		name: 'Suicide Cup Standard Team Validation',
+		desc: "Standard team validation for Suicide Cup.",
+		onValidateTeam: function (team) {
+            let problems = [];
+            if (team.length !== 6) problems.push(`Your team cannot have less than 6 Pok\u00e9mon.`);
+            let families = {};
+            for (const set of team) {
+                let pokemon = this.getTemplate(set.species);
+                if (pokemon.baseSpecies) pokemon = this.getTemplate(pokemon.baseSpecies);
+                if (pokemon.prevo) {
+                    pokemon = this.getTemplate(pokemon.prevo);
+                    if (pokemon.prevo) {
+                        pokemon = this.getTemplate(pokemon.prevo);
+                    }
+                }
+                if (!families[pokemon.species]) families[pokemon.species] = [];
+                families[pokemon.species].push(set.species);
+            }
+            for (const family in families) {
+                if (families[family].length > 1) problems.push(`${Chat.toListString(families[family])} are in the same evolutionary family.`);
+            }
+            return problems;
+        },
+	},
+	suicidecupstandardsetvalidation: {
+		effectType: 'ValidatorRule',
+		name: 'Suicide Cup Standard Set Validation',
+		desc: "Standard set validation for Suicide Cup.",
+		onValidateSet(set, format) {
+			let nRequiredLevel = 100;
+			if(format.forcedLevel) {
+				nRequiredLevel = format.forcedLevel;
+			}
+			else if(format.maxForcedLevel) {
+				nRequiredLevel = format.maxForcedLevel;
+			}
+			//const format = Dex.getFormat(this.format, true);
+			let ruleTable = this.getRuleTable(format);
+			if(ruleTable.has('littlecup')) {
+				nRequiredLevel = 5;
+			}
+			if(set.level !== nRequiredLevel) {
+				return ["" + set.species + " is level " + set.level.toString() + ", but the format requires a level of " + nRequiredLevel.toString() + "."];
+			}
+		},
+	},
+	suicidecupstandardpackage: {
+		effectType: 'Rule',
+		name: 'Suicide Cup Standard Package',
+		desc: "Standard package of rulesets for Suicide Cup.",
+		ruleset: ['Suicide Cup Battle Effects', 'Suicide Cup Standard Team Validation', 'Suicide Cup Standard Set Validation'],
 	},
 	// Original Metas
 	bitchandbeggarrule: {
