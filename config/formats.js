@@ -1107,7 +1107,14 @@ let Formats = [
 			if(ruleTable) {
 				ruleTable.forEach((v, rule) => {
 					//console.log("Trademarked rule: " + rule);
-					sAddOnRulesString += ','+rule;
+					if(rule.includes('basepokemon:')) {
+						let sEditedRule = rule;
+						sEditedRule = sEditedRule.replace('basepokemon:', 'pokemon:');
+						sAddOnRulesString += ','+sEditedRule;
+					}
+					else {
+						sAddOnRulesString += ','+rule;
+					}
 				});
 			}
 			let validator = new TeamValidator(Dex.getFormat(this.format.id + '@@@ignoreillegalabilities'+sAddOnRulesString));
