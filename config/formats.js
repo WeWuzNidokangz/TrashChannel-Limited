@@ -1103,21 +1103,9 @@ let Formats = [
 				if (restrictedMoves.includes(move.name)) return this.validateSet(set, teamHas);
 			}
 			let TeamValidator = /** @type {new(format: string | Format) => Validator} */ (this.constructor);
-			let sAddOnRulesString = '';
-			if(ruleTable) {
-				ruleTable.forEach((v, rule) => {
-					//console.log("Trademarked rule: " + rule);
-					if(rule.includes('basepokemon:')) {
-						let sEditedRule = rule;
-						sEditedRule = sEditedRule.replace('basepokemon:', 'pokemon:');
-						sAddOnRulesString += ','+sEditedRule;
-					}
-					else {
-						sAddOnRulesString += ','+rule;
-					}
-				});
-			}
-			let validator = new TeamValidator(Dex.getFormat(this.format.id + '@@@ignoreillegalabilities'+sAddOnRulesString));
+			let customRules = this.format.customRules || [];
+			if (!customRules.includes('ignoreillegalabilities')) customRules.push('ignoreillegalabilities');
+			let validator = new TeamValidator(Dex.getFormat(this.format.id + '@@@' + customRules.join(',')));
 			let moves = set.moves;
 			set.moves = [set.ability];
 			set.ability = '';
