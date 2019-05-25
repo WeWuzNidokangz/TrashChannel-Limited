@@ -611,6 +611,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
+		challengeShow: false,
 		searchShow: false,
 		maxLevel: 5,
 		ruleset: ['[Gen 7] LC'],
@@ -1736,6 +1737,8 @@ let Formats = [
 		],
 
 		mod: 'gen6',
+		challengeShow: false,
+		searchShow: false,
 		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Swagger Clause'],
 		banlist: ['Uber', 'Arena Trap', 'Shadow Tag', 'Soul Dew', 'Baton Pass'],
 	},
