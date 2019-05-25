@@ -1,7 +1,9 @@
 'use strict';
 
 const DexCalculator = require('../../../trashchannel/dex-calculator');
-global.Dex = require(/** @type {any} */ ('../../../.sim-dist/dex')).includeData();
+
+/** @type {typeof import('../../../sim/dex').Dex} */
+global.Dex = require(/** @type {any} */ ('../../../.sim-dist/dex')).Dex;
 
 /**@type {{[k: string]: MixedMeta}} */
 let MixedMetaCollection = {
