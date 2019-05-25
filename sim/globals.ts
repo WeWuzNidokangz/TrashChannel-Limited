@@ -889,7 +889,7 @@ interface ActiveMove extends BasicEffect, MoveData {
 	allies?: Pokemon[]
 	auraBooster?: Pokemon
 	causedCrashDamage?: boolean
-	forceStatus?: string
+	forceStatus?: ID
 	galvanizeBoosted?: boolean
 	hasAuraBreak?: boolean
 	hasBounced?: boolean
@@ -903,6 +903,7 @@ interface ActiveMove extends BasicEffect, MoveData {
 	pranksterBoosted?: boolean
 	refrigerateBoosted?: boolean
 	selfDropped?: boolean
+	selfSwitch?: ID | boolean
 	spreadHit?: boolean
 	stab?: number
 	statusRoll?: string
