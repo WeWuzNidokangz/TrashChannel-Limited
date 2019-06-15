@@ -580,7 +580,10 @@ const commands = {
 
 		if (!targetUser || !targetUser.connected) return this.errorReply(`User ${this.targetUsername} is not currently online.`);
 		if (!(targetUser in room.users) && !user.can('addhtml')) return this.errorReply("You do not have permission to use this command to users who are not in this room.");
-		if (targetUser.blockPMs && targetUser.blockPMs !== user.group && !user.can('lock')) return this.errorReply("This user is currently blocking PMs.");
+		if (targetUser.blockPMs && targetUser.blockPMs !== user.group && !user.can('lock')) {
+			Chat.maybeNotifyBlocked('pm', targetUser, user);
+			return this.errorReply("This user is currently blocking PMs.");
+		}
 		if (targetUser.locked && !user.can('lock')) return this.errorReply("This user is currently locked, so you cannot send them a pminfobox.");
 
 		// Apply the infobox to the message
@@ -606,7 +609,10 @@ const commands = {
 
 		if (!targetUser || !targetUser.connected) return this.errorReply(`User ${this.targetUsername} is not currently online.`);
 		if (!(targetUser in room.users) && !user.can('addhtml')) return this.errorReply("You do not have permission to use this command to users who are not in this room.");
-		if (targetUser.blockPMs && targetUser.blockPMs !== user.group && !user.can('lock')) return this.errorReply("This user is currently blocking PMs.");
+		if (targetUser.blockPMs && targetUser.blockPMs !== user.group && !user.can('lock')) {
+			Chat.maybeNotifyBlocked('pm', targetUser, user);
+			return this.errorReply("This user is currently blocking PMs.");
+		}
 		if (targetUser.locked && !user.can('lock')) return this.errorReply("This user is currently locked, so you cannot send them UHTML.");
 
 		let message = `|pm|${user.getIdentity()}|${targetUser.getIdentity()}|/uhtml${(cmd === 'pmuhtmlchange' ? 'change' : '')} ${target}`;
@@ -1907,7 +1913,7 @@ const commands = {
 		let affected = [];
 
 		if (targetUser) {
-			affected = Punishments.lock(targetUser, duration, null, userReason);
+			affected = Punishments.lock(targetUser, duration, targetUser.locked, userReason);
 		} else {
 			affected = Punishments.lock(null, duration, userid, userReason);
 		}
@@ -2599,7 +2605,6 @@ const commands = {
 
 		this.globalModlog("NAMELOCK", targetUser, ` by ${user.userid}${reasonText}`);
 		Ladders.cancelSearches(targetUser);
-		Chat.forceRenames.delete(targetUser.userid);
 		Punishments.namelock(targetUser, null, null, reason);
 		targetUser.popup(`|modal|${user.name} has locked your name and you can't change names anymore${reasonText}`);
 		return true;
@@ -4261,6 +4266,7 @@ const commands = {
 			let targetUser = Users.get(target);
 			if (!trustable || !targetUser) {
 				connection.send('|queryresponse|userdetails|' + JSON.stringify({
+					id: target,
 					userid: toID(target),
 					rooms: false,
 				}));
@@ -4288,12 +4294,14 @@ const commands = {
 			}
 			if (!targetUser.connected) roomList = false;
 			let userdetails = {
+				id: target,
 				userid: targetUser.userid,
 				avatar: targetUser.avatar,
 				group: targetUser.group,
 				autoconfirmed: !!targetUser.autoconfirmed,
 				rooms: roomList,
 			};
+			if (targetUser.userid !== target) userdetails.name = targetUser.name;
 			connection.send('|queryresponse|userdetails|' + JSON.stringify(userdetails));
 		} else if (cmd === 'roomlist') {
 			if (!trustable) return false;
@@ -4314,8 +4322,11 @@ const commands = {
 			if (!trustable) return false;
 
 			let targetRoom = Rooms.get(target);
-			if (!targetRoom || targetRoom === Rooms.global) return false;
-			if (targetRoom.isPrivate && !user.inRooms.has(targetRoom.id) && !user.games.has(targetRoom.id)) {
+			if (!targetRoom || targetRoom === Rooms.global || (
+				targetRoom.isPrivate && !user.inRooms.has(targetRoom.id) && !user.games.has(targetRoom.id)
+			)) {
+				const roominfo = {id: target, error: 'not found or access denied'};
+				connection.send(`|queryresponse|roominfo|${JSON.stringify(roominfo)}`);
 				return false;
 			}
 
@@ -4327,7 +4338,8 @@ const commands = {
 			}
 
 			let roominfo = {
-				id: targetRoom.id,
+				id: target,
+				roomid: targetRoom.id,
 				title: targetRoom.title,
 				type: targetRoom.type,
 				visibility: visibility,
@@ -4347,7 +4359,7 @@ const commands = {
 
 			for (let userid in targetRoom.users) {
 				let user = targetRoom.users[userid];
-				let userinfo = user.getIdentity(room.id);
+				let userinfo = user.getIdentity(targetRoom.id);
 				roominfo.users.push(userinfo);
 			}
 
