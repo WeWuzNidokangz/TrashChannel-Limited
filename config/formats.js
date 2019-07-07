@@ -26,6 +26,36 @@ let Formats = [
 		section: "Mashups Spotlight",
 	},
 	{
+		name: "[Gen 7] Pure Hackmons",
+		desc: `Anything that can be hacked in-game and is usable in local battles is allowed, with no bans or clauses.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/articles/pure-hackmons-introduction">Pure Hackmons Introduction</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3635904/page-4#post-7866923">Pure Hackmons Viability Rankings</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/old-generations-of-hackmons-megathread.3649618/">Pure Hackmons Old Gens Megathread</a>`,
+		],
+
+		mod: 'gen7',
+		ruleset: ['Pokemon', 'Endless Battle Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod'],
+	},
+	{
+		section: "Official OM Mashups (Singles)",
+	},
+	{
+		name: "[Gen 7] Mix and Mega Anything Goes",
+		desc: `Mega Stones and Primal Orbs can be used on any fully evolved Pok&eacute;mon with no Mega Evolution limit, and no bans or clauses.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3635904/#post-7802586">MnM AG Resources</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3587441/">Vanilla Anything Goes</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3587740/">Vanilla Mix and Mega</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3591580/">Vanilla Mix and Mega Resources</a>`,
+		],
+
+		mod: 'mixandmega',
+		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Mix and Mega Battle Effects'],
+		restrictedStones: ['Ultranecrozium Z'],
+		cannotMega: [],
+	},
+	{
 		name: "[Gen 7] Almost Any Ability Ubers",
 		desc: `Pok&eacute;mon can use any ability, barring the few that are restricted to their natural users, in an Ubers environment.`,
 		threads: [
@@ -43,36 +73,6 @@ let Formats = [
 			'Parental Bond', 'Protean', 'Pure Power', 'Simple', 'Speed Boost', 'Stakeout', 'Water Bubble', 'Wonder Guard',
 			'Arena Trap', 'Shadow Tag', // For Ubers
 		],
-	},
-	{
-		section: "Official OM Mashups (Singles)",
-	},
-	{
-		name: "[Gen 7] Pure Hackmons",
-		desc: `Anything that can be hacked in-game and is usable in local battles is allowed, with no bans or clauses.`,
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/articles/pure-hackmons-introduction">Pure Hackmons Introduction</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3635904/page-4#post-7866923">Pure Hackmons Viability Rankings</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/old-generations-of-hackmons-megathread.3649618/">Pure Hackmons Old Gens Megathread</a>`,
-		],
-
-		mod: 'gen7',
-		ruleset: ['Pokemon', 'Endless Battle Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod'],
-	},
-	{
-		name: "[Gen 7] Mix and Mega Anything Goes",
-		desc: `Mega Stones and Primal Orbs can be used on any fully evolved Pok&eacute;mon with no Mega Evolution limit, and no bans or clauses.`,
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3635904/#post-7802586">MnM AG Resources</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3587441/">Vanilla Anything Goes</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3587740/">Vanilla Mix and Mega</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3591580/">Vanilla Mix and Mega Resources</a>`,
-		],
-
-		mod: 'mixandmega',
-		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Mix and Mega Battle Effects'],
-		restrictedStones: ['Ultranecrozium Z'],
-		cannotMega: [],
 	},
 	{
 		name: "[Gen 7] CAAAmomons",
