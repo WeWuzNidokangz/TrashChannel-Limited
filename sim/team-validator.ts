@@ -9,7 +9,7 @@
 
 import {Dex} from './dex';
 
-export class Validator {
+export class TeamValidator {
 	readonly format: Format;
 	readonly dex: ModdedDex;
 	readonly ruleTable: RuleTable;
@@ -331,7 +331,7 @@ export class Validator {
 			return problems;
 		}
 
-		set.ivs = Validator.fillStats(set.ivs, 31);
+		set.ivs = TeamValidator.fillStats(set.ivs, 31);
 		let ivs: StatsTable = set.ivs;
 		const maxedIVs = Object.values(ivs).every(stat => stat === 31);
 
@@ -393,7 +393,7 @@ export class Validator {
 				}
 				ivs.hp = -1;
 			} else if (!canBottleCap) {
-				ivs = set.ivs = Validator.fillStats(dex.getType(set.hpType).HPivs, 31);
+				ivs = set.ivs = TeamValidator.fillStats(dex.getType(set.hpType).HPivs, 31);
 			}
 		}
 		if (set.hpType === 'Fighting' && ruleTable.has('pokemon')) {
@@ -451,16 +451,12 @@ export class Validator {
 		}
 		if(!ignoreNonCriticalProblems) {
 			if (dex.gen <= 2 || dex.gen !== 6 && (format.id.endsWith('hackmons') || format.name.includes('BH'))) {
-				if (!set.evs) set.evs = Validator.fillStats(null, 252);
+				if (!set.evs) set.evs = TeamValidator.fillStats(null, 252);
 				const evTotal = (set.evs.hp || 0) + (set.evs.atk || 0) + (set.evs.def || 0) +
 					(set.evs.spa || 0) + (set.evs.spd || 0) + (set.evs.spe || 0);
 				if (evTotal === 508 || evTotal === 510) {
 					problems.push(`${name} has exactly 510 EVs, but this format does not restrict you to 510 EVs: you can max out every EV (If this was intentional, add exactly 1 to one of your EVs, which won't change its stats but will tell us that it wasn't a mistake).`);
 				}
-			}
-			const noEVs = (!set.evs || !Object.values(set.evs).some(value => value > 0));
-			if (noEVs && !format.debug && !format.id.includes('letsgo')) {
-				problems.push(`${name} has exactly 0 EVs - did you forget to EV it? (If this was intentional, add exactly 1 to one of your EVs, which won't change its stats but will tell us that it wasn't a mistake).`);
 			}
 		}
 
@@ -713,7 +709,7 @@ export class Validator {
 			}
 		} else {
 			requiredIVs = eventData.perfectIVs || 0;
-			if (eventData.generation >= 6 && eventData.perfectIVs === undefined && Validator.hasLegendaryIVs(template)) {
+			if (eventData.generation >= 6 && eventData.perfectIVs === undefined && TeamValidator.hasLegendaryIVs(template)) {
 				requiredIVs = 3;
 			}
 		}
@@ -1333,12 +1329,8 @@ export class Validator {
 		}
 		return filledStats;
 	}
-}
 
-function getValidator(format: string | Format) {
-	return new Validator(format);
+	static get(format: string | Format) {
+		return new TeamValidator(format);
+	}
 }
-
-export const TeamValidator = Object.assign(getValidator, {
-	Validator,
-});

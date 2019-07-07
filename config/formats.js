@@ -549,7 +549,7 @@ let Formats = [
 	{
 		name: "[Gen 7] UU",
 		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3641851/">UU Metagame Discussion</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3651932/">UU Metagame Discussion</a>`,
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3641346/">UU Viability Rankings</a>`,
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3621217/">UU Sample Teams</a>`,
 		],
@@ -573,7 +573,7 @@ let Formats = [
 		searchShow: false,
 		ruleset: ['[Gen 7] UU'],
 		banlist: ['UU', 'RUBL', 'Aurora Veil'],
-		unbanlist: ['Drought'],
+		unbanlist: ['Absol-Mega', 'Drought'],
 	},
 	{
 		name: "[Gen 7] NU",
@@ -636,11 +636,11 @@ let Formats = [
 		ruleset: ['[Gen 7] LC'],
 		banlist: [
 			// LC
-			'Abra', 'Bunnelby', 'Carvanha', 'Chinchou', 'Corphish', 'Croagunk', 'Diglett-Base', 'Doduo', 'Dwebble',
-			'Ferroseed', 'Foongus', 'Gastly', 'Grimer-Alola', 'Magnemite', 'Mareanie', 'Meowth-Base', 'Mienfoo',
-			'Mudbray', 'Onix', 'Pawniard', 'Pikipek', 'Ponyta', 'Scraggy', 'Shellder', 'Snivy', 'Snubbull', 'Spritzee',
-			'Staryu', 'Surskit', 'Timburr', 'Tirtouga', 'Torchic', 'Trapinch', 'Vullaby', 'Vulpix-Alola', 'Zigzagoon',
-			// LCBL
+			'Abra', 'Bunnelby', 'Carvanha', 'Chinchou', 'Clamperl', 'Corphish', 'Croagunk', 'Dewpider', 'Diglett-Base',
+			'Doduo', 'Drilbur', 'Dwebble', 'Elekid', 'Ferroseed', 'Foongus', 'Frillish', 'Gastly', 'Grimer-Alola', 'Magnemite',
+			'Mareanie', 'Mienfoo', 'Mudbray', 'Munchlax', 'Omanyte', 'Onix', 'Pawniard', 'Ponyta', 'Scraggy', 'Shellder',
+			'Snivy', 'Snubbull', 'Spritzee', 'Staryu', 'Surskit', 'Timburr', 'Tirtouga', 'Vullaby', 'Vulpix-Alola', 'Zigzagoon',
+			// LC UUBL
 			'Magby', 'Rufflet', 'Wynaut', 'Deep Sea Tooth',
 		],
 	},
@@ -734,7 +734,10 @@ let Formats = [
 		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 7] OU', 'Allow CAP'],
-		banlist: ['Crucibelle + Head Smash', 'Crucibelle + Low Kick', 'Tomohawk + Earth Power', 'Tomohawk + Reflect'],
+		banlist: [
+			'Aurumoth + Quiver Dance', 'Crucibelle + Head Smash', 'Crucibelle + Low Kick',
+			'Tomohawk + Earth Power', 'Tomohawk + Reflect',
+		],
 	},
 	{
 		name: "[Gen 7] CAP LC",
@@ -950,6 +953,16 @@ let Formats = [
 				if (legends.includes(baseSpecies)) n++;
 				if (n > 2) return [`You can only use up to two legendary Pok\u00E9mon.`];
 			}
+			let leader = this.dex.deepClone(set);
+			leader.species = teamHas.leader;
+			let problems = this.validateSet(leader, teamHas);
+			if (problems) return problems;
+			set.ability = this.dex.getTemplate(set.species || set.name).abilities['0'];
+			// @ts-ignore
+			set.follower = true;
+			problems = this.validateSet(set, teamHas);
+			set.ability = leader.ability;
+			return problems;
 		},
 	},
 	{
@@ -1322,17 +1335,22 @@ let Formats = [
 		],
 
 		mod: 'gen7',
-		// searchShow: false,
+		searchShow: false,
 		ruleset: ['[Gen 7] OU', 'STABmons Move Legality'],
 		banlist: ['Aerodactyl-Mega', 'Blacephalon', 'Kartana', 'Komala', 'Kyurem-Black', 'Porygon-Z', 'Silvally', 'Tapu Koko', 'Tapu Lele', 'Thundurus-Base', 'King\'s Rock', 'Razor Fang'],
 		restrictedMoves: ['Acupressure', 'Belly Drum', 'Chatter', 'Extreme Speed', 'Geomancy', 'Lovely Kiss', 'Shell Smash', 'Shift Gear', 'Spore', 'Thousand Arrows'],
 	},
 	{
 		name: "[Gen 7] Tier Shift",
+		desc: "Pok&eacute;mon below OU get all their stats boosted. UU/RUBL get +10, RU/NUBL get +20, NU/PUBL get +30, and PU or lower get +40.",
+		threads: [
+			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3610073/\">Tier Shift</a>",
+		],
+
+		mod: 'gen7',
+		searchShow: false,
 		ruleset: ['[Gen 7] OU', 'Tier Shift Rule'],
 		banlist: ['Damp Rock', 'Deep Sea Tooth', 'Eviolite'],
-		desc: '<a href="http://www.smogon.com/forums/threads/3610073/">Tier Shift</a>: Pokemon get a +10 boost to each stat per tier below OU they are in. UU gets +10, RU +20, NU +30, and PU +40.',
-		mod: 'gen7',
 	},
 	{
 		name: "[Gen 7] Partners in Crime",
@@ -1770,7 +1788,7 @@ let Formats = [
 		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Pokemon', 'Standard', 'Evasion Abilities Clause', 'Baton Pass Clause', 'Swagger Clause', 'Team Preview'],
-		banlist: ['Uber', 'Arena Trap', 'Drizzle ++ Swift Swim', 'Drought ++ Chlorophyll', 'Sand Rush', 'Soul Dew'],
+		banlist: ['Uber', 'Arena Trap', 'Drizzle ++ Swift Swim', 'Drought ++ Chlorophyll', 'Sand Rush', 'Shadow Tag', 'Soul Dew'],
 	},
 	{
 		name: "[Gen 4] OU",
@@ -2314,6 +2332,7 @@ let Formats = [
 		searchShow: false,
 		ruleset: ['[Gen 4] OU'],
 		banlist: ['OU', 'UUBL'],
+		unbanlist: ['Sand Veil'],
 	},
 	{
 		name: "[Gen 4] NU",
@@ -2327,7 +2346,6 @@ let Formats = [
 		searchShow: false,
 		ruleset: ['[Gen 4] UU'],
 		banlist: ['UU', 'NUBL'],
-		unbanlist: ['Sand Veil'],
 	},
 	{
 		name: "[Gen 4] LC",
