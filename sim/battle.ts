@@ -2308,7 +2308,7 @@ export class Battle extends Dex.ModdedDex {
 		//#region TrashChannel
 		const format = Dex.getFormat(this.format, true);
 		let ruleTable = this.getRuleTable(format);
-		if(ruleTable.has('suicidecuprule')) {
+		if(ruleTable.has('suicidecupbattleeffects')) {
 			if (!team1PokemonLeft && !team2PokemonLeft && !team3PokemonLeft && !team4PokemonLeft) {
 				this.win(faintData ? faintData.target.side.foe : null);
 				return true;

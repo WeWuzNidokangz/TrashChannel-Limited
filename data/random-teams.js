@@ -12,6 +12,11 @@ const randomBSSFactorySets = require('./bss-factory-sets.json');
 // @ts-ignore
 const randomFactorySets = require('./factory-sets.json');
 
+const fs = require('fs');
+const path = require('path');
+
+const SCUSEFULMOVES = path.resolve(__dirname, '../data/mods/suicidecup/usefulmoves');
+
 /**
  * @typedef {Object} TeamData
  * @property {{[k: string]: number}} typeCount
@@ -2367,6 +2372,7 @@ class RandomTeams extends Dex.ModdedDex {
 	}
 
 //#region TrashChannel
+
 	randomHCTMTeam() { // Team for Trademarked: Hackmons Cup
 		let team = this.randomHCTeam();
 
@@ -2387,6 +2393,450 @@ class RandomTeams extends Dex.ModdedDex {
 		}
 
 		return team;
+	}
+
+	/**
+	 * @param {string | Template} template
+	 * @param {number} [slot]
+	 * @param {RandomTeamsTypes.TeamDetails} [teamDetails]
+	 * @param {boolean} [isDoubles]
+	 * @return {RandomTeamsTypes.RandomSet}
+	 */
+	suicideCupRandomSet(template, slot = 1, teamDetails = {}, isDoubles = false) {
+		template = this.getTemplate(template);
+		let baseTemplate = template;
+		let species = template.species;
+
+		if (!template.exists || ((!isDoubles || !template.randomDoubleBattleMoves) && !template.randomBattleMoves && !template.learnset)) {
+			// GET IT? UNOWN? BECAUSE WE CAN'T TELL WHAT THE POKEMON IS
+			template = this.getTemplate('unown');
+
+			let err = new Error('Template incompatible with random battles: ' + species);
+			Monitor.crashlog(err, 'The randbat set generator');
+		}
+
+		if (template.battleOnly) {
+			// Only change the species. The template has custom moves, and may have different typing and requirements.
+			species = template.baseSpecies;
+		}
+		let battleForme = this.checkBattleForme(template);
+		if (battleForme && battleForme.randomBattleMoves && template.otherFormes && (battleForme.isMega ? !teamDetails.megaStone : this.random(2))) {
+			template = this.getTemplate(template.otherFormes.length >= 2 ? this.sample(template.otherFormes) : template.otherFormes[0]);
+		}
+
+		// Load Suicide Cup useful moves array
+		/**@type {string[][]} */
+		let SCUsefulMoves;
+		try {
+			SCUsefulMoves = require(SCUSEFULMOVES).SuicideCupUsefulMoves;
+		} catch (e) {
+			console.log('e.code: ' + e.code);
+			if (e.code !== 'MODULE_NOT_FOUND' && e.code !== 'ENOENT') {
+				throw e;
+			}
+			SCUsefulMoves = null;
+		}
+		let nSCUMTierCount = SCUsefulMoves.length;
+
+		let movePool = template.learnset ? Object.keys(template.learnset) : []; // Directly use the learnset as a movepool
+		/**@type {string[]} */
+		let moves = [];
+		let ability = '';
+		let item = '';
+		let evs = {
+			hp: 0,
+			atk: 0,
+			def: 0,
+			spa: 0,
+			spd: 0,
+			spe: 255,
+		};
+		let ivs = {
+			hp: 0,
+			atk: 0,
+			def: 0,
+			spa: 0,
+			spd: 0,
+			spe: 31,
+		};
+		/**@type {{[k: string]: true}} */
+		let hasType = {};
+		hasType[template.types[0]] = true;
+		if (template.types[1]) {
+			hasType[template.types[1]] = true;
+		}
+		/**@type {{[k: string]: true}} */
+		let hasAbility = {};
+		hasAbility[template.abilities[0]] = true;
+		if (template.abilities[1]) {
+			// @ts-ignore
+			hasAbility[template.abilities[1]] = true;
+		}
+		if (template.abilities['H']) {
+			// @ts-ignore
+			hasAbility[template.abilities['H']] = true;
+		}
+		let availableHP = 0;
+		for (const moveid of movePool) {
+			if (moveid.startsWith('hiddenpower')) availableHP++;
+		}
+
+		let counterAbilities = ['Adaptability', 'Contrary', 'Hustle', 'Iron Fist', 'Skill Link'];
+
+		// **MOVES**
+		/**@type {{[k: string]: boolean}} */
+		let hasMove = {};
+		let counter;
+
+		/**@type {string[] | null} */
+		let movesTierArray = null;
+		let nMoveTier = -1;
+		let bExhaustedUsefulMoves = false;
+		let nMoveItr;
+		do {
+			// Move to the next tier of useful moves
+			while( (nMoveTier <nSCUMTierCount-1) &&
+				(!movesTierArray || (0 == movesTierArray.length) ) )
+			{
+				nMoveTier++;
+				movesTierArray = this.deepClone(SCUsefulMoves[nMoveTier]);
+
+				// Cull moves we can't learn
+				for(nMoveItr=movesTierArray.length-1; nMoveItr>-1; --nMoveItr) {
+					if(movePool.includes(movesTierArray[nMoveItr])) continue;
+					this.fastPop(movesTierArray, nMoveItr);
+				}
+			}
+
+			if( (!movesTierArray || (0 == movesTierArray.length) ) ) { // No more viable moves
+				bExhaustedUsefulMoves = true;
+			}
+			else { // Pull next move randomly from current tier
+				let sNextMoveId = this.sampleNoReplace(movesTierArray);
+
+				let bAcceptMove = true;
+				if( ('curse' === sNextMoveId) && !hasType['Ghosts']) { // Non-ghosts can't damage themselves with Curse
+					bAcceptMove = false;
+				}
+
+				if(bAcceptMove) { // Accept and track move
+					hasMove[sNextMoveId] = true;
+					moves.push(sNextMoveId);
+				}
+			}
+
+			counter = this.queryMoves(moves, hasType, hasAbility, movePool);
+		} while (moves.length < 4 && !bExhaustedUsefulMoves);
+
+		// FIXME: Moveset modifications?
+
+		// ** ABILITY **
+		/**@type {[string, string | undefined, string | undefined]} */
+		// @ts-ignore
+		let abilities = Object.values(baseTemplate.abilities);
+		abilities.sort((a, b) => this.getAbility(b).rating - this.getAbility(a).rating);
+		let ability0 = this.getAbility(abilities[0]);
+		let ability1 = this.getAbility(abilities[1]);
+		let ability2 = this.getAbility(abilities[2]);
+		if (abilities[1]) {
+			if (abilities[2] && ability1.rating <= ability2.rating && this.randomChance(1, 2)) {
+				[ability1, ability2] = [ability2, ability1];
+			}
+			if (ability0.rating <= ability1.rating && this.randomChance(1, 2)) {
+				[ability0, ability1] = [ability1, ability0];
+			} else if (ability0.rating - 0.6 <= ability1.rating && this.randomChance(2, 3)) {
+				[ability0, ability1] = [ability1, ability0];
+			}
+			ability = ability0.name;
+
+			let rejectAbility;
+			do {
+				rejectAbility = false;
+				if (counterAbilities.includes(ability)) {
+					// Adaptability, Contrary, Hustle, Iron Fist, Skill Link
+					// @ts-ignore
+					rejectAbility = !counter[toID(ability)];
+				} else if (ability === 'Chlorophyll') {
+					rejectAbility = abilities.includes('Harvest') || (!hasMove['sunnyday'] && !teamDetails['sun']);
+				} else if (ability === 'Compound Eyes' || ability === 'No Guard') {
+					rejectAbility = !counter['inaccurate'];
+				} else if (ability === 'Moody') {
+					rejectAbility = true;
+				} else if (ability === 'Harvest') {
+					rejectAbility = abilities.includes('Frisk');
+				} else if (ability === 'Hydration' || ability === 'Rain Dish' || ability === 'Swift Swim') {
+					rejectAbility = !hasMove['raindance'] && !teamDetails['rain'];
+				} else if (ability === 'Ice Body' || ability === 'Slush Rush' || ability === 'Snow Cloak') {
+					rejectAbility = !teamDetails['hail'];
+				} else if (ability === 'Lightning Rod') {
+					rejectAbility = template.types.includes('Ground');
+				} else if (ability === 'Limber') {
+					rejectAbility = template.types.includes('Electric');
+				} else if (ability === 'Poison Heal') {
+					rejectAbility = true;
+				} else if (ability === 'Prankster') {
+					rejectAbility = !counter['Status'];
+				} else if (ability === 'Sand Force' || ability === 'Sand Rush' || ability === 'Sand Veil') {
+					rejectAbility = !teamDetails['sand'];
+				} else if (ability === 'Scrappy') {
+					rejectAbility = !template.types.includes('Normal');
+				} else if (ability === 'Serene Grace') {
+					rejectAbility = !counter['serenegrace'] || template.species === 'Blissey';
+				}
+
+				if (rejectAbility) {
+					if (ability === ability0.name && ability1.rating > 1) {
+						ability = ability1.name;
+					} else if (ability === ability1.name && abilities[2] && ability2.rating > 1) {
+						ability = ability2.name;
+					} else {
+						// Default to the highest rated ability if all are rejected
+						ability = abilities[0];
+						rejectAbility = false;
+					}
+				}
+			} while (rejectAbility);
+
+			// FIXME: Complex ability rejection?
+		} else {
+			ability = ability0.name;
+		}
+
+		// ** ITEM **
+		item = 'Black Sludge';
+		if (hasType['Poison']) { // Poison Pokemon can't use most self-damaging items
+			if (hasType['Fire']) {
+				item = 'Sticky Barb';
+			}
+			else {
+				item = this.randomChance(1, 2) ? 'Sticky Barb' : 'Flame Orb';
+			}
+		}
+		else if (hasType['Steel']) {
+			if (hasType['Fire']) {
+				item = 'Black Sludge';
+			}
+			else {
+				item = this.randomChance(1, 2) ? 'Black Sludge' : 'Flame Orb';
+			}
+		}
+		else { // Pick Black Sludge or Toxic Orb
+			item = this.randomChance(1, 2) ? 'Black Sludge' : 'Toxic Orb';
+		}
+		if (template.requiredItems) {
+			// @ts-ignore
+			if (template.baseSpecies === 'Arceus' && (hasMove['judgment'] || !counter[template.types[0]] || teamDetails.zMove)) {
+				// Judgment doesn't change type with Z-Crystals
+				item = template.requiredItems[0];
+			} else {
+				item = this.sample(template.requiredItems);
+			}
+
+		// FIXME: Trick / Switcheroo
+		} /*else if (item === 'Leftovers' && hasType['Poison']) {
+			item = 'Black Sludge';
+		}*/
+
+		// Don't level-adjust for SC
+		let level = 100;
+
+		// FIXME: Invert
+		// Prepare optimal HP
+		let srWeakness = this.getEffectiveness('Rock', template);
+		while (evs.hp > 1) {
+			let hp = Math.floor(Math.floor(2 * template.baseStats.hp + ivs.hp + Math.floor(evs.hp / 4) + 100) * level / 100 + 10);
+			if (hasMove['substitute'] && hasMove['reversal']) {
+				// Reversal users should be able to use four Substitutes
+				if (hp % 4 > 0) break;
+			} else if (hasMove['substitute'] && (item === 'Petaya Berry' || item === 'Sitrus Berry' || ability === 'Power Construct' && item !== 'Leftovers')) {
+				// Three Substitutes should activate Petaya Berry for Dedenne
+				// Two Substitutes should activate Sitrus Berry or Power Construct
+				if (hp % 4 === 0) break;
+			} else if (hasMove['bellydrum'] && (item === 'Sitrus Berry' || ability === 'Gluttony')) {
+				// Belly Drum should activate Sitrus Berry
+				if (hp % 2 === 0) break;
+			} else {
+				// Maximize number of Stealth Rock switch-ins
+				if (srWeakness <= 0 || hp % (4 / srWeakness) > 0) break;
+			}
+			evs.hp -= 4;
+		}
+
+		if (hasMove['trickroom']) {
+			evs.spe = 0;
+			ivs.spe = 0;
+		}
+
+		return {
+			name: template.baseSpecies,
+			species: species,
+			gender: template.gender,
+			moves: moves,
+			ability: ability,
+			evs: evs,
+			ivs: ivs,
+			item: item,
+			level: level,
+			shiny: this.randomChance(1, 1024),
+		};
+	}
+
+	suicideCupRandomTeam() {
+		let pokemon = [];
+
+		const allowedMega = ['Absol-Mega', 'Gengar-Mega', 'Banette-Mega'];
+
+		// For Monotype
+		let isMonotype = this.format.id === 'gen7monotyperandombattle';
+		let typePool = Object.keys(this.data.TypeChart);
+		let type = this.sample(typePool);
+
+		let pokemonPool = [];
+		for (let id in this.data.FormatsData) {
+			let template = this.getTemplate(id);
+			if (isMonotype) {
+				let types = template.types;
+				if (template.battleOnly) types = this.getTemplate(template.baseSpecies).types;
+				if (types.indexOf(type) < 0) continue;
+			}
+			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
+				pokemonPool.push(id);
+			}
+		}
+
+		// PotD stuff
+		let potd;
+		if (global.Config && Config.potd && this.getRuleTable(this.getFormat()).has('potd')) {
+			potd = this.getTemplate(Config.potd);
+		}
+
+		/**@type {{[k: string]: number}} */
+		let baseFormes = {};
+		/**@type {{[k: string]: number}} */
+		let tierCount = {};
+		/**@type {{[k: string]: number}} */
+		let typeCount = {};
+		/**@type {{[k: string]: number}} */
+		let typeComboCount = {};
+		/**@type {RandomTeamsTypes.TeamDetails} */
+		let teamDetails = {};
+
+		while (pokemonPool.length && pokemon.length < 6) {
+			let template = this.getTemplate(this.sampleNoReplace(pokemonPool));
+			if (!template.exists) continue;
+
+			// Limit to one of each species (Species Clause)
+			if (baseFormes[template.baseSpecies]) continue;
+
+			// Adjust rate for species with multiple formes
+			switch (template.baseSpecies) {
+			case 'Arceus': case 'Silvally':
+				if (this.randomChance(17, 18)) continue;
+				break;
+			case 'Rotom':
+				if (this.randomChance(5, 6)) continue;
+				break;
+			case 'Deoxys': case 'Gourgeist': case 'Oricorio':
+				if (this.randomChance(3, 4)) continue;
+				break;
+			case 'Castform': case 'Kyurem': case 'Lycanroc': case 'Necrozma': case 'Wormadam':
+				if (this.randomChance(2, 3)) continue;
+				break;
+			case 'Basculin': case 'Cherrim': case 'Floette': case 'Giratina': case 'Hoopa': case 'Landorus': case 'Meloetta': case 'Meowstic': case 'Shaymin': case 'Thundurus': case 'Tornadus':
+				if (this.randomChance(1, 2)) continue;
+				break;
+			case 'Dugtrio': case 'Exeggutor': case 'Golem': case 'Greninja': case 'Marowak': case 'Muk': case 'Ninetales': case 'Persian': case 'Raichu': case 'Sandslash': case 'Zygarde':
+				if (this.gen >= 7 && this.randomChance(1, 2)) continue;
+				break;
+			}
+
+			let tier = template.tier;
+
+			let types = template.types;
+
+			if (!isMonotype) {
+				// Limit two of any type
+				let skip = false;
+				for (const type of types) {
+					if (typeCount[type] > 1 && this.randomChance(4, 5)) {
+						skip = true;
+						break;
+					}
+				}
+				if (skip) continue;
+			}
+
+			if (potd && potd.exists) {
+				// The Pokemon of the Day belongs in slot 2
+				if (pokemon.length === 1) {
+					template = potd;
+				} else if (template.species === potd.species) {
+					continue; // No thanks, I've already got it
+				}
+			}
+
+			let set = this.suicideCupRandomSet(template, pokemon.length, teamDetails, this.format.gameType !== 'singles');
+
+			// Illusion shouldn't be the last Pokemon of the team
+			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
+
+			// Limit 1 of any type combination, 2 in Monotype
+			let typeCombo = types.slice().sort().join();
+			if (set.ability === 'Drought' || set.ability === 'Drizzle' || set.ability === 'Sand Stream') {
+				// Drought, Drizzle and Sand Stream don't count towards the type combo limit
+				typeCombo = set.ability;
+				if (typeCombo in typeComboCount) continue;
+			} else {
+				if (typeComboCount[typeCombo] >= (isMonotype ? 2 : 1)) continue;
+			}
+
+			let item = this.getItem(set.item);
+
+			// Limit 1 Z-Move per team
+			if (teamDetails['zMove'] && item.zMove) continue;
+
+			// Okay, the set passes, add it to our team
+			pokemon.push(set);
+
+			if (pokemon.length === 6) {
+				// Set Zoroark's level to be the same as the last Pokemon
+				let illusion = teamDetails['illusion'];
+				if (illusion) pokemon[illusion - 1].level = pokemon[5].level;
+				break;
+			}
+
+			// Now that our Pokemon has passed all checks, we can increment our counters
+			baseFormes[template.baseSpecies] = 1;
+
+			// Increment type counters
+			for (const type of types) {
+				if (type in typeCount) {
+					typeCount[type]++;
+				} else {
+					typeCount[type] = 1;
+				}
+			}
+			if (typeCombo in typeComboCount) {
+				typeComboCount[typeCombo]++;
+			} else {
+				typeComboCount[typeCombo] = 1;
+			}
+
+			// Team has Mega/weather/hazards
+			if (item.megaStone) teamDetails['megaStone'] = 1;
+			if (item.zMove) teamDetails['zMove'] = 1;
+			if (set.ability === 'Snow Warning' || set.moves.includes('hail')) teamDetails['hail'] = 1;
+			if (set.moves.includes('raindance') || set.ability === 'Drizzle' && !item.onPrimal) teamDetails['rain'] = 1;
+			if (set.ability === 'Sand Stream') teamDetails['sand'] = 1;
+			if (set.moves.includes('sunnyday') || set.ability === 'Drought' && !item.onPrimal) teamDetails['sun'] = 1;
+			if (set.moves.includes('stealthrock')) teamDetails['stealthRock'] = 1;
+			if (set.moves.includes('toxicspikes')) teamDetails['toxicSpikes'] = 1;
+			if (set.moves.includes('defog') || set.moves.includes('rapidspin')) teamDetails['hazardClear'] = 1;
+
+			// For setting Zoroark's level
+			if (set.ability === 'Illusion') teamDetails['illusion'] = pokemon.length;
+		}
+		return pokemon;
 	}
 //#endregion TrashChannel
 }

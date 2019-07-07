@@ -344,6 +344,18 @@ let Formats = [
 		],
 	},
 	{
+		name: "[Gen 7] Suicide Cup: Random Battle",
+		desc: `Randomized teams of Pok&eacute;mon with sets that are generated to end their lives in a quick and humane manner.`,
+		threads: [
+            `&bullet; <a href="https://www.smogon.com/forums/threads/3633603/">Suicide Cup</a>`,
+        ],
+
+		mod: 'suicidecup',
+		forcedLevel: 100,
+		team: 'randomSC',
+		ruleset: ['PotD', 'Suicide Cup Standard Package', 'Cancel Mod', 'Evasion Moves Clause', 'Endless Battle Clause', 'HP Percentage Mod', 'Moody Clause', 'Nickname Clause', 'Pokemon', 'Sleep Clause Mod', 'Species Clause'],
+	},
+	{
 		name: "[Gen 7] Mix and Mega: Hackmons Cup",
 		desc: `Randomized teams of level-balanced Pok&eacute;mon with mega stones (and they know how to use 'em!)`,
 
@@ -3797,6 +3809,41 @@ let Formats = [
 			pokemon.addVolatile('perishsong', pokemon);
 		},
 	},
+
+	// Future Gens OU
+	///////////////////////////////////////////////////////////////////
+
+	/*{
+		section: "Future Gens OU",
+		column: 3,
+	},
+	{
+		name: "[Gen 7] Gen 8 OU",
+		threads: [
+			`&bullet; <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">OU Metagame Discussion</a>`,
+			`&bullet; <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">OU Viability Rankings</a>`,
+			`&bullet; <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">OU Sample Teams</a>`,
+		],
+
+		mod: 'gen7gen8',
+		ruleset: ['Pokemon', 'Standard', 'Team Preview'],
+		banlist: ['Uber', 'Arena Trap', 'Power Construct', 'Shadow Tag', 'Baton Pass'],
+		onBegin() {
+			for (const pokemon of this.getAllPokemon()) {
+				pokemon.m.originalSpecies = pokemon.baseTemplate.species;
+				pokemon.m.isDynamax = false;
+				pokemon.m.hasDynamaxed = false;
+				pokemon.m.revertDynamax = null;
+				pokemon.m.remainingDynamaxTurns = false;
+			}
+		},
+		onSwitchOut(pokemon) {
+			// @ts-ignore
+			if(pokemon.m.isDynamax && pokemon.m.revertDynamax) {
+				pokemon.m.revertDynamax.call(pokemon);
+			}
+		},
+	},*/
 //#endregion
 ];
 
