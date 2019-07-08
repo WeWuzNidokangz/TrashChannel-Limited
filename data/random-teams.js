@@ -2438,12 +2438,14 @@ class RandomTeams extends Dex.ModdedDex {
 			Monitor.crashlog(err, 'The randbat set generator');
 		}
 
+		const allowedMega = ['Absol', 'Gengar', 'Banette'];
+
 		if (template.battleOnly) {
 			// Only change the species. The template has custom moves, and may have different typing and requirements.
 			species = template.baseSpecies;
 		}
 		let battleForme = this.checkBattleForme(template);
-		if (battleForme && battleForme.randomBattleMoves && template.otherFormes && (battleForme.isMega ? !teamDetails.megaStone : this.random(2))) {
+		if (battleForme && battleForme.randomBattleMoves && template.otherFormes && (battleForme.isMega ? !teamDetails.megaStone && allowedMega.includes(template.name) : this.random(2))) {
 			template = this.getTemplate(template.otherFormes.length >= 2 ? this.sample(template.otherFormes) : template.otherFormes[0]);
 		}
 
@@ -2461,7 +2463,7 @@ class RandomTeams extends Dex.ModdedDex {
 		}
 		let nSCUMTierCount = SCUsefulMoves.length;
 
-		let movePool = template.learnset ? Object.keys(template.learnset) : []; // Directly use the learnset as a movepool
+		let movePool = baseTemplate.learnset ? Object.keys(baseTemplate.learnset) : []; // Directly use the learnset as a movepool
 		/**@type {string[]} */
 		let moves = [];
 		let ability = '';
@@ -2511,6 +2513,22 @@ class RandomTeams extends Dex.ModdedDex {
 		let hasMove = {};
 		let counter;
 
+		// Force megas to have either Curse or Perish Song to guarantee that they can kill themselves
+		if(battleForme && battleForme.isMega) {
+			let sForcedSuicideMoveId = null;
+			if(hasType['Ghost'] && movePool.includes('curse')) {
+				sForcedSuicideMoveId = 'curse';
+			}
+			else if(movePool.includes('perishsong')) {
+				sForcedSuicideMoveId = 'perishsong';
+			}
+
+			if(sForcedSuicideMoveId) {
+				hasMove[sForcedSuicideMoveId] = true;
+				moves.push(sForcedSuicideMoveId);
+			}
+		}
+
 		/**@type {string[] | null} */
 		let movesTierArray = null;
 		let nMoveTier = -1;
@@ -2524,10 +2542,11 @@ class RandomTeams extends Dex.ModdedDex {
 				nMoveTier++;
 				movesTierArray = this.deepClone(SCUsefulMoves[nMoveTier]);
 
-				// Cull moves we can't learn
+				// Cull moves we can't learn or already have
 				for(nMoveItr=movesTierArray.length-1; nMoveItr>-1; --nMoveItr) {
-					if(movePool.includes(movesTierArray[nMoveItr])) continue;
-					this.fastPop(movesTierArray, nMoveItr);
+					if(!movePool.includes(movesTierArray[nMoveItr]) || hasMove[movesTierArray[nMoveItr]]) {
+						this.fastPop(movesTierArray, nMoveItr);
+					}
 				}
 			}
 
@@ -2538,7 +2557,10 @@ class RandomTeams extends Dex.ModdedDex {
 				let sNextMoveId = this.sampleNoReplace(movesTierArray);
 
 				let bAcceptMove = true;
-				if( ('curse' === sNextMoveId) && !hasType['Ghosts']) { // Non-ghosts can't damage themselves with Curse
+				if( ('curse' === sNextMoveId) && !hasType['Ghost']) { // Non-ghosts can't damage themselves with Curse
+					bAcceptMove = false;
+				}
+				else if( battleForme && battleForme.isMega && ( ('trick' === sNextMoveId) || ('switcheroo' === sNextMoveId) ) ) { // Megas can't trick their item
 					bAcceptMove = false;
 				}
 
@@ -2654,37 +2676,19 @@ class RandomTeams extends Dex.ModdedDex {
 			} else {
 				item = this.sample(template.requiredItems);
 			}
-
-		// FIXME: Trick / Switcheroo
-		} /*else if (item === 'Leftovers' && hasType['Poison']) {
-			item = 'Black Sludge';
-		}*/
+		} else if (hasMove['trick'] || hasMove['switcheroo']) { // Trick / Switcheroo: give a healing item to switch onto opponent instead
+			item = this.randomChance(1, 2) ? 'Pecha Berry' : 'Leftovers';
+		}
 
 		// Don't level-adjust for SC
 		let level = 100;
 
-		// FIXME: Invert
-		// Prepare optimal HP
-		let srWeakness = this.getEffectiveness('Rock', template);
-		while (evs.hp > 1) {
-			let hp = Math.floor(Math.floor(2 * template.baseStats.hp + ivs.hp + Math.floor(evs.hp / 4) + 100) * level / 100 + 10);
-			if (hasMove['substitute'] && hasMove['reversal']) {
-				// Reversal users should be able to use four Substitutes
-				if (hp % 4 > 0) break;
-			} else if (hasMove['substitute'] && (item === 'Petaya Berry' || item === 'Sitrus Berry' || ability === 'Power Construct' && item !== 'Leftovers')) {
-				// Three Substitutes should activate Petaya Berry for Dedenne
-				// Two Substitutes should activate Sitrus Berry or Power Construct
-				if (hp % 4 === 0) break;
-			} else if (hasMove['bellydrum'] && (item === 'Sitrus Berry' || ability === 'Gluttony')) {
-				// Belly Drum should activate Sitrus Berry
-				if (hp % 2 === 0) break;
-			} else {
-				// Maximize number of Stealth Rock switch-ins
-				if (srWeakness <= 0 || hp % (4 / srWeakness) > 0) break;
-			}
-			evs.hp -= 4;
+		// Prepare optimal HP for dying to percentage-based damage
+		let nInBattleHP = Math.floor(Math.floor(2 * template.baseStats.hp + ivs.hp + Math.floor(evs.hp / 4) + 100) * level / 100 + 10);
+		while ( ( 0 !== ( nInBattleHP % 8 ) ) && ( ivs.hp < 31 ) ) {
+			ivs.hp++;
+			nInBattleHP = Math.floor(Math.floor(2 * template.baseStats.hp + ivs.hp + Math.floor(evs.hp / 4) + 100) * level / 100 + 10);
 		}
-
 		if (hasMove['trickroom']) {
 			evs.spe = 0;
 			ivs.spe = 0;
@@ -2706,8 +2710,6 @@ class RandomTeams extends Dex.ModdedDex {
 
 	suicideCupRandomTeam() {
 		let pokemon = [];
-
-		const allowedMega = ['Absol-Mega', 'Gengar-Mega', 'Banette-Mega'];
 
 		// For Monotype
 		let isMonotype = this.format.id === 'gen7monotyperandombattle';
