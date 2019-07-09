@@ -12,6 +12,8 @@ const randomBSSFactorySets = require('./bss-factory-sets.json');
 // @ts-ignore
 const randomFactorySets = require('./factory-sets.json');
 
+const DexCalculator = require('../trashchannel/dex-calculator');
+
 const fs = require('fs');
 const path = require('path');
 
@@ -2574,6 +2576,9 @@ class RandomTeams extends Dex.ModdedDex {
 		} while (moves.length < 4 && !bExhaustedUsefulMoves);
 
 		// FIXME: Moveset modifications?
+
+		// Shuffle move order
+		DexCalculator.shuffleArray(moves);
 
 		// ** ABILITY **
 		/**@type {[string, string | undefined, string | undefined]} */
