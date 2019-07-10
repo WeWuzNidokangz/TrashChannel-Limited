@@ -2601,12 +2601,71 @@ class RandomTeams extends Dex.ModdedDex {
 
 			let rejectAbility;
 			do {
+				//console.log('Testing ability: ' + ability.toString() );
+
 				rejectAbility = false;
-				if (counterAbilities.includes(ability)) {
-					// Adaptability, Contrary, Hustle, Iron Fist, Skill Link
-					// @ts-ignore
-					rejectAbility = !counter[toID(ability)];
-				} else if (ability === 'Chlorophyll') {
+				// Banned abilities: Always reject
+				if( (ability === 'Infiltator') ||
+					(ability === 'Misty Surge') ||
+					(ability === 'Magic Guard') ) {
+					rejectAbility = true;
+				}
+				// Hindering abilities: reject without skill swap, etc
+				else if(
+					// Healing
+					(ability === 'Poison Heal') ||
+					(ability === 'Regenerator') ||
+					(ability === 'Truant') ||
+					(ability === 'Cheek Pouch') ||
+					(ability === 'Ice Body') ||
+					(ability === 'Rain Dish') ||
+					(ability === 'Volt Absorb') ||
+					(ability === 'Water Absorb') ||
+					// Damage-boosting
+					(ability === 'Adaptability') ||
+					(ability === 'Aerilate') ||
+					(ability === 'Analytic') ||
+					(ability === 'Battery') ||
+					(ability === 'Flare Boost') ||
+					(ability === 'Galvanize') ||
+					(ability === 'Guts') ||
+					(ability === 'Iron Fist') ||
+					(ability === 'Mega Launcher') ||
+					(ability === 'Neuroforce') ||
+					(ability === 'Normalize') ||
+					(ability === 'Reckless') ||
+					(ability === 'Refrigerate') ||
+					(ability === 'Rivalry') ||
+					(ability === 'Sand Force') ||
+					(ability === 'Sheer Force') ||
+					(ability === 'Stakeout') ||
+					(ability === 'Steelworker') ||
+					(ability === 'Strong Jaw') ||
+					(ability === 'Technician') ||
+					(ability === 'Tough Claws') ||
+					(ability === 'Toxic Boost') ||
+					(ability === 'Water Bubble') ||
+					// Bad stat-boosting
+					(ability === 'Blaze') ||
+					(ability === 'Chlorophyll') ||
+					(ability === 'Flash Fire') ||
+					(ability === 'Fur Coat') ||
+					(ability === 'Huge Power') ||
+					(ability === 'Marvel Scale') ||
+					(ability === 'Overgrow') ||
+					(ability === 'Pure Power') ||
+					(ability === 'Swarm') ||
+					(ability === 'Torrent') ||
+					(ability === 'Intimidate') ||
+					(ability === 'Defiant') ||
+					(ability === 'Competitive') ||
+					(ability === 'Download') ||
+					// Prevents self-damage
+					(ability === 'Klutz') ) {
+						rejectAbility = !hasMove['skillswap'] && !hasMove['roleplay'] && !hasMove['entrainment'];
+				}
+				// Regular Random Battles rejections
+				else if (ability === 'Chlorophyll') {
 					rejectAbility = abilities.includes('Harvest') || (!hasMove['sunnyday'] && !teamDetails['sun']);
 				} else if (ability === 'Compound Eyes' || ability === 'No Guard') {
 					rejectAbility = !counter['inaccurate'];
@@ -2635,22 +2694,58 @@ class RandomTeams extends Dex.ModdedDex {
 				}
 
 				if (rejectAbility) {
-					if (ability === ability0.name && ability1.rating > 1) {
+					//console.log('REJECTED');
+					if (ability === ability0.name) {
 						ability = ability1.name;
-					} else if (ability === ability1.name && abilities[2] && ability2.rating > 1) {
+					} else if (ability === ability1.name && abilities[2]) {
 						ability = ability2.name;
 					} else {
 						// Default to the highest rated ability if all are rejected
 						ability = abilities[0];
 						rejectAbility = false;
+
+						//console.log('but fell back');
 					}
 				}
 			} while (rejectAbility);
-
-			// FIXME: Complex ability rejection?
 		} else {
 			ability = ability0.name;
 		}
+		//console.log('Post rejection ability: ' + ability.toString() );
+
+		// Preferred abilities
+		let paArray =
+		[
+			'Sticky Hold',
+			'Magic Bounce',
+			'Shadow Tag',
+			'Imposter',
+			'Oblivious',
+			'Prankster',
+			'Solar Power',
+			'Zen Mode',
+			'Quick Feet',
+			'Speed Boost',
+			'Trace',
+			'Mold Breaker',
+			'Dry Skin',
+			'Illusion',
+			'Triage',
+			'Long Reach',
+			'Arena Trap',
+			'Drought',
+			'Drizzle',
+			'Sand Stream',
+			'Snow Warning',
+			'Magician',
+			'Pickpocket',
+		];
+		for( let nPAItr=0; nPAItr<paArray.length; ++nPAItr ) {
+			if (abilities.includes(paArray[nPAItr])) {
+				ability = paArray[nPAItr];
+			}
+		}
+		//console.log('Post preferred ability: ' + ability.toString() );
 
 		// ** ITEM **
 		item = 'Black Sludge';
@@ -2681,8 +2776,14 @@ class RandomTeams extends Dex.ModdedDex {
 			} else {
 				item = this.sample(template.requiredItems);
 			}
-		} else if (hasMove['trick'] || hasMove['switcheroo']) { // Trick / Switcheroo: give a healing item to switch onto opponent instead
+		}
+		// Trick / Switcheroo: Give a healing item to switch onto opponent instead
+		else if (hasMove['trick'] || hasMove['switcheroo']) {
 			item = this.randomChance(1, 2) ? 'Pecha Berry' : 'Leftovers';
+		}
+		// Magician: Have no item if we can steal opponent's
+		else if ( (ability === 'Magician') && counter['damage'] ) {
+			item = '';
 		}
 
 		// Don't level-adjust for SC
@@ -2699,6 +2800,11 @@ class RandomTeams extends Dex.ModdedDex {
 			ivs.spe = 0;
 		}
 
+		// Set happiness to minimise Return / Frustration damage
+		let happiness = hasMove['frustration'] ? 255 : 0;
+
+		// FIXME: Natures
+
 		return {
 			name: template.baseSpecies,
 			species: species,
@@ -2709,6 +2815,7 @@ class RandomTeams extends Dex.ModdedDex {
 			ivs: ivs,
 			item: item,
 			level: level,
+			happiness: happiness,
 			shiny: this.randomChance(1, 1024),
 		};
 	}
