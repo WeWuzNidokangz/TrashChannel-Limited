@@ -193,7 +193,7 @@ let Formats = [
 	},
 	{
 		name: "[Gen 7] Mix and Mega Anything Goes",
-		desc: `Mega Stones and Primal Orbs can be used on any fully evolved Pok&eacute;mon with no Mega Evolution limit, and no bans or clauses.`,
+		desc: `Mega Stones and Primal Orbs can be used on any Pok&eacute;mon with no Mega Evolution limit, and no bans or clauses.`,
 		threads: [
 			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3635904/#post-7802586">MnM AG Resources</a>`,
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3587441/">Vanilla Anything Goes</a>`,
@@ -202,7 +202,8 @@ let Formats = [
 		],
 
 		mod: 'mixandmega',
-		ruleset: ['Pokemon', 'Standard', 'Team Preview', 'Mix and Mega Battle Effects'],
+		ruleset: ['Pokemon', 'Endless Battle Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Mix and Mega Battle Effects'],
+		banlist: ['Illegal', 'Unreleased'],
 		restrictedStones: ['Ultranecrozium Z'],
 		cannotMega: [],
 	},
@@ -3979,9 +3980,28 @@ let Formats = [
 			'Shadow Tag', 'Gengarite', 'Baton Pass', 'Electrify' // Mix and Mega
 		],
 		restrictedStones: ['Beedrillite', 'Blazikenite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite', 'Ultranecrozium Z'],
-		cannotMega: [
-			'Blaziken-Mega', 'Gengar-Mega', 'Mewtwo-Mega-Y', 'Rayquaza-Mega',
+		cannotMega: ['Blaziken-Mega', 'Gengar-Mega', 'Mewtwo-Mega-Y', 'Rayquaza-Mega'],
+	},
+	{
+		name: "[Gen 7] Mega and Mega Anything Goes",
+		desc: `Mega Stones and Primal Orbs can be used on any Pok&eacute;mon with no Mega Evolution limit, including Mega Evolutions, Primals and Ultras as if they were normal Pok&eacute;mon, and no bans or clauses.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3587441/">Vanilla Anything Goes</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3646310/">Vanilla Megamons</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3587740/">Vanilla Mix and Mega</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3591580/">Vanilla Mix and Mega Resources</a>`,
 		],
+
+		mod: 'megaandmega',
+		ruleset: [
+			'Endless Battle Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', // Anything Goes
+			'Megamons Legality Expansion', // Megamons
+			'Mix and Mega Battle Effects', // Mix and Mega
+			'Megamons Allow Irregular Megaesques', // Mega and Mega AG
+		],
+		banlist: ['Illegal', 'Unreleased'], // Anything Goes
+		restrictedStones: ['Ultranecrozium Z'],
+		cannotMega: [],
 	},
 
 	// Future Gens OU

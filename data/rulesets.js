@@ -1093,21 +1093,28 @@ let BattleFormats = {
 			set.moves = moves;
 
 			let battleForme = template.battleOnly && template.species;
+			// 19/07/14 TrashChannel: Option to pass non-mega analogous behaviour like Primal Reversion and Ultra Burst
+			let allowIrregularMegaesques = !!(format && this.getRuleTable(format).has('megamonsallowirregularmegaesques'));
 			if (battleForme && !template.isMega) {
 				if (template.requiredAbility && set.ability !== template.requiredAbility) {
 					problems.push("" + template.species + " transforms in-battle with " + template.requiredAbility + "."); // Darmanitan-Zen, Zygarde-Complete
 				}
-				if (template.requiredItems) {
+				if (template.requiredItems && !allowIrregularMegaesques) {
 					if (template.species === 'Necrozma-Ultra') {
 						problems.push(`Necrozma-Ultra must start the battle as Necrozma-Dawn-Wings or Necrozma-Dusk-Mane holding Ultranecrozium Z.`); // Necrozma-Ultra transforms from one of two formes, and neither one is the base forme
 					} else if (!template.requiredItems.includes(item.name)) {
 						problems.push(`${template.species} transforms in-battle with ${Chat.plural(template.requiredItems.length, "either ") + template.requiredItems.join(" or ")}.`); // Mega or Primal
 					}
 				}
-				if (template.requiredMove && set.moves.indexOf(toID(template.requiredMove)) < 0) {
+				if (template.requiredMove && set.moves.indexOf(toID(template.requiredMove)) < 0 &&
+				   (!allowIrregularMegaesques || ('dragonascent' !== toID(template.requiredMove)))) { // 19/07/14 TrashChannel: Allow Rayquaza-Mega without Dragon Ascent as an irregular megaesque
 					problems.push(`${template.species} transforms in-battle with ${template.requiredMove}.`); // Meloetta-Pirouette, Rayquaza-Mega
 				}
-				if (!format.noChangeForme) set.species = template.baseSpecies; // Fix battle-only forme
+				if (!format.noChangeForme &&
+				   (!allowIrregularMegaesques || !template.requiredItems)) { // 19/07/14 TrashChannel: Prevent irregular megaesques from being reverted on battle start
+					//console.log("Replacing (battle): " + set.species.toString());
+					set.species = template.baseSpecies; // Fix battle-only forme
+				}
 			} else {
 				if (template.requiredAbility && set.ability !== template.requiredAbility) {
 					problems.push(`${(set.name || set.species)} needs the ability ${template.requiredAbility}.`); // No cases currently.
@@ -1115,13 +1122,15 @@ let BattleFormats = {
 				if (template.requiredItems && !template.requiredItems.includes(item.name) && !template.isMega) {
 					problems.push(`${(set.name || set.species)} needs to hold ${Chat.plural(template.requiredItems.length, "either ") + template.requiredItems.join(" or ")}.`); // Memory/Drive/Griseous Orb/Plate/Z-Crystal - Forme mismatch
 				}
-				if (template.requiredMove && set.moves.indexOf(toID(template.requiredMove)) < 0) {
+				if (template.requiredMove && set.moves.indexOf(toID(template.requiredMove)) < 0 &&
+				   (!allowIrregularMegaesques || ('dragonascent' !== toID(template.requiredMove)))) { // 19/07/14 TrashChannel: Allow Rayquaza-Mega without Dragon Ascent as an irregular megaesque
 					problems.push(`${(set.name || set.species)} needs to have the move ${template.requiredMove}.`); // Keldeo-Resolute
 				}
 
 				// Mismatches between the set forme (if not base) and the item signature forme will have been rejected already.
 				// It only remains to assign the right forme to a set with the base species (Arceus/Genesect/Giratina/Silvally).
 				if (item.forcedForme && template.species === this.getTemplate(item.forcedForme).baseSpecies && !format.noChangeForme) {
+					//console.log("Replacing (item): " + set.species.toString());
 					set.species = item.forcedForme;
 				}
 			}
@@ -1155,14 +1164,18 @@ let BattleFormats = {
 		},
 	},
 	megamonsstandardvalidation: {
-		effectType: 'Rule',
-		name: 'Megamons Standard Validation',
-		desc: "Standard validation for Megamons.",
-		onValidateSet(set) {
-			if (set.species in {'Blaziken-Mega': 1, 'Gengar-Mega': 1, 'Mewtwo-Mega-Y': 1, 'Rayquaza-Mega': 1}) {
-				return [`${set.species} is banned.`];
+		name: 'Megamons Allow Irregular Megaesques',
+		desc: "Allow irregular Megaesque Pokemon like Primals and Ultras to be used without items with Megamons Legality Expansion.",
+		onBegin() {
+			for (const pokemon of this.getAllPokemon()) {
+				pokemon.m.hasActivatedPrimalOrb = false;
 			}
 		},
+	},
+	megamonsallowirregularmegaesques: { // Not part of Standard Package
+		effectType: 'Rule',
+		name: 'Megamons Allow Irregular Megaesques',
+		desc: "Allow irregular Megaesque Pokemon like Primals and Ultras to be used without items with Megamons Legality Expansion.",
 	},
 	megamonsstandardpackage: {
 		effectType: 'Rule',
