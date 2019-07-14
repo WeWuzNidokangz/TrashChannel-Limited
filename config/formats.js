@@ -3959,6 +3959,30 @@ let Formats = [
 			pokemon.addVolatile('perishsong', pokemon);
 		},
 	},
+	{
+		name: "[Gen 7] Mega and Mega",
+		desc: `Mega Stones and Primal Orbs can be used on almost any Pok&eacute;mon with no Mega Evolution limit, including Mega Evolutions as if they were normal Pok&eacute;mon.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3646310/">Vanilla Megamons</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3587740/">Vanilla Mix and Mega</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3591580/">Vanilla Mix and Mega Resources</a>`,
+		],
+
+		mod: 'megaandmega',
+		ruleset: [
+			'Megamons Legality Expansion', 'Species Clause', 'Nickname Clause', 'Moody Clause', 'OHKO Clause', 'Evasion Moves Clause', 
+			'Swagger Clause', 'Sleep Clause Mod', 'Endless Battle Clause', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview', // Megamons
+			'Mix and Mega Standard Package', // Mix and Mega
+		],
+		banlist: [
+			'Unreleased', 'Illegal', 'Baton Pass', // Megamons
+			'Shadow Tag', 'Gengarite', 'Baton Pass', 'Electrify' // Mix and Mega
+		],
+		restrictedStones: ['Beedrillite', 'Blazikenite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite', 'Ultranecrozium Z'],
+		cannotMega: [
+			'Blaziken-Mega', 'Gengar-Mega', 'Mewtwo-Mega-Y', 'Rayquaza-Mega',
+		],
+	},
 
 	// Future Gens OU
 	///////////////////////////////////////////////////////////////////
