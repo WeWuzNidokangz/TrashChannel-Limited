@@ -1104,7 +1104,7 @@ let BattleFormats = {
 						problems.push(`${template.species} transforms in-battle with ${Chat.plural(template.requiredItems.length, "either ") + template.requiredItems.join(" or ")}.`); // Mega or Primal
 					}
 				}
-				if (template.requiredMove && set.moves.indexOf(toId(template.requiredMove)) < 0) {
+				if (template.requiredMove && set.moves.indexOf(toID(template.requiredMove)) < 0) {
 					problems.push(`${template.species} transforms in-battle with ${template.requiredMove}.`); // Meloetta-Pirouette, Rayquaza-Mega
 				}
 				if (!format.noChangeForme) set.species = template.baseSpecies; // Fix battle-only forme
@@ -1115,7 +1115,7 @@ let BattleFormats = {
 				if (template.requiredItems && !template.requiredItems.includes(item.name) && !template.isMega) {
 					problems.push(`${(set.name || set.species)} needs to hold ${Chat.plural(template.requiredItems.length, "either ") + template.requiredItems.join(" or ")}.`); // Memory/Drive/Griseous Orb/Plate/Z-Crystal - Forme mismatch
 				}
-				if (template.requiredMove && set.moves.indexOf(toId(template.requiredMove)) < 0) {
+				if (template.requiredMove && set.moves.indexOf(toID(template.requiredMove)) < 0) {
 					problems.push(`${(set.name || set.species)} needs to have the move ${template.requiredMove}.`); // Keldeo-Resolute
 				}
 
