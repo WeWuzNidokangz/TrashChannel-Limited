@@ -177,6 +177,30 @@ let Formats = [
 		section: "Mashups Spotlight",
 	},
 	{
+		name: "[Gen 7] Tier Shift AAA",
+		desc: `Pok&eacute;mon can use any ability, barring the few that are restricted to their natural users. Pok&eacute;mon below OU get all their stats boosted. UU/RUBL get +10, RU/NUBL get +20, NU/PUBL get +30, and PU or lower get +40.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3587901/">Vanilla Almost Any Ability</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3595753/">Vanilla AAA Resources</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3610073/">Vanilla Tier Shift</a>`,
+		],
+
+		mod: 'gen7',
+		ruleset: ['[Gen 7] OU', 'AAA Standard Package', 'Tier Shift Rule'],
+		banlist: [
+			'Archeops', 'Dragonite', 'Hoopa-Unbound', 'Kartana', 'Keldeo', 'Kyurem-Black', 'Regigigas', 'Shedinja', 'Slaking', 'Terrakion', 'Weavile', // Almost Any Ability
+			'Damp Rock', 'Deep Sea Tooth', 'Eviolite', // Tier Shift
+		],
+		unbanlist: ['Aegislash', 'Genesect', 'Landorus', 'Metagross-Mega', 'Naganadel'],
+		restrictedAbilities: [
+			'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Huge Power', 'Illusion', 'Imposter', 'Innards Out',
+			'Parental Bond', 'Protean', 'Pure Power', 'Simple', 'Speed Boost', 'Stakeout', 'Water Bubble', 'Wonder Guard',
+		],
+	},
+	{
+		section: "Official OM Mashups (Singles)",
+	},
+	{
 		name: "[Gen 7] Pure Hackmons",
 		desc: `Anything that can be hacked in-game and is usable in local battles is allowed, with no bans or clauses.`,
 		threads: [
@@ -187,9 +211,6 @@ let Formats = [
 
 		mod: 'gen7',
 		ruleset: ['Pokemon', 'Endless Battle Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod'],
-	},
-	{
-		section: "Official OM Mashups (Singles)",
 	},
 	{
 		name: "[Gen 7] Mix and Mega Anything Goes",
