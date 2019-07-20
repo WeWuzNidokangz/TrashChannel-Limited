@@ -962,6 +962,91 @@ let BattleFormats = {
 			this.add('-start', pokemon, 'typechange', pokemon.types.join('/'), '[silent]');
 		},
 	},
+	crabmonsmovelegality: {
+		effectType: 'ValidatorRule',
+		name: 'CRABmons Move Legality',
+		desc: "Allows Pok&eacute;mon to use any move that they or a they share a type with in a Camomons environment",
+		checkLearnset(move, template, lsetData, set) {
+			// Get template
+			let dex = this.dex;
+			let baseTemplate = dex.getTemplate(template.baseSpecies);
+
+			// Determine target typing
+			let types = [...new Set(set.moves.slice(0, 2).map(moveId => dex.getMove(moveId).type))];
+
+			// Do full set validation to determine if we can access this typing if this the first move
+			if(toID(move) === toID(set.moves[0])) {
+				// Check that under these conditions, we learn native moves that could give us that typing normally
+				let typesetArray = Array();
+				for( let nTypeItr=0; nTypeItr<2; ++nTypeItr ) {
+					typesetArray[nTypeItr] = DexCalculator.getMovesPokemonLearnsOfType(baseTemplate, types[nTypeItr]);
+					if( typesetArray[nTypeItr].length > 0 ) continue;
+					// Reject early if we get zero moves of that type
+					return this.checkLearnset(move, template, lsetData, set);
+				}
+
+				// Same type case
+				if( types[0] === types[1] ) {
+					if( 1 === typesetArray[0].length ) { // Reject early if we don't learn sufficient moves from the type to fill out both slots
+						return this.checkLearnset(move, template, lsetData, set);
+					}
+				}
+
+				// Real validation complex check (check level limitations, move incompatibilities, etc)
+				let bFoundViableLearnPattern = false;
+				let typeALset = typesetArray[0];
+				let typeBLset = typesetArray[1];
+				let typeBLsetTemp;
+				let sMoveA, sMoveB;
+				let hypotheticalSet = DexCalculator.deepClone(set);
+				let nMvBItr;
+				for( let nMvAItr=typeALset.length-1; nMvAItr>-1; --nMvAItr ) {
+					sMoveA = typeALset[nMvAItr];
+					// Check if we should reject for not learning move A independently
+					hypotheticalSet.moves = [sMoveA];
+					if( null !== this.checkLearnset(sMoveA, template, lsetData, hypotheticalSet) ) {
+						continue;
+					}
+					// Operate interior loop on a deep clone of B that can't have a duplicate of the current move from A
+					typeBLsetTemp = DexCalculator.arrayRemove(typeBLset, sMoveA);
+					for( nMvBItr=typeBLsetTemp.length-1; nMvBItr>-1; --nMvBItr ) {
+						sMoveB = typeBLsetTemp[nMvBItr];
+						// Check if we should reject for not learning move A independently
+						hypotheticalSet.moves = [sMoveB];
+						if( null !== this.checkLearnset(sMoveB, template, lsetData, hypotheticalSet) ) {
+							typeBLset = DexCalculator.arrayRemove(typeBLset, sMoveB); // No point checking this in further loops
+							continue;
+						}
+						// Check if we should reject for not learning moves A and B together
+						hypotheticalSet.moves = [sMoveA, sMoveB];
+						if( null !== this.checkLearnset(sMoveA, template, lsetData, hypotheticalSet) ) {
+							continue;
+						}
+						// We have located a valid hypothetical moveset that could give us the specified typing
+						bFoundViableLearnPattern = true;
+						break;
+					}
+					if(bFoundViableLearnPattern) break;
+				}
+
+				if(!bFoundViableLearnPattern) {
+					return this.checkLearnset(move, template, lsetData, set);
+				}
+			}
+
+			// Check that out moveset includes only legal moves or moves that would be legal under STABmons with our new typing
+			const restrictedMoves = this.format.restrictedMoves || [];
+			if (!move.isZ && !restrictedMoves.includes(move.name)) {
+				if (types.includes(move.type)) return null;
+			}
+			return this.checkLearnset(move, template, lsetData, set);
+		},
+		unbanlist: [ // Deal with this hot garbage hack from Pokemon rule that should have been fixed months ago
+			'Chansey + Charm + Seismic Toss', 'Chansey + Charm + Psywave',
+			'Blissey + Charm + Seismic Toss', 'Blissey + Charm + Psywave',
+			'Shiftry + Leaf Blade + Sucker Punch'
+		],
+	},
 	megamonslegalityexpansion: {
 		effectType: 'Rule',
 		name: 'Megamons Legality Expansion',

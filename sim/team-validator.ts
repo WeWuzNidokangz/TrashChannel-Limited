@@ -111,7 +111,7 @@ export class TeamValidator {
 		teamHas: AnyObject,
 		format: Format,
 		ruleTable: RuleTable,
-		ignoreNonCriticalProblems: boolean): string[] | null
+		ignoreNonCriticalProblems: boolean = false): string[] | null
 	{
 		const dex = this.dex;
 

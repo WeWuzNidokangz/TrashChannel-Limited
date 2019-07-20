@@ -1394,7 +1394,7 @@ let Formats = [
 		],
 
 		mod: 'gen7',
-		searchShow: false,
+		//searchShow: false,
 		ruleset: ['[Gen 7] OU', 'STABmons Move Legality'],
 		banlist: ['Aerodactyl-Mega', 'Blacephalon', 'Kartana', 'Komala', 'Kyurem-Black', 'Porygon-Z', 'Silvally', 'Tapu Koko', 'Tapu Lele', 'Thundurus-Base', 'King\'s Rock', 'Razor Fang'],
 		restrictedMoves: ['Acupressure', 'Belly Drum', 'Chatter', 'Extreme Speed', 'Geomancy', 'Lovely Kiss', 'Shell Smash', 'Shift Gear', 'Spore', 'Thousand Arrows'],
@@ -3783,7 +3783,7 @@ let Formats = [
 
 			// Use validator if we can't determine meta through red flags
 			var TeamValidator = require('../.sim-dist/team-validator').TeamValidator;
-			var validator = TeamValidator();
+			var validator = new TeamValidator();
 
 			for (const mixedMetaKey in MMCollection) {
 				console.log("mixedMetaKey: " + mixedMetaKey);
@@ -4001,7 +4001,7 @@ let Formats = [
 	},
 	{
 		name: "[Gen 7] The Call of Pikacthulhu",
-		desc: `Pok&eacute;mon get Perish status applied when entering battle.`,
+		desc: `Pok&eacute;mon have Perish status applied when entering battle.`,
 		threads: [
 			``,
 		],
@@ -4011,6 +4011,13 @@ let Formats = [
 			// @ts-ignore
 			pokemon.addVolatile('perishsong', pokemon);
 		},
+	},
+	// Mirror Universe Mashups
+	///////////////////////////////////////////////////////////////////
+
+	{
+		section: "Mirror Universe Mashups",
+		column: 3,
 	},
 	{
 		name: "[Gen 7] Mega and Mega",
@@ -4054,6 +4061,25 @@ let Formats = [
 		banlist: ['Illegal', 'Unreleased'], // Anything Goes
 		restrictedStones: ['Ultranecrozium Z'],
 		cannotMega: [],
+	},
+	{
+		name: "[Gen 7] CRABmons",
+		desc: `Pok&eacute;mon change type to match any two moves they could learn naturally, and can use any move of their new typing, in addition to the moves they can normally learn.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3587949/">Vanilla STABmons</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3598418/">Vanilla Camomons</a>`,
+		],
+
+		mod: 'gen7',
+		ruleset: ['[Gen 7] OU', 'CRABmons Move Legality', 'Camomons Rule'],
+		banlist: [
+			'Aerodactyl-Mega', 'Blacephalon', 'Kartana', 'Komala', 'Kyurem-Black', 'Porygon-Z', 'Silvally', 'Tapu Koko', 'Tapu Lele', 'Thundurus-Base', 'King\'s Rock', 'Razor Fang', // STABmons
+			'Dragonite', 'Shedinja', // Camomons
+		],
+		restrictedMoves: [
+			'Acupressure', 'Belly Drum', 'Chatter', 'Extreme Speed', 'Geomancy', 'Lovely Kiss', 'Shell Smash', 'Shift Gear', 'Spore', 'Thousand Arrows', // STABmons
+			'V-create', // CRABmons
+		],
 	},
 
 	// Future Gens OU

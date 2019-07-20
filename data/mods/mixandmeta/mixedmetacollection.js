@@ -41,7 +41,7 @@ let MixedMetaCollection = {
 		isSetRedFlag: function(set) {
 			// Check if OU validator passes us
 			var TeamValidator = require('../../../.sim-dist/team-validator').TeamValidator;
-			var validator = TeamValidator();
+			var validator = new TeamValidator();
 
 			let metaFormat = global.Dex.getFormat('[Gen 7] OU', true);
 			let metaRuleTable = global.Dex.getRuleTable(metaFormat);

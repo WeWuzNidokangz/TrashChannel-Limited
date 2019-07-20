@@ -109,6 +109,7 @@ class DexCalculator {
 
 		tier = toID(tier);
 
+		// @ts-ignore
 		let tierEnum = (tier in tierEnums) ? tierEnums[tier] : 0;
 		return tierEnum;
 	}
@@ -130,6 +131,84 @@ class DexCalculator {
 			const j = Math.floor(Math.random() * (i + 1));
 			[array[i], array[j]] = [array[j], array[i]];
 		}
+	}
+
+	/**
+	 * @param {Template} template
+	 * @return {Set<string>}
+	 */
+	static getFullLearnsetOfPokemon(template) {
+		if (!template.learnset) {
+			template = Dex.getTemplate(template.baseSpecies);
+			// @ts-ignore
+			template.learnset = template.learnset || {};
+		}
+		const lsetData = new Set(Object.keys(template.learnset));
+
+		while (template.prevo) {
+			template = Dex.getTemplate(template.prevo);
+			for (const move in template.learnset) {
+				lsetData.add(move);
+			}
+		}
+
+		return lsetData;
+	};
+
+	/**
+	 * @param {Template} template
+	 * @param {String} type
+	 * @return {Array} array
+	 */
+	static getMovesPokemonLearnsOfType(template, type) {
+		const lsetData = DexCalculator.getFullLearnsetOfPokemon(template);
+
+		// Get full move data for learnset moves
+		/**@type {Move[]} */
+		// @ts-ignore
+		let dex = {};
+		for (const move of lsetData) {
+			// @ts-ignore
+			dex[move] = Dex.getMove(move);
+		}
+
+		// Get those that match the specified type
+		let results = [];
+		for (const move in dex) {
+			if (type !== dex[move].type) continue;
+			results.push(dex[move].name);
+		}
+
+		return results;
+	};
+
+	/**
+	 * Remove an element from an unsorted array significantly faster
+	 * than .splice
+	 *
+	 * @param {any[]} list
+	 * @param {number} index
+	 */
+	static fastPop(list, index) {
+		// If an array doesn't need to be in order, replacing the
+		// element at the given index with the removed element
+		// is much, much faster than using list.splice(index, 1).
+		let length = list.length;
+		let element = list[index];
+		list[index] = list[length - 1];
+		list.pop();
+		return element;
+	}
+
+	/**
+	 * @param {any[]} list
+	 * @param {any} value
+	 */
+	static arrayRemove(list, value) {
+		// @ts-ignore
+		return list.filter(function(ele) {
+			return ele != value;
+		});
 	}
 }
 
