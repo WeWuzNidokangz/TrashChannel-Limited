@@ -3490,7 +3490,8 @@ let Formats = [
 			let isNativeMega = false;
 			let item = Dex.getItem(set.item);
 			if (set.item && item.megaStone && ( item.megaEvolves === template.baseSpecies)) {
-				let bstMega = 0;
+				let baseTemplate = Dex.getTemplate(template.baseSpecies);
+				set.ability = baseTemplate.abilities[0]; // Avoid pre/post-mega ability mismatch inside validateSetInternal
 				template = Dex.getTemplate(item.megaStone);
 				isNativeMega = true;
 			}
@@ -3739,7 +3740,8 @@ let Formats = [
 			let isNativeMega = false;
 			let item = this.getItem(set.item);
 			if (set.item && item.megaStone && ( item.megaEvolves === template.baseSpecies)) {
-				let bstMega = 0;
+				let baseTemplate = this.getTemplate(template.baseSpecies);
+				set.ability = baseTemplate.abilities[0]; // Avoid pre/post-mega ability mismatch inside validateSetInternal
 				template = this.getTemplate(item.megaStone);
 				isNativeMega = true;
 			}
