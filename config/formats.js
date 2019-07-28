@@ -190,6 +190,7 @@ let Formats = [
 		banlist: [
 			'Archeops', 'Dragonite', 'Hoopa-Unbound', 'Kartana', 'Keldeo', 'Kyurem-Black', 'Regigigas', 'Shedinja', 'Slaking', 'Terrakion', 'Weavile', // Almost Any Ability
 			'Damp Rock', 'Deep Sea Tooth', 'Eviolite', // Tier Shift
+			'Thick Club' // TS AAA
 		],
 		unbanlist: ['Aegislash', 'Genesect', 'Landorus', 'Metagross-Mega', 'Naganadel'],
 		restrictedAbilities: [
