@@ -3442,6 +3442,7 @@ let Formats = [
 			for (const set of team) {
 				if(undefined === ourFormat.determineMeta) continue;
 				let setMetaKey = ourFormat.determineMeta.call(this, set, null);
+				if(!setMetaKey) continue; // No valid meta to count as
 				let setMetaKeyId = toID(setMetaKey);
 
 				console.log("setMetaKeyId: " + setMetaKeyId);
@@ -3803,7 +3804,7 @@ let Formats = [
 					}
 					continue;
 				}
-				
+
 				// MxM weighting restrictions
 				// @ts-ignore
 				let metaTierEnum = global.DexCalculator.calcTierEnumeration(mixedMetaValue.weightTier);
