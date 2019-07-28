@@ -40,11 +40,19 @@ let MixedMetaCollection = {
 		format: "[Gen 7] Camomons",
 		weightTier: "OU",
 		isSetRedFlag: function(set) {
+			//console.info(this);
+
 			// Check if OU validator passes us
 			var TeamValidator = require('../../../.sim-dist/team-validator').TeamValidator;
 			var validator = new TeamValidator();
 
-			let metaFormat = global.Dex.getFormat('[Gen 7] OU', true);
+			// We can only get customrules if called from Battle, not ModdedDex
+			// @ts-ignore
+			let customRules = (this.cachedFormat && this.cachedFormat.customRules) || [];
+			let sCustomRulesString = '@@@' + customRules.join(',');
+			//console.log("sCustomRulesString: " + sCustomRulesString);
+
+			let metaFormat = global.Dex.getFormat('[Gen 7] OU' + sCustomRulesString, true);
 			let metaRuleTable = global.Dex.getRuleTable(metaFormat);
 
 			let validatorProblems = validator.validateSetInternal(set, undefined, metaFormat, metaRuleTable, true) || [];
@@ -56,7 +64,7 @@ let MixedMetaCollection = {
 	},
 	balancedhackmons: {
 		format: "[Gen 7] Balanced Hackmons",
-		weightTier: "LC",
+		weightTier: "LC Uber",
 	},
 	purehackmons: {
 		format: "[Gen 7] Pure Hackmons",

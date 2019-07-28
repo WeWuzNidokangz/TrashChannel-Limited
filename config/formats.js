@@ -3548,6 +3548,9 @@ let Formats = [
 			clearRuleTable.set("Illegal", "+illegal");
 			clearRuleTable.set("Unreleased", "+unreleased");
 
+			let customRules = this.format.customRules || [];
+			let sCustomRulesString = '@@@' + customRules.join(',');
+
 			for (const mixedMetaKey in MMCollection) {
 				console.log("mixedMetaKey: " + mixedMetaKey);
 				
@@ -3561,7 +3564,7 @@ let Formats = [
 				}
 
 				// Regular validation problem for this OM
-				let metaFormat = Dex.getFormat(MMCollection[mixedMetaKey].format, true);
+				let metaFormat = Dex.getFormat(MMCollection[mixedMetaKey].format + sCustomRulesString, true);
 				let metaRuleTable = Dex.getRuleTable(metaFormat);
 
 				let validatorProblems = this.validateSetInternal(set, teamHas, metaFormat, metaRuleTable, true) || [];
@@ -3735,6 +3738,7 @@ let Formats = [
 			global.DexCalculator = require('../trashchannel/dex-calculator');
 
 			console.log("running determineMeta for: " + set.species || set.name);
+			//console.info(this);
 
 			// Calc set data
 			let template = this.getTemplate(set.species || set.name);
@@ -3774,13 +3778,13 @@ let Formats = [
 			// Do red flag checks first
 			for (const mixedMetaKey in MMCollection) {
 				console.log("Red flag check for mixedMetaKey: " + mixedMetaKey);
-				
+
 				let mixedMetaValue = MMCollection[mixedMetaKey];
 				if(undefined !== mixedMetaValue.banReason ) continue;
 
 				if(undefined === mixedMetaValue.isSetRedFlag) continue;
 
-				if(mixedMetaValue.isSetRedFlag(set)) {
+				if(mixedMetaValue.isSetRedFlag.call(this, set)) {
 					return MMCollection[mixedMetaKey].format;
 				}
 			}
@@ -3789,14 +3793,19 @@ let Formats = [
 			var TeamValidator = require('../.sim-dist/team-validator').TeamValidator;
 			var validator = new TeamValidator();
 
+			// We can only get customrules if called from Battle, not ModdedDex
+			let customRules = (this.cachedFormat && this.cachedFormat.customRules) || [];
+			let sCustomRulesString = '@@@' + customRules.join(',');
+			//console.log("sCustomRulesString: " + sCustomRulesString);
+
 			for (const mixedMetaKey in MMCollection) {
 				console.log("mixedMetaKey: " + mixedMetaKey);
-				
+
 				let mixedMetaValue = MMCollection[mixedMetaKey];
 				if(undefined !== mixedMetaValue.banReason ) continue;
 
 				// Regular validation problem for this OM
-				let metaFormat = this.getFormat(MMCollection[mixedMetaKey].format, true);
+				let metaFormat = this.getFormat(MMCollection[mixedMetaKey].format + sCustomRulesString, true);
 				let metaRuleTable = this.getRuleTable(metaFormat);
 
 				let validatorProblems = validator.validateSetInternal(set, teamHas, metaFormat, metaRuleTable, true) || [];
