@@ -20,9 +20,10 @@ let MixedMetaCollection = {
 		weightTier: "RU",
 		isSetRedFlag: function(set) {
 			// Dragon ascent red flags MnM
-			if(set.moves.includes('dragonascent')) {
+			// 19/07/28: Disabled to give STABmons access to DA
+			/*if(set.moves.includes('dragonascent')) {
 				return `having the Mega evolution move Dragon Ascent`;
-			}
+			}*/
 
 			// Check item-based mega evos
 			let template = global.Dex.getTemplate(set.species || set.name);
