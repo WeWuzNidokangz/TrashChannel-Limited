@@ -419,6 +419,30 @@ const commands = {
 		return target;
 	},
 
+	'!shrug': true,
+	shrug(target) {
+		target = target ? ' ' + target + ' ' : '';
+		if (target.startsWith(' /me')) target = target.slice(1);
+		return this.canTalk(target + '¯\\_(ツ)_/¯');
+	},
+	shrughelp: ['/shrug [message] - Sends the given message, if any, appended with ¯\\_(ツ)_/¯'],
+
+	'!tableflip': true,
+	tableflip(target) {
+		target = target ? ' ' + target + ' ' : '';
+		if (target.startsWith(' /me')) target = target.slice(1);
+		return this.canTalk(target + '(╯°□°）╯︵ ┻━┻');
+	},
+	tablefliphelp: ['/tableflip [message] - Sends the given message, if any, appended with (╯°□°）╯︵ ┻━┻'],
+
+	'!tableunflip': true,
+	tableunflip(target) {
+		target = target ? ' ' + target + ' ' : '';
+		if (target.startsWith(' /me')) target = target.slice(1);
+		return this.canTalk(target + '┬──┬◡ﾉ(° -°ﾉ)');
+	},
+	tableunfliphelp: ['/tableunflip [message] - Sends the given message, if any, appended with ┬──┬◡ﾉ(° -°ﾉ)'],
+
 	'!battle': true,
 	'battle!': 'battle',
 	battle(target, room, user, connection, cmd) {
@@ -654,36 +678,25 @@ const commands = {
 	},
 	unblockpmshelp: [`/unblockpms - Unblocks private messages. Block them with /blockpms.`],
 
+	'!status': true,
 	status(target, room, user, connection, cmd) {
-		if (!this.canTalk()) return;
+		if (user.locked || user.semilocked) return this.errorReply("Your status cannot be updated while you are locked or semilocked.");
 		if (!target) return this.parse('/help status');
 
 		if (target.length > 32) return this.errorReply(`Your status is too long; it must be under 32 characters.`);
-		target = Chat.nicknamefilter(target, user, true);
+		target = Chat.statusfilter(target, user);
 		if (!target) return this.errorReply("Your status contains a banned word.");
 
-		let statusType = '(Online)';
-		// Should work even if users use /status with a message containing ()
-		if (user.status && user.status.includes('(') && user.status.includes(')')) {
-			statusType = user.status.slice(0, user.status.indexOf(')') + 1);
-		}
-
-		user.setStatus(`${statusType} ${target}`);
-		this.sendReply(`Your status has been set to: ${target}`);
+		user.setUserMessage(target);
+		this.sendReply(`Your status has been set to: ${target}.`);
 	},
-	statushelp: [`/status [note] - Sets a short note as your status, visible when users click your username.`],
+	statushelp: [`/status [note] - Sets a short note as your status, visible when users click your username. Use /clearstatus to clear your status message.`],
 
 	'!busy': true,
 	busy(target, room, user) {
-		if (!this.canTalk()) return;
+		if (target) this.errorReply("Setting status messages in /busy is no longer supported. Set a status using /status.");
 
-		if (target) {
-			if (target.length > 32) return this.errorReply(`Your status is too long; it must be under 32 characters.`);
-			target = Chat.nicknamefilter(target, user, true);
-			if (!target) return this.errorReply("Your status contains a banned word.");
-		}
-
-		user.setStatus(`(Busy)${target ? ` ${target}` : ''}`);
+		user.setStatusType('busy');
 		this.parse('/blockpms');
 		this.parse('/blockchallenges');
 		this.sendReply("You are now marked as busy.");
@@ -695,51 +708,47 @@ const commands = {
 	afk: 'away',
 	brb: 'away',
 	away(target, room, user, connection, cmd) {
-		if (!this.canTalk()) return;
-		let awayType = cmd;
-		let awayMessage = '';
-		if (awayType === 'afk' || awayType === 'brb') {
-			awayType = awayType.toUpperCase();
-		} else {
-			awayType = `${awayType[0].toUpperCase()}${awayType.slice(1)}`;
-		}
+		if (target) this.errorReply("Setting status messages in /away is no longer supported. Set a status using /status.");
 
-		if (target) {
-			if (target.length > 32) return this.errorReply(`Your status is too long; it must be under 32 characters.`);
-
-			awayMessage = Chat.nicknamefilter(target, user, true);
-			if (!awayMessage) return this.errorReply("Your status contains a banned word.");
-		}
-		awayMessage = `(${awayType})${awayMessage ? ` ${awayMessage}` : ''}`;
-		user.setAway(awayMessage);
+		user.setStatusType('idle');
 		this.sendReply("You are now marked as away. Send a message or use /back to indicate you are back.");
 	},
 	awayhelp: [`/away - Marks you as away. Send a message or use /back to indicate you are back.`],
 
-	'!back': true,
-	clearstatus: 'back',
-	unaway: 'back',
-	unafk: 'back',
-	back(target, room, user) {
+	cs: 'clearstatus',
+	clearstatus(target, room, user) {
 		if (target) {
 			// Clearing another user's status
 			let reason = this.splitTarget(target);
 			let targetUser = this.targetUser;
 			if (!targetUser) return this.errorReply(`User '${target}' not found.`);
-			if (!targetUser.status) return this.errorReply(`${targetUser.name} does not have a status set.`);
+			if (!targetUser.userMessage) return this.errorReply(`${targetUser.name} does not have a status set.`);
 			if (!this.can('forcerename', targetUser)) return false;
 
-			let bracketIndex = targetUser.status.indexOf(')');
-			const status = targetUser.status.slice(bracketIndex + 2);
-			this.privateModAction(`(${targetUser.name}'s status "${status}" was cleared by ${user.name}${reason ? `: ${reason}` : ``})`);
-			this.globalModlog('CLEARSTATUS', targetUser, ` from ${status} by ${user.name}${reason ? `: ${reason}` : ``}`);
+			this.privateModAction(`(${targetUser.name}'s status "${targetUser.userMessage}" was cleared by ${user.name}${reason ? `: ${reason}` : ``})`);
+			this.globalModlog('CLEARSTATUS', targetUser, `from ${targetUser.userMessage} by ${user.name}${reason ? `: ${reason}` : ``}`);
 			targetUser.clearStatus();
-			targetUser.popup(`${user.name} has cleared your status for being inappropriate${reason ? `: ${reason}` : '.'}`);
+			targetUser.popup(`${user.name} has cleared your status message for being inappropriate${reason ? `: ${reason}` : '.'}`);
 			return;
 		}
-		if (!user.status) return this.errorReply("You do not have a status set and are already marked as back.");
-		const statusType = user.isAway() ? 'away' : user.status.startsWith('(Busy)') ? 'busy' : null;
-		user.clearStatus();
+
+		if (!user.userMessage) return this.sendReply("You don't have a status message set.");
+		user.setUserMessage('');
+
+		return this.sendReply("You have cleared your status message.");
+	},
+	clearstatushelp: [
+		`/clearstatus - Clears your status message.`,
+		`/clearstatus user, reason - Clears another person's status message. Requires: % @ & ~`,
+	],
+
+	'!back': true,
+	unaway: 'back',
+	unafk: 'back',
+	back(target, room, user) {
+		if (user.statusType === 'online') return this.errorReply("You are already marked as back.");
+		const statusType = user.statusType;
+		user.setStatusType('online');
 
 		if (statusType === 'busy') {
 			this.parse('/unblockpms');
@@ -752,10 +761,7 @@ const commands = {
 
 		return this.sendReply("You have cleared your status message.");
 	},
-	backhelp: [
-		`/back - Marks you as back if you are away.`,
-		`/clearstatus - Clears your status message.`,
-	],
+	backhelp: [`/back - Marks you as back if you are away.`],
 
 	'!rank': true,
 	rank(target, room, user) {
@@ -1002,6 +1008,8 @@ const commands = {
 			if (!this.can('editroom', null, room)) return;
 		} else if (room.battle) {
 			if (!this.can('editprivacy', null, room)) return;
+			const prefix = room.battle.forcedPublic();
+			if (prefix && !user.can('editprivacy')) return this.errorReply(`This battle is required to be public due to a player having a name prefixed by '${prefix}'.`);
 		} else {
 			// registered chatrooms show up on the room list and so require
 			// higher permissions to modify privacy settings
@@ -1585,7 +1593,7 @@ const commands = {
 			let roomRankList = rankLists[r].sort();
 			roomRankList = roomRankList.map(s => {
 				const u = Users(s);
-				const isAway = u && u.isAway();
+				const isAway = u && u.statusType !== 'online';
 				return s in targetRoom.users && !isAway ? `**${s}**` : s;
 			});
 			return `${Config.groups[r] ? `${Config.groups[r].name}s (${r})` : r}:\n${roomRankList.join(", ")}`;
@@ -2481,8 +2489,10 @@ const commands = {
 	},
 	promotehelp: [`/promote [username], [group] - Promotes the user to the specified group. Requires: & ~`],
 
+	untrustuser: 'trustuser',
+	unconfirmuser: 'trustuser',
 	confirmuser: 'trustuser',
-	trustuser(target, room, user) {
+	trustuser(target, room, user, connection, cmd) {
 		if (!target) return this.parse('/help trustuser');
 		if (!this.can('promote')) return;
 
@@ -2495,14 +2505,29 @@ const commands = {
 		if (!userid) return this.parse('/help trustuser');
 		if (!targetUser) return this.errorReply(`User '${name}' is not online.`);
 
-		if (targetUser.trusted) return this.errorReply(`User '${name}' is already trusted.`);
+		if (cmd.startsWith('un')) {
+			if (!targetUser.trusted) return this.errorReply(`User '${name}' is not trusted.`);
+			if (targetUser.group !== Config.groupsranking[0]) {
+				return this.errorReply(`User '${name}' has a global rank higher than trusted.`);
+			}
 
-		targetUser.setGroup(Config.groupsranking[0], true);
-		this.sendReply(`User '${name}' is now trusted.`);
-		this.privateModAction(`${name} was set as a trusted user by ${user.name}.`);
-		this.modlog('TRUSTUSER', userid);
+			targetUser.setGroup(' ');
+			this.sendReply(`User '${name}' is no longer trusted.`);
+			this.privateModAction(`${name} was set to no longer be a trusted user by ${user.name}.`);
+			this.modlog('UNTRUSTUSER', userid);
+		} else {
+			if (targetUser.trusted) return this.errorReply(`User '${name}' is already trusted.`);
+
+			targetUser.setGroup(Config.groupsranking[0], true);
+			this.sendReply(`User '${name}' is now trusted.`);
+			this.privateModAction(`${name} was set as a trusted user by ${user.name}.`);
+			this.modlog('TRUSTUSER', userid);
+		}
 	},
-	trustuserhelp: [`/trustuser [username] - Trusts the user (makes them immune to locks). Requires: & ~`],
+	trustuserhelp: [
+		`/trustuser [username] - Trusts the user (makes them immune to locks). Requires: & ~`,
+		`/untrustuser [username] - Removes the trusted user status from the user. Requires: & ~`,
+	],
 
 	globaldemote: 'demote',
 	demote(target) {
@@ -3273,6 +3298,7 @@ const commands = {
 	widendatacenters: 'adddatacenters',
 	adddatacenters(target, room, user, connection, cmd) {
 		if (!this.can('hotpatch')) return false;
+		if (!target) return this.parse(`/help adddatacenters`);
 		// should be in the format: IP, IP, name, URL
 		let widen = (cmd === 'widendatacenters');
 
@@ -3297,6 +3323,10 @@ const commands = {
 			for (const row of data) {
 				if (!row) continue;
 				let rowSplit = row.split(',');
+				if (rowSplit.length !== 4) {
+					this.errorReply(`Invalid row: ${row}`);
+					continue;
+				}
 				let rowData = [
 					IPTools.ipToNumber(rowSplit[0]),
 					IPTools.ipToNumber(rowSplit[1]),
@@ -3363,6 +3393,13 @@ const commands = {
 			if (widenSuccesses) this.sendReply(`${widenSuccesses} widens.`);
 		});
 	},
+	adddatacentershelp: [
+		`/adddatacenters [list] - Add datacenters to datacenters.csv`,
+		`/widendatacenters [list] - As above, but don't throw errors if a new range completely covers an old range`,
+		`[list] is in datacenters.csv format: [low],[high],[name],[url] (can be multiline) - example:`,
+		`5.152.192.0,5.152.223.255,Redstation Limited,http://redstation.com/`,
+		`Get datacenter info from whois, [low], [high] are the range in the last inetnum`,
+	],
 
 	disableladder(target, room, user) {
 		if (!this.can('disableladder')) return false;
@@ -3923,6 +3960,9 @@ const commands = {
 		if (room.tour) {
 			return this.errorReply("You can't offer ties in tournaments.");
 		}
+		if (battle.rqid < 100) {
+			return this.errorReply("It's too early to tie, please play until turn 100 or so.");
+		}
 		if (!this.can('roomvoice', null, room)) return;
 		if (cmd === 'accepttie' && !battle.players.some(player => player.wantsTie)) {
 			return this.errorReply("No other player is requesting a tie right now. It was probably canceled.");
@@ -4065,6 +4105,13 @@ const commands = {
 		}));
 	},
 
+	hidereplay(target, room, user, connection) {
+		if (!room || !room.battle || !this.can('joinbattle', null, room)) return;
+		if (room.hideReplay) return this.errorReply(`The replay for this battle is already set to hidden.`);
+		room.hideReplay = true;
+		this.addModAction(`${user.name} hid the replay of this battle.`);
+	},
+
 	addplayer(target, room, user) {
 		if (!target) return this.parse('/help addplayer');
 		if (!room.battle) return this.errorReply("You can only do this in battle rooms.");
@@ -4087,6 +4134,7 @@ const commands = {
 		if (room.battle[target].userid) {
 			return this.errorReply(`This room already has a player in slot ${target}.`);
 		}
+		if (targetUser.userid in room.battle.playerTable) return this.errorReply(`${targetUser.name} is already a player in this battle.`);
 
 		room.auth[targetUser.userid] = Users.PLAYER_SYMBOL;
 		let success = room.battle.joinGame(targetUser, target);
@@ -4422,7 +4470,7 @@ const commands = {
 				avatar: targetUser.avatar,
 				group: targetUser.group,
 				autoconfirmed: !!targetUser.autoconfirmed,
-				status: targetUser.status,
+				status: targetUser.getStatus(),
 				away: targetUser.away,
 				rooms: roomList,
 			};
@@ -4440,7 +4488,8 @@ const commands = {
 			));
 		} else if (cmd === 'laddertop') {
 			if (!trustable) return false;
-			Ladders(toID(target)).getTop().then(result => {
+			const [format, prefix] = target.split(',').map(x => x.trim());
+			Ladders(toID(format)).getTop(prefix).then(result => {
 				connection.send('|queryresponse|laddertop|' + JSON.stringify(result));
 			});
 		} else if (cmd === 'roominfo') {

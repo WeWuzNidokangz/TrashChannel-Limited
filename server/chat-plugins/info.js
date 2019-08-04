@@ -11,6 +11,8 @@
 
 'use strict';
 
+const net = require('net');
+
 /** @type {ChatCommands} */
 const commands = {
 
@@ -310,7 +312,7 @@ const commands = {
 		if (!target) return this.parse('/help host');
 		if (!this.can('rangeban')) return;
 		target = target.trim();
-		if (!/^[0-9.]+$/.test(target)) return this.errorReply('You must pass a valid IPv4 IP to /host.');
+		if (!net.isIPv4(target)) return this.errorReply('You must pass a valid IPv4 IP to /host.');
 		IPTools.lookup(target).then(({dnsbl, host, hostType}) => {
 			const dnsblMessage = dnsbl ? ` [${dnsbl}]` : ``;
 			this.sendReply(`IP ${target}: ${host || "ERROR"} [${hostType}]${dnsblMessage}`);
@@ -983,7 +985,7 @@ const commands = {
 			let buffer = '<div class="scrollable"><table cellpadding="1" width="100%"><tr><th></th>';
 			let icon = {};
 			for (let type in mod.data.TypeChart) {
-				icon[type] = `<img src="https://${Config.routes.client}/sprites/types/' + type + '.png" width="32" height="14">`;
+				icon[type] = `<img src="https://${Config.routes.client}/sprites/types/${type}.png" width="32" height="14">`;
 				// row of icons at top
 				buffer += '<th>' + icon[type] + '</th>';
 			}
@@ -1320,7 +1322,6 @@ const commands = {
 
 	'!uptime': true,
 	uptime(target, room, user) {
-		if (!this.can('broadcast')) return false;
 		if (!this.runBroadcast()) return;
 		let uptime = process.uptime();
 		let uptimeText;

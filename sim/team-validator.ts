@@ -12,7 +12,7 @@ import {Dex} from './dex';
 export class TeamValidator {
 	readonly format: Format;
 	readonly dex: ModdedDex;
-	readonly ruleTable: RuleTable;
+	readonly ruleTable: import('./dex-data').RuleTable;
 
 	constructor(format: string | Format) {
 		this.format = Dex.getFormat(format);
@@ -37,9 +37,6 @@ export class TeamValidator {
 			return null;
 		}
 		if (!team || !Array.isArray(team)) {
-			if (format.canUseRandomTeam) {
-				return null;
-			}
 			return [`You sent invalid team data. If you're not using a custom client, please report this as a bug.`];
 		}
 
@@ -67,7 +64,14 @@ export class TeamValidator {
 			if (setProblems) {
 				problems = problems.concat(setProblems);
 			}
-			if (removeNicknames) set.name = dex.getTemplate(set.species).baseSpecies;
+			if (removeNicknames) {
+				let crossTemplate: Template;
+				if (format.name === '[Gen 7] Cross Evolution' && (crossTemplate = dex.getTemplate(set.name)).exists) {
+					set.name = crossTemplate.species;
+				} else {
+					set.name = dex.getTemplate(set.species).baseSpecies;
+				}
+			}
 		}
 
 		for (const [rule, source, limit, bans] of ruleTable.complexTeamBans) {
