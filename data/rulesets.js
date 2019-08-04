@@ -1404,25 +1404,20 @@ let BattleFormats = {
 				'LC Uber': 40,
 				'LC': 40,
 			};
-			if (target) {
-				if (target.set.ability === 'Drizzle') return;
-			}
+			if (target && target.set.ability === 'Drizzle') return;
 			let dex = this && this.deepClone ? this : DexCalculator;
-			let pokemon = dex.deepClone(template);
-			if (target) {
-				if (target.set.item) {
-					let item = this.getItem(target.set.item);
-					if (item.name === 'Kommonium Z' || item.name === 'Mewnium Z') return;
-					if (item.megaEvolves === pokemon.species) pokemon.tier = this.getTemplate(item.megaStone).tier;
-				}
+			let tier = template.tier;
+			if (target && target.set.item) {
+				let item = this.getItem(target.set.item);
+				if (item.name === 'Kommonium Z' || item.name === 'Mewnium Z') return;
+				if (item.megaEvolves === template.species) tier = this.getTemplate(item.megaStone).tier;
 			}
-			if (pokemon.tier[0] === '(') pokemon.tier = pokemon.tier.slice(1, -1);
-			if (!(pokemon.tier in boosts)) return pokemon;
-			if (target) {
-				if (target.set.moves.includes('auroraveil')) pokemon.tier = 'UU';
-				if (target.set.ability === 'Drought') pokemon.tier = 'RU';
-			}
+			if (target && target.set.moves.includes('auroraveil')) tier = 'UU';
+			if (target && target.set.ability === 'Drought') tier = 'RU';
 
+			if (tier[0] === '(') tier = tier.slice(1, -1);
+			if (!(tier in boosts)) return;
+			let pokemon = dex.deepClone(template);
 			let boost = boosts[pokemon.tier];
 			for (let statName in pokemon.baseStats) {
 				if (statName === 'hp') continue;
