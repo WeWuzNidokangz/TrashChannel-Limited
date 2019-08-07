@@ -1418,11 +1418,14 @@ let BattleFormats = {
 			if (tier[0] === '(') tier = tier.slice(1, -1);
 			if (!(tier in boosts)) return;
 			let pokemon = dex.deepClone(template);
-			let boost = boosts[pokemon.tier];
+			//console.info(pokemon.baseStats);
+			let boost = boosts[tier];
+			//console.log("boost: " + boost.toString());
 			for (let statName in pokemon.baseStats) {
 				if (statName === 'hp') continue;
 				pokemon.baseStats[statName] = dex.clampIntRange(pokemon.baseStats[statName] + boost, 1, 255);
 			}
+			//console.info(pokemon.baseStats);
 			return pokemon;
         },
 	},
