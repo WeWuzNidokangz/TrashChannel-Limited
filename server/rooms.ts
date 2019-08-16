@@ -26,6 +26,8 @@ import {WriteStream} from '../lib/streams';
 import {PM as RoomBattlePM, RoomBattle, RoomBattlePlayer, RoomBattleTimer} from "./room-battle";
 import {RoomGame, RoomGamePlayer} from './room-game';
 import {Roomlogs} from './roomlogs';
+import * as fs from 'fs';
+import * as pathModule from 'path';
 
 /*********************************************************
  * the Room object.
@@ -1049,7 +1051,7 @@ export class BasicChatRoom extends BasicRoom {
 		this.filterEmojis = false;
 		this.filterCaps = false;
 		this.slowchat = false;
-		this.introMessage = FS.readFileSync('config/roomintro.html', 'utf8');
+		this.introMessage = fs.readFileSync(pathModule.resolve(__dirname, '../config/roomintro.html'), 'utf8');
 		this.staffMessage = '';
 		this.autojoin = false;
 		this.staffAutojoin = false;
