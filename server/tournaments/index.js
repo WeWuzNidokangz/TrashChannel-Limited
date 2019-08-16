@@ -113,6 +113,8 @@ class Tournament extends Rooms.RoomGame {
 		this.bracketUpdateTimer = null;
 		this.bracketCache = null;
 
+		/** @type {Set<string>} */
+		this.completedMatches = new Set();
 		this.isAvailableMatchesInvalidated = true;
 		this.availableMatchesCache = {challenges: new Map(), challengeBys: new Map()};
 
@@ -225,6 +227,12 @@ class Tournament extends Rooms.RoomGame {
 			}
 		} else if (this.autoStartTimer) {
 			clearTimeout(this.autoStartTimer);
+		}
+		for (const roomid of this.completedMatches) {
+			/** @type {GameRoom} */
+			// @ts-ignore
+			const room = Rooms(roomid);
+			if (room) room.tour = null;
 		}
 		for (const player of this.players) {
 			player.unlinkUser();
@@ -491,8 +499,8 @@ class Tournament extends Rooms.RoomGame {
 			matchPlayer.isBusy = false;
 
 			matchPlayer.inProgressMatch.room.addRaw(`<div class="broadcast-red"><b>${Chat.escapeHTML(user.name)} is no longer in the tournament.<br />You can finish playing, but this battle is no longer considered a tournament battle.</div>`).update();
-			matchPlayer.inProgressMatch.room.tour = null;
 			matchPlayer.inProgressMatch.room.parent = null;
+			this.completedMatches.add(matchPlayer.inProgressMatch.room.id);
 			matchPlayer.inProgressMatch = null;
 		}
 
@@ -718,8 +726,8 @@ class Tournament extends Rooms.RoomGame {
 		if (matchFrom) {
 			matchFrom.to.isBusy = false;
 			player.inProgressMatch = null;
-			matchFrom.room.tour = null;
 			matchFrom.room.parent = null;
+			this.completedMatches.add(matchFrom.room.id);
 			if (matchFrom.room.battle) matchFrom.room.battle.forfeit(player.name);
 		}
 
@@ -732,8 +740,8 @@ class Tournament extends Rooms.RoomGame {
 			matchTo.isBusy = false;
 			// @ts-ignore
 			let matchRoom = matchTo.inProgressMatch.room;
-			matchRoom.tour = null;
 			matchRoom.parent = null;
+			this.completedMatches.add(matchRoom.id);
 			if (matchRoom.battle) matchRoom.battle.forfeit(player.userid);
 			matchTo.inProgressMatch = null;
 		}
@@ -1047,6 +1055,7 @@ class Tournament extends Rooms.RoomGame {
 	 * @param {User} user
 	 */
 	onBattleJoin(room, user) {
+		if (!room.p1 || !room.p2) return;
 		if (this.scouting || this.isEnded || user.latestIp === room.p1.latestIp || user.latestIp === room.p2.latestIp) return;
 		if (user.can('makeroom')) return;
 		for (const otherPlayer of this.getRemainingPlayers()) {
@@ -1061,10 +1070,11 @@ class Tournament extends Rooms.RoomGame {
 	 * @param {string} winnerid
 	 */
 	onBattleWin(room, winnerid) {
-		room.tour = null;
+		if (this.completedMatches.has(room.id)) return;
+		this.completedMatches.add(room.id);
 		room.parent = null;
 		if (!room.battle) throw new Error("onBattleWin called without a battle");
-
+		if (!room.p1 || !room.p2) throw new Error("onBattleWin called with missing players");
 		const p1 = this.playerTable[room.p1.userid];
 		const p2 = this.playerTable[room.p2.userid];
 		const winner = this.playerTable[winnerid];
@@ -1139,6 +1149,12 @@ class Tournament extends Rooms.RoomGame {
 		if (this.autoDisqualifyTimer) clearTimeout(this.autoDisqualifyTimer);
 		delete exports.tournaments[this.room.id];
 		this.room.game = null;
+		for (const roomid of this.completedMatches) {
+			/** @type {GameRoom} */
+			// @ts-ignore
+			const room = Rooms(roomid);
+			if (room) room.tour = null;
+		}
 		for (const player of this.players) {
 			player.unlinkUser();
 		}

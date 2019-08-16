@@ -1,14 +1,14 @@
 import * as child_process from 'child_process';
 
-import RoomsType = require('./rooms');
-import RoomlogsType = require('./roomlogs');
+import * as RoomsType from './rooms';
+import {Roomlogs as RoomlogsType} from './roomlogs';
 import {LadderStore as LadderStoreType} from './ladders-remote';
-import LaddersType = require('./ladders');
+import {Ladders as LaddersType} from './ladders';
 import PunishmentsType = require('./punishments');
-import ChatType = require('./chat');
 
 import * as StreamsType from './../lib/streams';
 import * as UsersType from './users';
+import * as ChatType from './chat'
 
 declare global {
 	namespace NodeJS {
@@ -16,7 +16,7 @@ declare global {
 			IPTools: any
 			Config: any
 			Chat: any
-			__version: {head: string, origin?: string}
+			__version: {head: string, origin?: string, tree?: string}
 		}
 	}
 	// modules
@@ -30,13 +30,13 @@ declare global {
 
 	// rooms
 	const GlobalRoom: typeof RoomsType.GlobalRoom
-	const ChatRoom: typeof RoomsType.ChatRoomTypeForTS
+	const ChatRoom: typeof RoomsType.Rooms.ChatRoomTypeForTS
 	const GameRoom: typeof RoomsType.GameRoom
 	const BasicRoom: typeof RoomsType.BasicRoom
 	const BasicChatRoom: typeof RoomsType.ChatRoom
-	const RoomGame: typeof RoomsType.RoomGame
-	const RoomBattle: typeof RoomsType.RoomBattle
-	const Rooms: typeof RoomsType
+	const RoomGame: typeof RoomsType.Rooms.RoomGame
+	const RoomBattle: typeof RoomsType.Rooms.RoomBattle
+	const Rooms: typeof RoomsType.Rooms
 	const Roomlogs: typeof RoomlogsType
 	const Roomlog: typeof RoomlogsType.Roomlog
 
@@ -45,7 +45,7 @@ declare global {
 	const User: typeof UsersType.Users.User
 	const Connection: typeof UsersType.Users.Connection
 	// chat
-	const Chat: typeof ChatType
-	const CommandContext: typeof ChatType.CommandContext
-	const PageContext: typeof ChatType.PageContext
+	const Chat: typeof ChatType.Chat
+	const CommandContext: typeof ChatType.Chat.CommandContext
+	const PageContext: typeof ChatType.Chat.PageContext
 }

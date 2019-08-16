@@ -25,9 +25,9 @@
 
 'use strict';
 
-type GameRoom = import('./rooms').GameRoomType;
-type BasicRoom = import('./rooms').BasicRoomType;
-type BasicChatRoom = import('./rooms').BasicChatRoomType;
+type GameRoom = import('./rooms').GameRoom;
+type BasicRoom = import('./rooms').BasicRoom;
+type BasicChatRoom = import('./rooms').BasicChatRoom;
 
 type Room = import('./rooms').Room;
 
@@ -99,9 +99,9 @@ function deleteUser(user: User) {
 	prevUsers.delete('guest' + user.guestNum as ID);
 	users.delete(user.userid);
 }
-function merge(user1: User, user2: User) {
-	prevUsers.delete(user2.userid);
-	prevUsers.set(user1.userid, user2.userid);
+function merge(toRemain: User, toDestroy: User) {
+	prevUsers.delete(toRemain.userid);
+	prevUsers.set(toDestroy.userid, toRemain.userid);
 }
 
 /**
@@ -328,11 +328,17 @@ function isTrusted(name: string | User) {
 
 const connections = new Map();
 
-class Connection {
+export class Connection {
 	id: string;
 	socketid: string;
 	worker: Worker;
 	inRooms: Set<string>;
+	/**
+	 * This can be null during initialization and after disconnecting,
+	 * but we're asserting it non-null for ease of use. The main risk
+	 * is async code, where you need to re-check that it's not null
+	 * before using it.
+	 */
 	user: User;
 	ip: string;
 	protocol: string;
@@ -352,12 +358,6 @@ class Connection {
 		this.worker = worker;
 		this.inRooms = new Set();
 
-		/**
-		 * This can be null during initialization and after disconnecting,
-		 * but we're asserting it non-null for ease of use. The main risk
-		 * is async code, where you need to re-check that it's not null
-		 * before using it.
-		 */
 		this.user = user!;
 
 		this.ip = ip || '';
@@ -420,7 +420,7 @@ const SETTINGS = [
 ];
 
 // User
-class User extends Chat.MessageContext {
+export class User extends Chat.MessageContext {
 	user: User;
 	mmrCache: {[format: string]: number};
 	guestNum: number;
@@ -430,6 +430,7 @@ class User extends Chat.MessageContext {
 	userid: ID;
 	group: string;
 	avatar: string | number;
+	language: string | null;
 
 	connected: boolean;
 	connections: Connection[];
@@ -444,7 +445,11 @@ class User extends Chat.MessageContext {
 	prevNames: {[id: /** ID */ string]: string};
 
 	inRooms: Set<string>;
+	/**
+	 * Set of room IDs
+	 */
 	games: Set<string>;
+	/** Millisecond timestamp for last battle decision */
 	lastDecision: number;
 	lastChallenge: number;
 	lastPM: string;
@@ -492,6 +497,7 @@ class User extends Chat.MessageContext {
 		this.registered = false;
 		this.userid = '';
 		this.group = Config.groupsranking[0];
+		this.language = null;
 
 		this.avatar = DEFAULT_TRAINER_SPRITES[Math.floor(Math.random() * DEFAULT_TRAINER_SPRITES.length)];
 
@@ -514,11 +520,7 @@ class User extends Chat.MessageContext {
 		this.prevNames = Object.create(null);
 		this.inRooms = new Set();
 
-		/**
-		 * Set of room IDs
-		 */
 		this.games = new Set();
-		/** Millisecond timestamp for last battle decision */
 		this.lastDecision = 0;
 
 		// misc state
@@ -1042,6 +1044,11 @@ class User extends Chat.MessageContext {
 		if (oldUser.autoconfirmed) this.autoconfirmed = oldUser.autoconfirmed;
 
 		this.updateGroup(this.registered);
+		// We only propagate the 'busy' statusType through merging - merging is
+		// active enough that the user should no longer be in the 'idle' state.
+		// Doing this before merging connections ensures the updateuser message
+		// shows the correct idle state.
+		this.setStatusType((this.statusType === 'busy' || oldUser.statusType === 'busy') ? 'busy' : 'online');
 
 		for (const connection of oldUser.connections) {
 			this.mergeConnection(connection);
@@ -1079,9 +1086,6 @@ class User extends Chat.MessageContext {
 		this.latestHost = oldUser.latestHost;
 		this.latestHostType = oldUser.latestHostType;
 		this.userMessage = oldUser.userMessage || this.userMessage || '';
-		// We only propagate the 'busy' statusType through merging - merging is
-		// active enough that the user should no longer be in the 'idle' state.
-		this.setStatusType((this.statusType === 'busy' || oldUser.statusType === 'busy') ? 'busy' : 'online');
 
 		oldUser.markDisconnected();
 	}
@@ -1152,7 +1156,7 @@ class User extends Chat.MessageContext {
 		this.isStaff = Config.groups[this.group] && (Config.groups[this.group].lock || Config.groups[this.group].root);
 		if (!this.isStaff) {
 			const staffRoom = Rooms('staff');
-			this.isStaff = (staffRoom && staffRoom.auth && staffRoom.auth[this.userid]);
+			this.isStaff = !!(staffRoom && staffRoom.auth && staffRoom.auth[this.userid]);
 		}
 		if (this.trusted) {
 			if (this.locked && this.permalocked) {
@@ -1183,7 +1187,7 @@ class User extends Chat.MessageContext {
 		this.isStaff = Config.groups[this.group] && (Config.groups[this.group].lock || Config.groups[this.group].root);
 		if (!this.isStaff) {
 			const staffRoom = Rooms('staff');
-			this.isStaff = (staffRoom && staffRoom.auth && staffRoom.auth[this.userid]);
+			this.isStaff = !!(staffRoom && staffRoom.auth && staffRoom.auth[this.userid]);
 		}
 		if (wasStaff !== this.isStaff) this.update('isStaff');
 		Rooms.global.checkAutojoin(this);
@@ -1527,6 +1531,7 @@ class User extends Chat.MessageContext {
 		if (type === this.statusType) return;
 		this.statusType = type;
 		this.updateIdentity();
+		this.update('statusType');
 	}
 	setUserMessage(message: string) {
 		if (message === this.userMessage) return;
@@ -1693,8 +1698,8 @@ function socketReceive(worker: Worker, workerid: number, socketid: string, messa
 	}
 }
 
-const users: Map<ID, User> = new Map();
-const prevUsers: Map<ID, ID> = new Map();
+const users = new Map<ID, User>();
+const prevUsers = new Map<ID, ID>();
 let numUsers = 0;
 
 export const Users = Object.assign(getUser, {

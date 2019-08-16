@@ -150,11 +150,19 @@ class RoomSettings {
 		}
 	}
 	mafia() {
-		if (!this.user.can('editroom', null, this.room)) return this.button(this.room.mafiaEnabled ? 'Mafia enabled' : 'off', true);
-		if (this.room.mafiaEnabled) {
-			return `${this.button('Mafia enabled', true)} ${this.button('off', null, 'mafia disable')}`;
-		} else {
+		if (!this.user.can('editroom', null, this.room)) return this.button(this.room.mafiaDisabled ? 'off' : 'Mafia enabled', true);
+		if (this.room.mafiaDisabled) {
 			return `${this.button('Mafia enabled', null, 'mafia enable')} ${this.button('off', true)}`;
+		} else {
+			return `${this.button('Mafia enabled', true)} ${this.button('off', null, 'mafia disable')}`;
+		}
+	}
+	blackjack() {
+		if (!this.user.can('editroom', null, this.room)) return this.button(this.room.blackjackDisabled ? 'off' : 'Blackjack enabled', true);
+		if (this.room.blackjackDisabled) {
+			return `${this.button('Blackjack enabled', null, 'blackjack enable')} ${this.button('off', true)}`;
+		} else {
+			return `${this.button('Blackjack enabled', true)} ${this.button('off', null, 'blackjack disable')}`;
 		}
 	}
 	language() {
@@ -179,6 +187,7 @@ class RoomSettings {
 		output += `<strong>Tournaments:</strong> <br />${this.tourStatus()}<br />`;
 		output += `<strong>UNO:</strong> <br />${this.uno()}<br />`;
 		output += `<strong>Hangman:</strong> <br />${this.hangman()}<br />`;
+		output += `<strong>Blackjack:</strong> <br />${this.blackjack()}<br />`;
 		output += `<strong>Mafia:</strong> <br />${this.mafia()}<br />`;
 		output += '</div>';
 
@@ -270,7 +279,7 @@ exports.commands = {
 			const modchatSetting = Chat.escapeHTML(room.modchat);
 			this.add(`|raw|<div class="broadcast-red"><strong>Moderated chat was set to ${modchatSetting}!</strong><br />Only users of rank ${modchatSetting} and higher can talk.</div>`);
 		}
-		if (room.battle && !room.modchat && !user.can('modchat')) room.requestModchat(null);
+		if (room.requestModchat && !room.modchat) room.requestModchat(null);
 		this.privateModAction(`(${user.name} set modchat to ${room.modchat})`);
 		this.modlog('MODCHAT', null, `to ${room.modchat}`);
 
@@ -536,32 +545,42 @@ exports.commands = {
 
 	banwords: 'banword',
 	banword: {
-		add(target, room, user) {
+		regexadd: 'add',
+		addregex: 'add',
+		add(target, room, user, connection, cmd) {
 			if (!target || target === ' ') return this.parse('/help banword');
 			if (!this.can('declare', null, room)) return false;
+
+			const regex = cmd.includes('regex');
+			if (regex && !user.can('makeroom')) return this.errorReply("Regex banwords are only allowed for leaders or above.");
 
 			if (!room.banwords) room.banwords = [];
 
 			// Most of the regex code is copied from the client. TODO: unify them?
-			let words = target.match(/[^,]+(,\d*}[^,]*)?/g);
+			// Regex banwords can have commas in the {1,5} pattern
+			let words = (regex ? target.match(/[^,]+(,\d*}[^,]*)?/g) : target.split(','))
+				.map(word => word.replace(/\n/g, '').trim());
 			if (!words) return this.parse('/help banword');
 
-			words = words.map(word => word.replace(/\n/g, '').trim());
-
-			let banwordRegexLen = (room.banwordRegex instanceof RegExp) ? room.banwordRegex.source.length : 30;
+			// Escape any character with a special meaning in regex
+			if (!regex) {
+				words = words.map(word => {
+					if (/[\\^$*+?()|{}[\]]/.test(word)) this.errorReply(`"${word}" might be a regular expression, did you mean "/banword addregex"?`);
+					return word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+				});
+			}
+			// PS adds a preamble to the banword regex that's 32 chars long
+			let banwordRegexLen = (room.banwordRegex instanceof RegExp) ? room.banwordRegex.source.length : 32;
 			for (let word of words) {
-				if (/[\\^$*+?()|{}[\]]/.test(word)) {
-					if (!user.can('makeroom')) return this.errorReply("Regex banwords are only allowed for leaders or above.");
-
-					try {
-						new RegExp(word); // eslint-disable-line no-new
-					} catch (e) {
-						return this.errorReply(e.message.startsWith('Invalid regular expression: ') ? e.message : `Invalid regular expression: /${word}/: ${e.message}`);
-					}
+				try {
+					new RegExp(word); // eslint-disable-line no-new
+				} catch (e) {
+					return this.errorReply(e.message.startsWith('Invalid regular expression: ') ? e.message : `Invalid regular expression: /${word}/: ${e.message}`);
 				}
 				if (room.banwords.includes(word)) return this.errorReply(`${word} is already a banned phrase.`);
 
-				banwordRegexLen += (banwordRegexLen === 30) ? word.length : `|${word}`.length;
+				// Banword strings are joined, so account for the first string not having the prefix
+				banwordRegexLen += (banwordRegexLen === 32) ? word.length : `|${word}`.length;
 				// RegExp instances whose source is greater than or equal to
 				// v8's RegExpMacroAssembler::kMaxRegister in length will crash
 				// the server on compile. In this case, that would happen each
@@ -637,7 +656,8 @@ exports.commands = {
 		},
 	},
 	banwordhelp: [
-		`/banword add [words] - Adds the comma-separated list of phrases (& or ~ can also input regex) to the banword list of the current room. Requires: # & ~`,
+		`/banword add [words] - Adds the comma-separated list of phrases to the banword list of the current room. Requires: # & ~`,
+		`/banword addregex [words] - Adds the comma-separated list of regular expressions to the banword list of the current room. Requires & ~`,
 		`/banword delete [words] - Removes the comma-separated list of phrases from the banword list. Requires: # & ~`,
 		`/banword list - Shows the list of banned words in the current room. Requires: % @ # & ~`,
 	],

@@ -825,6 +825,29 @@ let Formats = [
 		],
 	},
 	{
+		name: "[Gen 7] NFE",
+		desc: `Only Pok&eacute;mon that can evolve are allowed.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3648183/">NFE</a>`,
+		],
+
+		mod: 'gen7',
+		challengeShow: false,
+		searchShow: false,
+		ruleset: ['[Gen 7] OU'],
+		banlist: [
+			'Chansey', 'Doublade', 'Gligar', 'Golbat', 'Gurdurr', 'Magneton', 'Piloswine',
+			'Porygon2', 'Rhydon', 'Scyther', 'Sneasel', 'Type: Null', 'Vigoroth',
+			'Drought', 'Aurora Veil',
+		],
+		onValidateSet(set) {
+			let template = this.getTemplate(set.species || set.name);
+			if (!template.nfe) {
+				return [set.species + " cannot evolve."];
+			}
+		},
+	},
+	{
 		name: "[Gen 7] CAP",
 		threads: [
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3621207/">CAP Metagame Discussion</a>`,
@@ -1473,7 +1496,7 @@ let Formats = [
 		mod: 'gen7',
 		//searchShow: false,
 		ruleset: ['[Gen 7] OU'],
-		banlist: ['Dragonite', 'Kartana', 'Kyurem-Black', 'Shedinja'],
+		banlist: ['Dragonite', 'Kartana', 'Kyurem-Black', 'Latias-Mega', 'Shedinja'],
 		onModifyTemplate(template, target, source, effect) {
 			if (!target) return; // Chat command
 			if (effect && ['imposter', 'transform'].includes(effect.id)) return;
@@ -3394,27 +3417,6 @@ let Formats = [
 			if (!donorTemplate.exists) return;
 			// Place volatiles on the Pokémon to show the donor details.
 			this.add('-start', pokemon, donorTemplate.species, '[silent]');
-		},
-	},
-	{
-		name: "[Gen 7] NFE",
-		desc: `Only Pok&eacute;mon that can evolve are allowed.`,
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3648183/">NFE</a>`,
-		],
-
-		mod: 'gen7',
-		ruleset: ['[Gen 7] OU'],
-		banlist: [
-			'Chansey', 'Doublade', 'Gligar', 'Golbat', 'Gurdurr', 'Magneton', 'Piloswine',
-			'Porygon2', 'Rhydon', 'Scyther', 'Sneasel', 'Type: Null', 'Vigoroth',
-			'Drought', 'Aurora Veil',
-		],
-		onValidateSet(set) {
-			let template = this.getTemplate(set.species || set.name);
-			if (!template.nfe) {
-				return [set.species + " cannot evolve."];
-			}
 		},
 	},
 	{
