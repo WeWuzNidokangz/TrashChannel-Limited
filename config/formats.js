@@ -3853,6 +3853,7 @@ let Formats = [
 		},
 		onModifyTemplate(template, pokemon, source) {
 			let pokemonTemplate = this.deepClone(template);
+			if(!pokemon) return pokemonTemplate;
 			if(pokemon.meta) {
 				let metaFormat = this.getFormat(pokemon.meta);
 				if(metaFormat.onModifyTemplate) {
