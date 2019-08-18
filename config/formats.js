@@ -3645,15 +3645,20 @@ let Formats = [
 			let template = Dex.getTemplate(set.species || set.name);
 			let isNativeMega = false;
 			let item = Dex.getItem(set.item);
-			if (set.item && item.megaStone && ( item.megaEvolves === template.baseSpecies)) {
-				let baseTemplate = Dex.getTemplate(template.baseSpecies);
-				set.ability = baseTemplate.abilities[0]; // Avoid pre/post-mega ability mismatch inside validateSetInternal
-				template = Dex.getTemplate(item.megaStone);
+			let sCorrectTier = template.tier;
+			if (set.item && item.megaStone && (item.megaEvolves === template.baseSpecies)) {
+				let megaTemplate = Dex.getTemplate(item.megaStone);
+				if(template.species !== template.baseSpecies) {
+					let baseTemplate = Dex.getTemplate(template.baseSpecies);
+					set.ability = baseTemplate.abilities[0]; // Avoid pre/post-mega ability mismatch inside validateSetInternal
+					template = megaTemplate;
+				}
+				sCorrectTier = megaTemplate.tier;
 				isNativeMega = true;
 			}
-			let setTierEnum = global.DexCalculator.calcTierEnumeration(template.tier);
+			let setTierEnum = global.DexCalculator.calcTierEnumeration(sCorrectTier);
 
-			console.log("template.tier: " + template.tier);
+			console.log("sCorrectTier: " + sCorrectTier);
 			console.log("setTierEnum: " + setTierEnum.toString());
 			let setBst = 0;
 			for (let stat in template.baseStats) {
@@ -3900,15 +3905,20 @@ let Formats = [
 			let template = this.getTemplate(set.species || set.name);
 			let isNativeMega = false;
 			let item = this.getItem(set.item);
-			if (set.item && item.megaStone && ( item.megaEvolves === template.baseSpecies)) {
-				let baseTemplate = this.getTemplate(template.baseSpecies);
-				set.ability = baseTemplate.abilities[0]; // Avoid pre/post-mega ability mismatch inside validateSetInternal
-				template = this.getTemplate(item.megaStone);
+			let sCorrectTier = template.tier;
+			if (set.item && item.megaStone && (item.megaEvolves === template.baseSpecies)) {
+				let megaTemplate = Dex.getTemplate(item.megaStone);
+				if(template.species !== template.baseSpecies) {
+					let baseTemplate = Dex.getTemplate(template.baseSpecies);
+					set.ability = baseTemplate.abilities[0]; // Avoid pre/post-mega ability mismatch inside validateSetInternal
+					template = megaTemplate;
+				}
+				sCorrectTier = megaTemplate.tier;
 				isNativeMega = true;
 			}
-			let setTierEnum = global.DexCalculator.calcTierEnumeration(template.tier);
+			let setTierEnum = global.DexCalculator.calcTierEnumeration(sCorrectTier);
 
-			console.log("template.tier: " + template.tier);
+			console.log("sCorrectTier: " + sCorrectTier);
 			console.log("setTierEnum: " + setTierEnum.toString());
 			let setBst = 0;
 			for (let stat in template.baseStats) {
