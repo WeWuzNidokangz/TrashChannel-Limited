@@ -45,9 +45,13 @@ exports.BattleScripts = {
 			this.types = pokemon.types;
 			this.addedType = pokemon.addedType;
 			this.knownType = this.side === pokemon.side && pokemon.knownType;
+			this.apparentType = pokemon.apparentType;
 
-			for (let statName in this.stats) {
-				this.stats[statName] = pokemon.stats[statName];
+			// 19/08/18 TrashChannel: Previous code did nothing to stats
+			for (let statName in this.storedStats) {
+				if ('hp' === statName) continue;
+				this.storedStats[statName] = pokemon.storedStats[statName];
+				//console.log("new " + statName + ": " + this.storedStats[statName].toString() );
 			}
 			this.moveSlots = [];
 			this.set.ivs = (this.battle.gen >= 5 ? this.set.ivs : pokemon.set.ivs);

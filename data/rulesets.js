@@ -966,7 +966,7 @@ let BattleFormats = {
 				// @ts-ignore
 				pokemon.types[nTypeItr] = pokemon.lockTypesArray[nTypeItr];
 			}
-			this.add('-start', pokemon, 'typechange', pokemon.types.join('/'), '[silent]');
+			this.add('-start', pokemon, 'typechange', pokemon.getTypes(true).join('/'), '[silent]');
 		},
 		onAfterMega: function (pokemon) {
 			//console.log('camomonsrule: onAfterMega');
@@ -976,7 +976,7 @@ let BattleFormats = {
 				// @ts-ignore
 				pokemon.types[nTypeItr] = pokemon.lockTypesArray[nTypeItr];
 			}
-			this.add('-start', pokemon, 'typechange', pokemon.types.join('/'), '[silent]');
+			this.add('-start', pokemon, 'typechange', pokemon.getTypes(true).join('/'), '[silent]');
 		},
 	},
 	crabmonsmovelegality: {
