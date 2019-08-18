@@ -578,6 +578,9 @@ class CommandContext extends MessageContext {
 		// Output the message
 
 		if (message && message !== true && typeof message.then !== 'function') {
+			// 19/08/18 TrashChannel: Prevent hate-speech against stall
+			message = message.replace('t*ll', 't<3ll');
+
 			if (this.pmTarget) {
 				Chat.sendPM(message, this.user, this.pmTarget);
 			} else {
