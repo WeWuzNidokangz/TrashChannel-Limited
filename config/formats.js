@@ -577,6 +577,39 @@ let Formats = [
 			'Arena Trap', 'Shadow Tag', // For Ubers
 		],
 	},
+	{
+		name: "[Gen 7] PokeAAAbilities",
+		desc: `Pok&eacute;mon have all of their released Abilities simultaneously, and can use any 1 additional ability, barring the few that are restricted to their natural users.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3588652/">Pok&eacute;bilities</a>`,
+		],
+
+		mod: 'pokebilities',
+		ruleset: ['[Gen 7] OU', 'AAA Standard Package'],
+		banlist: ['Bibarel', 'Bidoof', 'Diglett', 'Dugtrio', 'Excadrill', 'Glalie', 'Gothita', 'Gothitelle', 'Gothorita', 'Octillery', 'Porygon-Z', 'Remoraid', 'Smeargle', 'Snorunt', 'Trapinch', 'Wobbuffet', 'Wynaut'],
+		restrictedAbilities: [
+			'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Huge Power', 'Illusion', 'Imposter', 'Innards Out',
+			'Parental Bond', 'Protean', 'Pure Power', 'Simple', 'Speed Boost', 'Stakeout', 'Water Bubble', 'Wonder Guard',
+		],
+		onBegin() {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let pokemon of allPokemon) {
+				if (pokemon.ability === toID(pokemon.template.abilities['S'])) {
+					continue;
+				}
+				// @ts-ignore
+				pokemon.innates = Object.keys(pokemon.template.abilities).filter(key => key !== 'S' && (key !== 'H' || !pokemon.template.unreleasedHidden)).map(key => toID(pokemon.template.abilities[key])).filter(ability => ability !== pokemon.ability);
+			}
+		},
+		onSwitchInPriority: 2,
+		onSwitchIn(pokemon) {
+			if (pokemon.innates) pokemon.innates.forEach(innate => pokemon.addVolatile("ability" + innate, pokemon));
+		},
+		onAfterMega(pokemon) {
+			Object.keys(pokemon.volatiles).filter(innate => innate.startsWith('ability')).forEach(innate => pokemon.removeVolatile(innate));
+			pokemon.innates = undefined;
+		},
+	},
 //#endregion TrashChannel: Mashups
 
 	// US/UM Singles
