@@ -186,6 +186,23 @@ let Formats = [
 		mod: 'gen7',
 		ruleset: ['[Gen 7] Ubers', 'Camomons Rule'],
 		banlist: ['Shedinja'],
+		onBegin() {
+			if (this.format === 'gen7camomonsubers') this.add('html', `<div class="broadcast-blue"><strong>In this ladder, Silvally and Arceus CANNOT change their base typing in Camomons.`);
+		},
+	},
+	{
+		name: "[Gen 7] Camomons Ubers (Mutable Basis Silvally/Arceus Test)",
+		desc: `Pok&eacute;mon change type to match their first two moves, in an Ubers environment.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3598418/">Vanilla Camomons</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3637068/">Vanilla Ubers</a>`,
+		],
+		mod: 'camomonsmutable',
+		ruleset: ['[Gen 7] Ubers', 'Camomons Rule'],
+		banlist: ['Shedinja'],
+		onBegin() {
+			this.add('html', `<div class="broadcast-blue"><strong>In this ladder, Silvally and Arceus CAN change their base typing in Camomons.`);
+		},
 	},
 	{
 		section: "Official OM Mashups (Singles)",
@@ -1543,6 +1560,23 @@ let Formats = [
 		},
 		onAfterMega(pokemon) {
 			this.add('-start', pokemon, 'typechange', pokemon.getTypes(true).join('/'), '[silent]');
+		},
+		onBegin() {
+			if (this.format === 'gen7camomons') this.add('html', `<div class="broadcast-blue"><strong>In this ladder, Silvally and Arceus CANNOT change their base typing in Camomons.`);
+		},
+	},
+	{
+		name: "[Gen 7] Camomons (Mutable Basis Silvally/Arceus Test)",
+		desc: `Pok&eacute;mon change type to match their first two moves.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3598418/">Camomons</a>`,
+		],
+		mod: 'camomonsmutable',
+		//searchShow: false,
+		ruleset: ['[Gen 7] OU', 'Camomons Rule'],
+		banlist: ['Dragonite', 'Kartana', 'Kyurem-Black', 'Latias-Mega', 'Shedinja'],
+		onBegin() {
+			this.add('html', `<div class="broadcast-blue"><strong>In this ladder, Silvally and Arceus CAN change their base typing in Camomons.`);
 		},
 	},
 	{
