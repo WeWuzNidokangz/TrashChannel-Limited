@@ -707,7 +707,7 @@ let Formats = [
 		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 7] UU'],
-		banlist: ['UU', 'RUBL', 'Mimikyu', 'Aurora Veil', 'Drizzle'],
+		banlist: ['UU', 'RUBL', 'Mimikyu', 'Aurora Veil'],
 		unbanlist: ['Drought'],
 	},
 	{
@@ -1427,7 +1427,7 @@ let Formats = [
 
 		mod: 'gen7',
 		ruleset: ['Pokemon', 'Ability Clause', 'OHKO Clause', 'Evasion Moves Clause', 'CFZ Clause', 'Sleep Clause Mod', 'Endless Battle Clause', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
-		banlist: ['Groudon-Primal', 'Arena Trap', 'Contrary', 'Huge Power', 'Illusion', 'Innards Out', 'Magnet Pull', 'Moody', 'Parental Bond', 'Protean', 'Psychic Surge', 'Pure Power', 'Shadow Tag', 'Stakeout', 'Water Bubble', 'Wonder Guard', 'Gengarite', 'Chatter', 'Comatose + Sleep Talk'],
+		banlist: ['Groudon-Primal', 'Rayquaza-Mega', 'Arena Trap', 'Contrary', 'Huge Power', 'Illusion', 'Innards Out', 'Magnet Pull', 'Moody', 'Parental Bond', 'Protean', 'Psychic Surge', 'Pure Power', 'Shadow Tag', 'Stakeout', 'Water Bubble', 'Wonder Guard', 'Gengarite', 'Chatter', 'Comatose + Sleep Talk'],
 	},
 	{
 		name: "[Gen 7] Mix and Mega",
@@ -1553,7 +1553,7 @@ let Formats = [
 		mod: 'gen7',
 		// searchShow: false,
 		ruleset: ['[Gen 7] OU', 'STABmons Move Legality'],
-		banlist: ['Aerodactyl-Mega', 'Blacephalon', 'Kartana', 'Komala', 'Kyurem-Black', 'Porygon-Z', 'Silvally', 'Tapu Koko', 'Tapu Lele', 'Thundurus-Base', 'King\'s Rock', 'Razor Fang'],
+		banlist: ['Aerodactyl', 'Blacephalon', 'Kartana', 'Komala', 'Kyurem-Black', 'Porygon-Z', 'Silvally', 'Tapu Koko', 'Tapu Lele', 'Thundurus-Base', 'King\'s Rock', 'Razor Fang'],
 		restrictedMoves: ['Acupressure', 'Belly Drum', 'Chatter', 'Extreme Speed', 'Geomancy', 'Lovely Kiss', 'Shell Smash', 'Shift Gear', 'Spore', 'Thousand Arrows'],
 	},
 	{
@@ -2033,8 +2033,8 @@ let Formats = [
 		mod: 'gen3',
 		challengeShow: false,
 		searchShow: false,
-		ruleset: ['Pokemon', 'Standard'],
-		banlist: ['Uber', 'Smeargle + Ingrain'],
+		ruleset: ['Pokemon', 'Standard', '3 Baton Pass Clause'],
+		banlist: ['Uber', 'Smeargle + Baton Pass'],
 	},
 	{
 		name: "[Gen 2] OU",
@@ -2449,6 +2449,24 @@ let Formats = [
 		ruleset: ['[Gen 5] OU', 'Same Type Clause'],
 	},
 	{
+		name: "[Gen 5] 1v1",
+		desc: `Bring three Pok&eacute;mon to Team Preview and choose one to battle.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/posts/8031457/">BW 1v1</a>`,
+		],
+
+		mod: 'gen5',
+		challengeShow: false,
+		searchShow: false,
+		teamLength: {
+			validate: [1, 3],
+			battle: 1,
+		},
+		ruleset: ['Pokemon', 'Standard', 'Baton Pass Clause', 'Swagger Clause', 'Team Preview'],
+		banlist: ['Uber', 'Focus Sash', 'Soul Dew', 'Perish Song'],
+		unbanlist: ['Genesect', 'Landorus', 'Manaphy', 'Thundurus', 'Tornadus-Therian'],
+	},
+	{
 		name: "[Gen 5] GBU Singles",
 
 		mod: 'gen5',
@@ -2651,7 +2669,7 @@ let Formats = [
 		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 3] OU'],
-		banlist: ['OU', 'UUBL'],
+		banlist: ['Uber', 'OU', 'UUBL', 'Smeargle + Ingrain'],
 	},
 	{
 		name: "[Gen 3] NU",

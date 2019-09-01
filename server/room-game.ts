@@ -12,14 +12,8 @@
  * The player system is optional: Some games, like Hangman, don't designate
  * players and just allow any user in the room to play.
  *
- * @license MIT license
+ * @license MIT
  */
-
-import {User} from "./users";
-
-type Connection = import('./users').Connection;
-type GameRoom = import('./rooms').GameRoom;
-type ChatRoom = import('./rooms').ChatRoom;
 
 // globally Rooms.RoomGamePlayer
 export class RoomGamePlayer {
@@ -260,6 +254,9 @@ export class RoomGame {
 			return;
 		}
 		if (!(oldUserid in this.playerTable)) return;
+		if (!user.named) {
+			return this.onLeave(user, oldUserid);
+		}
 		this.renamePlayer(user, oldUserid);
 	}
 
@@ -267,7 +264,7 @@ export class RoomGame {
 	 * Called when a user leaves the room. (i.e. when the user's last
 	 * connection leaves)
 	 */
-	onLeave(user: User) {}
+	onLeave(user: User, oldUserid?: ID) {}
 
 	/**
 	 * Called each time a connection joins a room (after onJoin if

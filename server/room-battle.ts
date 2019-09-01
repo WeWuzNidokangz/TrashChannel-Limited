@@ -20,10 +20,6 @@ import * as RoomGames from "./room-game";
 
 type ChannelIndex = 0 | 1 | 2 | 3 | 4;
 type PlayerIndex = 1 | 2 | 3 | 4;
-type GameRoom = import('./rooms').GameRoom;
-type Connection = import('./users').Connection;
-type User = import('./users').User;
-type Stream = import("../lib/streams").ObjectReadWriteStream<string>;
 
 interface BattleRequestTracker {
 	rqid: number;
@@ -122,7 +118,7 @@ export class RoomBattlePlayer extends RoomGames.RoomGamePlayer {
 		}
 	}
 	getUser() {
-		return (this.userid && Users(this.userid)) || null;
+		return (this.userid && Users.get(this.userid)) || null;
 	}
 	unlinkUser() {
 		const user = this.getUser();
@@ -485,7 +481,7 @@ export class RoomBattle extends RoomGames.RoomGame {
 	turn: number;
 	rqid: number;
 	requestCount: number;
-	stream: Stream;
+	stream: Streams.ObjectReadWriteStream<string>;
 	timer: RoomBattleTimer;
 	constructor(room: GameRoom, formatid: string, options: AnyObject) {
 		super(room);
@@ -886,7 +882,7 @@ export class RoomBattle extends RoomGames.RoomGame {
 	onUpdateConnection(user: User, connection: Connection | null = null) {
 		this.onConnect(user, connection);
 	}
-	onRename(user: User, oldUserid: string, isJoining: boolean, isForceRenamed: boolean) {
+	onRename(user: User, oldUserid: ID, isJoining: boolean, isForceRenamed: boolean) {
 		if (user.userid === oldUserid) return;
 		if (!this.playerTable) {
 			// !! should never happen but somehow still does
@@ -912,6 +908,10 @@ export class RoomBattle extends RoomGames.RoomGame {
 			}
 			return;
 		}
+		if (!user.named) {
+			this.onLeave(user, oldUserid);
+			return;
+		}
 		if (user.userid in this.playerTable) return;
 		const player = this.playerTable[oldUserid];
 		if (player) {
@@ -931,8 +931,8 @@ export class RoomBattle extends RoomGames.RoomGame {
 			this.room.add(`|player|${player.slot}|${user.name}|${user.avatar}`);
 		}
 	}
-	onLeave(user: User) {
-		const player = this.playerTable[user.userid];
+	onLeave(user: User, oldUserid?: ID) {
+		const player = this.playerTable[oldUserid || user.userid];
 		if (player && player.active) {
 			player.sendRoom(`|request|null`);
 			player.active = false;

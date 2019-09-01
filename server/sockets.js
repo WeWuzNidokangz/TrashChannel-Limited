@@ -13,12 +13,8 @@
 
 'use strict';
 
-const MINUTES = 60 * 1000;
-
 const cluster = require('cluster');
 const fs = require('fs');
-/** @type {typeof import('../lib/fs').FS} */
-const FS = require(/** @type {any} */('../.lib-dist/fs')).FS;
 
 /** @typedef {0 | 1 | 2 | 3 | 4} ChannelID */
 
@@ -435,22 +431,6 @@ if (cluster.isMaster) {
 	 */
 	const roomChannels = new Map();
 
-	/** @type {WriteStream} */
-	const logger = FS(`logs/sockets-${process.pid}`).createAppendStream();
-
-	// Deal with phantom connections.
-	const sweepSocketInterval = setInterval(() => {
-		for (const socket of sockets.values()) {
-			// @ts-ignore
-			if (socket.protocol === 'xhr-streaming' && socket._session && socket._session.recv) {
-				// @ts-ignore
-				logger.write(`Found a ghost connection with protocol xhr-streaming and ready state ${socket._session.readyState}\n`);
-				// @ts-ignore
-				socket._session.recv.didClose();
-			}
-		}
-	}, 10 * MINUTES);
-
 	/**
 	 * @param {string} message
 	 * @param {-1 | ChannelID} channelid
@@ -612,9 +592,7 @@ if (cluster.isMaster) {
 	// Clean up any remaining connections on disconnect. If this isn't done,
 	// the process will not exit until any remaining connections have been destroyed.
 	// Afterwards, the worker process will die on its own.
-	process.once('disconnect', () => {
-		clearInterval(sweepSocketInterval);
-
+	const cleanup = () => {
 		for (const socket of sockets.values()) {
 			try {
 				socket.destroy();
@@ -629,7 +607,10 @@ if (cluster.isMaster) {
 
 		// Let the server(s) finish closing.
 		setImmediate(() => process.exit(0));
-	});
+	};
+
+	process.once('disconnect', cleanup);
+	process.once('exit', cleanup);
 
 	// this is global so it can be hotpatched if necessary
 	let isTrustedProxyIp = IPTools.checker(Config.proxyip);
