@@ -2478,19 +2478,6 @@ let Formats = [
 		column: 4,
 	},
 	{
-		name: "[Gen 4] Ubers",
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/posts/7433831/">DPP Ubers Information &amp; Resources</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3505128/">DPP Ubers Viability Ranking</a>`,
-		],
-
-		mod: 'gen4',
-		challengeShow: false,
-		searchShow: false,
-		ruleset: ['Pokemon', 'Standard'],
-		banlist: ['Arceus'],
-	},
-	{
 		name: "[Gen 4] UU",
 		threads: [
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3532624/">DPP UU Metagame Discussion</a>`,
