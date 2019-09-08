@@ -131,7 +131,7 @@ const commands = {
 
 		this.sendReply(`|html|${Chat.getDataPokemonHTML(cloneTemplate)}`);
 	},
-	'350cuptiershifthelp': [`/350ts OR /350tiershift OR /350tiershift <pokemon> - Shows the base stats that a Pokemon would have in a mashup including 350 Cup and Tier Shift.`],
+	'350cuptiershifthelp': [`/350ts OR /350tiershift OR /350cuptiershift <pokemon> - Shows the base stats that a Pokemon would have in a mashup including 350 Cup and Tier Shift.`],
 
 	'!mixandmegatiershift': true,
 	tiershiftmixandmega: 'mixandmegatiershift',
@@ -162,7 +162,6 @@ const commands = {
 		TrashChannelChatSupport.mixandmegainternal(this, cloneTemplate, sep[1], "TS");
 	},
 	mixandmegatiershifthelp: [`/mnmts <pokemon> @ <mega stone> - Shows the Tier Shifted Mix and Mega evolved Pokemon's type and stats.`],
-
 
 	'!bitchandbeggar': true,
 	bnb: 'bitchandbeggar',
