@@ -14,12 +14,12 @@ let BattleStatuses = {
 			if (pokemon.transformed) return types;
 			let camoDefaultTypes = [...new Set(pokemon.baseMoveSlots.slice(0, 2).map(move => this.getMove(move.id).type))];
 			/** @type {string | undefined} */
-			let type = 'Normal';
+			let type = undefined;
 			if (pokemon.ability === 'multitype') {
 				type = pokemon.getItem().onPlate;
-				if (!type) {
-					return camoDefaultTypes;
-				}
+			}
+			if (!type) {
+				return camoDefaultTypes;
 			}
 			return [type];
 		},
@@ -33,12 +33,12 @@ let BattleStatuses = {
 			if (pokemon.transformed) return types;
 			let camoDefaultTypes = [...new Set(pokemon.baseMoveSlots.slice(0, 2).map(move => this.getMove(move.id).type))];
 			/** @type {string | undefined} */
-			let type = 'Normal';
+			let type = undefined;
 			if (pokemon.ability === 'rkssystem') {
 				type = pokemon.getItem().onMemory;
-				if (!type) {
-					return camoDefaultTypes;
-				}
+			}
+			if (!type) {
+				return camoDefaultTypes;
 			}
 			return [type];
 		},

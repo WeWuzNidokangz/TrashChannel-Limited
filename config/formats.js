@@ -177,29 +177,33 @@ let Formats = [
 		section: "Mashups Spotlight",
 	},
 	{
-		name: "[Gen 7] Camomons Ubers",
-		desc: `Pok&eacute;mon change type to match their first two moves, in an Ubers environment.`,
+		name: "[Gen 7] Camomons Balanced Hackmons",
+		desc: `Nearly anything that can be hacked in-game and is usable in local battles is allowed but each Pok&eacute;mon can change type to match their first two moves.`,
 		threads: [
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3598418/">Vanilla Camomons</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3637068/">Vanilla Ubers</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3587475/">Vanilla Balanced Hackmons</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3588586/">Vanilla BH Suspects and Bans Discussion</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3593766/">Vanilla BH Resources</a>`,
 		],
 		mod: 'gen7',
-		ruleset: ['[Gen 7] Ubers', 'Camomons Rule'],
-		banlist: ['Shedinja'],
+		ruleset: ['Pokemon', 'Ability Clause', 'OHKO Clause', 'Evasion Moves Clause', 'CFZ Clause', 'Sleep Clause Mod', 'Endless Battle Clause', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Camomons Rule'],
+		banlist: [/*'Groudon-Primal', 'Rayquaza-Mega',*/ 'Arena Trap', 'Contrary', 'Huge Power', 'Illusion', 'Innards Out', 'Magnet Pull', 'Moody', 'Parental Bond', 'Protean', 'Psychic Surge', 'Pure Power', 'Shadow Tag', 'Stakeout', 'Water Bubble', 'Wonder Guard', 'Gengarite', 'Chatter', 'Comatose + Sleep Talk'],
 		onBegin() {
-			if (this.format === 'gen7camomonsubers') this.add('html', `<div class="broadcast-blue"><strong>In this ladder, Silvally and Arceus CANNOT change their base typing in Camomons.`);
+			if (this.format === 'gen7camomonsbalancedhackmons') this.add('html', `<div class="broadcast-blue"><strong>In this ladder, Silvally and Arceus CANNOT change their base typing in Camomons.`);
 		},
 	},
 	{
-		name: "[Gen 7] Camomons Ubers (Mutable Basis Silvally/Arceus Test)",
-		desc: `Pok&eacute;mon change type to match their first two moves, in an Ubers environment.`,
+		name: "[Gen 7] Camomons Balanced Hackmons (Mutable Basis Silvally/Arceus Test)",
+		desc: `Nearly anything that can be hacked in-game and is usable in local battles is allowed but each Pok&eacute;mon can change type to match their first two moves.`,
 		threads: [
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3598418/">Vanilla Camomons</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3637068/">Vanilla Ubers</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3587475/">Vanilla Balanced Hackmons</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3588586/">Vanilla BH Suspects and Bans Discussion</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3593766/">Vanilla BH Resources</a>`,
 		],
 		mod: 'camomonsmutable',
-		ruleset: ['[Gen 7] Ubers', 'Camomons Rule'],
-		banlist: ['Shedinja'],
+		ruleset: ['Pokemon', 'Ability Clause', 'OHKO Clause', 'Evasion Moves Clause', 'CFZ Clause', 'Sleep Clause Mod', 'Endless Battle Clause', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Camomons Rule'],
+		banlist: [/*'Groudon-Primal', 'Rayquaza-Mega',*/ 'Arena Trap', 'Contrary', 'Huge Power', 'Illusion', 'Innards Out', 'Magnet Pull', 'Moody', 'Parental Bond', 'Protean', 'Psychic Surge', 'Pure Power', 'Shadow Tag', 'Stakeout', 'Water Bubble', 'Wonder Guard', 'Gengarite', 'Chatter', 'Comatose + Sleep Talk'],
 		onBegin() {
 			this.add('html', `<div class="broadcast-blue"><strong>In this ladder, Silvally and Arceus CAN change their base typing in Camomons.`);
 		},
@@ -575,6 +579,34 @@ let Formats = [
 			'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Huge Power', 'Illusion', 'Imposter', 'Innards Out',
 			'Parental Bond', 'Protean', 'Pure Power', 'Simple', 'Speed Boost', 'Stakeout', 'Water Bubble', 'Wonder Guard',
 		],
+	},
+	{
+		name: "[Gen 7] Camomons Ubers",
+		desc: `Pok&eacute;mon change type to match their first two moves, in an Ubers environment.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3598418/">Vanilla Camomons</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3637068/">Vanilla Ubers</a>`,
+		],
+		mod: 'gen7',
+		ruleset: ['[Gen 7] Ubers', 'Camomons Rule'],
+		banlist: ['Shedinja'],
+		onBegin() {
+			if (this.format === 'gen7camomonsubers') this.add('html', `<div class="broadcast-blue"><strong>In this ladder, Silvally and Arceus CANNOT change their base typing in Camomons.`);
+		},
+	},
+	{
+		name: "[Gen 7] Camomons Ubers (Mutable Basis Silvally/Arceus Test)",
+		desc: `Pok&eacute;mon change type to match their first two moves, in an Ubers environment.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3598418/">Vanilla Camomons</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3637068/">Vanilla Ubers</a>`,
+		],
+		mod: 'camomonsmutable',
+		ruleset: ['[Gen 7] Ubers', 'Camomons Rule'],
+		banlist: ['Shedinja'],
+		onBegin() {
+			this.add('html', `<div class="broadcast-blue"><strong>In this ladder, Silvally and Arceus CAN change their base typing in Camomons.`);
+		},
 	},
 	{
 		name: "[Gen 7] CAAAmomons Ubers",
