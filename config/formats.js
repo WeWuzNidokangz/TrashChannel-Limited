@@ -186,27 +186,15 @@ let Formats = [
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3593766/">Vanilla BH Resources</a>`,
 		],
 		mod: 'gen7',
-		ruleset: ['Pokemon', 'Ability Clause', 'OHKO Clause', 'Evasion Moves Clause', 'CFZ Clause', 'Sleep Clause Mod', 'Endless Battle Clause', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Camomons Rule'],
-		banlist: [/*'Groudon-Primal', 'Rayquaza-Mega',*/ 'Arena Trap', 'Contrary', 'Huge Power', 'Illusion', 'Innards Out', 'Magnet Pull', 'Moody', 'Parental Bond', 'Protean', 'Psychic Surge', 'Pure Power', 'Shadow Tag', 'Stakeout', 'Water Bubble', 'Wonder Guard', 'Gengarite', 'Chatter', 'Comatose + Sleep Talk'],
-		onBegin() {
-			if (this.format === 'gen7camomonsbalancedhackmons') this.add('html', `<div class="broadcast-blue"><strong>In this ladder, Silvally and Arceus CANNOT change their base typing in Camomons.`);
-		},
-	},
-	{
-		name: "[Gen 7] Camomons Balanced Hackmons (Mutable Basis Silvally/Arceus Test)",
-		desc: `Nearly anything that can be hacked in-game and is usable in local battles is allowed but each Pok&eacute;mon can change type to match their first two moves.`,
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3598418/">Vanilla Camomons</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3587475/">Vanilla Balanced Hackmons</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3588586/">Vanilla BH Suspects and Bans Discussion</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3593766/">Vanilla BH Resources</a>`,
+		ruleset: [ 
+			'Pokemon', 'Ability Clause', 'OHKO Clause', 'Evasion Moves Clause', 'CFZ Clause', 'Sleep Clause Mod', 'Endless Battle Clause', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview', // BH
+			'Camomons Rule', // Camomons
+			'Species Clause', // BH Camomons
+		 ],
+		banlist: [
+			'Arena Trap', 'Contrary', 'Huge Power', 'Illusion', 'Innards Out', 'Magnet Pull', 'Moody', 'Parental Bond', 'Protean', 'Psychic Surge', 'Pure Power', 'Shadow Tag', 'Stakeout', 'Water Bubble', 'Wonder Guard', 'Gengarite', 'Chatter', 'Comatose + Sleep Talk',  // BH
+			'V-Create', // BH Camomons
 		],
-		mod: 'camomonsmutable',
-		ruleset: ['Pokemon', 'Ability Clause', 'OHKO Clause', 'Evasion Moves Clause', 'CFZ Clause', 'Sleep Clause Mod', 'Endless Battle Clause', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Camomons Rule'],
-		banlist: [/*'Groudon-Primal', 'Rayquaza-Mega',*/ 'Arena Trap', 'Contrary', 'Huge Power', 'Illusion', 'Innards Out', 'Magnet Pull', 'Moody', 'Parental Bond', 'Protean', 'Psychic Surge', 'Pure Power', 'Shadow Tag', 'Stakeout', 'Water Bubble', 'Wonder Guard', 'Gengarite', 'Chatter', 'Comatose + Sleep Talk'],
-		onBegin() {
-			this.add('html', `<div class="broadcast-blue"><strong>In this ladder, Silvally and Arceus CAN change their base typing in Camomons.`);
-		},
 	},
 	{
 		section: "Official OM Mashups (Singles)",
@@ -270,9 +258,9 @@ let Formats = [
 		mod: 'gen7',
 		ruleset: ['[Gen 7] OU', 'Camomons Rule', 'AAA Standard Package'],
 		banlist: [
-			'Kartana', 'Kyurem-Black', 'Latias-Mega', 'Shedinja', 'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Huge Power', 'Illusion', 'Imposter', 
+			'Kartana', 'Kyurem-Black', 'Latias-Mega', 'Shedinja', 'Kommonium Z', 'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Huge Power', 'Illusion', 'Imposter', 
 			'Innards Out', 'Parental Bond', 'Protean', 'Pure Power', 'Simple', 'Speed Boost', 'Stakeout', 'Water Bubble', 'Wonder Guard', 
-			'Archeops', 'Dragonite', 'Hoopa-Unbound', 'Keldeo', 'Regigigas', 'Shedinja', 'Slaking', 'Terrakion', 'Weavile'
+			'Archeops', 'Dragonite', 'Hoopa-Unbound', 'Keldeo', 'Regigigas', 'Shedinja', 'Slaking', 'Terrakion', 'Victini', 'Weavile'
 		],
 		unbanlist: ['Aegislash', 'Genesect', 'Landorus', 'Metagross-Mega', 'Naganadel'],
 		restrictedAbilities: [
@@ -307,13 +295,16 @@ let Formats = [
 		mod: 'gen7',
 		ruleset: ['[Gen 7] OU', 'STABmons Move Legality', 'AAA Standard Package'],
 		banlist: [
-			'Aerodactyl', 'Araquanid', 'Archeops', 'Blacephalon', 'Dragonite', 'Hoopa-Unbound', 'Kartana', 'Keldeo', 'Komala', 'Kyurem-Black', 'Regigigas', 'Shedinja',
-			'Silvally', 'Slaking', 'Tapu Koko', 'Terrakion', 'Thundurus-Base', 'Thundurus-Therian', 'King\'s Rock', 'Razor Fang'],
+			'Archeops', 'Blacephalon', 'Dragonite', 'Hoopa-Unbound', 'Kartana', 'Keldeo', 'Komala', 'Kyurem-Black', 'Regigigas', 'Shedinja',
+			'Silvally', 'Slaking', 'Tapu Koko', 'Terrakion', 'Thundurus-Base', 'Thundurus-Therian', 'King\'s Rock', 'Razor Fang', // STABmons
+			'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Huge Power', 'Illusion', 'Imposter', 'Innards Out',
+			'Parental Bond', 'Protean', 'Pure Power', 'Simple', 'Speed Boost', 'Stakeout', 'Water Bubble', 'Wonder Guard', // AAA
+		],
 		restrictedMoves: ['Acupressure', 'Belly Drum', 'Chatter', 'Extreme Speed', 'Geomancy', 'Lovely Kiss', 'Shell Smash', 'Shift Gear', 'Spore', 'Thousand Arrows'],
-		restrictedAbilities: [
+		/*restrictedAbilities: [
 			'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Huge Power', 'Illusion', 'Imposter', 'Innards Out',
 			'Parental Bond', 'Protean', 'Pure Power', 'Simple', 'Speed Boost', 'Stakeout', 'Water Bubble', 'Wonder Guard',
-		],
+		],*/
 	},
 	{
 		name: "[Gen 7] STAB n Mega",
@@ -335,7 +326,7 @@ let Formats = [
 		cannotMega: [
 			'Archeops', 'Arceus', 'Deoxys', 'Deoxys-Attack', 'Deoxys-Speed', 'Dialga', 'Dragonite', 'Giratina', 'Groudon', 'Ho-Oh', 'Kyogre', 'Kyurem-Black',
 			'Kyurem-White', 'Landorus-Therian', 'Lugia', 'Lunala', 'Marshadow', 'Mewtwo', 'Naganadel', 'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane',
-			'Palkia', 'Pheromosa', 'Rayquaza', 'Regigigas', 'Reshiram', 'Slaking', 'Solgaleo', 'Xerneas', 'Yveltal', 'Zekrom', // Mix and Mega
+			'Palkia', 'Pheromosa', 'Rayquaza', 'Regigigas', 'Reshiram', 'Shuckle', 'Slaking', 'Solgaleo', 'Xerneas', 'Yveltal', 'Zekrom', // Mix and Mega
 			'Blacephalon', 'Kartana', 'Silvallly', 'Tapu Koko', 'Tapu Lele', // STAB n Mega
 		],
 		restrictedMoves: ['Acupressure', 'Belly Drum', 'Chatter', 'Geomancy', 'Lovely Kiss', 'Shell Smash', 'Shift Gear', 'Spore', 'Thousand Arrows'],
@@ -480,7 +471,7 @@ let Formats = [
 
 		mod: 'gen7',
 		maxLevel: 5,
-		ruleset: ['Pokemon', 'Standard', 'Swagger Clause', 'Team Preview', 'Little Cup', 'AAA Standard Package'],
+		ruleset: ['Pokemon', 'Standard', 'Swagger Clause', 'Team Preview', 'Little Cup', 'STABmons Move Legality'],
 		banlist: [
 			'Aipom', 'Cutiefly', 'Drifloon', 'Gligar', 'Meditite', 'Misdreavus', 'Murkrow', 'Porygon',
 			'Scyther', 'Sneasel', 'Swirlix', 'Tangela', 'Torchic', 'Vulpix-Base', 'Yanma',
@@ -524,7 +515,7 @@ let Formats = [
 		cannotMega: [
 			'Archeops', 'Arceus', 'Deoxys', 'Deoxys-Attack', 'Deoxys-Speed', 'Dialga', 'Dragonite', 'Giratina', 'Groudon', 'Ho-Oh', 'Kyogre', 'Kyurem-Black',
 			'Kyurem-White', 'Landorus-Therian', 'Lugia', 'Lunala', 'Marshadow', 'Mewtwo', 'Naganadel', 'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane',
-			'Palkia', 'Pheromosa', 'Rayquaza', 'Regigigas', 'Reshiram', 'Slaking', 'Solgaleo', 'Xerneas', 'Yveltal', 'Zekrom',
+			'Palkia', 'Pheromosa', 'Rayquaza', 'Regigigas', 'Reshiram', 'Shuckle', 'Slaking', 'Solgaleo', 'Xerneas', 'Yveltal', 'Zekrom',
 		],
 	},
 	{
@@ -544,7 +535,7 @@ let Formats = [
 		ruleset: ['[Gen 7] UU', 'STABmons Move Legality', 'AAA Standard Package'],
 		banlist: [
 			'UU', 'RUBL', // RU
-			'Aerodactyl', 'Archeops', 'Araquanid', 'Komala', 'Regigigas', 'Shedinja', 'Silvally', 'Slaking', // AAA
+			'Aerodactyl', 'Archeops', 'Komala', 'Regigigas', 'Shedinja', 'Silvally', 'Slaking', // AAA
 			'King\'s Rock', 'Razor Fang', // STABmons
 			'Marowak-Alola', 'Emboar' // STAAABmons RU
 		],
@@ -570,7 +561,7 @@ let Formats = [
 		mod: 'gen7',
 		ruleset: ['[Gen 7] OU', 'AAA Standard Package', 'Tier Shift Rule'],
 		banlist: [
-			'Archeops', 'Dragonite', 'Hoopa-Unbound', 'Kartana', 'Keldeo', 'Kyurem-Black', 'Regigigas', 'Shedinja', 'Slaking', 'Terrakion', 'Weavile', // Almost Any Ability
+			'Archeops', 'Dragonite', 'Hoopa-Unbound', 'Kartana', 'Keldeo', 'Kyurem-Black', 'Regigigas', 'Shedinja', 'Slaking', 'Terrakion', 'Victini', 'Weavile', // Almost Any Ability
 			'Damp Rock', 'Deep Sea Tooth', 'Eviolite', // Tier Shift
 			'Thick Club' // TS AAA
 		],
@@ -590,23 +581,6 @@ let Formats = [
 		mod: 'gen7',
 		ruleset: ['[Gen 7] Ubers', 'Camomons Rule'],
 		banlist: ['Shedinja'],
-		onBegin() {
-			if (this.format === 'gen7camomonsubers') this.add('html', `<div class="broadcast-blue"><strong>In this ladder, Silvally and Arceus CANNOT change their base typing in Camomons.`);
-		},
-	},
-	{
-		name: "[Gen 7] Camomons Ubers (Mutable Basis Silvally/Arceus Test)",
-		desc: `Pok&eacute;mon change type to match their first two moves, in an Ubers environment.`,
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3598418/">Vanilla Camomons</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3637068/">Vanilla Ubers</a>`,
-		],
-		mod: 'camomonsmutable',
-		ruleset: ['[Gen 7] Ubers', 'Camomons Rule'],
-		banlist: ['Shedinja'],
-		onBegin() {
-			this.add('html', `<div class="broadcast-blue"><strong>In this ladder, Silvally and Arceus CAN change their base typing in Camomons.`);
-		},
 	},
 	{
 		name: "[Gen 7] CAAAmomons Ubers",
@@ -639,7 +613,7 @@ let Formats = [
 		ruleset: ['[Gen 7] OU', 'AAA Standard Package'],
 		banlist: [
 			'Bibarel', 'Bidoof', 'Diglett', 'Dugtrio', 'Excadrill', 'Glalie', 'Gothita', 'Gothitelle', 'Gothorita', 'Octillery', 'Porygon-Z', 'Remoraid', 'Smeargle', 'Snorunt', 'Trapinch', 'Wobbuffet', 'Wynaut', // Pokebilities
-			'Archeops', 'Dragonite', 'Hoopa-Unbound', 'Kartana', 'Keldeo', 'Kyurem-Black', 'Regigigas', 'Shedinja', 'Slaking', 'Terrakion', 'Weavile' // AAA
+			 'Archeops', 'Dragonite', 'Hoopa-Unbound', 'Kartana', 'Keldeo', 'Kyurem-Black', 'Regigigas', 'Shedinja', 'Slaking', 'Terrakion', 'Victini', 'Weavile' // AAA
 		],
 		restrictedAbilities: [
 			'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Huge Power', 'Illusion', 'Imposter', 'Innards Out',
@@ -1507,20 +1481,6 @@ let Formats = [
 		},
 		onAfterMega(pokemon) {
 			this.add('-start', pokemon, 'typechange', pokemon.getTypes(true).join('/'), '[silent]');
-		},
-	},
-	{
-		name: "[Gen 7] Camomons (Mutable Basis Silvally/Arceus Test)",
-		desc: `Pok&eacute;mon change type to match their first two moves.`,
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3598418/">Camomons</a>`,
-		],
-		mod: 'camomonsmutable',
-		//searchShow: false,
-		ruleset: ['[Gen 7] OU', 'Camomons Rule'],
-		banlist: ['Dragonite', 'Kartana', 'Kyurem-Black', 'Latias-Mega', 'Shedinja'],
-		onBegin() {
-			this.add('html', `<div class="broadcast-blue"><strong>In this ladder, Silvally and Arceus CAN change their base typing in Camomons.`);
 		},
 	},
 	{
@@ -4175,7 +4135,7 @@ let Formats = [
 		name: "[Gen 7] Bitch and Beggar",
 		onDesc() {
 			let bstLimitString = this.modValueNumberA ? " (<=" + this.modValueNumberA.toString() + ")" : "";
-			return "Pok&eacute;mon can 'Beggar-Evolve' using low" + bstLimitString + " BST Pok&eacute;mon as Stones.";
+			return "You've heard of Mix and Mega, what about Bitch and Beggar? Pok&eacute;mon can 'Beggar-Evolve' using low" + bstLimitString + " BST Pok&eacute;mon as Stones.";
 		},
 		threads: [
 			``,
@@ -4295,7 +4255,7 @@ let Formats = [
 	},
 	{
 		name: "[Gen 7] Bitch and Beggar: Hackmons Cup",
-		desc: `Randomized teams of level-balanced Pok&eacute;mon with absolutely any ability, move, and bitch.`,
+		desc: `You've heard of Mix and Mega, what about Bitch and Beggar? Randomized teams of level-balanced Pok&eacute;mon with absolutely any ability, move, and bitch.`,
 		threads: [
 			``,
 		],
@@ -4418,8 +4378,8 @@ let Formats = [
 		mod: 'gen7',
 		ruleset: ['[Gen 7] OU', 'CRABmons Move Legality', 'Camomons Rule'],
 		banlist: [
-			'Aerodactyl', 'Blacephalon', 'Kartana', 'Komala', 'Kyurem-Black', 'Porygon-Z', 'Silvally', 'Tapu Koko', 'Tapu Lele', 'Thundurus-Base', 'King\'s Rock', 'Razor Fang', // STABmons
-			'Dragonite', 'Latias-Mega', 'Shedinja', // Camomons
+			'Aerodactyl', 'Araquanid', 'Blacephalon', 'Kartana', 'Komala', 'Kyurem-Black', 'Porygon-Z', 'Silvally', 'Tapu Koko', 'Tapu Lele', 'Thundurus-Base', 'King\'s Rock', 'Razor Fang', // STABmons
+			'Dragonite', 'Latias-Mega', 'Shedinja', 'Kommonium Z', // Camomons
 		],
 		restrictedMoves: [
 			'Acupressure', 'Belly Drum', 'Chatter', 'Extreme Speed', 'Geomancy', 'Lovely Kiss', 'Shell Smash', 'Shift Gear', 'Spore', 'Thousand Arrows', // STABmons
@@ -4444,8 +4404,8 @@ let Formats = [
 		banlist: [
 			'UU', 'RUBL', // RU
 			'Archeops', 'Komala', 'Regigigas', 'Silvally', 'Slaking', // AAA
-			'Aerodactyl', 'Blacephalon', 'Kartana', 'Komala', 'Kyurem-Black', 'Porygon-Z', 'Silvally', 'Tapu Koko', 'Tapu Lele', 'Thundurus-Base', 'King\'s Rock', 'Razor Fang', // STABmons
-			'Dragonite', 'Latias-Mega', 'Shedinja', // Camomons
+			'Aerodactyl', 'Araquanid', 'Blacephalon', 'Kartana', 'Komala', 'Kyurem-Black', 'Porygon-Z', 'Silvally', 'Tapu Koko', 'Tapu Lele', 'Thundurus-Base', 'King\'s Rock', 'Razor Fang', // STABmons
+			'Dragonite', 'Latias-Mega', 'Shedinja', 'Kommonium Z', // Camomons
 			'Marowak-Alola', 'Emboar' // STAAABmons RU
 		],
 		restrictedMoves: [
