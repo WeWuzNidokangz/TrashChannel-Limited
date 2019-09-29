@@ -986,6 +986,8 @@ let Formats = [
 		threads: [`&bullet; <a href="https://www.smogon.com/forums/threads/3653945/">Battle Spot Special 17</a>`],
 
 		mod: 'gen7',
+		challengeShow: false,
+		searchShow: false,
 		maxForcedLevel: 1,
 		teamLength: {
 			validate: [3, 6],
@@ -1019,6 +1021,8 @@ let Formats = [
 		threads: [`&bullet; <a href="https://www.smogon.com/forums/threads/3654575/">Ultra Final Discussion</a>`],
 
 		mod: 'gen7',
+		challengeShow: false,
+		searchShow: false,
 		forcedLevel: 100,
 		teamLength: {
 			validate: [3, 6],
@@ -1489,7 +1493,7 @@ let Formats = [
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3598418/">Camomons</a>`,
 		],
 		mod: 'gen7',
-		// searchShow: false,
+		searchShow: false,
 		ruleset: ['[Gen 7] OU'],
 		banlist: ['Dragonite', 'Kartana', 'Kyurem-Black', 'Latias-Mega', 'Shedinja', 'Kommonium Z'],
 		onModifyTemplate(template, target, source, effect) {
@@ -1760,6 +1764,8 @@ let Formats = [
 
 		mod: 'ssb',
 		team: 'randomStaffBros',
+		challengeShow: false,
+		searchShow: false,
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod'],
 		onBegin() {
 			this.add('raw|SUPER STAFF BROS <b>BRAWL</b>!!');
