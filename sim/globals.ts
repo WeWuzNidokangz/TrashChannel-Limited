@@ -741,7 +741,9 @@ interface AbilityData extends EffectData, AbilityEventMethods, EventMethods {
 	suppressWeather?: boolean
 }
 
-interface ModdedAbilityData extends Partial<AbilityData>, ModdedEffectData {}
+interface ModdedAbilityData extends Partial<AbilityData>, ModdedEffectData {
+	onAfterMega?: (this: Battle, pokemon: Pokemon) => void
+}
 
 interface Ability extends Readonly<BasicEffect & AbilityData> {
 	readonly effectType: 'Ability'
@@ -1141,6 +1143,7 @@ interface ModdedBattlePokemon {
 	recalculateStats?: (this: Pokemon) => void
 	setAbility?: (this: Pokemon, ability: string | Ability, source: Pokemon | null, isFromFormeChange: boolean) => string | false
 	transformInto?: (this: Pokemon, pokemon: Pokemon, effect: Effect | null) => boolean
+	setStatus?: (this: Pokemon, status: string | PureEffect, source: Pokemon | null, sourceEffect: Effect | null, ignoreImmunities: boolean) => boolean
 }
 
 interface ModdedBattleScriptsData extends Partial<BattleScriptsData> {
@@ -1155,7 +1158,6 @@ interface ModdedBattleScriptsData extends Partial<BattleScriptsData> {
 	init?: (this: Battle) => void
 	modifyDamage?: (this: Battle, baseDamage: number, pokemon: Pokemon, target: Pokemon, move: ActiveMove, suppressMessages?: boolean) => void
 	natureModify?: (this: Battle, stats: StatsTable, set: PokemonSet) => StatsTable
-	setTerrain?: (this: Battle, status: string | Effect, source: Pokemon | null | 'debug', sourceEffect: Effect | null) => boolean
 	spreadModify?: (this: Battle, baseStats: StatsTable, set: PokemonSet) => StatsTable
 	suppressingWeather?: (this: Battle) => boolean
 

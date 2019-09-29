@@ -986,15 +986,13 @@ let Formats = [
 		threads: [`&bullet; <a href="https://www.smogon.com/forums/threads/3653945/">Battle Spot Special 17</a>`],
 
 		mod: 'gen7',
-		challengeShow: false,
-		searchShow: false,
 		maxForcedLevel: 1,
 		teamLength: {
 			validate: [3, 6],
 			battle: 3,
 		},
 		ruleset: ['Pokemon', 'Standard GBU'],
-		banlist: ['Sonic Boom', 'Dragon Rage'],
+		banlist: ['Sonic Boom', 'Dragon Rage', 'Type: Null', 'Poipole'],
 		onValidateSet(set) {
 			let allowedNonLittleCupMons = [
 				'Accelgor', 'Aerodactyl', 'Alomomola', 'Arcanine', 'Aromatisse', 'Audino', 'Basculin', 'Bouffalant', 'Bruxish', 'Carbink',
@@ -1006,8 +1004,8 @@ let Formats = [
 				'Mr. Mime', 'Musharna', 'Ninetales', 'Oranguru', 'Oricorio', 'Pachirisu', 'Passimian', 'Pinsir', 'Plusle', 'Porygon-Z', 'Porygon2',
 				'Pyukumuku', 'Qwilfish', 'Regigigas', 'Relicanth', 'Roselia', 'Roserade', 'Rotom', 'Sableye', 'Sawk', 'Scizor', 'Seviper', 'Shuckle',
 				'Sigilyph', 'Simipour', 'Simisage', 'Simisear', 'Skarmory', 'Slowking', 'Slurpuff', 'Smeargle', 'Snorlax', 'Solrock', 'Spinda',
-				'Spiritomb', 'Stantler', 'Starmie', 'Steelix', 'Stunfisk', 'Sudowoodo', 'Sunflora', 'Tauros', 'Throh', 'Torkoal', 'Trevenant',
-				'Tropius', 'Turtonator', 'Vaporeon', 'Volbeat', 'Whimsicott', 'Wigglytuff', 'Wobbuffet', 'Zangoose',
+				'Spiritomb', 'Stantler', 'Starmie', 'Steelix', 'Stunfisk', 'Sudowoodo', 'Sunflora', 'Tauros', 'Throh', 'Togedemaru', 'Torkoal',
+				'Trevenant', 'Tropius', 'Turtonator', 'Vaporeon', 'Volbeat', 'Whimsicott', 'Wishiwashi', 'Wobbuffet', 'Zangoose',
 			];
 			let template = this.getTemplate(set.species || set.name);
 			let futureGenEvo = template.evos && this.getTemplate(template.evos[0]).gen > this.gen;
@@ -1015,6 +1013,19 @@ let Formats = [
 				return [set.species + " isn't obtainable at Level 1."];
 			}
 		},
+	},
+	{
+		name: "[Gen 7] Ultra Final",
+		threads: [`&bullet; <a href="https://www.smogon.com/forums/threads/3654575/">Ultra Final Discussion</a>`],
+
+		mod: 'gen7',
+		forcedLevel: 100,
+		teamLength: {
+			validate: [3, 6],
+			battle: 3,
+		},
+		ruleset: ['Pokemon', 'Nickname Clause', 'Team Preview', 'Cancel Mod'],
+		banlist: ['Unreleased', 'Illegal'],
 	},
 	{
 		name: "[Gen 7] Custom Game",
@@ -1056,7 +1067,7 @@ let Formats = [
 		threads: [
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3648227/">Doubles OU Metagame Discussion</a>`,
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3623347/">Doubles OU Viability Rankings</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3590987/">Doubles OU Sample Teams</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3645990/">Doubles OU Sample Teams</a>`,
 		],
 
 		mod: 'gen7',
@@ -1395,7 +1406,7 @@ let Formats = [
 		cannotMega: [
 			'Arceus', 'Deoxys', 'Deoxys-Attack', 'Deoxys-Speed', 'Dialga', 'Dragonite', 'Giratina', 'Groudon', 'Ho-Oh', 'Kyogre', 'Kyurem-Black',
 			'Kyurem-White', 'Landorus-Therian', 'Lugia', 'Lunala', 'Marshadow', 'Mewtwo', 'Naganadel', 'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane',
-			'Palkia', 'Pheromosa', 'Rayquaza', 'Regigigas', 'Reshiram', 'Slaking', 'Solgaleo', 'Xerneas', 'Yveltal', 'Zekrom',
+			'Palkia', 'Pheromosa', 'Rayquaza', 'Regigigas', 'Reshiram', 'Shuckle', 'Slaking', 'Solgaleo', 'Xerneas', 'Yveltal', 'Zekrom',
 		],
 		onValidateTeam(team) {
 			/**@type {{[k: string]: true}} */
@@ -1452,7 +1463,7 @@ let Formats = [
 
 		mod: 'gen7',
 		ruleset: ['[Gen 7] OU', 'Ability Clause', 'Ignore Illegal Abilities'],
-		banlist: ['Archeops', 'Dragonite', 'Hoopa-Unbound', 'Kartana', 'Keldeo', 'Kyurem-Black', 'Regigigas', 'Shedinja', 'Slaking', 'Terrakion', 'Weavile'],
+		banlist: ['Archeops', 'Dragonite', 'Hoopa-Unbound', 'Kartana', 'Keldeo', 'Kyurem-Black', 'Regigigas', 'Shedinja', 'Slaking', 'Terrakion', 'Victini', 'Weavile'],
 		unbanlist: ['Aegislash', 'Genesect', 'Landorus', 'Metagross-Mega', 'Naganadel'],
 		restrictedAbilities: [
 			'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Huge Power', 'Illusion', 'Imposter', 'Innards Out',
@@ -1478,9 +1489,9 @@ let Formats = [
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3598418/">Camomons</a>`,
 		],
 		mod: 'gen7',
-		//searchShow: false,
+		// searchShow: false,
 		ruleset: ['[Gen 7] OU'],
-		banlist: ['Dragonite', 'Kartana', 'Kyurem-Black', 'Latias-Mega', 'Shedinja'],
+		banlist: ['Dragonite', 'Kartana', 'Kyurem-Black', 'Latias-Mega', 'Shedinja', 'Kommonium Z'],
 		onModifyTemplate(template, target, source, effect) {
 			if (!target) return; // Chat command
 			if (effect && ['imposter', 'transform'].includes(effect.id)) return;
@@ -1492,9 +1503,6 @@ let Formats = [
 		},
 		onAfterMega(pokemon) {
 			this.add('-start', pokemon, 'typechange', pokemon.getTypes(true).join('/'), '[silent]');
-		},
-		onBegin() {
-			if (this.format === 'gen7camomons') this.add('html', `<div class="broadcast-blue"><strong>In this ladder, Silvally and Arceus CANNOT change their base typing in Camomons.`);
 		},
 	},
 	{
@@ -1752,17 +1760,17 @@ let Formats = [
 
 		mod: 'ssb',
 		team: 'randomStaffBros',
-		challengeShow: false,
-		searchShow: false,
 		ruleset: ['HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod'],
 		onBegin() {
 			this.add('raw|SUPER STAFF BROS <b>BRAWL</b>!!');
 			this.add('message', 'GET READY FOR THE NEXT BATTLE!');
+			if (this.teamGenerator.allXfix) this.add(`c|&HoeenHero|Oops I dropped my bag of xfix sets sorry!`);
 			this.add(`raw|<div class='broadcast-green'><b>Wondering what all these custom moves, abilities, and items do?<br />Check out the <a href="https://www.smogon.com/articles/super-staff-bros-brawl" target="_blank">Super Staff Bros Brawl Guide</a> and find out!</b></div>`);
 		},
+		onSwitchInPriority: 100,
 		onSwitchIn(pokemon) {
 			let name = toID(pokemon.illusion ? pokemon.illusion.name : pokemon.name);
-			if (this.getTemplate(name).exists) {
+			if (this.getTemplate(name).exists || name === 'rage') {
 				// Certain pokemon have volatiles named after their speciesid
 				// To prevent overwriting those, and to prevent accidentaly leaking
 				// that a pokemon is on a team through the onStart even triggering
@@ -2120,8 +2128,8 @@ let Formats = [
 		searchShow: false,
 		ruleset: ['Pokemon', 'Standard', 'Swagger Clause', 'Same Type Clause', 'Team Preview'],
 		banlist: [
-			'Aegislash', 'Altaria-Mega', 'Arceus', 'Blaziken', 'Charizard-Mega-X', 'Darkrai', 'Deoxys-Base', 'Deoxys-Attack', 'Dialga', 'Genesect', 'Gengar-Mega',
-			'Giratina', 'Greninja', 'Groudon', 'Ho-Oh', 'Hoopa-Unbound', 'Kangaskhan-Mega', 'Kyogre', 'Kyurem-White', 'Lucario-Mega', 'Lugia', 'Mawile-Mega', 'Metagross-Mega',
+			'Aegislash', 'Altaria-Mega', 'Arceus', 'Blaziken', 'Charizard-Mega-X', 'Darkrai', 'Deoxys-Base', 'Deoxys-Attack', 'Dialga', 'Genesect', 'Gengar-Mega', 'Giratina',
+			'Greninja', 'Groudon', 'Ho-Oh', 'Hoopa-Unbound', 'Kangaskhan-Mega', 'Kyogre', 'Kyurem-White', 'Lucario-Mega', 'Lugia', 'Mawile-Mega', 'Medicham-Mega', 'Metagross-Mega',
 			'Mewtwo', 'Palkia', 'Rayquaza', 'Reshiram', 'Sableye-Mega', 'Salamence-Mega', 'Shaymin-Sky', 'Slowbro-Mega', 'Talonflame', 'Xerneas', 'Yveltal', 'Zekrom',
 			'Shadow Tag', 'Damp Rock', 'Smooth Rock', 'Soul Dew', 'Baton Pass',
 		],
@@ -2423,7 +2431,7 @@ let Formats = [
 			battle: 1,
 		},
 		ruleset: ['Pokemon', 'Standard', 'Baton Pass Clause', 'Swagger Clause', 'Team Preview'],
-		banlist: ['Uber', 'Focus Sash', 'Soul Dew', 'Perish Song'],
+		banlist: ['Uber', 'Whimsicott', 'Focus Sash', 'Soul Dew', 'Perish Song'],
 		unbanlist: ['Genesect', 'Landorus', 'Manaphy', 'Thundurus', 'Tornadus-Therian'],
 	},
 	{

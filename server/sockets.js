@@ -43,24 +43,26 @@ if (cluster.isMaster) {
 			case '*': {
 				// *socketid, ip, protocol
 				// connect
-				let nlPos = data.indexOf('\n');
-				let nlPos2 = data.indexOf('\n', nlPos + 1);
-				Users.socketConnect(worker, id, data.slice(1, nlPos), data.slice(nlPos + 1, nlPos2), data.slice(nlPos2 + 1));
+				const [socketid, ip, protocol] = data.substr(1).split('\n');
+				Users.socketConnect(worker, id, socketid, ip, protocol);
 				break;
 			}
 
 			case '!': {
 				// !socketid
 				// disconnect
-				Users.socketDisconnect(worker, id, data.substr(1));
+				const socketid = data.substr(1);
+				Users.socketDisconnect(worker, id, socketid);
 				break;
 			}
 
 			case '<': {
 				// <socketid, message
 				// message
-				let nlPos = data.indexOf('\n');
-				Users.socketReceive(worker, id, data.substr(1, nlPos - 1), data.substr(nlPos + 1));
+				const idx = data.indexOf('\n');
+				const socketid = data.substr(1, idx - 1);
+				const message = data.substr(idx + 1);
+				Users.socketReceive(worker, id, socketid, message);
 				break;
 			}
 
@@ -194,7 +196,7 @@ if (cluster.isMaster) {
 	};
 
 	/**
-	 * @param {string} roomid
+	 * @param {RoomID} roomid
 	 * @param {string} message
 	 */
 	exports.roomBroadcast = function (roomid, message) {
@@ -205,7 +207,7 @@ if (cluster.isMaster) {
 
 	/**
 	 * @param {cluster.Worker} worker
-	 * @param {string} roomid
+	 * @param {RoomID} roomid
 	 * @param {string} socketid
 	 */
 	exports.roomAdd = function (worker, roomid, socketid) {
@@ -214,7 +216,7 @@ if (cluster.isMaster) {
 
 	/**
 	 * @param {cluster.Worker} worker
-	 * @param {string} roomid
+	 * @param {RoomID} roomid
 	 * @param {string} socketid
 	 */
 	exports.roomRemove = function (worker, roomid, socketid) {
@@ -222,7 +224,7 @@ if (cluster.isMaster) {
 	};
 
 	/**
-	 * @param {string} roomid
+	 * @param {RoomID} roomid
 	 * @param {string} message
 	 */
 	exports.channelBroadcast = function (roomid, message) {
@@ -233,7 +235,7 @@ if (cluster.isMaster) {
 
 	/**
 	 * @param {cluster.Worker} worker
-	 * @param {string} roomid
+	 * @param {RoomID} roomid
 	 * @param {ChannelID} channelid
 	 * @param {string} socketid
 	 */
@@ -422,12 +424,12 @@ if (cluster.isMaster) {
 	const sockets = new Map();
 	/**
 	 * roomid:socketid:Connection
-	 * @type {Map<string, Map<string, import('sockjs').Connection>>}
+	 * @type {Map<RoomID, Map<string, import('sockjs').Connection>>}
 	 */
 	const rooms = new Map();
 	/**
 	 * roomid:socketid:channelid
-	 * @type {Map<string, Map<string, ChannelID>>}
+	 * @type {Map<RoomID, Map<string, ChannelID>>}
 	 */
 	const roomChannels = new Map();
 
@@ -461,7 +463,8 @@ if (cluster.isMaster) {
 		let socketid = '';
 		/** @type {Map<string, import('sockjs').Connection> | undefined?} */
 		let room = null;
-		let roomid = '';
+		/** @type {RoomID} */
+		let roomid = /** @type {RoomID} */('');
 		/** @type {Map<string, ChannelID> | undefined?} */
 		let roomChannel = null;
 		/** @type {ChannelID} */
@@ -629,7 +632,7 @@ if (cluster.isMaster) {
 			return;
 		}
 
-		let socketid = '' + (++socketCounter);
+		const socketid = '' + (++socketCounter);
 		sockets.set(socketid, socket);
 
 		let socketip = socket.remoteAddress;
