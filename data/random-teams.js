@@ -13,7 +13,7 @@ const DexCalculator = require('../trashchannel/dex-calculator');
 const fs = require('fs');
 const path = require('path');
 
-const SCUSEFULMOVES = path.resolve(__dirname, '../data/mods/suicidecup/usefulmoves');
+const SCUSEFULMOVES = path.resolve(__dirname, '../data/mods/gen7suicidecup/usefulmoves');
 //#endregion TrashChannel
 
 /**

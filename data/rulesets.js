@@ -808,7 +808,7 @@ let BattleFormats = {
                 bst += stat;
             });
 			if (bst <= 350) {
-				let dex = this && this.dex.deepClone ? this : DexCalculator;
+				let dex = this && this.dex ? this.dex : DexCalculator;
 				let pokemon = dex.deepClone(template);
 				for (let i in pokemon.baseStats) {
 					pokemon.baseStats[i] *= 2;
@@ -841,7 +841,7 @@ let BattleFormats = {
 		effectType: 'Rule',
 		name: 'AAA Standard Package',
 		desc: "Standard package of rulesets for Almost Any Ability.",
-		ruleset: ['Ability Clause', 'AAA Restrictions Validation'],
+		ruleset: ['2 Ability Clause', 'AAA Restrictions Validation'],
 	},
 	averagemonsrule: {
 		effectType: 'Rule',
@@ -849,7 +849,7 @@ let BattleFormats = {
 		desc: "The mod for Averagemons: Every Pok&eacute;mon, including formes, has base 100 in every stat.",
 		onModifyTemplate: function (template, target, source, effect) {
 			if (!effect) return;
-			let dex = this && this.dex.deepClone ? this : DexCalculator;
+			let dex = this && this.dex ? this.dex : DexCalculator;
 			let pokemon = dex.deepClone(template);
 			pokemon.baseStats = {hp: 100, atk: 100, def: 100, spa: 100, spd: 100, spe: 100};
 			return pokemon;
@@ -1283,7 +1283,7 @@ let BattleFormats = {
 		desc: "The mod for Reversed: Every Pok&eacute;mon has its base Atk and Sp. Atk stat, as well as its base Def and Sp. Def stat, swapped.",
 		onModifyTemplate: function (template, target, source, effect) {
 			if (!effect) return;
-			let dex = this && this.dex.deepClone ? this : DexCalculator;
+			let dex = this && this.dex ? this.dex : DexCalculator;
 			let pokemon = dex.deepClone(template);
 			const atk = pokemon.baseStats.atk;
 			const def = pokemon.baseStats.def;
@@ -1316,7 +1316,7 @@ let BattleFormats = {
 				'LC': 40,
 			};
 			if (target && target.set.ability === 'Drizzle') return;
-			let dex = this && this.dex.deepClone ? this : DexCalculator;
+			let dex = this && this.dex ? this.dex : DexCalculator;
 			let tier = template.tier;
 			if (target && target.set.item) {
 				let item = this.dex.getItem(target.set.item);

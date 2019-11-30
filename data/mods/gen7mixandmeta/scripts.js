@@ -7,7 +7,7 @@ const path = require('path');
 
 // Includes
 const GENERIC_SCRIPTS = path.resolve(__dirname, '../../../data/scripts');
-const MNM_SCRIPTS = path.resolve(__dirname, '../mixandmega/scripts');
+const MNM_SCRIPTS = path.resolve(__dirname, '../gen7mixandmega/scripts');
 const MMCOLLECTION = path.resolve(__dirname, './mixedmetacollection');
 
 // 18/12/20 TrashChannel: IT'S TIEM
