@@ -55,20 +55,20 @@ let BattleAbilities = {
 			if (target === source || move.hasBounced || !move.flags['reflectable']) {
 				return;
 			}
-			let newMove = this.getActiveMove(move.id);
+			let newMove = this.dex.getActiveMove(move.id);
 			newMove.hasBounced = true;
 			newMove.pranksterBoosted = false;
-			this.useMove(newMove, target, source, this.getAbility('magicbounce'));
+			this.useMove(newMove, target, source, this.dex.getAbility('magicbounce'));
 			return null;
 		},
 		onAllyTryHitSide(target, source, move) {
 			if (target.side === source.side || move.hasBounced || !move.flags['reflectable']) {
 				return;
 			}
-			let newMove = this.getActiveMove(move.id);
+			let newMove = this.dex.getActiveMove(move.id);
 			newMove.hasBounced = true;
 			newMove.pranksterBoosted = false;
-			this.useMove(newMove, this.effectData.target, source, this.getAbility('magicbounce'));
+			this.useMove(newMove, this.effectData.target, source, this.dex.getAbility('magicbounce'));
 			return null;
 		},
 		onDamagePriority: -100,
@@ -128,18 +128,17 @@ let BattleAbilities = {
 		},
 	},
 	// Akir
-	regrowth: {
-		desc: "This Pokemon's healing moves have their priority increased by one stage. When switching out, this Pokemon restores 1/3 of its maximum HP, rounded down.",
-		shortDesc: "Healing moves have priority increased by 1. Heals 1/3 max HP when switching out.",
-		id: "regrowth",
-		name: "Regrowth",
+	neutralizingspores: {
+		desc: "Nullifies all abilities while on the field.",
+		shortDesc: "Nullifies all abilities while on the field.",
+		id: "neutralizingspores",
+		name: "Neutralizing Spores",
 		isNonstandard: "Custom",
-		onModifyPriority(priority, pokemon, target, move) {
-			if (move && move.flags['heal']) return priority + 1;
+		onStart(pokemon) {
+			this.add('-ability', pokemon, 'Neutralizing Spores');
+			this.add('-message', `${pokemon.name} neutralized all abilities on the field!`);
 		},
-		onSwitchOut(pokemon) {
-			pokemon.heal(pokemon.maxhp / 3);
-		},
+		// ability ignoring located in scripts.js
 	},
 	// Alpha
 	osolemio: {
@@ -173,7 +172,7 @@ let BattleAbilities = {
 		name: "Distortion World",
 		isNonstandard: "Custom",
 		onStart() {
-			this.field.setTerrain('distortionworld');
+			this.field.addPseudoWeather('distortionworld');
 		},
 	},
 	// A Quag To The Past
@@ -188,7 +187,7 @@ let BattleAbilities = {
 			if (target === source || move.hasBounced || !move.flags['reflectable']) {
 				return;
 			}
-			let newMove = this.getActiveMove(move.id);
+			let newMove = this.dex.getActiveMove(move.id);
 			newMove.hasBounced = true;
 			newMove.pranksterBoosted = false;
 			this.useMove(newMove, target, source);
@@ -198,7 +197,7 @@ let BattleAbilities = {
 			if (target.side === source.side || move.hasBounced || !move.flags['reflectable']) {
 				return;
 			}
-			let newMove = this.getActiveMove(move.id);
+			let newMove = this.dex.getActiveMove(move.id);
 			newMove.hasBounced = true;
 			newMove.pranksterBoosted = false;
 			this.useMove(newMove, this.effectData.target, source);
@@ -231,7 +230,7 @@ let BattleAbilities = {
 		name: "Logia",
 		isNonstandard: "Custom",
 		onTryHit(target, source, move) {
-			let plateType = this.getItem(target.item).onPlate;
+			let plateType = this.dex.getItem(target.item).onPlate;
 			if (target !== source && (move.type === 'Normal' || plateType === move.type)) {
 				this.add('-immune', target, '[from] ability: Logia');
 				return null;
@@ -250,7 +249,7 @@ let BattleAbilities = {
 			if (formes.includes(toID(source.template.species))) {
 				formes.splice(formes.indexOf(toID(source.template.species)), 1);
 				this.add('-activate', source, 'ability: Arabesque');
-				source.formeChange(formes[this.random(formes.length)], this.getAbility('arabesque'), true);
+				source.formeChange(formes[this.random(formes.length)], this.dex.getAbility('arabesque'), true);
 			}
 		},
 	},
@@ -271,7 +270,7 @@ let BattleAbilities = {
 		onEffectiveness(typeMod, target, type, move) {
 			if (!target) return;
 			if (target.template.baseSpecies !== 'Shaymin' || target.transformed) return;
-			return this.getEffectiveness(move.type, 'Grass');
+			return this.dex.getEffectiveness(move.type, 'Grass');
 		},
 		onAfterDamage(damage, target, source, effect) {
 			if (source === target) return;
@@ -433,8 +432,8 @@ let BattleAbilities = {
 		},
 		onAfterDamage(damage, target, source, effect) {
 			// Illusion that only breaks when hit with a move that is super effective VS dark
-			if (target.illusion && effect && effect.effectType === 'Move' && effect.id !== 'confused' && this.getEffectiveness(effect.type, target.getTypes()) > 0) {
-				this.singleEvent('End', this.getAbility('Illusion'), target.abilityData, target, source, effect);
+			if (target.illusion && effect && effect.effectType === 'Move' && effect.id !== 'confused' && this.dex.getEffectiveness(effect.type, target.getTypes()) > 0) {
+				this.singleEvent('End', this.dex.getAbility('Illusion'), target.abilityData, target, source, effect);
 			}
 		},
 		onEnd(pokemon) {
@@ -446,12 +445,12 @@ let BattleAbilities = {
 				this.add('replace', pokemon, details);
 				this.add('-end', pokemon, 'Illusion');
 				// Handle hippopotas
-				if (this.getTemplate(disguisedAs).exists) disguisedAs += 'user';
+				if (this.dex.getTemplate(disguisedAs).exists) disguisedAs += 'user';
 				if (pokemon.volatiles[disguisedAs]) {
 					pokemon.removeVolatile(disguisedAs);
 				}
 				if (!pokemon.volatiles[toID(pokemon.name)]) {
-					let status = this.getEffect(toID(pokemon.name));
+					let status = this.dex.getEffect(toID(pokemon.name));
 					if (status && status.exists) {
 						pokemon.addVolatile(toID(pokemon.name), pokemon);
 					}
@@ -680,7 +679,7 @@ let BattleAbilities = {
 				return this.chainModify(1.5);
 			}
 		},
-		onModifyAccuracy(accuracy) {
+		onSourceModifyAccuracy(accuracy) {
 			if (!this.field.isWeather('')) {
 				return this.chainModify(1.5);
 			}
@@ -725,7 +724,7 @@ let BattleAbilities = {
 				pokemon.moveSlots = [];
 				for (let i = 0; i < set.length; i++) {
 					let newMove = set[i];
-					let moveTemplate = this.getMove(newMove);
+					let moveTemplate = this.dex.getMove(newMove);
 					pokemon.moveSlots.push({
 						move: moveTemplate.name,
 						id: moveTemplate.id,
@@ -861,8 +860,8 @@ let BattleAbilities = {
 	},
 	// ptoad
 	fatrain: {
-		desc: "This Pokemon summons Rain Dance when it switches in, and its Defense is 1.5x when Rain is active.",
-		shortDesc: "On switch-in, summons Rain Dance. This Pokemon's Defense is 1.5x during Rain.",
+		desc: "This Pokemon summons Rain Dance when it switches in, and its Defense is 2x when Rain is active.",
+		shortDesc: "On switch-in, summons Rain Dance. This Pokemon's Defense is 2x during Rain.",
 		id: "fatrain",
 		name: "Fat Rain",
 		isNonstandard: "Custom",
@@ -875,7 +874,7 @@ let BattleAbilities = {
 		},
 		onModifyDef(def, pokemon) {
 			if (this.field.isWeather(['raindance', 'primordialsea'])) {
-				return this.chainModify(1.5);
+				return this.chainModify(2);
 			}
 		},
 	},
@@ -1185,7 +1184,7 @@ let BattleAbilities = {
 		name: "Snow Storm",
 		isNonstandard: "Custom",
 		onStart() {
-			let snowStorm = this.getEffect('hail');
+			let snowStorm = this.dex.getEffect('hail');
 			this.field.setWeather(snowStorm);
 		},
 	},
@@ -1201,12 +1200,12 @@ let BattleAbilities = {
 				this.add('replace', pokemon, details);
 				this.add('-end', pokemon, 'Illusion');
 				// Handle hippopotas
-				if (this.getTemplate(disguisedAs).exists) disguisedAs += 'user';
+				if (this.dex.getTemplate(disguisedAs).exists) disguisedAs += 'user';
 				if (pokemon.volatiles[disguisedAs]) {
 					pokemon.removeVolatile(disguisedAs);
 				}
 				if (!pokemon.volatiles[toID(pokemon.name)]) {
-					let status = this.getEffect(toID(pokemon.name));
+					let status = this.dex.getEffect(toID(pokemon.name));
 					if (status && status.exists) {
 						pokemon.addVolatile(toID(pokemon.name), pokemon);
 					}

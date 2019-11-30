@@ -60,13 +60,13 @@ let BattleStatuses = {
 	aeonic: {
 		noCopy: true,
 		onStart() {
-			this.add(`c|+Aeonic|Guys the emoji movie wasn't __that__ bad`);
+			this.add(`c|%Aeonic|Guys the emoji movie wasn't __that__ bad`);
 		},
 		onSwitchOut() {
-			this.add(`c|+Aeonic|Still better than kie btw`);
+			this.add(`c|%Aeonic|Still better than kie btw`);
 		},
 		onFaint() {
-			this.add(`c|+Aeonic|Don't forget me`);
+			this.add(`c|%Aeonic|Don't forget me`);
 		},
 	},
 	aethernum: {
@@ -79,18 +79,6 @@ let BattleStatuses = {
 		},
 		onFaint() {
 			this.add(`c|@Aethernum| Has been fun! But i'm too lazy to keep fighting ^_^'`);
-		},
-	},
-	akasianse: {
-		noCopy: true,
-		onStart() {
-			this.add(`c|%Akasianse|Hi I'm here to participate in a totally serious conversation`);
-		},
-		onSwitchOut() {
-			this.add(`c|%Akasianse|Okay that's enough shitposting for now`);
-		},
-		onFaint() {
-			this.add(`c|%Akasianse|Fine I'll go back to work...`);
 		},
 	},
 	akiamara: {
@@ -107,21 +95,21 @@ let BattleStatuses = {
 	},
 	akir: {
 		noCopy: true,
-		onStart(source) {
+		onStart() {
 			this.add(`c|%Akir|hey whats up`);
-			if (source.illusion) return;
-			this.boost({def: 1, spd: 1}, source);
 		},
-		onSwitchOut() {
+		onSwitchOut(pokemon) {
 			this.add(`c|%Akir|sorry need to build more`);
+			if (pokemon.illusion) return;
+			pokemon.heal(pokemon.maxhp / 3);
 		},
 		onFaint() {
 			this.add(`c|%Akir|too sleepy, c ya`);
 		},
 		onSourceModifyDamage(damage, source, target, move) {
-			if (target.getMoveHitData(move).typeMod > 0 && !target.illusion) {
-				this.debug('Solid Rock neutralize');
-				return this.chainModify(0.75);
+			if (target.getMoveHitData(move) && !target.illusion) {
+				this.debug('Mushroom Guard halves damage.');
+				return this.chainModify(0.5);
 			}
 		},
 	},
@@ -154,7 +142,7 @@ let BattleStatuses = {
 		onStart() {
 			this.add(`c|&Anubis|hi ur qt`);
 			// In loving memory of the SSB programming team's sanity.
-			if (this.random(300) === 272) this.add(`c|&HoeenHero|Anubis's set is OP against programmer sanity.`);
+			if (this.random(300) === 272) this.add(`c|~HoeenHero|Anubis's set is OP against programmer sanity.`);
 		},
 		onSwitchOut() {
 			this.add(`c|&Anubis|brb making coffee`);
@@ -250,7 +238,7 @@ let BattleStatuses = {
 		onStart() {
 			this.add(`c|+Averardo|ECCOMI`);
 		},
-		onSwitchIn() {
+		onSwitchOut() {
 			this.add(`c|+Averardo|Scillato (PA)`);
 		},
 		onFaint() {
@@ -490,10 +478,10 @@ let BattleStatuses = {
 	eien: {
 		noCopy: true,
 		onStart() {
-			this.add(`c|@Eien|umu!`);
+			this.add(`c|&Eien|umu!`);
 		},
 		onFaint() {
-			this.add(`c|@Eien|This game is Bad Civilization...`);
+			this.add(`c|&Eien|This game is Bad Civilization...`);
 		},
 	},
 	elgino: {
@@ -591,11 +579,23 @@ let BattleStatuses = {
 		},
 		onFaint(pokemon) {
 			let activeMon = toID(pokemon.side.foe.active[0].illusion ? pokemon.side.foe.active[0].illusion.name : pokemon.side.foe.active[0].name);
-			if (activeMon === 'akasianse') {
-				this.add(`c|%fart|Akasianse I'm deleting your mon`);
+			if (activeMon === 'felucia') {
+				this.add(`c|%fart|Felucia I'm deleting your mon`);
 			} else {
 				this.add(`c|%fart|the things I do for love...`);
 			}
+		},
+	},
+	felucia: {
+		noCopy: true,
+		onStart() {
+			this.add(`c|%Felucia|Hi I'm here to participate in a totally serious conversation`);
+		},
+		onSwitchOut() {
+			this.add(`c|%Felucia|Okay that's enough shitposting for now`);
+		},
+		onFaint() {
+			this.add(`c|%Felucia|Fine I'll go back to work...`);
 		},
 	},
 	flare: {
@@ -686,27 +686,27 @@ let BattleStatuses = {
 		noCopy: true,
 		onStart() {
 			this.add(`c|@Hippopotas|Something broke. If you're seeing this message, please PM a staff member about it.`);
-			this.add(`c|&HoeenHero|No, its not a bug Hippopotas, stop telling people to PM staff, its annoying.`);
+			this.add(`c|~HoeenHero|No, its not a bug Hippopotas, stop telling people to PM staff, its annoying.`);
 		},
 		onSwitchOut() {
 			this.add(`c|@Hippopotas|Something broke. If you're seeing this message, please PM a staff member about it.`);
-			this.add(`c|&HoeenHero|There's still no bug!`);
+			this.add(`c|~HoeenHero|There's still no bug!`);
 		},
 		onFaint() {
 			this.add(`c|@Hippopotas|Something broke. If you're seeing this message, please PM a staff member about it.`);
-			this.add(`c|&HoeenHero|My PMs are flooded with bug reports :(`);
+			this.add(`c|~HoeenHero|My PMs are flooded with bug reports :(`);
 		},
 	},
 	hoeenhero: {
 		noCopy: true,
 		onStart() {
-			this.add(`c|&HoeenHero|My scripts will lead me to victory!`);
+			this.add(`c|~HoeenHero|My scripts will lead me to victory!`);
 		},
 		onSwitchOut() {
-			this.add(`c|&HoeenHero|I need to look something up, hold on...`);
+			this.add(`c|~HoeenHero|I need to look something up, hold on...`);
 		},
 		onFaint() {
-			this.add(`c|&HoeenHero|There must have been a bug in my script ;-;`);
+			this.add(`c|~HoeenHero|There must have been a bug in my script ;-;`);
 		},
 	},
 	hubriz: {
@@ -730,7 +730,7 @@ let BattleStatuses = {
 			this.add(`c|+inactive|I'll keep an eye out for you next time...`);
 		},
 		onFaint() {
-			this.add(`c|+inactive|/me turns to stone`);
+			this.add(`c|+inactive|/me turns to stone and crumbles`);
 		},
 	},
 	irritated: {
@@ -828,13 +828,13 @@ let BattleStatuses = {
 	kay: {
 		noCopy: true,
 		onStart() {
-			this.add(`c|@kay|Every kiss begins with Kay`);
+			this.add(`c|+kay|Every kiss begins with Kay`);
 		},
 		onSwitchOut() {
-			this.add(`c|@kay|くコ:彡`);
+			this.add(`c|+kay|くコ:彡`);
 		},
 		onFaint() {
-			this.add(`c|@kay|'kay bye!くコ:彡`);
+			this.add(`c|+kay|'kay bye!くコ:彡`);
 		},
 		// Simple Innate
 		onBoost(boost, target, source, effect) {
@@ -897,9 +897,9 @@ let BattleStatuses = {
 			for (const target of pokemon.side.foe.active) {
 				if (!target || target.fainted) continue;
 				for (const moveSlot of target.moveSlots) {
-					const move = this.getMove(moveSlot.move);
+					const move = this.dex.getMove(moveSlot.move);
 					const moveType = move.id === 'hiddenpower' ? target.hpType : move.type;
-					if (move.category !== 'Status' && (this.getImmunity(moveType, pokemon) && this.getEffectiveness(moveType, pokemon) > 0 || move.ohko)) {
+					if (move.category !== 'Status' && (this.dex.getImmunity(moveType, pokemon) && this.dex.getEffectiveness(moveType, pokemon) > 0 || move.ohko)) {
 						this.add('-ability', pokemon, 'Anticipation');
 						return;
 					}
@@ -928,15 +928,15 @@ let BattleStatuses = {
 	lifeisdank: {
 		noCopy: true,
 		onStart(target) {
-			this.add(`c|&LifeisDANK|!!!ლ(⁰⊖⁰ლ) Peent Peent.`);
+			this.add(`c|+LifeisDANK|!!!ლ(⁰⊖⁰ლ) Peent Peent.`);
 			if (target.illusion) return;
 			this.boost({spe: 2}, target);
 		},
 		onSwitchOut() {
-			this.add(`c|&LifeisDANK|!(•⌔• ) Peent Peent.`);
+			this.add(`c|+LifeisDANK|!(•⌔• ) Peent Peent.`);
 		},
 		onFaint() {
-			this.add(`c|&LifeisDANK|(•⌔•. ) Peent.`);
+			this.add(`c|+LifeisDANK|(•⌔•. ) Peent.`);
 		},
 		// Mountaineer innate
 		onDamage(damage, target, source, effect) {
@@ -1092,13 +1092,13 @@ let BattleStatuses = {
 	nui: {
 		noCopy: true,
 		onStart() {
-			this.add(`c|&nui|（*＾3＾）`);
+			this.add(`c|@nui|（*＾3＾）`);
 		},
 		onSwitchOut() {
-			this.add(`c|&nui|(´◔‸◔\`) **??+ !`);
+			this.add(`c|@nui|(´◔‸◔\`) **??+ !`);
 		},
 		onFaint() {
-			this.add(`c|&nui|(◕︿◕✿)`);
+			this.add(`c|@nui|(◕︿◕✿)`);
 		},
 	},
 	om: {
@@ -1286,13 +1286,13 @@ let BattleStatuses = {
 	rageuser: {
 		noCopy: true,
 		onStart(pokemon) {
-			this.add(`c|+Rage|I'm about to ruin this mans whole career`);
+			this.add(`c|%Rage|I'm about to ruin this mans whole career`);
 		},
 		onSwitchOut() {
-			this.add(`c|+Rage|Ain't supposed to be like that chief, we out`);
+			this.add(`c|%Rage|Ain't supposed to be like that chief, we out`);
 		},
 		onFaint() {
-			this.add(`c|+Rage|/me quits`);
+			this.add(`c|%Rage|/me quits`);
 		},
 	},
 	raid: {
@@ -1316,10 +1316,10 @@ let BattleStatuses = {
 			this.boost({atk: 1}, pokemon);
 		},
 		onSwitchOut() {
-			this.add(`c|+Rory Mercury|brb`);
+			this.add(`c|+Rory Mercury|brb running low on battery`);
 		},
 		onFaint() {
-			this.add(`c|+Rory Mercury|/me shook af`);
+			this.add(`c|+Rory Mercury|pressing charges for battery`);
 		},
 	},
 	samjo: {
@@ -1390,7 +1390,10 @@ let BattleStatuses = {
 		},
 		onSwitchOut(pokemon) {
 			this.add(`c|@Snaquaza|Lynch Hoeen while I'm away...`);
-			if (pokemon.m.claimHP) pokemon.m.claimHP = null;
+			if (pokemon.m.claimHP) {
+				pokemon.hp = pokemon.m.claimHP;
+				pokemon.m.claimHP = null;
+			}
 		},
 		onFaint() {
 			this.add(`c|@Snaquaza|How did you know I was scum?`);
@@ -1416,13 +1419,13 @@ let BattleStatuses = {
 	sparksblade: {
 		noCopy: true,
 		onStart() {
-			this.add(`c|%SparksBlade|this team looks marsh weak`);
+			this.add(`c|%sparksblade|this team looks marsh weak`);
 		},
 		onSwitchOut() {
-			this.add(`c|%SparksBlade|we lose`);
+			this.add(`c|%sparksblade|we lose`);
 		},
 		onFaint() {
-			this.add(`c|%SparksBlade|i don't even play this game`);
+			this.add(`c|%sparksblade|i don't even play this game`);
 		},
 	},
 	sundar: {
@@ -1472,10 +1475,10 @@ let BattleStatuses = {
 			let silentRemove = ['reflect', 'lightscreen', 'auroraveil', 'safeguard', 'mist'];
 			for (const sideCondition of removeAll) {
 				if (target.side.removeSideCondition(sideCondition)) {
-					if (!(silentRemove.includes(sideCondition))) this.add('-sideend', target.side, this.getEffect(sideCondition).name, '[from] move: No Fun Zone', '[of] ' + source);
+					if (!(silentRemove.includes(sideCondition))) this.add('-sideend', target.side, this.dex.getEffect(sideCondition).name, '[from] move: No Fun Zone', '[of] ' + source);
 				}
 				if (source.side.removeSideCondition(sideCondition)) {
-					if (!(silentRemove.includes(sideCondition))) this.add('-sideend', source.side, this.getEffect(sideCondition).name, '[from] move: No Fun Zone', '[of] ' + source);
+					if (!(silentRemove.includes(sideCondition))) this.add('-sideend', source.side, this.dex.getEffect(sideCondition).name, '[from] move: No Fun Zone', '[of] ' + source);
 				}
 			}
 			this.add('-clearallboost');
@@ -1557,13 +1560,13 @@ let BattleStatuses = {
 	vivalospride: {
 		noCopy: true,
 		onStart() {
-			this.add(`c|+vivalospride|bet`);
+			this.add(`c|%vivalospride|bet`);
 		},
 		onSwitchOut() {
-			this.add(`c|+vivalospride|tuh`);
+			this.add(`c|%vivalospride|tuh`);
 		},
 		onFaint() {
-			this.add(`c|+vivalospride|THERE IT IS!!`);
+			this.add(`c|%vivalospride|THERE IT IS!!`);
 		},
 	},
 	volco: {
@@ -1575,7 +1578,7 @@ let BattleStatuses = {
 			this.add(`c|+Volco|I've decided to spare you, lucky you.`);
 		},
 		onFaint() {
-			this.add(`c|+Volco|Well, seems I was got taken down instead.`);
+			this.add(`c|+Volco|Well, seems I was taken down instead.`);
 		},
 	},
 	xayah: {
@@ -1727,9 +1730,7 @@ let BattleStatuses = {
 		noCopy: true,
 		onStart(pokemon) {
 			this.add('-message', `${pokemon.illusion ? pokemon.illusion.name : pokemon.name}'s weight has doubled.`);
-		},
-		onModifyWeight(weight) {
-			return weight * 2;
+			pokemon.weighthg *= 2;
 		},
 	},
 	// Gooey volatile for Decem's move
@@ -1793,7 +1794,8 @@ let BattleStatuses = {
 			this.add('-message', `${pokemon.illusion ? pokemon.illusion.name : pokemon.name}'s next attack will hit multiple times!`);
 		},
 		onPrepareHit(source, target, move) {
-			if (move.category !== 'Status') {
+			// beat up relies on its multihit being the number of valid allies
+			if (move.category !== 'Status' && move.id !== 'beatup') {
 				move.multihit = [2, 5];
 				move.basePower = 25;
 				this.effectData.usedup = true;
@@ -2053,7 +2055,7 @@ let BattleStatuses = {
 			this.add('-sidestart', side, 'move: Stealth Rock');
 		},
 		onSwitchIn(pokemon) {
-			let typeMod = this.clampIntRange(pokemon.runEffectiveness(this.getActiveMove('stealthrock')), -6, 6);
+			let typeMod = this.dex.clampIntRange(pokemon.runEffectiveness(this.dex.getActiveMove('stealthrock')), -6, 6);
 			this.damage(pokemon.maxhp * Math.pow(2, typeMod) / 8);
 		},
 	},
@@ -2068,7 +2070,7 @@ let BattleStatuses = {
 		onSwitchIn(pokemon) {
 			if (!pokemon.isGrounded()) return;
 			this.add('-activate', pokemon, 'move: Sticky Web');
-			this.boost({spe: -1}, pokemon, pokemon.side.foe.active[0], this.getActiveMove('stickyweb'));
+			this.boost({spe: -1}, pokemon, pokemon.side.foe.active[0], this.dex.getActiveMove('stickyweb'));
 		},
 	},
 	toxicspikes: {

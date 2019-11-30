@@ -91,10 +91,10 @@ const commands = {
 			baseTemplate = Dex.getTemplate("Kyogre");
 			megaTemplate = Dex.getTemplate("Kyogre-Primal");
 		}
-		/** @type {{baseStats: {[k: string]: number}, weightkg: number, type?: string}} */
+		/** @type {{baseStats: {[k: string]: number}, weighthg: number, type?: string}} */
 		let deltas = {
 			baseStats: {},
-			weightkg: megaTemplate.weightkg - baseTemplate.weightkg,
+			weighthg: megaTemplate.weighthg - baseTemplate.weighthg,
 		};
 		for (let statId in megaTemplate.baseStats) {
 			// @ts-ignore
@@ -109,7 +109,7 @@ const commands = {
 		}
 		let details = {
 			"Gen": 6,
-			"Weight": (JSON.stringify(deltas.weightkg).startsWith("-") ? "" : "+") + Math.round(deltas.weightkg * 100) / 100 + " kg",
+			"Weight": (deltas.weighthg < 0 ? "" : "+") + deltas.weighthg / 10 + " kg",
 		};
 		let tier;
 		if (['redorb', 'blueorb'].includes(stone.id)) {
@@ -290,9 +290,9 @@ const commands = {
 		if (crossTemplate.types[0] !== prevo.types[0]) mixedTemplate.types[0] = crossTemplate.types[0];
 		if (crossTemplate.types[1] !== prevo.types[1]) mixedTemplate.types[1] = crossTemplate.types[1] || crossTemplate.types[0];
 		if (mixedTemplate.types[0] === mixedTemplate.types[1]) mixedTemplate.types = [mixedTemplate.types[0]];
-		mixedTemplate.weightkg += crossTemplate.weightkg - prevo.weightkg;
-		if (mixedTemplate.weightkg <= 0) {
-			mixedTemplate.weightkg = 0.1;
+		mixedTemplate.weighthg += crossTemplate.weighthg - prevo.weighthg;
+		if (mixedTemplate.weighthg < 1) {
+			mixedTemplate.weighthg = 1;
 		}
 		for (const stat of Object.values(mixedTemplate.baseStats)) {
 			if (stat < 1 || stat > 255) {
@@ -302,15 +302,15 @@ const commands = {
 		}
 		mixedTemplate.tier = "CE";
 		let weighthit = 20;
-		if (mixedTemplate.weightkg >= 200) {
+		if (mixedTemplate.weighthg >= 2000) {
 			weighthit = 120;
-		} else if (mixedTemplate.weightkg >= 100) {
+		} else if (mixedTemplate.weighthg >= 1000) {
 			weighthit = 100;
-		} else if (mixedTemplate.weightkg >= 50) {
+		} else if (mixedTemplate.weighthg >= 500) {
 			weighthit = 80;
-		} else if (mixedTemplate.weightkg >= 25) {
+		} else if (mixedTemplate.weighthg >= 250) {
 			weighthit = 60;
-		} else if (mixedTemplate.weightkg >= 10) {
+		} else if (mixedTemplate.weighthg >= 100) {
 			weighthit = 40;
 		}
 		/** @type {{[k: string]: string}} */
@@ -318,7 +318,7 @@ const commands = {
 			"Dex#": mixedTemplate.num,
 			"Gen": mixedTemplate.gen,
 			"Height": mixedTemplate.heightm + " m",
-			"Weight": mixedTemplate.weightkg + " kg <em>(" + weighthit + " BP)</em>",
+			"Weight": mixedTemplate.weighthg / 10 + " kg <em>(" + weighthit + " BP)</em>",
 			"Dex Colour": mixedTemplate.color,
 		};
 		if (mixedTemplate.eggGroups) details["Egg Group(s)"] = mixedTemplate.eggGroups.join(", ");
