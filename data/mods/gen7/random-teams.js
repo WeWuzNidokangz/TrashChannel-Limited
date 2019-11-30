@@ -2,6 +2,8 @@
 
 const RandomTeams = require('../../random-teams');
 
+/** @typedef {import('../../random-teams').TeamData} TeamData */
+
 class RandomGen7Teams extends RandomTeams {
 	/**
 	 * @param {Format | string} format
@@ -34,7 +36,7 @@ class RandomGen7Teams extends RandomTeams {
 			template = this.dex.getTemplate('unown');
 
 			let err = new Error('Template incompatible with random battles: ' + species);
-			Monitor.crashlog(err, 'The randbat set generator');
+			Monitor.crashlog(err, 'The gen 7 randbat set generator');
 		}
 
 		if (template.battleOnly) {
@@ -94,7 +96,7 @@ class RandomGen7Teams extends RandomTeams {
 		// These moves can be used even if we aren't setting up to use them:
 		let SetupException = ['closecombat', 'diamondstorm', 'extremespeed', 'superpower', 'clangingscales', 'dracometeor'];
 
-		let counterAbilities = ['Adaptability', 'Contrary', 'Hustle', 'Iron Fist', 'Skill Link'];
+		let counterAbilities = ['Adaptability', 'Contrary', 'Iron Fist', 'Skill Link', 'Strong Jaw'];
 		let ateAbilities = ['Aerilate', 'Galvanize', 'Pixilate', 'Refrigerate'];
 
 		/**@type {{[k: string]: boolean}} */
@@ -360,7 +362,7 @@ class RandomGen7Teams extends RandomTeams {
 				case 'overheat':
 					if (hasMove['fireblast'] || hasMove['flareblitz'] || hasMove['lavaplume']) rejected = true;
 					break;
-				case 'airslash': case 'hurricane':
+				case 'hurricane':
 					if (hasMove['bravebird']) rejected = true;
 					break;
 				case 'hex':
@@ -650,7 +652,7 @@ class RandomGen7Teams extends RandomTeams {
 			do {
 				rejectAbility = false;
 				if (counterAbilities.includes(ability)) {
-					// Adaptability, Contrary, Hustle, Iron Fist, Skill Link
+					// Adaptability, Contrary, Iron Fist, Skill Link, Strong Jaw
 					// @ts-ignore
 					rejectAbility = !counter[toID(ability)];
 				} else if (ateAbilities.includes(ability)) {
@@ -673,6 +675,8 @@ class RandomGen7Teams extends RandomTeams {
 					rejectAbility = !hasMove['bellydrum'];
 				} else if (ability === 'Harvest') {
 					rejectAbility = abilities.includes('Frisk');
+				} else if (ability === 'Hustle') {
+					rejectAbility = counter.Physical < 2;
 				} else if (ability === 'Hydration' || ability === 'Rain Dish' || ability === 'Swift Swim') {
 					rejectAbility = template.baseStats.spe > 100 || !hasMove['raindance'] && !teamDetails['rain'];
 				} else if (ability === 'Ice Body' || ability === 'Slush Rush' || ability === 'Snow Cloak') {
@@ -723,8 +727,6 @@ class RandomGen7Teams extends RandomTeams {
 					rejectAbility = !counter.setupType && !hasMove['flamecharge'];
 				} else if (ability === 'Solar Power') {
 					rejectAbility = !counter['Special'] || !teamDetails['sun'] || template.isMega;
-				} else if (ability === 'Strong Jaw') {
-					rejectAbility = !counter['bite'];
 				} else if (ability === 'Swarm') {
 					rejectAbility = !counter['Bug'] || template.isMega;
 				} else if (ability === 'Sweet Veil') {
@@ -1055,13 +1057,6 @@ class RandomGen7Teams extends RandomTeams {
 				bst += baseStats.atk + baseStats.spa;
 			}
 			level = 70 + Math.floor(((600 - this.dex.clampIntRange(bst, 300, 600)) / 10.34));
-		}
-
-		if (template.species === 'Stunfisk') {
-			// This is just to amuse Zarel
-			ability = 'Limber';
-			item = 'Cheri Berry';
-			level += 2;
 		}
 
 		// Prepare optimal HP
