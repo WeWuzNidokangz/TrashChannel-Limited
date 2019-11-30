@@ -31,15 +31,21 @@ class TrashChannelChatSupport {
 				return {
 					id: move.id,
 					name: move.name,
+					fullname: move.name,
 					megaEvolves: 'Rayquaza',
 					megaStone: 'Rayquaza-Mega',
 					exists: true,
+					// Adding extra values to appease typescript
+					gen: 6,
+					num: -1,
+					effectType: 'Item',
+					sourceEffect: '',
 				};
 			} else {
-				return {exists: false};
+				return null;
 			}
 		}
-		if (!item.megaStone && !item.onPrimal) return {exists: false};
+		if (!item.megaStone && !item.onPrimal) return null;
 		return item;
 	}
 
@@ -122,7 +128,7 @@ class TrashChannelChatSupport {
 		for (let statName in template.baseStats) { // Add the changed stats and weight
 			mixedTemplate.baseStats[statName] = Dex.clampIntRange(mixedTemplate.baseStats[statName] + deltas.baseStats[statName], 1, 255);
 		}
-		mixedTemplate.weightkg = Math.round(Math.max(0.1, template.weightkg + deltas.weightkg) * 100) / 100;
+		mixedTemplate.weighthg = Math.max(1, template.weighthg + deltas.weighthg);
 		mixedTemplate.tier = "MnM";
 		//#region TrashChannel
 		if(tierTextSuffix) {
@@ -130,15 +136,15 @@ class TrashChannelChatSupport {
 		}
 		//#endregion
 		let weighthit = 20;
-		if (mixedTemplate.weightkg >= 200) {
+		if (mixedTemplate.weightkg >= 2000) {
 			weighthit = 120;
-		} else if (mixedTemplate.weightkg >= 100) {
+		} else if (mixedTemplate.weightkg >= 1000) {
 			weighthit = 100;
-		} else if (mixedTemplate.weightkg >= 50) {
+		} else if (mixedTemplate.weightkg >= 500) {
 			weighthit = 80;
-		} else if (mixedTemplate.weightkg >= 25) {
+		} else if (mixedTemplate.weightkg >= 250) {
 			weighthit = 60;
-		} else if (mixedTemplate.weightkg >= 10) {
+		} else if (mixedTemplate.weightkg >= 100) {
 			weighthit = 40;
 		}
 		/** @type {{[k: string]: string}} */
@@ -146,7 +152,7 @@ class TrashChannelChatSupport {
 			"Dex#": '' + mixedTemplate.num,
 			"Gen": '' + mixedTemplate.gen,
 			"Height": mixedTemplate.heightm + " m",
-			"Weight": mixedTemplate.weightkg + " kg <em>(" + weighthit + " BP)</em>",
+			"Weight": mixedTemplate.weighthg / 10 + " kg <em>(" + weighthit + " BP)</em>",
 			"Dex Colour": mixedTemplate.color,
 		};
 		if (mixedTemplate.eggGroups) details["Egg Group(s)"] = mixedTemplate.eggGroups.join(", ");

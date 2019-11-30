@@ -7,13 +7,6 @@ const Dex = require(/** @type {any} */ ('../.sim-dist/dex')).Dex;
 /** @type {typeof import('../sim/prng').PRNG} */
 const PRNG = require(/** @type {any} */ ('../.sim-dist/prng')).PRNG;
 
-/**@type {AnyObject} */
-// @ts-ignore
-const randomBSSFactorySets = require('./bss-factory-sets.json');
-/**@type {AnyObject} */
-// @ts-ignore
-const randomFactorySets = require('./factory-sets.json');
-
 //#region TrashChannel
 const DexCalculator = require('../trashchannel/dex-calculator');
 
@@ -1896,11 +1889,11 @@ class RandomTeams {
 	randomHCTMTeam() { // Team for Trademarked: Hackmons Cup
 		let team = this.randomHCTeam();
 
-		let movePool = Object.keys(this.data.Movedex);
+		let movePool = Object.keys(this.dex.data.Movedex);
 
 		let trademarkPool = [];
 		for (const moveid of movePool) {
-			let move = this.getMove(moveid);
+			let move = this.dex.getMove(moveid);
 			if (move.category !== 'Status') continue;
 			trademarkPool.push(moveid);
 		}
@@ -1923,13 +1916,13 @@ class RandomTeams {
 	 * @return {RandomTeamsTypes.RandomSet}
 	 */
 	suicideCupRandomSet(template, slot = 1, teamDetails = {}, isDoubles = false) {
-		template = this.getTemplate(template);
+		template = this.dex.getTemplate(template);
 		let baseTemplate = template;
 		let species = template.species;
 
 		if (!template.exists || ((!isDoubles || !template.randomDoubleBattleMoves) && !template.randomBattleMoves && !template.learnset)) {
 			// GET IT? UNOWN? BECAUSE WE CAN'T TELL WHAT THE POKEMON IS
-			template = this.getTemplate('unown');
+			template = this.dex.getTemplate('unown');
 
 			let err = new Error('Template incompatible with random battles: ' + species);
 			Monitor.crashlog(err, 'The randbat set generator');
@@ -1943,7 +1936,7 @@ class RandomTeams {
 		}
 		let battleForme = this.checkBattleForme(template);
 		if (battleForme && battleForme.randomBattleMoves && template.otherFormes && (battleForme.isMega ? !teamDetails.megaStone && allowedMega.includes(template.name) : this.random(2))) {
-			template = this.getTemplate(template.otherFormes.length >= 2 ? this.sample(template.otherFormes) : template.otherFormes[0]);
+			template = this.dex.getTemplate(template.otherFormes.length >= 2 ? this.sample(template.otherFormes) : template.otherFormes[0]);
 		}
 
 		// Load Suicide Cup useful moves array
@@ -2037,7 +2030,7 @@ class RandomTeams {
 				(!movesTierArray || (0 == movesTierArray.length) ) )
 			{
 				nMoveTier++;
-				movesTierArray = this.deepClone(SCUsefulMoves[nMoveTier]);
+				movesTierArray = this.dex.deepClone(SCUsefulMoves[nMoveTier]);
 
 				// Cull moves we can't learn or already have
 				for(nMoveItr=movesTierArray.length-1; nMoveItr>-1; --nMoveItr) {
@@ -2079,10 +2072,10 @@ class RandomTeams {
 		/**@type {[string, string | undefined, string | undefined]} */
 		// @ts-ignore
 		let abilities = Object.values(baseTemplate.abilities);
-		abilities.sort((a, b) => this.getAbility(b).rating - this.getAbility(a).rating);
-		let ability0 = this.getAbility(abilities[0]);
-		let ability1 = this.getAbility(abilities[1]);
-		let ability2 = this.getAbility(abilities[2]);
+		abilities.sort((a, b) => this.dex.getAbility(b).rating - this.dex.getAbility(a).rating);
+		let ability0 = this.dex.getAbility(abilities[0]);
+		let ability1 = this.dex.getAbility(abilities[1]);
+		let ability2 = this.dex.getAbility(abilities[2]);
 		if (abilities[1]) {
 			if (abilities[2] && ability1.rating <= ability2.rating && this.randomChance(1, 2)) {
 				[ability1, ability2] = [ability2, ability1];
@@ -2320,15 +2313,15 @@ class RandomTeams {
 
 		// For Monotype
 		let isMonotype = this.format.id === 'gen7monotyperandombattle';
-		let typePool = Object.keys(this.data.TypeChart);
+		let typePool = Object.keys(this.dex.data.TypeChart);
 		let type = this.sample(typePool);
 
 		let pokemonPool = [];
-		for (let id in this.data.FormatsData) {
-			let template = this.getTemplate(id);
+		for (let id in this.dex.data.FormatsData) {
+			let template = this.dex.getTemplate(id);
 			if (isMonotype) {
 				let types = template.types;
-				if (template.battleOnly) types = this.getTemplate(template.baseSpecies).types;
+				if (template.battleOnly) types = this.dex.getTemplate(template.baseSpecies).types;
 				if (types.indexOf(type) < 0) continue;
 			}
 			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
@@ -2338,8 +2331,8 @@ class RandomTeams {
 
 		// PotD stuff
 		let potd;
-		if (global.Config && Config.potd && this.getRuleTable(this.getFormat()).has('potd')) {
-			potd = this.getTemplate(Config.potd);
+		if (global.Config && Config.potd && this.dex.getRuleTable(this.format).has('potd')) {
+			potd = this.dex.getTemplate(Config.potd);
 		}
 
 		/**@type {{[k: string]: number}} */
@@ -2354,7 +2347,7 @@ class RandomTeams {
 		let teamDetails = {};
 
 		while (pokemonPool.length && pokemon.length < 6) {
-			let template = this.getTemplate(this.sampleNoReplace(pokemonPool));
+			let template = this.dex.getTemplate(this.sampleNoReplace(pokemonPool));
 			if (!template.exists) continue;
 
 			// Limit to one of each species (Species Clause)
@@ -2422,7 +2415,7 @@ class RandomTeams {
 				if (typeComboCount[typeCombo] >= (isMonotype ? 2 : 1)) continue;
 			}
 
-			let item = this.getItem(set.item);
+			let item = this.dex.getItem(set.item);
 
 			// Limit 1 Z-Move per team
 			if (teamDetails['zMove'] && item.zMove) continue;

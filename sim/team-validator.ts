@@ -299,11 +299,10 @@ export class TeamValidator {
 		set: PokemonSet,
 		teamHas: AnyObject,
 		format: Format,
-		ruleTable: RuleTable,
+		ruleTable: import('./dex-data').RuleTable,
 		ignoreNonCriticalProblems: boolean = false): string[] | null
 	{
 		const dex = this.dex;
-		const ruleTable = this.ruleTable;
 
 		let problems: string[] = [];
 		if (!set) {

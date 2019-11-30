@@ -15,13 +15,13 @@ let BattleScripts = {
 	},
 	canMegaEvo(pokemon) {
 		if (pokemon.template.isMega || pokemon.template.isPrimal) return null;
-		let bitchTemplate = this.getTemplate(pokemon.item);
+		let bitchTemplate = this.dex.getTemplate(pokemon.item);
 		if (bitchTemplate.exists) { // Bitch and beggar
 			return bitchTemplate.id;
 		}
 		
 		// Regular mega evo case: have to copy and paste code from data/scripts.js for now
-		let altForme = pokemon.baseTemplate.otherFormes && this.getTemplate(pokemon.baseTemplate.otherFormes[0]);
+		let altForme = pokemon.baseTemplate.otherFormes && this.dex.getTemplate(pokemon.baseTemplate.otherFormes[0]);
 		let item = pokemon.getItem();
 		if (altForme && altForme.isMega && altForme.requiredMove && pokemon.baseMoves.includes(toID(altForme.requiredMove)) && !item.zMove) return altForme.species;
 		if (item.megaEvolves !== pokemon.baseTemplate.baseSpecies || item.megaStone === pokemon.species) {
@@ -42,7 +42,7 @@ let BattleScripts = {
 			}
 		}
 
-		// Take care of regular megaevo case first (this.getTemplate(pokemon.canMegaEvo).exists is true on Mega Stones!)
+		// Take care of regular megaevo case first (this.dex.getTemplate(pokemon.canMegaEvo).exists is true on Mega Stones!)
 		let item = pokemon.getItem();
 		let isBeggarEvo = !pokemon.getItem().exists;
 
@@ -82,7 +82,7 @@ let BattleScripts = {
 		const template = this.getMixedTemplate(pokemon.m.originalSpecies, bitchSpecies);
 		
 		// Update ability for slot
-		let oTemplate = this.getTemplate(pokemon.template);
+		let oTemplate = this.dex.getTemplate(pokemon.template);
 		let oAbilitySlot = pokemon.calcActiveAbilitySlot();
 		// @ts-ignore
 		template.abilities = {'0': template.abilities[oAbilitySlot]};
@@ -91,7 +91,7 @@ let BattleScripts = {
 		// @ts-ignore
 		pokemon.formeChange(template, pokemon.getItem(), true);
 		// @ts-ignore
-		this.add('-start', pokemon, this.generateMegaStoneName(bitchSpecies), '[silent]');
+		this.add('-start', pokemon, this.dex.generateMegaStoneName(bitchSpecies), '[silent]');
 		if (oTemplate.types.length !== pokemon.template.types.length || oTemplate.types[1] !== pokemon.template.types[1]) {
 			this.add('-start', pokemon, 'typechange', pokemon.template.types.join('/'), '[silent]');
 		}
@@ -115,7 +115,7 @@ let BattleScripts = {
 	getMixedTemplate(originalSpecies, bitchSpecies) {
 		//console.log("originalSpecies: "+ originalSpecies.toString());
 		//console.log("bitchSpecies: "+ bitchSpecies.toString());
-		let context = (typeof Dex != 'undefined') ? Dex : this;
+		let context = (typeof Dex != 'undefined') ? Dex : this.dex;
 		let originalTemplate = context.getTemplate(originalSpecies);
 		let bitchTemplate = context.getTemplate(bitchSpecies);
 		/**@type {{abilities: TemplateAbility, baseStats: {[k: string]: number}, weightkg: number, originalMega: string, requiredItem: string | undefined, type?: string, isMega?: boolean, isPrimal?: boolean}} */
@@ -144,7 +144,7 @@ let BattleScripts = {
 	},
 	doGetMixedTemplate(template, deltas) {
 		if (!deltas) throw new TypeError("Must specify deltas!");
-		let context = (typeof Dex != 'undefined') ? Dex : this;
+		let context = (typeof Dex != 'undefined') ? Dex : this.dex;
 		if (!template || typeof template === 'string') template = context.getTemplate(template);
 		template = DexCalculator.deepClone(template);
 		// Generate ability mapping: take bitch's ability for slot if it exists,
@@ -175,7 +175,7 @@ let BattleScripts = {
 			// @ts-ignore
 			template.baseStats[statName] = DexCalculator.clampIntRange(baseStats[statName] + deltas.baseStats[statName], 1, 255);
 		}
-		template.weightkg = Math.max(0.1, template.weightkg + deltas.weightkg);
+		template.weighthg = Math.max(1, template.weighthg + deltas.weighthg);
 		template.originalMega = deltas.originalMega;
 		template.requiredItem = deltas.requiredItem;
 		if (deltas.isMega) template.isMega = true;
