@@ -158,6 +158,7 @@ let BattleAliases = {
 	"keldeor": "Keldeo-Resolute",
 	"keldeoresolution": "Keldeo-Resolute",
 	"kyuremb": "Kyurem-Black",
+	"karaboga": "Kyurem-Black",
 	"kyuremw": "Kyurem-White",
 	"landorust": "Landorus-Therian",
 	"meloettap": "Meloetta-Pirouette",

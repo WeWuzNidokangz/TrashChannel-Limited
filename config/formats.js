@@ -2790,6 +2790,39 @@ let Formats = [
 		column: 2,
 	},
 	{
+        name: "[Gen 8] Suicide Cup",
+        desc: `Victory is obtained when all of your Pok&eacute;mon have fainted.`,
+        threads: [
+            `&bullet; <a href="https://www.smogon.com/forums/threads/3633603/">Suicide Cup</a>`,
+        ],
+
+        mod: 'gen8',
+        forcedLevel: 100,
+        ruleset: ['Suicide Cup Standard Package', 'Cancel Mod', 'Evasion Moves Clause', 'Endless Battle Clause', 'HP Percentage Mod', 'Moody Clause', 'Nickname Clause', 'Obtainable', 'Sleep Clause Mod', 'Species Clause', 'Team Preview'],
+        banlist: [
+        	'Shedinja', 'Infiltrator', 'Magic Guard', 'Misty Surge', 'Assault Vest', 'Choice Scarf', 'Explosion',
+            'Final Gambit', 'Healing Wish', 'Lunar Dance', 'Magic Room', 'Memento', 'Misty Terrain', 'Self-Destruct',
+        ],
+    },
+	{
+        name: "[Gen 8] Suicide Cup: National Dex",
+        desc: `Victory is obtained when all of your Pok&eacute;mon have fainted, in a National Dex environment.`,
+        threads: [
+            `&bullet; <a href="https://www.smogon.com/forums/threads/3633603/">Suicide Cup</a>`,
+        ],
+
+        mod: 'gen8',
+        forcedLevel: 100,
+        ruleset: [
+			'Suicide Cup Standard Package', 'Cancel Mod', 'Evasion Moves Clause', 'Endless Battle Clause', 'HP Percentage Mod', 'Moody Clause', 'Nickname Clause',
+			'Obtainable', 'Sleep Clause Mod', 'Species Clause', 'Team Preview', '+Past', '+Unreleased', 'NatDex'
+		],
+		banlist: [
+        	'Shedinja', 'Infiltrator', 'Magic Guard', 'Misty Surge', 'Assault Vest', 'Choice Scarf', 'Explosion',
+            'Final Gambit', 'Healing Wish', 'Lunar Dance', 'Magic Room', 'Memento', 'Misty Terrain', 'Self-Destruct',
+        ],
+    },
+	{
 		name: "[Gen 7] Mix and Mega",
 		desc: `Mega Stones and Primal Orbs can be used on almost any Pok&eacute;mon with no Mega Evolution limit.`,
 		threads: [
