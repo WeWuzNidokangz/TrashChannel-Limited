@@ -23,11 +23,13 @@ class TrashChannelChatSupport {
 	 * @param {string} stone
 	 * @return {Object}
 	 */
-	static getMegaStone(stone) {
+	static getMegaStone(stone, mod = 'gen8') {
 		let item = Dex.getItem(stone);
+		let dex = Dex;
+		if (mod && toID(mod) in Dex.dexes) dex = Dex.mod(toID(mod));
 		if (!item.exists) {
 			if (toID(stone) === 'dragonascent') {
-				let move = Dex.getMove(stone);
+				let move = dex.getMove(stone);
 				return {
 					id: move.id,
 					name: move.name,
@@ -53,12 +55,15 @@ class TrashChannelChatSupport {
 	 * @param {CommandContext} commandContext
 	 * @param {Template} template
 	 * @param {string} stoneName
+	 * @param {string} mod
 	 * @param {string} tierTextSuffix
 	 * @return {Object}
 	 */
-	static mixandmegainternal(commandContext, template, stoneName, tierTextSuffix) {
+	static mixandmegainternal(commandContext, template, stoneName, mod, tierTextSuffix) {
+		let dex = Dex;
+		if (mod && toID(mod) in Dex.dexes) dex = Dex.mod(toID(mod));
 		let stone = TrashChannelChatSupport.getMegaStone(stoneName);
-		if (!stone.exists) return commandContext.errorReply(`Error: Mega Stone not found.`);
+		if (!stone || (dex.gen >= 8 && ['redorb', 'blueorb'].includes(stone.id))) return commandContext.errorReply(`Error: Mega Stone not found.`);
 		if (!template) return commandContext.errorReply(`Error: Pokemon not found.`);
 		if (!template.exists) return commandContext.errorReply(`Error: Pokemon not found.`);
 		if (template.isMega || template.name === 'Necrozma-Ultra') { // Mega Pokemon and Ultra Necrozma cannot be mega evolved
@@ -110,15 +115,17 @@ class TrashChannelChatSupport {
 		if (megaTemplate.types.length > baseTemplate.types.length) {
 			deltas.type = megaTemplate.types[1];
 		} else if (megaTemplate.types.length < baseTemplate.types.length) {
-			deltas.type = 'mono';
+			deltas.type = dex.gen >= 8 ? 'mono' : megaTemplate.types[0];
 		} else if (megaTemplate.types[1] !== baseTemplate.types[1]) {
 			deltas.type = megaTemplate.types[1];
 		}
 		//////////////////////////////////////////
 		let mixedTemplate = Dex.deepClone(template);
-		mixedTemplate.abilities = Object.assign({}, megaTemplate.abilities);
+		mixedTemplate.abilities = Dex.deepClone(megaTemplate.abilities);
 		if (mixedTemplate.types[0] === deltas.type) { // Add any type gains
 			mixedTemplate.types = [deltas.type];
+		} else if (deltas.type === 'mono') {
+			mixedTemplate.types = [mixedTemplate.types[0]];
 		} else if (deltas.type) {
 			mixedTemplate.types = [mixedTemplate.types[0], deltas.type];
 		}

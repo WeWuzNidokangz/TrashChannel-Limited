@@ -2,6 +2,7 @@
 
 /**@type {ModdedBattleScriptsData} */
 exports.BattleScripts = {
+	inherit: 'gen7',
 	runMove(moveOrMoveName, pokemon, targetLoc, sourceEffect, zMove, externalMove) {
 		let target = this.getTarget(pokemon, zMove || moveOrMoveName, targetLoc);
 		let baseMove = this.getActiveMove(moveOrMoveName);

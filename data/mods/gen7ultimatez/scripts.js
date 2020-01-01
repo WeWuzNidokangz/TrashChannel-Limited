@@ -2,6 +2,7 @@
 
 /**@type {ModdedBattleScriptsData} */
 exports.BattleScripts = {
+	inherit: 'gen7',
 	getZMove(move, pokemon, skipChecks) {
 		let item = pokemon.getItem();
 		if (!skipChecks) {

@@ -2,6 +2,7 @@
 
 /**@type {ModdedBattleScriptsData} */
 exports.BattleScripts = {
+	inherit: 'gen7',
 	init() {
 		let learnsets = Object.assign({}, this.data.Learnsets);
 		let dex = [];

@@ -38,13 +38,6 @@ let Formats = [
 		team: 'randomSC',
 		ruleset: ['PotD', 'Suicide Cup Standard Package', 'Cancel Mod', 'Evasion Moves Clause', 'HP Percentage Mod', 'Moody Clause', 'Nickname Clause', 'Obtainable', 'Sleep Clause Mod', 'Species Clause'],
 	},
-	/*{
-		name: "[Gen 8] OU (Blitz)",
-
-		mod: 'gen8',
-		ruleset: ['[Gen 8] OU', 'Blitz'],
-		minSourceGen: 8,
-	},*/
 	{
 		name: "[Gen 7] Mix and Mega: Hackmons Cup",
 		desc: `Randomized teams of level-balanced Pok&eacute;mon with mega stones (and they know how to use 'em!)`,
@@ -77,7 +70,7 @@ let Formats = [
 			}
 		},
 	},
-	/*{
+	{
 		name: "[Gen 7] Partners in Crime: Hackmons Cup",
 		desc: `Randomized teams of level-balanced Pok&eacute;mon where both active ally Pok&eacute;mon share dumb abilities and moves.`,
 		threads: [
@@ -144,7 +137,7 @@ let Formats = [
 				delete ally.m.innate;
 			}
 		},
-	},*/
+	},
 	/*{
 		name: "[Gen 7] Trademarked: Hackmons Cup",
 		desc: `Randomized teams of level-balanced Pok&eacute;mon with random trademarks.`,
@@ -246,7 +239,7 @@ let Formats = [
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3591580/">Vanilla Mix and Mega Resources</a>`,
 		],
 
-		mod: 'mixandmega',
+		mod: 'gen7mixandmega',
 		ruleset: ['Obtainable', 'Endless Battle Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Mix and Mega Battle Effects'],
 		restrictedStones: ['Ultranecrozium Z'],
 		cannotMega: [],
@@ -316,7 +309,7 @@ let Formats = [
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3591580/">Vanilla Mix and Mega Resources</a>`,
 		],
 
-		mod: 'mixandmega',
+		mod: 'gen7mixandmega',
 		ruleset: ['Obtainable', 'Standard', 'Mix and Mega Standard Package', 'STABmons Move Legality', 'Mega Rayquaza Clause', 'Team Preview'],
 		banlist: ['Shadow Tag', 'Gengarite', 'Baton Pass', 'Electrify', // Mix and Mega
 			'King\'s Rock', 'Razor Fang', // STABmons
@@ -381,7 +374,7 @@ let Formats = [
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3648227/">Vanilla Doubles OU Metagame Discussion</a>`,
 		],
 
-		mod: 'mixandmega',
+		mod: 'gen7mixandmega',
 		gameType: 'doubles',
 		ruleset: ['Obtainable', 'Standard Doubles', 'Swagger Clause', 'Mix and Mega Standard Package', 'Mega Rayquaza Clause', 'Team Preview'],
 		banlist: [
@@ -487,7 +480,7 @@ let Formats = [
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3635904/">OM Mashup Megathread</a>`,
 		],
 
-		mod: 'mixandmega',
+		mod: 'gen7mixandmega',
 		maxLevel: 5,
 		ruleset: ['Obtainable', 'Standard', 'Team Preview', 'Little Cup', 'Mix and Mega Standard Package'],
 		banlist: ['Eevium Z', 'Baton Pass', 'Dragon Rage', 'Electrify', 'Sonic Boom'],
@@ -531,7 +524,7 @@ let Formats = [
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3591580/">Vanilla Mix and Mega Resources</a>`,
 		],
 
-		mod: 'mixandmega',
+		mod: 'gen7mixandmega',
 		ruleset: ['Obtainable', 'Standard', 'Mix and Mega Standard Package', 'Tier Shift Rule', 'Mega Rayquaza Clause', 'Team Preview'],
 		banlist: ['Shadow Tag', 'Gengarite', 'Baton Pass', 'Electrify'],
 		restrictedStones: ['Beedrillite', 'Blazikenite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite', 'Ultranecrozium Z'],
@@ -681,6 +674,12 @@ let Formats = [
 		banlist: ['Uber', 'Moody', 'Shadow Tag', 'Baton Pass'],
 		minSourceGen: 8,
 	},
+	/*{
+		name: "[Gen 8] OU (Blitz)",
+		mod: 'gen8',
+		ruleset: ['[Gen 8] OU', 'Blitz'],
+		minSourceGen: 8,
+	},*/
 	{
 		name: "[Gen 8] Ubers",
 		threads: [
@@ -696,21 +695,21 @@ let Formats = [
 		banlist: [],
 		minSourceGen: 8,
 	},
-	/*{
-		name: "[Gen 8] OU (Blitz)",
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3656245/">OU Metagame Discussion</a>`,
-		],
+	{
+		name: "[Gen 8] UU",
+
 		mod: 'gen8',
 		challengeShow: false,
 		searchShow: false,
-		ruleset: ['[Gen 8] OU', 'Blitz'],
+		ruleset: ['[Gen 8] OU'],
+		banlist: ['OU', 'UUBL'],
 		minSourceGen: 8,
-	},*/
+	},
 	{
 		name: "[Gen 8] LC",
 		threads: [
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3656348/">LC Metagame Discussion</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3657374/">LC Viability Rankings</a>`,
 		],
 
 		mod: 'gen8',
@@ -718,7 +717,7 @@ let Formats = [
 		searchShow: false,
 		maxLevel: 5,
 		ruleset: ['Obtainable', 'Little Cup', 'Standard', 'Team Preview', 'Dynamax Clause'],
-		banlist: ['Corsola-Galar', 'Sneasel', 'Swirlix', 'Baton Pass'],
+		banlist: ['Cherubi', 'Corsola-Galar', 'Gastly', 'Gothita', 'Sneasel', 'Swirlix', 'Moody', 'Baton Pass'],
 		minSourceGen: 8,
 	},
 	{
@@ -733,8 +732,8 @@ let Formats = [
 		mod: 'gen8',
 		challengeShow: false,
 		searchShow: false,
-		ruleset: ['Obtainable', 'Same Type Clause', 'Standard', 'Team Preview'],
-		banlist: ['Eternatus', 'Zacian', 'Zamazenta', 'Damp Rock', 'Smooth Rock', 'Shadow Tag', 'Baton Pass'],
+		ruleset: ['Obtainable', 'Same Type Clause', 'Standard', 'Team Preview', 'Dynamax Clause'],
+		banlist: ['Eternatus', 'Zacian', 'Zamazenta', 'Damp Rock', 'Smooth Rock', 'Moody', 'Shadow Tag', 'Baton Pass'],
 		minSourceGen: 8,
 	},
 	{
@@ -754,13 +753,14 @@ let Formats = [
 		desc: `Only Pok&eacute;mon that can evolve are allowed.`,
 		threads: [
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3656332/">NFE Metagame Discussion</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3657558/">NFE Resources</a>`,
 		],
 
 		mod: 'gen8',
 		challengeShow: false,
 		searchShow: false,
-		ruleset: ['[Gen 8] OU', 'NFE Clause'],
-		banlist: ['Doublade', 'Rhydon', 'Type: Null', 'Shadow Tag'],
+		ruleset: ['Obtainable', 'NFE Clause', 'Standard', 'Team Preview', 'Dynamax Clause'],
+		banlist: ['Doublade', 'Rhydon', 'Type: Null', 'Shadow Tag', 'Baton Pass'],
 		minSourceGen: 8,
 	},
 	{
@@ -768,8 +768,7 @@ let Formats = [
 		desc: `Bring three Pok&eacute;mon to Team Preview and choose one to battle.`,
 		threads: [
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3656364/">1v1 Metagame Discussion</a>`,
-			//`&bullet; <a href="https://www.smogon.com/forums/threads/3646758/">1v1 Viability Rankings</a>`,
-			//`&bullet; <a href="https://www.smogon.com/forums/threads/3646826/">1v1 Sample Teams</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3657779/">1v1 Viability Rankings</a>`,
 		],
 
 		mod: 'gen8',
@@ -779,7 +778,7 @@ let Formats = [
 			validate: [1, 3],
 			battle: 1,
 		},
-		ruleset: ['Obtainable', 'Species Clause', 'Nickname Clause', 'OHKO Clause', 'Evasion Moves Clause', 'Accuracy Moves Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Endless Battle Clause'],
+		ruleset: ['Obtainable', 'Species Clause', 'Nickname Clause', 'OHKO Clause', 'Evasion Moves Clause', 'Accuracy Moves Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Dynamax Clause', 'Endless Battle Clause'],
 		banlist: ['Eternatus', 'Zacian', 'Zamazenta', 'Focus Sash', 'Perish Song'],
 		minSourceGen: 8,
 	},
@@ -818,24 +817,6 @@ let Formats = [
 				pokemon.canGigantamax = null;
 			}
 		},
-	},
-	{
-		name: "[Gen 8] Galar Beginnings",
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3656359/">Galar Beginnings</a>`,
-		],
-
-		mod: 'gen8',
-		challengeShow: false,
-		searchShow: false,
-		maxForcedLevel: 50,
-		teamLength: {
-			validate: [3, 6],
-			battle: 3,
-		},
-		ruleset: ['Obtainable', 'Standard GBU'],
-		unbanlist: ['Snorlax-Gmax'],
-		minSourceGen: 8,
 	},
 	{
 		name: "[Gen 8] Custom Game",
@@ -881,7 +862,26 @@ let Formats = [
 		challengeShow: false,
 		searchShow: false,
 		ruleset: ['Obtainable', 'Standard Doubles', 'Team Preview'],
-		banlist: ['DUber', 'Gravity ++ Hypnosis', 'Gravity ++ Lovely Kiss', 'Gravity ++ Sing', 'Gravity ++ Sleep Powder'],
+		banlist: ['DUber'],
+		minSourceGen: 8,
+	},
+	{
+		name: "[Gen 8] VGC 2020",
+		threads: [
+			`&bullet; <a href="https://www.pokemon.com/us/pokemon-news/2020-pokemon-video-game-championships-vgc-format-rules/">VGC 2020 Rules</a>`,
+		],
+
+		mod: 'gen8',
+		gameType: 'doubles',
+		challengeShow: false,
+		searchShow: false,
+		forcedLevel: 50,
+		teamLength: {
+			validate: [4, 6],
+			battle: 4,
+		},
+		ruleset: ['Obtainable', 'Standard GBU', 'VGC Timer'],
+		banlist: ['Alcremie-Gmax', 'Appletun-Gmax', 'Charizard-Gmax ++ Solar Power', 'Coalossal-Gmax', 'Copperajah-Gmax', 'Duraludon-Gmax', 'Flapple-Gmax', 'Garbodor-Gmax', 'Gengar-Gmax', 'Grimmsnarl-Gmax', 'Hatterene-Gmax', 'Kingler-Gmax', 'Lapras-Gmax', 'Machamp-Gmax', 'Melmetal-Gmax', 'Orbeetle-Gmax', 'Toxtricity-Gmax'],
 		minSourceGen: 8,
 	},
 	{
@@ -903,25 +903,6 @@ let Formats = [
 				pokemon.canGigantamax = null;
 			}
 		},
-	},
-	{
-		name: "[Gen 8] 2v2 Doubles",
-		desc: `Double battle where you bring four Pok&eacute;mon to Team Preview and choose only two.`,
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3656321/">2v2 Doubles</a>`,
-		],
-
-		mod: 'gen8',
-		gameType: 'doubles',
-		challengeShow: false,
-		searchShow: false,
-		teamLength: {
-			validate: [2, 4],
-			battle: 2,
-		},
-		ruleset: ['Obtainable', 'Standard Doubles', 'Accuracy Moves Clause', 'Team Preview', 'Sleep Clause Mod'],
-		banlist: ['DUber', 'Focus Sash', 'Perish Song', 'Swagger'],
-		minSourceGen: 8,
 	},
 	{
 		name: '[Gen 8] Metronome Battle',
@@ -984,7 +965,6 @@ let Formats = [
 		gameType: 'doubles',
 		challengeShow: false,
 		searchShow: false,
-		searchShow: false,
 		maxLevel: 9999,
 		trunc(n) { return Math.trunc(n); },
 		defaultLevel: 100,
@@ -1010,6 +990,8 @@ let Formats = [
 		],
 
 		mod: 'gen8',
+		challengeShow: false,
+		searchShow: false,
 		ruleset: ['Obtainable', 'Standard NatDex', 'OHKO Clause', 'Evasion Moves Clause', 'Species Clause', 'Team Preview', 'Sleep Clause Mod'],
 		banlist: [
 			'Arceus', 'Blaziken', 'Darkrai', 'Deoxys-Attack', 'Deoxys-Base', 'Deoxys-Speed', 'Dialga', 'Eternatus', 'Gengar-Mega',
@@ -1028,7 +1010,7 @@ let Formats = [
 		mod: 'gen8',
 		challengeShow: false,
 		searchShow: false,
-		ruleset: ['Obtainable', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', '+Past', '+Unreleased', 'NatDex'],
+		ruleset: ['Obtainable', 'Standard NatDex', 'Team Preview'],
 	},
 
 	// OM of the Month
@@ -1318,7 +1300,7 @@ let Formats = [
 		},
 		challengeShow: false,
 		searchShow: false,
-		ruleset: ['Obtainable', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
+		ruleset: ['Obtainable', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Dynamax Clause'],
 	},
 	{
 		name: "[Gen 8] Challenge Cup 2v2",
@@ -1331,7 +1313,7 @@ let Formats = [
 		},
 		challengeShow: false,
 		searchShow: false,
-		ruleset: ['Obtainable', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
+		ruleset: ['Obtainable', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview', 'Dynamax Clause'],
 	},
 	{
 		name: "[Gen 8] Hackmons Cup",
@@ -1404,6 +1386,16 @@ let Formats = [
 			battle: 3,
 		},
 		ruleset: ['Obtainable', 'Standard GBU'],
+	},
+	{
+		name: "[Gen 7] Hackmons Cup",
+		desc: `Randomized teams of level-balanced Pok&eacute;mon with absolutely any ability, moves, and item.`,
+
+		mod: 'gen7',
+		team: 'randomHC',
+		challengeShow: false,
+		searchShow: false,
+		ruleset: ['HP Percentage Mod', 'Cancel Mod'],
 	},
 	{
 		name: "[Gen 7] Super Staff Bros Brawl",
@@ -1899,10 +1891,6 @@ let Formats = [
 		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 7] OU', '+CAP'],
-		banlist: [
-			'Aurumoth + Quiver Dance', 'Crucibelle + Head Smash', 'Crucibelle + Low Kick',
-			'Tomohawk + Earth Power', 'Tomohawk + Reflect',
-		],
 	},
 	{
 		name: "[Gen 7] Battle Spot Singles",
@@ -2099,19 +2087,6 @@ let Formats = [
 			validate: [2, 24],
 			battle: 24,
 		},
-		// no restrictions, for serious (other than team preview)
-		ruleset: ['Team Preview', 'Cancel Mod'],
-	},
-	{
-		name: "[Gen 5] Triples Custom Game",
-
-		mod: 'gen5',
-		gameType: 'triples',
-		searchShow: false,
-		debug: true,
-		maxLevel: 9999,
-		trunc(n) { return Math.trunc(n); },
-		defaultLevel: 100,
 		// no restrictions, for serious (other than team preview)
 		ruleset: ['Team Preview', 'Cancel Mod'],
 	},
@@ -2613,6 +2588,20 @@ let Formats = [
 		// no restrictions, for serious (other than team preview)
 		ruleset: ['Team Preview', 'Cancel Mod'],
 	},
+	{
+		name: "[Gen 5] Triples Custom Game",
+
+		mod: 'gen5',
+		gameType: 'triples',
+		challengeShow: false,
+		searchShow: false,
+		debug: true,
+		maxLevel: 9999,
+		trunc(n) { return Math.trunc(n); },
+		defaultLevel: 100,
+		// no restrictions, for serious (other than team preview)
+		ruleset: ['Team Preview', 'Cancel Mod'],
+	},
 
 	// DPP Singles
 	///////////////////////////////////////////////////////////////////
@@ -2677,6 +2666,7 @@ let Formats = [
 			'Ninetales', 'Piloswine', 'Poliwrath', 'Porygon2', 'Regice', 'Regirock', 'Roselia', 'Sandslash',
 			'Sharpedo', 'Shiftry', 'Skuntank', 'Slowking', 'Tauros', 'Typhlosion', 'Venomoth', 'Vileplume',
 		],
+	},
 	{
 		name: "[Gen 4] LC",
 		threads: [
@@ -3044,19 +3034,6 @@ let Formats = [
             'Final Gambit', 'Healing Wish', 'Lunar Dance', 'Magic Room', 'Memento', 'Misty Terrain', 'Self-Destruct',
         ],
     },
-	{
-		name: "[Gen 7] Balanced Hackmons",
-		desc: `Anything that can be hacked in-game and is usable in local battles is allowed.`,
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3587475/">Balanced Hackmons</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3588586/">BH Suspects and Bans Discussion</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3593766/">BH Resources</a>`,
-		],
-
-		mod: 'gen7',
-		ruleset: ['-Nonexistent', '2 Ability Clause', 'OHKO Clause', 'Evasion Moves Clause', 'CFZ Clause', 'Sleep Clause Mod', 'Endless Battle Clause', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
-		banlist: ['Groudon-Primal', 'Rayquaza-Mega', 'Arena Trap', 'Contrary', 'Huge Power', 'Illusion', 'Innards Out', 'Magnet Pull', 'Moody', 'Parental Bond', 'Protean', 'Psychic Surge', 'Pure Power', 'Shadow Tag', 'Stakeout', 'Water Bubble', 'Wonder Guard', 'Gengarite', 'Chatter', 'Comatose + Sleep Talk'],
-	},
 	{
 		name: "[Gen 7] STABmons",
 		desc: `Pok&eacute;mon can use any move of their typing, in addition to the moves they can normally learn.`,

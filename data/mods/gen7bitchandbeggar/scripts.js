@@ -6,6 +6,7 @@ const DexCalculator = require('../../../trashchannel/dex-calculator');
 
 /**@type {ModdedBattleScriptsData} */
 let BattleScripts = {
+	inherit: 'gen7',
 	init() {
 		for (let id in this.data.Items) {
 			let bitchTemplate = this.getTemplate(id);

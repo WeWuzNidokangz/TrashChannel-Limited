@@ -7,6 +7,7 @@ const MODMOVES = require('./moves');
 
 /**@type {ModdedBattleScriptsData} */
 let BattleScripts = {
+	inherit: 'gen7',
 	init() {
 		// Generate a beast mode move for every pokemon
 		let beastModeBaseMove = this.data.Movedex['beastmodebase'];

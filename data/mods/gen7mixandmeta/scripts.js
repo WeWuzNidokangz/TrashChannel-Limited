@@ -14,6 +14,7 @@ const MMCOLLECTION = path.resolve(__dirname, './mixedmetacollection');
 
 /**@type {ModdedBattleScriptsData} */
 let BattleScripts = {
+	inherit: 'gen7',
 	init() {
 		console.log("1 init");
 
