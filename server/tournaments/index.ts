@@ -868,7 +868,7 @@ export class Tournament extends Rooms.RoomGame {
 		this.isAvailableMatchesInvalidated = true;
 		this.update();
 
-		const ready = await Ladders(this.fullFormat).prepBattle(output.connection);
+		const ready = await Ladders(this.fullFormat).prepBattle(output.connection, 'tour');
 		if (!ready) {
 			from.isBusy = false;
 			to.isBusy = false;
@@ -928,7 +928,7 @@ export class Tournament extends Rooms.RoomGame {
 		const challenge = player.pendingChallenge;
 		if (!challenge || !challenge.from) return;
 
-		const ready = await Ladders(this.fullFormat).prepBattle(output.connection);
+		const ready = await Ladders(this.fullFormat).prepBattle(output.connection, 'tour');
 		if (!ready) return;
 
 		// Prevent battles between offline users from starting
@@ -946,6 +946,7 @@ export class Tournament extends Rooms.RoomGame {
 			p2: user,
 			p2team: ready.team,
 			rated: !Ladders.disabled && this.isRated,
+			challengeType: ready.challengeType,
 			tour: this,
 		});
 		if (!room || !room.battle) throw new Error(`Failed to create battle in ${room}`);
@@ -1761,6 +1762,15 @@ export const commands: ChatCommands = {
 		);
 	},
 };
+const roomSettings: SettingsHandler = room => ({
+	label: "Tournaments",
+	permission: 'gamemanagement',
+	options: [
+		['%', room.toursEnabled === '%' || 'tournament enable %'],
+		['@', room.toursEnabled === true || 'tournament enable @'],
+		['#', room.toursEnabled === false || 'tournament disable'],
+	],
+});
 
 export const Tournaments = {
 	TournamentGenerators,
@@ -1769,4 +1779,5 @@ export const Tournaments = {
 	createTournament,
 	tourCommands,
 	commands,
+	roomSettings,
 };

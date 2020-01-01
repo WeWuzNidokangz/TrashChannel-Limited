@@ -410,6 +410,9 @@ export class ModdedDex {
 				} else if (template.speciesid.endsWith('totem')) {
 					template.tier = this.data.FormatsData[template.speciesid.slice(0, -5)].tier || 'Illegal';
 					template.doublesTier = this.data.FormatsData[template.speciesid.slice(0, -5)].doublesTier || 'Illegal';
+				}  else if (template.inheritsFrom) {
+					template.tier = this.data.FormatsData[template.inheritsFrom].tier || 'Illegal';
+					template.doublesTier = this.data.FormatsData[template.inheritsFrom].doublesTier || 'Illegal';
 				} else {
 					const baseFormatsData = this.data.FormatsData[toID(template.baseSpecies)];
 					if (!baseFormatsData) {
@@ -578,8 +581,8 @@ export class ModdedDex {
 			name = this.data.Aliases[id];
 			id = toID(name);
 		}
-		if (this.data.Formats.hasOwnProperty('gen7' + id)) {
-			id = ('gen7' + id) as ID;
+		if (this.data.Formats.hasOwnProperty('gen8' + id)) {
+			id = ('gen8' + id) as ID;
 		}
 		let supplementaryAttributes: AnyObject | null = null;
 		if (name.includes('@@@')) {
@@ -963,7 +966,9 @@ export class ModdedDex {
 					// custom tags
 					'mega',
 					// illegal/nonstandard reasons
-					'glitch', 'past', 'future', 'lgpe', 'pokestar', 'custom',
+					'past', 'future', 'unobtainable', 'lgpe', 'custom',
+					// all
+					'allpokemon', 'allitems', 'allmoves', 'allabilities',
 				];
 				if (validTags.includes(ruleid)) matches.push('pokemontag:' + ruleid);
 				continue;
@@ -973,7 +978,7 @@ export class ModdedDex {
 			if (table.hasOwnProperty(id)) {
 				if (matchType === 'pokemon') {
 					const template: Template = table[id] as Template;
-					if (template.otherFormes) {
+					if (template.otherFormes && ruleid !== template.id + toID(template.baseForme)) {
 						matches.push('basepokemon:' + id);
 						continue;
 					}
@@ -987,7 +992,7 @@ export class ModdedDex {
 			}
 		}
 		if (matches.length > 1) {
-			throw new Error(`More than one thing matches "${rule}"; please use something like "-item:metronome" to disambiguate`);
+			throw new Error(`More than one thing matches "${rule}"; please specify one of: ` + matches.join(', '));
 		}
 		if (matches.length < 1) {
 			throw new Error(`Nothing matches "${rule}"`);

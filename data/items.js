@@ -500,17 +500,17 @@ let BattleItems = {
 		onResidual(pokemon) {
 			if (this.field.isTerrain('grassyterrain')) return;
 			if (pokemon.hasType('Poison')) {
-				this.heal(pokemon.maxhp / 16);
+				this.heal(pokemon.baseMaxhp / 16);
 			} else {
-				this.damage(pokemon.maxhp / 8);
+				this.damage(pokemon.baseMaxhp / 8);
 			}
 		},
 		onTerrain(pokemon) {
 			if (!this.field.isTerrain('grassyterrain')) return;
 			if (pokemon.hasType('Poison')) {
-				this.heal(pokemon.maxhp / 16);
+				this.heal(pokemon.baseMaxhp / 16);
 			} else {
-				this.damage(pokemon.maxhp / 8);
+				this.damage(pokemon.baseMaxhp / 8);
 			}
 		},
 		num: 281,
@@ -1133,12 +1133,11 @@ let BattleItems = {
 			basePower: 100,
 			type: "Ghost",
 		},
-		onModifyPriorityPriority: -1,
-		onModifyPriority(priority, pokemon) {
+		onFractionalPriorityPriority: -1,
+		onFractionalPriority(priority, pokemon) {
 			if (pokemon.hp <= pokemon.maxhp / 4 || (pokemon.hp <= pokemon.maxhp / 2 && pokemon.hasAbility('gluttony'))) {
 				if (pokemon.eatItem()) {
 					this.add('-activate', pokemon, 'item: Custap Berry', '[consumed]');
-					pokemon.removeVolatile('custapberry');
 					return Math.round(priority) + 0.1;
 				}
 			}
@@ -1714,7 +1713,7 @@ let BattleItems = {
 		onHit(target, source, move) {
 			if (move && target.getMoveHitData(move).typeMod > 0) {
 				if (target.eatItem()) {
-					this.heal(target.maxhp / 4);
+					this.heal(target.baseMaxhp / 4);
 				}
 			}
 		},
@@ -2198,7 +2197,7 @@ let BattleItems = {
 		fling: {
 			basePower: 10,
 		},
-		onModifyPriority(priority, pokemon) {
+		onFractionalPriority(priority, pokemon) {
 			return Math.round(priority) - 0.1;
 		},
 		num: 316,
@@ -2915,7 +2914,7 @@ let BattleItems = {
 		onAfterDamage(damage, target, source, move) {
 			if (source && source.hp && source !== target && move && move.category === 'Physical') {
 				if (target.eatItem()) {
-					this.damage(source.maxhp / 8, source, target);
+					this.damage(source.baseMaxhp / 8, source, target);
 				}
 			}
 		},
@@ -3078,7 +3077,7 @@ let BattleItems = {
 		fling: {
 			basePower: 10,
 		},
-		onModifyPriority(priority, pokemon) {
+		onFractionalPriority(priority, pokemon) {
 			return Math.round(priority) - 0.1;
 		},
 		num: 279,
@@ -3194,11 +3193,11 @@ let BattleItems = {
 		onResidualSubOrder: 2,
 		onResidual(pokemon) {
 			if (this.field.isTerrain('grassyterrain')) return;
-			this.heal(pokemon.maxhp / 16);
+			this.heal(pokemon.baseMaxhp / 16);
 		},
 		onTerrain(pokemon) {
 			if (!this.field.isTerrain('grassyterrain')) return;
-			this.heal(pokemon.maxhp / 16);
+			this.heal(pokemon.baseMaxhp / 16);
 		},
 		num: 234,
 		gen: 2,
@@ -3273,7 +3272,7 @@ let BattleItems = {
 		},
 		onAfterMoveSecondarySelf(source, target, move) {
 			if (source && source !== target && move && move.category !== 'Status') {
-				this.damage(source.maxhp / 10, source, source, this.dex.getItem('lifeorb'));
+				this.damage(source.baseMaxhp / 10, source, source, this.dex.getItem('lifeorb'));
 			}
 		},
 		num: 270,
@@ -4843,8 +4842,8 @@ let BattleItems = {
 	},
 	"quickclaw": {
 		id: "quickclaw",
-		onModifyPriorityPriority: -1,
-		onModifyPriority(priority, pokemon) {
+		onFractionalPriorityPriority: -1,
+		onFractionalPriority(priority, pokemon) {
 			if (this.randomChance(1, 5)) {
 				this.add('-activate', pokemon, 'item: Quick Claw');
 				return Math.round(priority) + 0.1;
@@ -5167,7 +5166,7 @@ let BattleItems = {
 		onAfterDamageOrder: 2,
 		onAfterDamage(damage, target, source, move) {
 			if (source && source !== target && move && move.flags['contact']) {
-				this.damage(source.maxhp / 6, source, target);
+				this.damage(source.baseMaxhp / 6, source, target);
 			}
 		},
 		num: 540,
@@ -5183,7 +5182,7 @@ let BattleItems = {
 		},
 		onUpdate(pokemon) {
 			if (this.field.getPseudoWeather('trickroom') && pokemon.useItem()) {
-				this.boost({spe: -1});
+				this.boost({spe: -1}, pokemon, pokemon);
 			}
 		},
 		num: 1122,
@@ -5254,7 +5253,7 @@ let BattleItems = {
 		onAfterDamage(damage, target, source, move) {
 			if (source && source.hp && source !== target && move && move.category === 'Special') {
 				if (target.eatItem()) {
-					this.damage(source.maxhp / 8, source, target);
+					this.damage(source.baseMaxhp / 8, source, target);
 				}
 			}
 		},
@@ -5631,7 +5630,7 @@ let BattleItems = {
 			if (!this.runEvent('TryHeal', pokemon)) return false;
 		},
 		onEat(pokemon) {
-			this.heal(pokemon.maxhp / 4);
+			this.heal(pokemon.baseMaxhp / 4);
 		},
 		num: 158,
 		gen: 3,
@@ -5998,7 +5997,7 @@ let BattleItems = {
 		onResidualOrder: 26,
 		onResidualSubOrder: 2,
 		onResidual(pokemon) {
-			this.damage(pokemon.maxhp / 8);
+			this.damage(pokemon.baseMaxhp / 8);
 		},
 		onHit(target, source, move) {
 			if (source && source !== target && !source.item && move && move.flags['contact']) {
@@ -6315,6 +6314,18 @@ let BattleItems = {
 		num: 252,
 		gen: 2,
 		desc: "Evolves Porygon into Porygon2 when traded.",
+	},
+	"utilityumbrella": {
+		id: "utilityumbrella",
+		name: "Utility Umbrella",
+		spritenum: 0,
+		fling: {
+			basePower: 60,
+		},
+		// Implemented in statuses.js, moves.js, and abilities.js
+		num: 1123,
+		gen: 8,
+		desc: "Blocks the holder from receiving any effects of Sunny Day/Rain Dance.",
 	},
 	"venusaurite": {
 		id: "venusaurite",

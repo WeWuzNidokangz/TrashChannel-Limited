@@ -1864,7 +1864,7 @@ let BattleFormatsData = {
 			fillerMoves2: ["hiddenpowerbug", "hiddenpowerrock", "hiddenpowerground"],
 		},
 		eventPokemon: [
-			{"generation": 2, "level": 5, "shiny": 1, "moves": ["vicegrip", "rockthrow"]},
+			{"generation": 2, "level": 5, "shiny": 1, "moves": ["visegrip", "rockthrow"]},
 		],
 		tier: "UU",
 	},
@@ -3081,7 +3081,7 @@ let BattleFormatsData = {
 		tier: "LC",
 	},
 	forretress: { // Spikes
-		randomSet3: {
+		randomSet1: {
 			chance: 16,
 			item: ["leftovers"],
 			baseMove1: "spikes", baseMove2: "explosion",

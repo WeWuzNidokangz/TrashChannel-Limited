@@ -7,7 +7,7 @@
 
 import {State} from './state';
 
- /** A Pokemon's move slot. */
+/** A Pokemon's move slot. */
 interface MoveSlot {
 	id: ID;
 	move: string;
@@ -18,6 +18,10 @@ interface MoveSlot {
 	disabledSource?: string;
 	used: boolean;
 	virtual?: boolean;
+}
+
+interface EffectState {
+	[k: string]: any;
 }
 
 export class Pokemon {
@@ -50,11 +54,11 @@ export class Pokemon {
 
 	baseTemplate: Template;
 	template: Template;
-	speciesData: AnyObject;
+	speciesData: EffectState;
 
 	status: ID;
-	statusData: AnyObject;
-	volatiles: AnyObject;
+	statusData: EffectState;
+	volatiles: {[id: string]: EffectState};
 	showCure?: boolean;
 
 	/**
@@ -62,7 +66,7 @@ export class Pokemon {
 	 * calculated purely from the species base stats, level, IVs, EVs,
 	 * and Nature, before modifications from item, ability, etc.
 	 *
-	 * `storedStats` are reset to `baseStoredStats` on switch-out.
+	 * Forme changes affect these, but Transform doesn't.
 	 */
 	baseStoredStats: StatsTable;
 	/**
@@ -76,18 +80,16 @@ export class Pokemon {
 	 *
 	 * (Except in Gen 1, where stat multipliers are stored, leading
 	 * to several famous glitches.)
-	 *
-	 * `storedStats` are reset to `baseStoredStats` on switch-out.
 	 */
 	storedStats: StatsExceptHPTable;
 	boosts: BoostsTable;
 
 	baseAbility: ID;
 	ability: ID;
-	abilityData: {[k: string]: string | Pokemon};
+	abilityData: EffectState;
 
 	item: ID;
-	itemData: {[k: string]: string | Pokemon};
+	itemData: EffectState;
 	lastItem: ID;
 	usedItemThisTurn: boolean;
 	ateBerry: boolean;
@@ -100,6 +102,8 @@ export class Pokemon {
 	transformed: boolean;
 
 	maxhp: number;
+	/** This is the max HP before Dynamaxing; it's updated for Power Construct etc */
+	baseMaxhp: number;
 	hp: number;
 	fainted: boolean;
 	faintQueued: boolean;
@@ -198,6 +202,7 @@ export class Pokemon {
 
 	canMegaEvo: string | null | undefined;
 	canUltraBurst: string | null | undefined;
+	canDynamax: boolean;
 	canGigantamax: string | null;
 
 	staleness?: 'internal' | 'external';
@@ -386,14 +391,18 @@ export class Pokemon {
 
 		this.canMegaEvo = this.battle.canMegaEvo(this);
 		this.canUltraBurst = this.battle.canUltraBurst(this);
+		// Normally would want to use battle.canDynamax to set this, but it references this property.
+		this.canDynamax = (this.battle.gen >= 8);
 		this.canGigantamax = gMax;
 
 		// This is used in gen 1 only, here to avoid code repetition.
 		// Only declared if gen 1 to avoid declaring an object we aren't going to need.
 		if (this.battle.gen === 1) this.modifiedStats = {atk: 0, def: 0, spa: 0, spd: 0, spe: 0};
 
+		this.maxhp = 0;
+		this.baseMaxhp = 0;
+		this.hp = 0;
 		this.clearVolatile();
-		this.maxhp = this.template.maxHP || this.baseStoredStats.hp;
 		this.hp = this.maxhp;
 
 //#region TrashChannel
@@ -597,6 +606,13 @@ export class Pokemon {
 		return this.foes().filter(foe => this.battle.isAdjacent(this, foe));
 	}
 
+	getUndynamaxedHP() {
+		if (this.volatiles['dynamax']) {
+			return Math.ceil(this.hp * this.baseMaxhp / this.maxhp);
+		}
+		return this.hp;
+	}
+
 	getMoveTargets(move: Move, target: Pokemon): {targets: Pokemon[], pressureTargets: Pokemon[]} {
 		const targets = [];
 		let pressureTargets;
@@ -662,11 +678,12 @@ export class Pokemon {
 
 	ignoringAbility() {
 		const abilities = [
-			'battlebond', 'comatose', 'disguise', 'multitype', 'powerconstruct', 'rkssystem', 'schooling', 'shieldsdown', 'stancechange',
+			'battlebond', 'comatose', 'disguise', 'gulpmissile', 'multitype', 'powerconstruct', 'rkssystem', 'schooling', 'shieldsdown', 'stancechange',
 		];
 		// Check if any active pokemon have the ability Neutralizing Gas
 		let neutralizinggas = false;
 		for (const pokemon of this.battle.getAllActive()) {
+			// can't use hasAbility because it would lead to infinite recursion
 			if (pokemon.ability === ('neutralizinggas' as ID) && !pokemon.volatiles['gastroacid']
 				&& !pokemon.abilityData.ending) {
 				neutralizinggas = true;
@@ -775,8 +792,12 @@ export class Pokemon {
 				}
 			}
 			let disabled = moveSlot.disabled;
-			if ((moveSlot.pp <= 0 && !this.volatiles['partialtrappinglock']) || disabled &&
-				this.side.active.length >= 2 && this.battle.targetTypeChoices(target!)) {
+			if (this.volatiles['dynamax']) {
+				disabled = false;
+			} else if (
+				(moveSlot.pp <= 0 && !this.volatiles['partialtrappinglock']) || disabled &&
+				this.side.active.length >= 2 && this.battle.targetTypeChoices(target!)
+			) {
 				disabled = true;
 			} else if (disabled === 'hidden' && restrictData) {
 				disabled = false;
@@ -797,12 +818,18 @@ export class Pokemon {
 	}
 
 	getRequestData() {
-		const lockedMove = this.getLockedMove();
+		let lockedMove = this.getLockedMove();
 
 		// Information should be restricted for the last active Pokémon
 		const isLastActive = this.isLastActive();
 		const canSwitchIn = this.battle.canSwitch(this.side) > 0;
-		const moves = this.getMoves(lockedMove, isLastActive);
+		let moves = this.getMoves(lockedMove, isLastActive);
+
+		if (!moves.length) {
+			moves = [{move: 'Struggle', id: 'struggle', target: 'randomNormal', disabled: false}];
+			lockedMove = 'struggle';
+		}
+
 		const data: {
 			moves: {move: string, id: string, target?: string, disabled?: string | boolean}[],
 			maybeDisabled?: boolean,
@@ -813,7 +840,9 @@ export class Pokemon {
 			canZMove?: AnyObject | null,
 			canDynamax?: boolean,
 			maxMoves?: DynamaxOptions,
-		} = {moves: moves.length ? moves : [{move: 'Struggle', id: 'struggle', target: 'randomNormal', disabled: false}]};
+		} = {
+			moves,
+		};
 
 		if (isLastActive) {
 			if (this.maybeDisabled) {
@@ -921,9 +950,12 @@ export class Pokemon {
 		const template = pokemon.template;
 		if (pokemon.fainted || pokemon.illusion || (pokemon.volatiles['substitute'] && this.battle.gen >= 5) ||
 			(pokemon.transformed && this.battle.gen >= 2) || (this.transformed && this.battle.gen >= 5) ||
-			!this.setTemplate(template) || template.species === 'Eternatus-Eternamax') {
+			template.species === 'Eternatus-Eternamax') {
  			return false;
 		}
+
+		if (!this.setTemplate(template, null, true)) return false;
+
 		this.transformed = true;
 		this.weighthg = pokemon.weighthg;
 
@@ -999,7 +1031,7 @@ export class Pokemon {
 	 * This function only handles changes to stats and type.
 	 * Use formChange to handle changes to ability and sending client messages.
 	 */
-	setTemplate(rawTemplate: Template, source: Effect | null = this.battle.effect) {
+	setTemplate(rawTemplate: Template, source: Effect | null = this.battle.effect, isTransform = false) {
 		const template = this.battle.runEvent('ModifyTemplate', this, null, source, rawTemplate);
 		if (!template) return null;
 		this.template = template;
@@ -1011,11 +1043,18 @@ export class Pokemon {
 		this.weighthg = template.weighthg;
 
 		const stats = this.battle.dex.spreadModify(this.template.baseStats, this.set);
-		if (!this.baseStoredStats) this.baseStoredStats = stats;
+		if (this.template.maxHP) stats.hp = this.template.maxHP;
+
+		if (!this.maxhp) {
+			this.baseMaxhp = stats.hp;
+			this.maxhp = stats.hp;
+			this.hp = stats.hp;
+		}
+
+		if (!isTransform) this.baseStoredStats = stats;
 		let statName: StatNameExceptHP;
 		for (statName in this.storedStats) {
 			this.storedStats[statName] = stats[statName];
-			this.baseStoredStats[statName] = stats[statName];
 			if (this.modifiedStats) this.modifiedStats[statName] = stats[statName]; // Gen 1: Reset modified stats.
 		}
 		if (this.battle.gen <= 1) {
@@ -1337,15 +1376,17 @@ export class Pokemon {
 		return this.battle.dex.getEffectByID(this.status);
 	}
 
-	eatItem(source?: Pokemon, sourceEffect?: Effect) {
+	eatItem(force?: boolean, source?: Pokemon, sourceEffect?: Effect) {
 		if (!this.hp || !this.isActive) return false;
 		if (!this.item) return false;
 
 		if (!sourceEffect && this.battle.effect) sourceEffect = this.battle.effect;
 		if (!source && this.battle.event && this.battle.event.target) source = this.battle.event.target;
 		const item = this.getItem();
-		if (this.battle.runEvent('UseItem', this, null, null, item) &&
-			this.battle.runEvent('TryEatItem', this, null, null, item)) {
+		if (
+			this.battle.runEvent('UseItem', this, null, null, item) &&
+			(force || this.battle.runEvent('TryEatItem', this, null, null, item))
+		) {
 
 			this.battle.add('-enditem', this, item, '[eat]');
 
@@ -1355,11 +1396,11 @@ export class Pokemon {
 			if (item.id === 'leppaberry') {
 				switch (this.pendingStaleness) {
 				case 'internal':
-						if (this.staleness !== 'external') this.staleness = 'internal';
-						break;
+					if (this.staleness !== 'external') this.staleness = 'internal';
+					break;
 				case 'external':
-						this.staleness = 'external';
-						break;
+					this.staleness = 'external';
+					break;
 				}
 				this.pendingStaleness = undefined;
 			}
@@ -1685,6 +1726,22 @@ export class Pokemon {
 		return false;
 	}
 
+	/**
+	 * Like Field.effectiveWeather(), but ignores sun and rain if
+	 * the Utility Umbrella is active for the Pokemon.
+	 */
+	effectiveWeather() {
+		const weather = this.battle.field.effectiveWeather();
+		switch (weather) {
+		case 'sunnyday':
+		case 'raindance':
+		case 'desolateland':
+		case 'primordialsea':
+			if (this.hasItem('utilityumbrella')) return '';
+		}
+		return weather;
+	}
+
 	runEffectiveness(move: ActiveMove) {
 		let totalTypeMod = 0;
 		for (const type of this.getTypes()) {
@@ -1695,6 +1752,7 @@ export class Pokemon {
 		return totalTypeMod;
 	}
 
+	/** false = immune, true = not immune */
 	runImmunity(type: string, message?: string | boolean) {
 		if (!type || type === '???') return true;
 		if (!(type in this.battle.dex.data.TypeChart)) {

@@ -44,6 +44,17 @@ export interface ChatCommands {
 	[k: string]: ChatHandler | string | string[] | true | ChatCommands;
 }
 
+export type SettingsHandler = (
+	room: BasicChatRoom,
+	user: User,
+	connection: Connection
+) => {
+	label: string,
+	permission: boolean | string,
+	// button label, command | disabled
+	options: [string, string | true][],
+};
+
 /**
  * Chat filters can choose to:
  * 1. return false OR null - to not send a user's message
@@ -343,7 +354,7 @@ export class CommandContext extends MessageContext {
 			}
 			if (this.cmdToken) {
 				// To guard against command typos, show an error message
-				if (this.cmdToken === BROADCAST_TOKEN) {
+				if (this.shouldBroadcast()) {
 					if (/[a-z0-9]/.test(this.cmd.charAt(0))) {
 						return this.errorReply(`The command "${this.cmdToken}${this.fullCmd}" does not exist.`);
 					}
@@ -725,8 +736,11 @@ export class CommandContext extends MessageContext {
 		}
 		return true;
 	}
+	shouldBroadcast() {
+		return this.cmdToken === BROADCAST_TOKEN;
+	}
 	canBroadcast(ignoreCooldown?: boolean, suppressMessage?: string | null) {
-		if (!this.broadcasting && this.cmdToken === BROADCAST_TOKEN) {
+		if (!this.broadcasting && this.shouldBroadcast()) {
 			if (this.room instanceof Rooms.GlobalRoom) {
 				this.errorReply(`You have no one to broadcast this to.`);
 				this.errorReply(`To see it for yourself, use: /${this.message.substr(1)}`);
@@ -759,7 +773,7 @@ export class CommandContext extends MessageContext {
 		return true;
 	}
 	runBroadcast(ignoreCooldown = false, suppressMessage: string | null = null) {
-		if (this.broadcasting || this.cmdToken !== BROADCAST_TOKEN) {
+		if (this.broadcasting || !this.shouldBroadcast()) {
 			// Already being broadcast, or the user doesn't intend to broadcast.
 			return true;
 		}
@@ -1131,6 +1145,7 @@ export const Chat = new class {
 	basePages: PageTable = undefined!;
 	pages: PageTable = undefined!;
 	readonly destroyHandlers: (() => void)[] = [];
+	roomSettings: SettingsHandler[] = [];
 
 	/*********************************************************
 	 * Load chat filters
@@ -1256,6 +1271,8 @@ export const Chat = new class {
 
 	loadTranslations() {
 		return FS(TRANSLATION_DIRECTORY).readdir().then(files => {
+			// ensure that english is the first entry when we iterate over Chat.languages
+			Chat.languages.set('english', 'English');
 			for (const fname of files) {
 				if (!fname.endsWith('.json')) continue;
 
@@ -1426,7 +1443,10 @@ export const Chat = new class {
 		if (plugin.pages) Object.assign(Chat.pages, plugin.pages);
 
 		if (plugin.destroy) Chat.destroyHandlers.push(plugin.destroy);
-
+		if (plugin.roomSettings) {
+			if (!Array.isArray(plugin.roomSettings)) plugin.roomSettings = [plugin.roomSettings];
+			Chat.roomSettings = Chat.roomSettings.concat(plugin.roomSettings);
+		}
 		if (plugin.chatfilter) Chat.filters.push(plugin.chatfilter);
 		if (plugin.namefilter) Chat.namefilters.push(plugin.namefilter);
 		if (plugin.hostfilter) Chat.hostfilters.push(plugin.hostfilter);

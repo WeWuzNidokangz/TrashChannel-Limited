@@ -55,7 +55,6 @@ export class Side {
 	faintedLastTurn: boolean;
 	faintedThisTurn: boolean;
 	zMoveUsed: boolean;
-	canDynamax: boolean;
 
 	sideConditions: AnyObject;
 	slotConditions: AnyObject[];
@@ -103,7 +102,6 @@ export class Side {
 		this.faintedLastTurn = false;
 		this.faintedThisTurn = false;
 		this.zMoveUsed = false;
-		this.canDynamax = (this.battle.gen >= 8);
 
 		this.sideConditions = {};
 		this.slotConditions = [];
@@ -528,9 +526,13 @@ export class Side {
 		if (ultra && this.choice.ultra) {
 			return this.emitChoiceError(`Can't move: You can only ultra burst once per battle`);
 		}
-		const dynamax = (megaDynaOrZ === 'dynamax');
+		let dynamax = (megaDynaOrZ === 'dynamax');
 		if (dynamax && (this.choice.dynamax || !this.battle.canDynamax(pokemon))) {
-			return this.emitChoiceError(`Can't move: You can only Dynamax once per battle.`);
+			if (pokemon.volatiles['dynamax']) {
+				dynamax = false;
+			} else {
+				return this.emitChoiceError(`Can't move: You can only Dynamax once per battle.`);
+			}
 		}
 
 		this.choice.actions.push({
