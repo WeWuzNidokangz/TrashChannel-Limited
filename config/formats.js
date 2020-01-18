@@ -70,7 +70,7 @@ let Formats = [
 			}
 		},
 	},
-	{
+	/*{
 		name: "[Gen 7] Partners in Crime: Hackmons Cup",
 		desc: `Randomized teams of level-balanced Pok&eacute;mon where both active ally Pok&eacute;mon share dumb abilities and moves.`,
 		threads: [
@@ -137,7 +137,7 @@ let Formats = [
 				delete ally.m.innate;
 			}
 		},
-	},
+	},*/
 	/*{
 		name: "[Gen 7] Trademarked: Hackmons Cup",
 		desc: `Randomized teams of level-balanced Pok&eacute;mon with random trademarks.`,
@@ -709,6 +709,8 @@ let Formats = [
 		],
 
 		mod: 'gen8',
+		challengeShow: false,
+		searchShow: false,
 		ruleset: ['[Gen 8] UU'],
 		banlist: ['UU', 'RUBL'],
 	},
@@ -883,6 +885,8 @@ let Formats = [
 
 		mod: 'gen8',
 		gameType: 'doubles',
+		challengeShow: false,
+		searchShow: false,
 		ruleset: ['[Gen 8] Doubles OU'],
 		banlist: ['DOU', 'DBL'],
 	},
@@ -941,6 +945,8 @@ let Formats = [
 
 		mod: 'gen8',
 		gameType: 'doubles',
+		challengeShow: false,
+		searchShow: false,
 		forcedLevel: 50,
 		teamLength: {
 			validate: [4, 6],
