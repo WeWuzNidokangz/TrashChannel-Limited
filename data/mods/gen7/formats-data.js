@@ -485,6 +485,8 @@ let BattleFormatsData = {
 		doublesTier: "(DUU)",
 	},
 	psyduck: {
+		inherit: true,
+		isNonstandard: null,
 		tier: "LC",
 	},
 	golduck: {
@@ -658,7 +660,7 @@ let BattleFormatsData = {
 	},
 	slowpoke: {
 		inherit: true,
-		isNonstandard: null,
+		isUnreleased: false,
 		tier: "LC",
 	},
 	slowbro: {

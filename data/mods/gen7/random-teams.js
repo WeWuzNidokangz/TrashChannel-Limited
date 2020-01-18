@@ -226,7 +226,7 @@ class RandomGen7Teams extends RandomTeams {
 					if ((counter[move.type] > 1 && counter.Status > 1) || (hasAbility['Sheer Force'] && !!counter['sheerforce'])) rejected = true;
 					break;
 				case 'defog':
-					if (counter.setupType || hasMove['spikes'] || hasMove['stealthrock'] || (hasMove['rest'] && hasMove['sleeptalk']) || teamDetails.hazardClear) rejected = true;
+					if (counter.setupType || hasMove['spikes'] || hasMove['stealthrock'] || teamDetails.defog) rejected = true;
 					break;
 				case 'fakeout': case 'tailwind':
 					if (counter.setupType || hasMove['substitute'] || hasMove['switcheroo'] || hasMove['trick']) rejected = true;
@@ -258,7 +258,7 @@ class RandomGen7Teams extends RandomTeams {
 					if (counter.setupType || counter.Status > 1 || counter['Dark'] > 2 || hasMove['knockoff'] && !hasType['Dark']) rejected = true;
 					break;
 				case 'rapidspin':
-					if (counter.setupType || teamDetails.hazardClear) rejected = true;
+					if (counter.setupType || teamDetails.rapidSpin) rejected = true;
 					break;
 				case 'reversal':
 					if (hasMove['substitute'] && teamDetails.zMove) rejected = true;
@@ -1006,7 +1006,6 @@ class RandomGen7Teams extends RandomTeams {
 				UUBL: 81,
 				'(OU)': 80,
 				OU: 80,
-				Unreleased: 80,
 				Uber: 78,
 			};
 			/** @type {{[species: string]: number}} */
@@ -1015,7 +1014,7 @@ class RandomGen7Teams extends RandomTeams {
 				Dugtrio: 82, Gothitelle: 82, Pelipper: 84, Politoed: 84, Wobbuffet: 82,
 
 				// Holistic judgement
-				'Genesect-Douse': 80,
+				'Floette-Eternal': 80, 'Genesect-Douse': 80,
 				Castform: 100, Delibird: 100, Spinda: 100, Unown: 100,
 			};
 			level = levelScale[template.tier] || 90;

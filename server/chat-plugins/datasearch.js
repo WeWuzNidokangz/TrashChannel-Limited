@@ -573,7 +573,6 @@ function runDexsearch(target, cmd, canAll, message, replaceSearchFormat) {
 				if (gmaxSearch === isNotSearch) return {reply: "A search cannot include and exclude 'gigantamax'."};
 				if (parameters.length > 1) return {reply: "The parameter 'gigantamax' cannot have alternative parameters"};
 				gmaxSearch = !isNotSearch;
-				console.log(gmaxSearch);
 				orGroup.skip = true;
 				break;
 			}
