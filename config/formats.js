@@ -169,53 +169,280 @@ let Formats = [
 		section: "Mashups Spotlight",
 	},
 	{
-		name: "[Gen 7] STAAABmons",
-		desc: `Pok&eacute;mon can use any ability, barring the few that are restricted to their natural users, and learn any move of their type, apart from those restricted to their natural users.`,
+		name: "[Gen 8] STAB n Mega",
+		desc: `Pokemon can use any move of their typing and mega evolve with any stone to gain the respective boosts.`,
 		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3635904/#post-7802586">STAAABmons Resources</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3587949/">Vanilla STABmons</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3587901/">Vanilla Almost Any Ability</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3595753/">Vanilla AAA Resources</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3657159/#post-8299984">STAB n Mega Resources</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3656429/">Vanilla STABmons</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3658578/">Vanilla STABmons Resources</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3656469/">Vanilla Mix and Mega</a>`,
 		],
 
-		mod: 'gen7',
-		ruleset: ['[Gen 7] OU', 'STABmons Move Legality', 'AAA Standard Package', '!Obtainable Abilities'],
+		mod: 'mixandmega',
+		ruleset: [
+			'Obtainable', 'Species Clause', 'Nickname Clause', 'OHKO Clause', 'Evasion Moves Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Dynamax Clause', 'Sleep Clause Mod', 'Endless Battle Clause', // Mix and Mega
+			'STABmons Move Legality', // STABmons
+			'Mix and Mega Standard Package', // STAB n Mega
+		],
 		banlist: [
-			'Archeops', 'Blacephalon', 'Dragonite', 'Hoopa-Unbound', 'Kartana', 'Keldeo', 'Komala', 'Kyurem-Black', 'Regigigas', 'Shedinja',
-			'Silvally', 'Slaking', 'Tapu Koko', 'Terrakion', 'Thundurus-Base', 'Thundurus-Therian', 'King\'s Rock', 'Razor Fang', // STABmons
-			'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Huge Power', 'Illusion', 'Imposter', 'Innards Out',
-			'Parental Bond', 'Protean', 'Pure Power', 'Simple', 'Speed Boost', 'Stakeout', 'Water Bubble', 'Wonder Guard', // AAA
+			'AG', 'Eternatus', 'Gothitelle', 'Gothorita', 'Zacian', 'Moody', 'Baton Pass', 'Electrify',
+			'Beedrillite', 'Blazikenite', 'Gengarite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite', // Mix and Mega
 		],
-		restrictedMoves: ['Acupressure', 'Belly Drum', 'Chatter', 'Extreme Speed', 'Geomancy', 'Lovely Kiss', 'Shell Smash', 'Shift Gear', 'Spore', 'Thousand Arrows'],
-		/*restrictedAbilities: [
-			'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Huge Power', 'Illusion', 'Imposter', 'Innards Out',
-			'Parental Bond', 'Protean', 'Pure Power', 'Simple', 'Speed Boost', 'Stakeout', 'Water Bubble', 'Wonder Guard',
-		],*/
-	},
-	{
-		name: "[Gen 7] Tier Shift AAA",
-		desc: `Pok&eacute;mon can use any ability, barring the few that are restricted to their natural users. Pok&eacute;mon below OU get all their stats boosted. UU/RUBL get +10, RU/NUBL get +20, NU/PUBL get +30, and PU or lower get +40.`,
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3587901/">Vanilla Almost Any Ability</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3595753/">Vanilla AAA Resources</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3610073/">Vanilla Tier Shift</a>`,
-		],
-
-		mod: 'gen7',
-		ruleset: ['[Gen 7] OU', 'AAA Standard Package', '!Obtainable Abilities', 'Tier Shift Rule'],
-		banlist: [
-			'Archeops', 'Dragonite', 'Hoopa-Unbound', 'Kartana', 'Keldeo', 'Kyurem-Black', 'Regigigas', 'Shedinja', 'Slaking', 'Terrakion', 'Victini', 'Weavile', // Almost Any Ability
-			'Damp Rock', 'Deep Sea Tooth', 'Eviolite', // Tier Shift
-			'Thick Club', 'Absol', 'Metagross', // TS AAA
-		],
-		unbanlist: ['Aegislash', 'Genesect', 'Landorus', 'Metagross-Mega', 'Naganadel'],
-		restrictedAbilities: [
-			'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Huge Power', 'Illusion', 'Imposter', 'Innards Out',
-			'Parental Bond', 'Protean', 'Pure Power', 'Simple', 'Speed Boost', 'Stakeout', 'Water Bubble', 'Wonder Guard',
+		restrictedMoves: [
+			'Acupressure', 'Belly Drum', 'Fishious Rend', 'Shell Smash', 'Shift Gear', 'Spore', // STABmons
+			'Extreme Speed', // STAB n Mega
 		],
 	},
 	{
 		section: "Official OM Mashups (Singles)",
+	},
+	{
+		name: "[Gen 8] Balanced Hackmons Camomons",
+		desc: `Pokemon can use anything that can be hacked in-game and is usable in local battles and will be the typing of their first two moves.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3657159/#post-8299984">BH Camomons Resources</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3656413/">Vanilla Camomons</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3587475/">Vanilla Balanced Hackmons</a>`,
+		],
+		mod: 'gen8',
+		ruleset: [ 
+			'-Nonexistent', 'OHKO Clause', 'Evasion Moves Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod', 'Endless Battle Clause', // BH
+			'Camomons Rule', 'Balanced Hackmons Validation', // BH Camomons
+		 ],
+		 banlist: [
+			'Eternatus-Eternamax', 'Comatose + Sleep Talk',
+			'Arena Trap', 'Contrary', 'Gorilla Tactics', 'Huge Power', 'Illusion', 'Innards Out', 'Libero', 'Magnet Pull', 'Moody',
+			'Neutralizing Gas', 'Parental Bond', 'Protean', 'Pure Power', 'Shadow Tag', 'Stakeout', 'Water Bubble', 'Wonder Guard', // BH
+		],
+	},
+	{
+		name: "[Gen 8] STAAABmons",
+		desc: `Pokemon can use almost any ability and any move of their typing.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3657159/#post-8299984">STAAABmons Resources</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3656429/">Vanilla STABmons</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3658578/">Vanilla STABmons Resources</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3656414/">Vanilla Almost Any Ability</a>`,
+		],
+
+		mod: 'gen8',
+		ruleset: [
+			'Standard', 'STABmons Move Legality', 'Dynamax Clause', // STABmons
+			'!Obtainable Abilities', '2 Ability Clause', // AAA
+		],
+		banlist: [
+			'Darmanitan-Galar', 'Eternatus', 'Silvally', 'Zacian', 'Zamazenta', 'King\'s Rock', 'Razor Fang', 'Moody', 'Shadow Tag', 'Baton Pass', // STABmons
+			'Shedinja',
+			'Arena Trap', 'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Gorilla Tactics', 'Huge Power', 'Ice Scales', 'Illusion', 'Imposter', 'Innards Out', 'Intrepid Sword',
+			'Libero', 'Neutralizing Gas', 'Parental Bond', 'Protean', 'Pure Power', 'Simple', 'Stakeout', 'Speed Boost', 'Water Bubble', 'Wonder Guard', // AAA
+		],
+		restrictedMoves: [
+			'Acupressure', 'Belly Drum', 'Fishious Rend', 'Shell Smash', 'Shift Gear', 'Spore', // STABmons
+			'Double Iron Bash', // STAAABmons
+		],
+	},
+	{
+		name: "[Gen 8] CAAAmomons",
+		desc: `Pokemon can use almost any ability and will be the typing of their first two moves.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3657159/#post-8299984">CAAAmomons Resources</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3656413/">Vanilla Camomons</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3656414/">Vanilla Almost Any Ability</a>`,
+		],
+		mod: 'gen8',
+		ruleset: [
+			'Obtainable', 'Species Clause', 'Nickname Clause', 'OHKO Clause', 'Evasion Moves Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Dynamax Clause', 'Sleep Clause Mod', 'Endless Battle Clause', // Camomons
+			'!Obtainable Abilities', '2 Ability Clause', // AAA
+			'Camomons Rule', // CAAAmomons
+
+		],
+		banlist: [
+			'Darmanitan-Galar', 'Eternatus', 'Shedinja', 'Zacian', 'Zamazenta',
+			'Arena Trap', 'Moody', 'Shadow Tag', 'Baton Pass', // Camomons
+		]
+	},
+	{
+		section: "Official OM Mashups (Doubles)",
+	},
+	{
+		name: "[Gen 8] Almost Any Ability Doubles",
+		desc: `Pok&eacute;mon can use any ability, barring the few that are restricted to their natural users, in a Doubles environment.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3657159/#post-8299984">Almost Any Ability Doubles</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3656414/">Vanilla Almost Any Ability</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3656244/">Vanilla Doubles OU Metagame Discussion</a>`,
+		],
+
+		mod: 'gen8',
+		gameType: 'doubles',
+		ruleset: [
+			'Standard Doubles', // Doubles OU
+			'!Obtainable Abilities', '2 Ability Clause', // AAA
+		],
+		banlist: [
+			'DUber', // Doubles OU
+			'Shedinja',
+			'Arena Trap', 'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Gorilla Tactics', 'Huge Power', 'Ice Scales', 'Illusion', 'Imposter', 'Innards Out', 'Intrepid Sword',
+			'Libero', 'Moody', 'Neutralizing Gas', 'Parental Bond', 'Protean', 'Pure Power', 'Shadow Tag', 'Simple', 'Stakeout', 'Speed Boost', 'Water Bubble', 'Wonder Guard', // AAA
+			'Anger Point', // Doubles AAA
+		],
+	},
+	{
+		name: "[Gen 8] Balanced Hackmons Doubles",
+		desc: `Anything that can be hacked in-game and is usable in local battles is allowed, in a doubles environment.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3657159/#post-8299984">Balanced Hackmons Doubles Resources</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3587475/">Vanilla Balanced Hackmons</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3656244/">Vanilla Doubles OU Metagame Discussion</a>`,
+		],
+
+		mod: 'gen8',
+		gameType: 'doubles',
+		ruleset: [
+			'Standard Doubles', // Doubles OU
+			'!Obtainable', 'Balanced Hackmons Validation', // BH Doubles
+		],
+		banlist: [
+			'Eternatus-Eternamax', 'Comatose + Sleep Talk', 'Arena Trap', 'Contrary', 'Gorilla Tactics', 'Huge Power', 'Illusion', 'Innards Out',
+			'Libero', 'Magnet Pull', 'Moody', 'Neutralizing Gas', 'Parental Bond', 'Protean', 'Pure Power', 'Shadow Tag', 'Stakeout', 'Water Bubble', 'Wonder Guard', // BH
+		],
+	},
+	{
+		name: "[Gen 8] Camomons Doubles",
+		desc: `Pok&eacute;mon change type to match their first two moves, in a Doubles environment.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3657159/#post-8299984">Camomons Doubles</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3656413/">Vanilla Camomons</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3656244/">Vanilla Doubles OU Metagame Discussion</a>`,
+		],
+
+		mod: 'gen8',
+		gameType: 'doubles',
+		ruleset: [
+			'Standard Doubles', // Doubles OU
+			'Camomons Rule', // Camomons Doubles
+		],
+		banlist: [
+			'DUber', // Doubles OU
+			'Darmanitan-Galar', 'Eternatus', 'Shedinja', 'Zacian', 'Zamazenta',
+			'Arena Trap', 'Moody', 'Shadow Tag', 'Baton Pass', // Camomons
+		],
+	},
+	{
+		name: "[Gen 8] STABmons Doubles",
+		desc: `Pok&eacute;mon can use any move of their typing, in addition to the moves they can normally learn, in a Doubles setting.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3657159/#post-8299984">STABmons Doubles</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3656429/">Vanilla STABmons</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3656244/">Vanilla Doubles OU Metagame Discussion</a>`,
+		],
+
+		mod: 'gen8',
+		gameType: 'doubles',
+		ruleset: [
+			'Standard Doubles', // Doubles OU
+			'STABmons Move Legality', // STABmons
+		],
+		banlist: [
+			'DUber', // Doubles OU
+		],
+		restrictedMoves: ['Acupressure', 'Belly Drum', 'Fishious Rend', 'Shell Smash', 'Shift Gear', 'Spore'],
+	},
+	{
+		section: "Official OM Mashups (Little Cup)",
+	},
+	{
+		name: "[Gen 8] Almost Any Ability Little Cup",
+		desc: `Pok&eacute;mon can use any ability, barring the few that are restricted to their natural users, in a Little Cup setting.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3657159/#post-8299984">Almost Any Ability LC Resources</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3656414/">Vanilla Almost Any Ability</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3656348/">Vanilla LC Metagame Discussion</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3657374/">Vanilla LC Viability Rankings</a>`,
+		],
+
+		mod: 'gen8',
+		maxLevel: 5,
+		ruleset: [
+			'Little Cup', 'Standard', 'Dynamax Clause', // LC
+			'!Obtainable Abilities', '2 Ability Clause', // AAA
+		],
+		banlist: [
+			'Cherubi', 'Corsola-Galar', 'Gastly', 'Gothita', 'Sneasel', 'Swirlix', 'Moody', 'Baton Pass', // LC
+			'Arena Trap', 'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Gorilla Tactics', 'Huge Power', 'Ice Scales', 'Illusion', 'Imposter', 'Innards Out', 'Intrepid Sword',
+			'Libero', 'Moody', 'Neutralizing Gas', 'Parental Bond', 'Protean', 'Pure Power', 'Shadow Tag', 'Simple', 'Stakeout', 'Speed Boost', 'Water Bubble', 'Wonder Guard', // AAA
+		],
+	},
+	{
+		name: "[Gen 8] Balanced Hackmons Little Cup",
+		desc: `Anything that can be hacked in-game and is usable in local battles is allowed, in a Little Cup setting.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3657159/#post-8299984">Balanced Hackmons LC Resources</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3587475/">Vanilla Balanced Hackmons</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3656348/">Vanilla LC Metagame Discussion</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3657374/">Vanilla LC Viability Rankings</a>`,
+		],
+
+		mod: 'gen8',
+		maxLevel: 5,
+		ruleset: [
+			'Little Cup', 'Standard', 'Dynamax Clause', // LC
+			'-Nonexistent', 'OHKO Clause', 'Evasion Moves Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod', 'Endless Battle Clause', // BH
+		],
+		banlist: [
+			'Moody', 'Baton Pass', // LC
+			'Eternatus-Eternamax', 'Comatose + Sleep Talk',
+			'Arena Trap', 'Contrary', 'Gorilla Tactics', 'Huge Power', 'Illusion', 'Innards Out', 'Libero', 'Magnet Pull', 'Moody',
+			'Neutralizing Gas', 'Parental Bond', 'Protean', 'Pure Power', 'Shadow Tag', 'Stakeout', 'Water Bubble', 'Wonder Guard',  // Balanced Hackmons
+			'Balanced Hackmons Validation', // BH LC
+		],
+	},{
+		name: "[Gen 8] Camomons Little Cup",
+		desc: `Pok&eacute;mon change type to match their first two moves, in a Little Cup setting.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3657159/#post-8299984">Camomons LC Resources</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3656413/">Vanilla Camomons</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3656348/">Vanilla LC Metagame Discussion</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3657374/">Vanilla LC Viability Rankings</a>`,
+		],
+
+		mod: 'gen8',
+		maxLevel: 5,
+		ruleset: [
+			'Little Cup', 'Standard', 'Dynamax Clause', // LC
+			'Camomons Rule', // Camomons Doubles
+		],
+		banlist: [
+			'Cherubi', 'Corsola-Galar', 'Gastly', 'Gothita', 'Sneasel', 'Swirlix', 'Moody', 'Baton Pass', // LC
+		],
+	},
+	{
+		name: "[Gen 8] STABmons Little Cup",
+		desc: `Pok&eacute;mon can use any move of their typing, in addition to the moves they can normally learn, in a Little Cup environment.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3657159/#post-8299984">STABmons LC Resources</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3656429/">Vanilla STABmons</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3658578/">Vanilla STABmons Resources</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3656348/">Vanilla LC Metagame Discussion</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3657374/">Vanilla LC Viability Rankings</a>`,
+		],
+
+		mod: 'gen8',
+		maxLevel: 5,
+		ruleset: [
+			'Little Cup', 'Standard', 'Dynamax Clause', // LC
+			'STABmons Move Legality', // STABmons
+		],
+		banlist: [
+			'Cherubi', 'Corsola-Galar', 'Gastly', 'Gothita', 'Sneasel', 'Swirlix', 'Moody', 'Baton Pass', // LC
+		],
+		restrictedMoves: ['Acupressure', 'Belly Drum', 'Fishious Rend', 'Shell Smash', 'Shift Gear', 'Spore'],
+	},
+	{
+		section: "Other Mashups",
+	},
+	{
+		section: "US/UM Official OM Mashups (Singles)",
 	},
 	{
 		name: "[Gen 7] Pure Hackmons",
@@ -240,7 +467,7 @@ let Formats = [
 		],
 
 		mod: 'gen7mixandmega',
-		ruleset: ['Obtainable', 'Endless Battle Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Mix and Mega Battle Effects'],
+		ruleset: ['Obtainable', 'Endless Battle Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Gen 7 Mix and Mega Battle Effects'],
 		restrictedStones: ['Ultranecrozium Z'],
 		cannotMega: [],
 	},
@@ -300,6 +527,30 @@ let Formats = [
 		restrictedMoves: ['Acupressure', 'Belly Drum', 'Chatter', 'Geomancy', 'Lovely Kiss', 'Shell Smash', 'Shift Gear', 'Spore', 'Thousand Arrows'],
 	},
 	{
+		name: "[Gen 7] STAAABmons",
+		desc: `Pok&eacute;mon can use any ability, barring the few that are restricted to their natural users, and learn any move of their type, apart from those restricted to their natural users.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3635904/#post-7802586">STAAABmons Resources</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3587949/">Vanilla STABmons</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3587901/">Vanilla Almost Any Ability</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3595753/">Vanilla AAA Resources</a>`,
+		],
+
+		mod: 'gen7',
+		ruleset: ['[Gen 7] OU', 'STABmons Move Legality', 'AAA Standard Package', '!Obtainable Abilities'],
+		banlist: [
+			'Archeops', 'Blacephalon', 'Dragonite', 'Hoopa-Unbound', 'Kartana', 'Keldeo', 'Komala', 'Kyurem-Black', 'Regigigas', 'Shedinja',
+			'Silvally', 'Slaking', 'Tapu Koko', 'Terrakion', 'Thundurus-Base', 'Thundurus-Therian', 'King\'s Rock', 'Razor Fang', // STABmons
+			'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Huge Power', 'Illusion', 'Imposter', 'Innards Out',
+			'Parental Bond', 'Protean', 'Pure Power', 'Simple', 'Speed Boost', 'Stakeout', 'Water Bubble', 'Wonder Guard', // AAA
+		],
+		restrictedMoves: ['Acupressure', 'Belly Drum', 'Chatter', 'Extreme Speed', 'Geomancy', 'Lovely Kiss', 'Shell Smash', 'Shift Gear', 'Spore', 'Thousand Arrows'],
+		/*restrictedAbilities: [
+			'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Huge Power', 'Illusion', 'Imposter', 'Innards Out',
+			'Parental Bond', 'Protean', 'Pure Power', 'Simple', 'Speed Boost', 'Stakeout', 'Water Bubble', 'Wonder Guard',
+		],*/
+	},
+	{
 		name: "[Gen 7] STAB n Mega",
 		desc: `Mega Stones and Primal Orbs can be used on almost any fully evolved Pok&eacute;mon with no Mega Evolution limit, and Pok&eacute;mon can use any move of their typing, in addition to the moves they can normally learn.`,
 		threads: [
@@ -310,7 +561,7 @@ let Formats = [
 		],
 
 		mod: 'gen7mixandmega',
-		ruleset: ['Obtainable', 'Standard', 'Mix and Mega Standard Package', 'STABmons Move Legality', 'Mega Rayquaza Clause', 'Team Preview'],
+		ruleset: ['Obtainable', 'Standard', 'Gen 7 Mix and Mega Standard Package', 'STABmons Move Legality', 'Mega Rayquaza Clause', 'Team Preview'],
 		banlist: ['Shadow Tag', 'Gengarite', 'Baton Pass', 'Electrify', // Mix and Mega
 			'King\'s Rock', 'Razor Fang', // STABmons
 			'Arceus', 'Kangaskhanite', // STAB n Mega
@@ -325,7 +576,7 @@ let Formats = [
 		restrictedMoves: ['Acupressure', 'Belly Drum', 'Chatter', 'Geomancy', 'Lovely Kiss', 'Shell Smash', 'Shift Gear', 'Spore', 'Thousand Arrows'],
 	},
 	{
-		section: "Official OM Mashups (Doubles)",
+		section: "US/UM Official OM Mashups (Doubles)",
 	},
 	{
 		name: "[Gen 7] Balanced Hackmons Doubles",
@@ -376,7 +627,7 @@ let Formats = [
 
 		mod: 'gen7mixandmega',
 		gameType: 'doubles',
-		ruleset: ['Obtainable', 'Standard Doubles', 'Swagger Clause', 'Mix and Mega Standard Package', 'Mega Rayquaza Clause', 'Team Preview'],
+		ruleset: ['Obtainable', 'Standard Doubles', 'Swagger Clause', 'Gen 7 Mix and Mega Standard Package', 'Mega Rayquaza Clause', 'Team Preview'],
 		banlist: [
 			'Eevium Z', 'Dark Void', 'Gravity ++ Grass Whistle', 'Gravity ++ Hypnosis', 'Gravity ++ Lovely Kiss', 'Gravity ++ Sing', 'Gravity ++ Sleep Powder', // Doubles
 			'Shadow Tag', 'Gengarite', 'Baton Pass', 'Electrify', // MnM
@@ -407,7 +658,7 @@ let Formats = [
 		restrictedMoves: ['Chatter', 'Diamond Storm', 'Geomancy', 'Shell Smash', 'Shift Gear', 'Thousand Arrows'],
 	},
 	{
-		section: "Official OM Mashups (Little Cup)",
+		section: "US/UM Official OM Mashups (Little Cup)",
 	},
 	{
 		name: "[Gen 7] Balanced Hackmons LC",
@@ -482,7 +733,7 @@ let Formats = [
 
 		mod: 'gen7mixandmega',
 		maxLevel: 5,
-		ruleset: ['Obtainable', 'Standard', 'Team Preview', 'Little Cup', 'Mix and Mega Standard Package'],
+		ruleset: ['Obtainable', 'Standard', 'Team Preview', 'Little Cup', 'Gen 7 Mix and Mega Standard Package'],
 		banlist: ['Eevium Z', 'Baton Pass', 'Dragon Rage', 'Electrify', 'Sonic Boom'],
 		restrictedStones: ['Beedrillite', 'Blazikenite', 'Gengarite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite', 'Ultranecrozium Z'],
 		cannotMega: [
@@ -490,27 +741,7 @@ let Formats = [
 		],
 	},
 	{
-		name: "[Gen 7] Camomons Balanced Hackmons",
-		desc: `Nearly anything that can be hacked in-game and is usable in local battles is allowed but each Pok&eacute;mon can change type to match their first two moves.`,
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3598418/">Vanilla Camomons</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3587475/">Vanilla Balanced Hackmons</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3588586/">Vanilla BH Suspects and Bans Discussion</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3593766/">Vanilla BH Resources</a>`,
-		],
-		mod: 'gen7',
-		ruleset: [ 
-			'-Nonexistent', '2 Ability Clause', 'OHKO Clause', 'Evasion Moves Clause', 'CFZ Clause', 'Sleep Clause Mod', 'Endless Battle Clause', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview', // BH
-			'Camomons Rule', // Camomons
-			'Species Clause', // BH Camomons
-		 ],
-		banlist: [
-			'Arena Trap', 'Contrary', 'Huge Power', 'Illusion', 'Innards Out', 'Magnet Pull', 'Moody', 'Parental Bond', 'Protean', 'Psychic Surge', 'Pure Power', 'Shadow Tag', 'Stakeout', 'Water Bubble', 'Wonder Guard', 'Gengarite', 'Chatter', 'Comatose + Sleep Talk',  // BH
-			'V-Create', // BH Camomons
-		],
-	},
-	{
-		section: "Other Mashups",
+		section: "US/UM Other Mashups",
 	},
 	{
 		name: "[Gen 7] Mix and Mega Tier Shift",
@@ -522,7 +753,7 @@ let Formats = [
 		],
 
 		mod: 'gen7mixandmega',
-		ruleset: ['Obtainable', 'Standard', 'Mix and Mega Standard Package', 'Tier Shift Rule', 'Mega Rayquaza Clause', 'Team Preview'],
+		ruleset: ['Obtainable', 'Standard', 'Gen 7 Mix and Mega Standard Package', 'Tier Shift Rule', 'Mega Rayquaza Clause', 'Team Preview'],
 		banlist: ['Shadow Tag', 'Gengarite', 'Baton Pass', 'Electrify'],
 		restrictedStones: ['Beedrillite', 'Blazikenite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite', 'Ultranecrozium Z'],
 		cannotMega: [
@@ -628,6 +859,48 @@ let Formats = [
 			Object.keys(pokemon.volatiles).filter(innate => innate.startsWith('ability')).forEach(innate => pokemon.removeVolatile(innate));
 			pokemon.innates = undefined;
 		},
+	},
+	{
+		name: "[Gen 7] Camomons Balanced Hackmons",
+		desc: `Nearly anything that can be hacked in-game and is usable in local battles is allowed but each Pok&eacute;mon can change type to match their first two moves.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3598418/">Vanilla Camomons</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3587475/">Vanilla Balanced Hackmons</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3588586/">Vanilla BH Suspects and Bans Discussion</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3593766/">Vanilla BH Resources</a>`,
+		],
+		mod: 'gen7',
+		ruleset: [ 
+			'-Nonexistent', '2 Ability Clause', 'OHKO Clause', 'Evasion Moves Clause', 'CFZ Clause', 'Sleep Clause Mod', 'Endless Battle Clause', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview', // BH
+			'Camomons Rule', // Camomons
+			'Species Clause', // BH Camomons
+		 ],
+		banlist: [
+			'Arena Trap', 'Contrary', 'Huge Power', 'Illusion', 'Innards Out', 'Magnet Pull', 'Moody', 'Parental Bond', 'Protean', 'Psychic Surge', 'Pure Power', 'Shadow Tag', 'Stakeout', 'Water Bubble', 'Wonder Guard', 'Gengarite', 'Chatter', 'Comatose + Sleep Talk',  // BH
+			'V-Create', // BH Camomons
+		],
+	},
+	{
+		name: "[Gen 7] Tier Shift AAA",
+		desc: `Pok&eacute;mon can use any ability, barring the few that are restricted to their natural users. Pok&eacute;mon below OU get all their stats boosted. UU/RUBL get +10, RU/NUBL get +20, NU/PUBL get +30, and PU or lower get +40.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3587901/">Vanilla Almost Any Ability</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3595753/">Vanilla AAA Resources</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3610073/">Vanilla Tier Shift</a>`,
+		],
+
+		mod: 'gen7',
+		ruleset: ['[Gen 7] OU', 'AAA Standard Package', '!Obtainable Abilities', 'Tier Shift Rule'],
+		banlist: [
+			'Archeops', 'Dragonite', 'Hoopa-Unbound', 'Kartana', 'Keldeo', 'Kyurem-Black', 'Regigigas', 'Shedinja', 'Slaking', 'Terrakion', 'Victini', 'Weavile', // Almost Any Ability
+			'Damp Rock', 'Deep Sea Tooth', 'Eviolite', // Tier Shift
+			'Thick Club', 'Absol', 'Metagross', // TS AAA
+		],
+		unbanlist: ['Aegislash', 'Genesect', 'Landorus', 'Metagross-Mega', 'Naganadel'],
+		restrictedAbilities: [
+			'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Huge Power', 'Illusion', 'Imposter', 'Innards Out',
+			'Parental Bond', 'Protean', 'Pure Power', 'Simple', 'Speed Boost', 'Stakeout', 'Water Bubble', 'Wonder Guard',
+		],
 	},
 //#endregion TrashChannel: Mashups
 
@@ -1168,7 +1441,7 @@ let Formats = [
 		mod: 'mixandmega',
 		ruleset: ['Obtainable', 'Species Clause', 'Nickname Clause', 'OHKO Clause', 'Evasion Moves Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Dynamax Clause', 'Sleep Clause Mod', 'Endless Battle Clause'],
 		banlist: [
-			'AG', 'Gothitelle', 'Gothorita', 'Zacian', 'Moody', 'Baton Pass', 'Electrify',
+			'AG', 'Eternatus', 'Gothitelle', 'Gothorita', 'Zacian', 'Moody', 'Baton Pass', 'Electrify',
 			'Beedrillite', 'Blazikenite', 'Gengarite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite',
 		],
 		onValidateTeam(team, format) {
@@ -4790,7 +5063,7 @@ let Formats = [
 		ruleset: [
 			'Megamons Legality Expansion', 'Species Clause', 'Nickname Clause', 'Moody Clause', 'OHKO Clause', 'Evasion Moves Clause', 
 			'Swagger Clause', 'Sleep Clause Mod', 'Endless Battle Clause', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview', // Megamons
-			'Mix and Mega Standard Package', // Mix and Mega
+			'Gen 7 Mix and Mega Standard Package', // Mix and Mega
 		],
 		banlist: [
 			'Baton Pass', // Megamons
@@ -4813,7 +5086,7 @@ let Formats = [
 		ruleset: [
 			'Endless Battle Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', // Anything Goes
 			'Megamons Legality Expansion', // Megamons
-			'Mix and Mega Battle Effects', // Mix and Mega
+			'Gen 7 Mix and Mega Battle Effects', // Mix and Mega
 			'Megamons Allow Irregular Megaesques', // Mega and Mega AG
 		],
 		restrictedStones: ['Ultranecrozium Z'],

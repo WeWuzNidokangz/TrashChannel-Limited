@@ -875,6 +875,38 @@ let BattleFormats = {
 			return pokemon;
 		},
 	},
+	balancedhackmonsvalidation: {
+		effectType: 'Rule',
+		name: 'Balanced Hackmons Validation',
+		desc: "Forces Zacian/Zamzenta sets to conform to on-cart behaviour.",
+		onChangeSet(set) {
+			const item = toID(set.item);
+			if (set.species === 'Zacian' || set.species === 'Zacian-Crowned') {
+				if (item === 'rustedsword') {
+					set.species = 'Zacian-Crowned';
+					set.ability = 'Intrepid Sword';
+					let ironHead = set.moves.indexOf('ironhead');
+					if (ironHead >= 0) {
+						set.moves[ironHead] = 'behemothblade';
+					}
+				} else {
+					set.species = 'Zacian';
+				}
+			}
+			if (set.species === 'Zamazenta' || set.species === 'Zamazenta-Crowned') {
+				if (item === 'rustedshield') {
+					set.species = 'Zamazenta-Crowned';
+					set.ability = 'Dauntless Shield';
+					let ironHead = set.moves.indexOf('ironhead');
+					if (ironHead >= 0) {
+						set.moves[ironHead] = 'behemothbash';
+					}
+				} else {
+					set.species = 'Zamazenta';
+				}
+			}
+		},
+	},
 	camomonsrule: {
 		effectType: 'Rule',
 		name: 'Camomons Rule',
@@ -884,7 +916,7 @@ let BattleFormats = {
 			if (!target) return; // Chat command
 			//console.log('passed target');
 			if (effect && ['imposter', 'transform'].includes(effect.id)) return;
-			let types = [...new Set(target.baseMoveSlots.slice(0, 2).map(move => this.getMove(move.id).type))];
+			let types = [...new Set(target.baseMoveSlots.slice(0, 2).map(move => this.dex.getMove(move.id).type))];
 			return Object.assign({}, template, {types: types});
 		},
 		onSwitchIn: function (pokemon) {
@@ -1214,10 +1246,10 @@ let BattleFormats = {
 		desc: "Standard package of rulesets for Megamons.",
 		ruleset: ['Megamons Legality Expansion', 'Megamons Standard Validation'],
 	},
-	mixandmegastandardvalidation: {
+	gen7mixandmegastandardvalidation: {
 		effectType: 'ValidatorRule',
-		name: 'Mix and Mega Standard Validation',
-		desc: "Standard validation for Mix and Mega.",
+		name: 'Gen 7 Mix and Mega Standard Validation',
+		desc: "Standard validation for Gen 7 Mix and Mega.",
 		onValidateTeam(team) {
 			/**@type {{[k: string]: true}} */
 			let itemTable = {};
@@ -1237,6 +1269,60 @@ let BattleFormats = {
 			let uberStones = format.restrictedStones || [];
 			let uberPokemon = format.cannotMega || [];
 			if (uberPokemon.includes(template.name) || set.ability === 'Power Construct' || uberStones.includes(item.name)) return ["" + template.species + " is not allowed to hold " + item.name + "."];
+		},
+	},
+	gen7mixandmegabattleeffects: {
+		effectType: 'Rule',
+		name: 'Gen 7 Mix and Mega Battle Effects',
+		desc: "Battle effects for Gen 7 Mix and Mega (insufficient to run MnM without mod, crashes when called though Mix and Meta).",
+		onBegin() {
+			for (const pokemon of this.getAllPokemon()) {
+				pokemon.m.originalSpecies = pokemon.baseTemplate.species;
+			}
+		},
+		onSwitchIn(pokemon) {
+			// @ts-ignore
+			let oMegaTemplate = this.dex.getTemplate(pokemon.template.originalMega);
+			if (oMegaTemplate.exists && pokemon.m.originalSpecies !== oMegaTemplate.baseSpecies) {
+				// Place volatiles on the Pokémon to show its mega-evolved condition and details
+				this.add('-start', pokemon, oMegaTemplate.requiredItem || oMegaTemplate.requiredMove, '[silent]');
+				let oTemplate = this.dex.getTemplate(pokemon.m.originalSpecies);
+				if (oTemplate.types.length !== pokemon.template.types.length || oTemplate.types[1] !== pokemon.template.types[1]) {
+					this.add('-start', pokemon, 'typechange', pokemon.template.types.join('/'), '[silent]');
+				}
+			}
+		},
+		onSwitchOut(pokemon) {
+			// @ts-ignore
+			let oMegaTemplate = this.dex.getTemplate(pokemon.template.originalMega);
+			if (oMegaTemplate.exists && pokemon.m.originalSpecies !== oMegaTemplate.baseSpecies) {
+				this.add('-end', pokemon, oMegaTemplate.requiredItem || oMegaTemplate.requiredMove, '[silent]');
+			}
+		},
+	},
+	gen7mixandmegastandardpackage: {
+		effectType: 'Rule',
+		name: 'Gen 7 Mix and Mega Standard Package',
+		desc: "Standard package of rulesets for Mix and Mega (insufficient to run MnM without mod, crashes when called though Mix and Meta).",
+		ruleset: ['Gen 7 Mix and Mega Standard Validation', 'Gen 7 Mix and Mega Battle Effects'],
+	},
+	mixandmegastandardvalidation: {
+		effectType: 'ValidatorRule',
+		name: 'Mix and Mega Standard Validation',
+		desc: "Standard validation for Mix and Mega.",
+		onValidateTeam(team, format) {
+			/**@type {{[k: string]: true}} */
+			let itemTable = {};
+			for (const set of team) {
+				let item = this.dex.getItem(set.item);
+				if (!item || !item.megaStone) continue;
+				let template = this.dex.getTemplate(set.species);
+				if (format.banlist.includes('AG') && ['Venusaur', 'Blastoise', 'Zamazenta'].includes(template.baseSpecies)) {
+					return [`${template.species} is not allowed to hold ${item.name}.`];
+				}
+				if (itemTable[item.id]) return ["You are limited to one of each mega stone.", "(You have more than one " + item.name + ")"];
+				itemTable[item.id] = true;
+			}
 		},
 	},
 	mixandmegabattleeffects: {
