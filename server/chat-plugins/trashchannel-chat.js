@@ -17,7 +17,7 @@ const TrashChannelChatSupport = require('../../trashchannel/trashchannel-chatsup
 const RULESETS = path.resolve(__dirname, '../../data/rulesets');
 const FORMATS = path.resolve(__dirname, '../../config/formats');
 
-const BITCHANDBEGGARMOD = path.resolve(__dirname, '../../data/mods/gen7bitchandbeggar/scripts');
+const BITCHANDBEGGARMOD = path.resolve(__dirname, '../../data/mods/bitchandbeggar/scripts');
 
 const MAX_PROCESSES = 1;
 const RESULTS_MAX_LENGTH = 10;
@@ -176,11 +176,11 @@ const commands = {
 		if (beggarTemplate.isMega || beggarTemplate.name === 'Necrozma-Ultra') { // Mega Pokemon and Ultra Necrozma cannot be beggar evolved
 			this.errorReply(`Warning: You cannot beggar evolve Mega Pokemon and Ultra Necrozma in Bitch and Beggar.`);
 		}
-		let banlist = Dex.getFormat('gen7bitchandbeggar').banlist;
+		let banlist = Dex.getFormat('gen8bitchandbeggar').banlist;
 		if (banlist.includes(bitchTemplate.name)) {
 			this.errorReply(`Warning: ${bitchTemplate.name} is banned from Bitch and Beggar.`);
 		}
-		let cannotMega = Dex.getFormat('gen7bitchandbeggar').cannotMega || [];
+		let cannotMega = Dex.getFormat('gen8bitchandbeggar').cannotMega || [];
 		if (cannotMega.includes(beggarTemplate.name) && beggarTemplate.name !== bitchTemplate.megaEvolves && !beggarTemplate.isMega) { // Separate messages because there's a difference between being already beggar evolved / NFE and being banned from beggar evolving
 			this.errorReply(`Warning: ${beggarTemplate.name} is banned from beggar evolving in Bitch and Beggar.`);
 		}
@@ -210,7 +210,7 @@ const commands = {
 			let BnBFormat = null;
 			for(let nFrmItr=0; nFrmItr<Formats.length; ++nFrmItr) {
 				//console.log("nFrmItr: " + nFrmItr.toString() + ", name: " + Formats[nFrmItr].name);
-				if(Formats[nFrmItr].name === '[Gen 7] Bitch and Beggar') {
+				if(Formats[nFrmItr].name === '[Gen 8] Bitch and Beggar') {
 					BnBFormat = Formats[nFrmItr];
 				}
 			}
@@ -222,11 +222,11 @@ const commands = {
 			}
 		}
 		// Fake Pokemon and Mega Stones
-		if (beggarTemplate.isNonstandard) {
+		if (beggarTemplate.isNonstandard === "CAP") {
 			this.errorReply(`Warning: ${beggarTemplate.name} is not a real Pokemon and is therefore not usable in Bitch and Beggar.`);
 		}
 		// Actually can be used with CAP
-		if (bitchTemplate.isNonstandard) {
+		if (bitchTemplate.isNonstandard === "CAP") {
 			this.errorReply(`Warning: ${bitchTemplate.name} is a fake bitch created by the CAP Project and is restricted to CAP mashups.`);
 		}
 

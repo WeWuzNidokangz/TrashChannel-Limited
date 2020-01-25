@@ -14,7 +14,8 @@ const RULESETS = path.resolve(__dirname, '../data/rulesets');
 const MMCOLLECTION = path.resolve(__dirname, '../data/mods/gen7mixandmeta/mixedmetacollection');
 
 // Bitch and Beggar includes
-const BITCHANDBEGGARMOD = path.resolve(__dirname, '../data/mods/gen7bitchandbeggar/scripts');
+const BITCHANDBEGGARMOD = path.resolve(__dirname, '../data/mods/bitchandbeggar/scripts');
+const GEN7BITCHANDBEGGARMOD = path.resolve(__dirname, '../data/mods/gen7bitchandbeggar/scripts');
 //#endregion
 
 /**@type {(FormatsData | {section: string, column?: number})[]} */
@@ -1451,10 +1452,12 @@ let Formats = [
 				let item = this.dex.getItem(set.item);
 				if (!item || !item.megaStone) continue;
 				let template = this.dex.getTemplate(set.species);
-				if (format.banlist.includes('AG') && ['Venusaur', 'Blastoise', 'Zamazenta'].includes(template.baseSpecies)) {
-					return [`${template.species} is not allowed to hold ${item.name}.`];
+				if (this.dex.getRuleTable(format).has('-AG') ) {
+					if(['Venusaur', 'Blastoise', 'Zamazenta'].includes(template.baseSpecies)) {
+						return [`${template.species} is not allowed to hold ${item.name}.`];
+					}
+					if (itemTable[item.id]) return ["You are limited to one of each mega stone.", "(You have more than one " + item.name + ")"];
 				}
-				if (itemTable[item.id]) return ["You are limited to one of each mega stone.", "(You have more than one " + item.name + ")"];
 				itemTable[item.id] = true;
 			}
 		},
@@ -4362,6 +4365,167 @@ let Formats = [
 		column: 3,
 	},
 	{
+		name: "[Gen 8] Bitch and Beggar",
+		onDesc() {
+			let bstLimitString = this.modValueNumberA ? " (<=" + this.modValueNumberA.toString() + ")" : "";
+			return "You've heard of Mix and Mega, what about Bitch and Beggar? Pok&eacute;mon can 'Beggar-Evolve' using low" + bstLimitString + " BST Pok&eacute;mon as Stones.";
+		},
+		threads: [
+			``,
+		],
+
+		mod: 'bitchandbeggar',
+		ruleset: ['Obtainable', 'Bitch And Beggar Rule', 'Species Clause', 'Nickname Clause', 'OHKO Clause', 'Evasion Moves Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Dynamax Clause', 'Sleep Clause Mod', 'Endless Battle Clause'],
+		banlist: [
+			'AG', 'Eternatus', 'Gothitelle', 'Gothorita', 'Zacian', 'Moody', 'Baton Pass', 'Electrify',
+			'Beedrillite', 'Blazikenite', 'Gengarite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite',
+		],
+		restrictionlist: [
+			'Huge Power', 'Pure Power', 'Wonder Guard', 
+		],
+		modValueNumberA: 300,
+		onValidateTeam(team) {
+			/**@type {{[k: string]: true}} */
+			let itemTable = {};
+			for (const set of team) {
+				let bitchTemplate = this.dex.getTemplate(set.item);
+				if (this.dex.getRuleTable(this.format).has('-AG') ) {
+					if(['Venusaur', 'Blastoise', 'Zamazenta'].includes(template.baseSpecies)) {
+						return [`${template.species} is not allowed to hold ${item.name}.`];
+					}
+					if (!bitchTemplate.exists) continue;
+					if (itemTable[bitchTemplate.id]) return ["You are limited to one of each Bitch.", "(You have more than one " + bitchTemplate.name + ")"];
+				}
+				itemTable[bitchTemplate.id] = true;
+			}
+		},
+		onValidateSet(set, format, setHas, teamHas, ruleTable) {
+			//console.log('BnB: val ');
+			//console.log('format.modValueNumberA: '+format.modValueNumberA.toString());
+
+			let beggarTemplate = this.dex.getTemplate(set.species || set.name);
+			let bitchTemplate = this.dex.getTemplate(set.item);
+			//console.log('bitch: '+set.item);
+			if(!bitchTemplate.exists) return;
+
+			let problems = [];
+			let bitchBST = this.dex.calcBST(bitchTemplate.baseStats);
+			//console.log('bitchBST: '+bitchBST.toString());
+			if(format.modValueNumberA) {
+				if(bitchBST > format.modValueNumberA) {
+					problems.push("Bitches are limited to " + format.modValueNumberA.toString() + " BST, but " + bitchTemplate.name + " has " + bitchBST.toString() + "!");
+				}
+			}
+			let uberBitches = format.restrictedStones || [];
+			let uberPokemon = format.cannotMega || [];
+			if (uberPokemon.includes(beggarTemplate.name) || set.ability === 'Power Construct' || uberBitches.includes(bitchTemplate.name)) return ["" + beggarTemplate.species + " is not allowed to hold " + bitchTemplate.name + "."];
+			
+			// Load BnB mod functions
+			/**@type {ModdedBattleScriptsData | null} */
+			let BnBMod = null;
+			try {
+				BnBMod = require(BITCHANDBEGGARMOD).BattleScripts;
+			} catch (e) {
+				console.log('e.code: ' + e.code);
+				if (e.code !== 'MODULE_NOT_FOUND' && e.code !== 'ENOENT') {
+					throw e;
+				}
+				problems.push("BnBMod not found!");
+			}
+
+			if(!BnBMod) {
+				return problems;
+			}
+
+			const mixedTemplate = BnBMod.getMixedTemplate(beggarTemplate.name, bitchTemplate.baseSpecies);
+			let oAbilitySlot = this.dex.calcActiveAbilitySlot(beggarTemplate, set.ability);
+			//console.log("oAbilitySlot: " + oAbilitySlot);
+			// @ts-ignore
+			let postBeggarAbilityName = mixedTemplate.abilities[oAbilitySlot];
+			let postBeggarAbilityId = toID(postBeggarAbilityName);
+			//console.log("postBeggarAbilityId: " + postBeggarAbilityId);
+			let abilityTest = '-ability:'+postBeggarAbilityId;
+			//console.log("abilityTest: " + abilityTest);
+			ruleTable.forEach((v, rule) => {
+				//console.log("BnB rule: " + rule);
+				if( rule === abilityTest ) {
+					//console.log("BnB rule IN ");
+					problems.push("If "+set.name+" beggar-evolves with the ability "+ set.ability + ", it will gain the banned ability "
+						+ postBeggarAbilityName + " from its bitch "+ bitchTemplate.name + ".");
+				}
+			});
+			let restrictedAbilities = format.restrictedAbilities || [];
+			if (restrictedAbilities.includes(postBeggarAbilityId)) {
+				//console.log("BnB restriction IN ");
+				problems.push("If "+set.name+" beggar-evolves with the ability "+ set.ability + ", it will gain the restricted ability "
+					+ postBeggarAbilityName + " from its bitch "+ bitchTemplate.name + ".");
+			}
+			return problems;
+		},
+		onBegin() {
+			for (const pokemon of this.getAllPokemon()) {
+				pokemon.m.originalSpecies = pokemon.baseTemplate.species;
+			}
+		},
+		onSwitchIn(pokemon) {
+			// Take care of non-BnB case
+			let bitchTemplate = this.dex.getTemplate(pokemon.item);
+			if(!bitchTemplate.exists) return;
+			if (null === pokemon.canMegaEvo) {
+				// Place volatiles on the Pokémon to show its beggar-evolved condition and details
+				let bitchSpecies = pokemon.item;
+				this.add('-start', pokemon, this.dex.generateMegaStoneName(bitchSpecies), '[silent]');
+				let oTemplate = this.dex.getTemplate(pokemon.m.originalSpecies);
+				if (oTemplate.types.length !== pokemon.template.types.length || oTemplate.types[1] !== pokemon.template.types[1]) {
+					this.add('-start', pokemon, 'typechange', pokemon.template.types.join('/'), '[silent]');
+				}
+			}
+		},
+		onSwitchOut(pokemon) {
+			// @ts-ignore
+			let oMegaTemplate = this.dex.getTemplate(pokemon.template.originalMega);
+			if (oMegaTemplate.exists && pokemon.m.originalSpecies !== oMegaTemplate.baseSpecies) {
+				this.add('-end', pokemon, oMegaTemplate.requiredItem || oMegaTemplate.requiredMove, '[silent]');
+			}
+		},
+	},
+	{
+		name: "[Gen 8] Bitch and Beggar: Hackmons Cup",
+		desc: `You've heard of Mix and Mega, what about Bitch and Beggar? Randomized teams of level-balanced Pok&eacute;mon with absolutely any ability, move, and bitch.`,
+		threads: [
+			``,
+		],
+		mod: 'bitchandbeggar',
+		ruleset: ['Obtainable', 'HP Percentage Mod', 'Cancel Mod'],
+		team: 'randomHCBnB',
+		onBegin() {
+			for (const pokemon of this.getAllPokemon()) {
+				pokemon.m.originalSpecies = pokemon.baseTemplate.species;
+			}
+		},
+		onSwitchIn(pokemon) {
+			// Take care of non-BnB case
+			let bitchTemplate = this.dex.getTemplate(pokemon.item);
+			if(!bitchTemplate.exists) return;
+			if (null === pokemon.canMegaEvo) {
+				// Place volatiles on the Pokémon to show its beggar-evolved condition and details
+				let bitchSpecies = pokemon.item;
+				this.add('-start', pokemon, this.dex.generateMegaStoneName(bitchSpecies), '[silent]');
+				let oTemplate = this.dex.getTemplate(pokemon.m.originalSpecies);
+				if (oTemplate.types.length !== pokemon.template.types.length || oTemplate.types[1] !== pokemon.template.types[1]) {
+					this.add('-start', pokemon, 'typechange', pokemon.template.types.join('/'), '[silent]');
+				}
+			}
+		},
+		onSwitchOut(pokemon) {
+			// @ts-ignore
+			let oMegaTemplate = this.dex.getTemplate(pokemon.template.originalMega);
+			if (oMegaTemplate.exists && pokemon.m.originalSpecies !== oMegaTemplate.baseSpecies) {
+				this.add('-end', pokemon, oMegaTemplate.requiredItem || oMegaTemplate.requiredMove, '[silent]');
+			}
+		},
+	},
+	{
 		name: "[Gen 7] Mix and Meta",
 		onDesc() {
 			let descString = `<b>Are you ready, true believers? Mashups and Trash Channel have joined forces once again to bring you...MIX AND META!</b> <br>Pit sets from a variety of popular OMs against each other to see which is the strongest. Supported metas:-`;
@@ -4910,7 +5074,7 @@ let Formats = [
 			if(!bitchTemplate.exists) return;
 
 			let problems = [];
-			let bitchBST = this.calcBST(bitchTemplate.baseStats);
+			let bitchBST = this.dex.calcBST(bitchTemplate.baseStats);
 			//console.log('bitchBST: '+bitchBST.toString());
 			if(format.modValueNumberA) {
 				if(bitchBST > format.modValueNumberA) {
@@ -4925,7 +5089,7 @@ let Formats = [
 			/**@type {ModdedBattleScriptsData | null} */
 			let BnBMod = null;
 			try {
-				BnBMod = require(BITCHANDBEGGARMOD).BattleScripts;
+				BnBMod = require(GEN7BITCHANDBEGGARMOD).BattleScripts;
 			} catch (e) {
 				console.log('e.code: ' + e.code);
 				if (e.code !== 'MODULE_NOT_FOUND' && e.code !== 'ENOENT') {
@@ -4939,7 +5103,7 @@ let Formats = [
 			}
 
 			const mixedTemplate = BnBMod.getMixedTemplate(beggarTemplate.name, bitchTemplate.baseSpecies);
-			let oAbilitySlot = this.calcActiveAbilitySlot(beggarTemplate, set.ability);
+			let oAbilitySlot = this.dex.calcActiveAbilitySlot(beggarTemplate, set.ability);
 			//console.log("oAbilitySlot: " + oAbilitySlot);
 			// @ts-ignore
 			let postBeggarAbilityName = mixedTemplate.abilities[oAbilitySlot];
@@ -4963,42 +5127,6 @@ let Formats = [
 			}
 			return problems;
 		},
-		onBegin() {
-			for (const pokemon of this.getAllPokemon()) {
-				pokemon.m.originalSpecies = pokemon.baseTemplate.species;
-			}
-		},
-		onSwitchIn(pokemon) {
-			// Take care of non-BnB case
-			let bitchTemplate = this.dex.getTemplate(pokemon.item);
-			if(!bitchTemplate.exists) return;
-			if (null === pokemon.canMegaEvo) {
-				// Place volatiles on the Pokémon to show its beggar-evolved condition and details
-				let bitchSpecies = pokemon.item;
-				this.add('-start', pokemon, this.dex.generateMegaStoneName(bitchSpecies), '[silent]');
-				let oTemplate = this.dex.getTemplate(pokemon.m.originalSpecies);
-				if (oTemplate.types.length !== pokemon.template.types.length || oTemplate.types[1] !== pokemon.template.types[1]) {
-					this.add('-start', pokemon, 'typechange', pokemon.template.types.join('/'), '[silent]');
-				}
-			}
-		},
-		onSwitchOut(pokemon) {
-			// @ts-ignore
-			let oMegaTemplate = this.dex.getTemplate(pokemon.template.originalMega);
-			if (oMegaTemplate.exists && pokemon.m.originalSpecies !== oMegaTemplate.baseSpecies) {
-				this.add('-end', pokemon, oMegaTemplate.requiredItem || oMegaTemplate.requiredMove, '[silent]');
-			}
-		},
-	},
-	{
-		name: "[Gen 7] Bitch and Beggar: Hackmons Cup",
-		desc: `You've heard of Mix and Mega, what about Bitch and Beggar? Randomized teams of level-balanced Pok&eacute;mon with absolutely any ability, move, and bitch.`,
-		threads: [
-			``,
-		],
-		mod: 'gen7bitchandbeggar',
-		ruleset: ['Obtainable', 'HP Percentage Mod', 'Cancel Mod'],
-		team: 'randomHCBnB',
 		onBegin() {
 			for (const pokemon of this.getAllPokemon()) {
 				pokemon.m.originalSpecies = pokemon.baseTemplate.species;
