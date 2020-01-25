@@ -3379,6 +3379,17 @@ let Formats = [
         ],
     },
 	{
+		name: "[Gen 8] 350 Cup",
+		desc: "Pok&eacute;mon with a base stat total of 350 or lower get their stats doubled. &bullet; <a href=\"https://www.smogon.com/forums/threads/350-cup.3656554/\">350 Cup</a>",
+		mod: 'gen8',
+		ruleset: ['[Gen 8] Ubers', '350 Cup Rule'],
+		banlist: [
+			'Shadow Tag', 'Arena Trap', // Abilities
+			'Eviolite', 'Light Ball', // Items
+			'Rufflet​', 'Pawniard​', // Pokemon
+		],
+	},
+	{
 		name: "[Gen 7] STABmons",
 		desc: `Pok&eacute;mon can use any move of their typing, in addition to the moves they can normally learn.`,
 		threads: [
@@ -3417,7 +3428,7 @@ let Formats = [
 		name: "[Gen 7] 350 Cup",
 		desc: "Pok&eacute;mon with a base stat total of 350 or lower get their stats doubled. &bullet; <a href=\"https://www.smogon.com/forums/threads/3589641/\">350 Cup</a>",
 		mod: 'gen7',
-		ruleset: ['[Gen 7] Ubers', 'R 350 Cup Rule'],
+		ruleset: ['[Gen 7] Ubers', '350 Cup Rule'],
 		banlist: ['Deep Sea Tooth', 'Eevium Z', 'Eviolite', 'Light Ball'],
 	},
 	{

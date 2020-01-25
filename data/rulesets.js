@@ -817,9 +817,9 @@ let BattleFormats = {
 	/////////////////////////////
 	// TrashChannel: New rules //
 	/////////////////////////////
-    r350cuprule: {
+    "350cuprule": {
 		effectType: 'Rule',
-		name: 'R 350 Cup Rule',
+		name: '350 Cup Rule',
 		desc: "The mod for 350 Cup: Pok&eacute;mon with a base stat total of 350 or lower get their stats doubled.",
         onModifyTemplate: function (template, target, source, effect) {
 			//console.log('r350cuprule: onModifyTemplate');
