@@ -93,7 +93,9 @@ export const commands: ChatCommands = {
 		const template = dex.getTemplate(sep[0]);
 		TrashChannelChatSupport.mixandmegainternal(this, template, stoneName[0], mod, "");
 	},
-	mixandmegahelp: [`/mnm <pokemon> @ <mega stone>[, generation] - Shows the Mix and Mega evolved Pokemon's type and stats.`],
+	mixandmegahelp: [
+		`/mnm <pokemon> @ <mega stone>[, generation] - Shows the Mix and Mega evolved Pokemon's type and stats.`,
+	],
 
 	'!stone': true,
 	orb: 'stone',
@@ -105,19 +107,13 @@ export const commands: ChatCommands = {
 		if (sep[1] && toID(sep[1]) in Dex.dexes) dex = Dex.mod(toID(sep[1]));
 		const targetid = toID(sep[0]);
 		if (!targetid) return this.parse('/help stone');
-		let stone = TrashChannelChatSupport.getMegaStone(targetid, sep[1]);
-		if (!stone || (dex.gen >= 8 && ['redorb', 'blueorb'].includes(stone.id))) return this.errorReply(`Error: Mega Stone not found.`);
+		const stone = TrashChannelChatSupport.getMegaStone(targetid, sep[1]);
+		if (!stone || (dex.gen >= 8 && ['redorb', 'blueorb'].includes(stone.id))) {
+			return this.errorReply(`Error: Mega Stone not found.`);
+		}
 		const banlist = Dex.getFormat('gen8mixandmega').banlist;
 		if (banlist.includes(stone.name)) {
 			this.errorReply(`Warning: ${stone.name} is banned from Mix and Mega.`);
-		}
-		const restrictedStones = Dex.getFormat('gen8mixandmega').restrictedStones || [];
-		if (restrictedStones.includes(stone.name)) {
-			if (dex.getTemplate(stone.megaEvolves).isNonstandard === "Past") {
-				this.errorReply(`Warning: ${stone.name} is restricted in Mix and Mega.`);
-			} else {
-				this.errorReply(`Warning: ${stone.name} is restricted to ${stone.megaEvolves} in Mix and Mega.`);
-			}
 		}
 		if (stone.isUnreleased) {
 			this.errorReply(`Warning: ${stone.name} is unreleased and is not usable in current Mix and Mega.`);
@@ -293,7 +289,9 @@ export const commands: ChatCommands = {
 		}
 		this.sendReply(`|raw|${Chat.getDataPokemonHTML(template)}`);
 	},
-	natureswapshelp: [`/ns OR /natureswap <pokemon> - Shows the base stats that a Pokemon would have in Nature Swap. Usage: /ns <Nature> <Pokemon>.`],
+	natureswapshelp: [
+		`/ns OR /natureswap <pokemon> - Shows the base stats that a Pokemon would have in Nature Swap. Usage: /ns <Nature> <Pokemon>.`,
+	],
 
 	'!crossevolve': true,
 	ce: 'crossevolve',
@@ -382,5 +380,7 @@ export const commands: ChatCommands = {
 			return '<font color="#686868">' + detail + ':</font> ' + details[detail];
 		}).join("&nbsp;|&ThickSpace;") + '</font>');
 	},
-	crossevolvehelp: ["/crossevo <base pokemon>, <evolved pokemon> - Shows the type and stats for the Cross Evolved Pokemon."],
+	crossevolvehelp: [
+		"/crossevo <base pokemon>, <evolved pokemon> - Shows the type and stats for the Cross Evolved Pokemon.",
+	],
 };

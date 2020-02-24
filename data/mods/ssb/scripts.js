@@ -12,7 +12,7 @@ let BattleScripts = {
 			if (changedMove && changedMove !== true) {
 				baseMove = this.dex.getActiveMove(changedMove);
 				if (pranksterBoosted) baseMove.pranksterBoosted = pranksterBoosted;
-				target = this.resolveTarget(pokemon, baseMove);
+				target = this.getRandomTarget(pokemon, baseMove);
 			}
 		}
 		let move = zMove ? this.getActiveZMove(baseMove, pokemon) : baseMove;
@@ -24,7 +24,7 @@ let BattleScripts = {
 		/* if (pokemon.moveThisTurn) {
 			// THIS IS PURELY A SANITY CHECK
 			// DO NOT TAKE ADVANTAGE OF THIS TO PREVENT A POKEMON FROM MOVING;
-			// USE this.cancelMove INSTEAD
+			// USE this.queue.cancelMove INSTEAD
 			this.debug('' + pokemon.id + ' INCONSISTENT STATE, ALREADY MOVED: ' + pokemon.moveThisTurn);
 			this.clearActiveMove(true);
 			return;

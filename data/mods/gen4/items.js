@@ -50,9 +50,9 @@ let BattleItems = {
 		onModifyPriority() {},
 		onBeforeTurn(pokemon) {
 			if (pokemon.hp <= pokemon.maxhp / 4 || (pokemon.hp <= pokemon.maxhp / 2 && pokemon.ability === 'gluttony')) {
-				let action = this.willMove(pokemon);
+				let action = this.queue.willMove(pokemon);
 				if (!action) return;
-				this.insertQueue({
+				this.queue.insertChoice({
 					choice: 'event',
 					event: 'Custap',
 					priority: action.priority + 0.1,
@@ -63,10 +63,10 @@ let BattleItems = {
 			}
 		},
 		onCustap(pokemon) {
-			let action = this.willMove(pokemon);
+			let action = this.queue.willMove(pokemon);
 			this.debug('custap action: ' + action);
 			if (action && pokemon.eatItem()) {
-				this.cancelAction(pokemon);
+				this.queue.cancelAction(pokemon);
 				this.add('-message', "Custap Berry activated.");
 				this.runAction(action);
 			}
@@ -124,17 +124,6 @@ let BattleItems = {
 		inherit: true,
 		onEffectiveness() {},
 		desc: "Holder's Speed is halved and it becomes grounded.",
-	},
-	"jabocaberry": {
-		inherit: true,
-		onAfterDamage() {},
-		onAfterMoveSecondary(target, source, move) {
-			if (source && source !== target && move && move.category === 'Physical') {
-				if (target.eatItem()) {
-					this.damage(source.baseMaxhp / 8, source, target, null, true);
-				}
-			}
-		},
 	},
 	"kingsrock": {
 		inherit: true,
@@ -255,17 +244,6 @@ let BattleItems = {
 					chance: 10,
 					volatileStatus: 'flinch',
 				});
-			}
-		},
-	},
-	"rowapberry": {
-		inherit: true,
-		onAfterDamage() {},
-		onAfterMoveSecondary(target, source, move) {
-			if (source && source !== target && move && move.category === 'Special') {
-				if (target.eatItem()) {
-					this.damage(source.baseMaxhp / 8, source, target, null, true);
-				}
 			}
 		},
 	},

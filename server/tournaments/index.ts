@@ -12,6 +12,7 @@ type Generator = RoundRobin | Elimination;
 
 const BRACKET_MINIMUM_UPDATE_INTERVAL = 2 * 1000;
 const AUTO_DISQUALIFY_WARNING_TIMEOUT = 30 * 1000;
+const MAX_AUTO_DISQUALIFY_TIMEOUT = 60 * 60 * 1000;
 const AUTO_START_MINIMUM_TIMEOUT = 30 * 1000;
 const MAX_REASON_LENGTH = 300;
 const MAX_CUSTOM_NAME_LENGTH = 100;
@@ -146,7 +147,7 @@ export class Tournament extends Rooms.RoomGame {
 
 		this.isEnded = false;
 
-		room.add(`|tournament|create|${this.name}|${generator.name}|${this.playerCap}`);
+		room.add(`|tournament|create|${this.baseFormat}|${generator.name}|${this.playerCap}${this.name === this.baseFormat ? `` : `|${this.name}`}`);
 		const update: {
 			format: string, teambuilderFormat?: string, generator: string,
 			playerCap: number, isStarted: boolean, isJoined: boolean,
@@ -491,7 +492,10 @@ export class Tournament extends Rooms.RoomGame {
 			matchPlayer.inProgressMatch.to.isBusy = false;
 			matchPlayer.isBusy = false;
 
-			matchPlayer.inProgressMatch.room.addRaw(Chat.html`<div class="broadcast-red"><b>${user.name} is no longer in the tournament.<br />You can finish playing, but this battle is no longer considered a tournament battle.</div>`).update();
+			matchPlayer.inProgressMatch.room.addRaw(
+				Chat.html`<div class="broadcast-red"><b>${user.name} is no longer in the tournament.<br />` +
+				`You can finish playing, but this battle is no longer considered a tournament battle.</div>`
+			).update();
 			matchPlayer.inProgressMatch.room.parent = null;
 			this.completedMatches.add(matchPlayer.inProgressMatch.room.roomid);
 			matchPlayer.inProgressMatch = null;
@@ -770,7 +774,7 @@ export class Tournament extends Rooms.RoomGame {
 	}
 
 	setAutoDisqualifyTimeout(timeout: number, output: CommandContext) {
-		if (timeout < AUTO_DISQUALIFY_WARNING_TIMEOUT || isNaN(timeout)) {
+		if (timeout < AUTO_DISQUALIFY_WARNING_TIMEOUT || timeout > MAX_AUTO_DISQUALIFY_TIMEOUT || isNaN(timeout)) {
 			output.sendReply('|tournament|error|InvalidAutoDisqualifyTimeout');
 			return false;
 		}
@@ -1165,7 +1169,10 @@ const tourCommands: {basic: TourCommands, creation: TourCommands, moderation: To
 		getusers(tournament) {
 			if (!this.runBroadcast()) return;
 			const users = usersToNames(tournament.getRemainingPlayers().sort());
-			this.sendReplyBox(Chat.html`<strong>${users.length}/${tournament.players.length} users remain in this tournament:</strong><br />${users.join(', ')}`);
+			this.sendReplyBox(
+				Chat.html`<strong>${users.length}/${tournament.players.length}` +
+				` users remain in this tournament:</strong><br />${users.join(', ')}`
+			);
 		},
 		getupdate(tournament, user) {
 			tournament.updateFor(user);
@@ -1588,9 +1595,9 @@ export const commands: ChatCommands = {
 			if (!this.runBroadcast()) return;
 			const update = [];
 			for (const tourRoom of Rooms.rooms.values()) {
-				if (!tourRoom.game || tourRoom.game.gameid !== 'tournament') continue;
+				const tournament = tourRoom.getGame(Tournament);
+				if (!tournament) continue;
 				if (tourRoom.isPrivate || tourRoom.isPersonal || tourRoom.staffRoom) continue;
-				const tournament = tourRoom.game as Tournament;
 				update.push({
 					room: tourRoom.roomid, title: room.title, format: tournament.name,
 					generator: tournament.generator.name, isStarted: tournament.isTournamentStarted,
@@ -1691,12 +1698,16 @@ export const commands: ChatCommands = {
 				if (room.tourAnnouncements) {
 					const tourRoom = Rooms.search(Config.tourroom || 'tournaments');
 					if (tourRoom && tourRoom !== room) {
-						tourRoom.addRaw(Chat.html`<div class="infobox"><a href="/${room.roomid}" class="ilink"><strong>${Dex.getFormat(tour.name).name}</strong> tournament created in <strong>${room.title}</strong>.</a></div>`).update();
+						tourRoom.addRaw(
+							Chat.html`<div class="infobox"><a href="/${room.roomid}" class="ilink">` +
+							`<strong>${Dex.getFormat(tour.name).name}</strong> tournament created in` +
+							` <strong>${room.title}</strong>.</a></div>`
+						).update();
 					}
 				}
 			}
 		} else {
-			const tournament = (room.game && room.game.gameid === 'tournament') ? room.game as Tournament : null;
+			const tournament = room.getGame(Tournament);
 			if (!tournament) {
 				return this.sendReply("There is currently no tournament running in this room.");
 			}

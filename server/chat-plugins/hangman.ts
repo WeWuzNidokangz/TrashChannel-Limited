@@ -7,7 +7,7 @@
 
 const maxMistakes = 6;
 
-class Hangman extends Rooms.RoomGame {
+export class Hangman extends Rooms.RoomGame {
 	gameNumber: number;
 	creator: ID;
 	word: string;
@@ -138,7 +138,7 @@ class Hangman extends Rooms.RoomGame {
 		}
 
 		const color = result === 1 ? 'red' : (result === 2 ? 'green' : 'blue');
-		const message = result === 1 ? 'Too bad! The mon has been hanged.' : (result === 2 ? 'The word has been guessed. Congratulations!' : 'Hangman');
+		const message = `${result === 1 ? 'Too bad! The mon has been hanged.' : (result === 2 ? 'The word has been guessed. Congratulations!' : 'Hangman')}`;
 		let output = `<div class="broadcast-${color}">`;
 		output += `<p style="text-align:left;font-weight:bold;font-size:10pt;margin:5px 0 0 15px">${message}</p>`;
 		output += `<table><tr><td style="text-align:center;">${this.hangingMan()}</td><td style="text-align:center;width:100%;word-wrap:break-word">`;
@@ -165,7 +165,8 @@ class Hangman extends Rooms.RoomGame {
 				// last guess was a letter
 				output += Chat.html` <small>&ndash; ${this.lastGuesser}</small>`;
 			} else {
-				output += Chat.html`<br />Guessed: ${this.guesses[this.guesses.length - 1]} <small>&ndash; ${this.lastGuesser}</small>`;
+				output += Chat.html`<br />Guessed: ${this.guesses[this.guesses.length - 1]} ` +
+					`<small>&ndash; ${this.lastGuesser}</small>`;
 			}
 		}
 
@@ -220,7 +221,9 @@ export const commands: ChatCommands = {
 			const word = params[0].replace(/[^A-Za-z '-]/g, '');
 			if (word.replace(/ /g, '').length < 1) return this.errorReply("Enter a valid word");
 			if (word.length > 30) return this.errorReply("Phrase must be less than 30 characters.");
-			if (word.split(' ').some(w => w.length > 20)) return this.errorReply("Each word in the phrase must be less than 20 characters.");
+			if (word.split(' ').some(w => w.length > 20)) {
+				return this.errorReply("Each word in the phrase must be less than 20 characters.");
+			}
 			if (!/[a-zA-Z]/.test(word)) return this.errorReply("Word must contain at least one letter.");
 
 			let hint;
@@ -240,10 +243,10 @@ export const commands: ChatCommands = {
 
 		guess(target, room, user) {
 			if (!target) return this.parse('/help guess');
-			if (!room.game || room.game.gameid !== 'hangman') return this.errorReply("There is no game of hangman running in this room.");
+			const game = room.getGame(Hangman);
+			if (!game) return this.errorReply("There is no game of hangman running in this room.");
 			if (!this.canTalk()) return;
 
-			const game = room.game as Hangman;
 			game.guess(target, user);
 		},
 		guesshelp: [
@@ -255,9 +258,9 @@ export const commands: ChatCommands = {
 		end(target, room, user) {
 			if (!this.can('minigame', null, room)) return false;
 			if (!this.canTalk()) return;
-			if (!room.game || room.game.gameid !== 'hangman') return this.errorReply("There is no game of hangman running in this room.");
+			const game = room.getGame(Hangman);
+			if (!game) return this.errorReply("There is no game of hangman running in this room.");
 
-			const game = room.game as Hangman;
 			game.end();
 			this.modlog('ENDHANGMAN');
 			return this.privateModAction(`(The game of hangman was ended by ${user.name}.)`);
@@ -291,11 +294,11 @@ export const commands: ChatCommands = {
 		},
 
 		display(target, room, user) {
-			if (!room.game || room.game.title !== 'Hangman') return this.errorReply("There is no game of hangman running in this room.");
+			const game = room.getGame(Hangman);
+			if (!game) return this.errorReply("There is no game of hangman running in this room.");
 			if (!this.runBroadcast()) return;
 			room.update();
 
-			const game = room.game as Hangman;
 			game.display(user, this.broadcasting);
 		},
 
@@ -316,11 +319,11 @@ export const commands: ChatCommands = {
 	],
 
 	guess(target, room, user) {
-		if (!room.game) return this.errorReply("There is no game running in this room.");
+		const game = room.getGame(Hangman);
+		if (!game) return this.errorReply("There is no game of hangman running in this room.");
 		if (!this.canTalk()) return;
-		if (!(room.game as Hangman).guess) return this.errorReply("You can't guess anything in this game.");
 
-		(room.game as Hangman).guess(target, user);
+		game.guess(target, user);
 	},
 	guesshelp: [
 		`/guess - Shortcut for /hangman guess.`,

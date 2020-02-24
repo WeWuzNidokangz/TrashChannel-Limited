@@ -102,17 +102,17 @@ let BattleScripts = {
 			let changedMove = this.runEvent('OverrideAction', pokemon, target, move);
 			if (changedMove && changedMove !== true) {
 				move = this.dex.getActiveMove(changedMove);
-				target = this.resolveTarget(pokemon, move);
+				target = this.getRandomTarget(pokemon, move);
 			}
 		}
-		if (!target && target !== false) target = this.resolveTarget(pokemon, move);
+		if (!target && target !== false) target = this.getRandomTarget(pokemon, move);
 
 		this.setActiveMove(move, pokemon, target);
 
 		if (pokemon.moveThisTurn) {
 			// THIS IS PURELY A SANITY CHECK
 			// DO NOT TAKE ADVANTAGE OF THIS TO PREVENT A POKEMON FROM MOVING;
-			// USE this.cancelMove INSTEAD
+			// USE this.queue.cancelMove INSTEAD
 			this.debug('' + pokemon.id + ' INCONSISTENT STATE, ALREADY MOVED: ' + pokemon.moveThisTurn);
 			this.clearActiveMove(true);
 			return;

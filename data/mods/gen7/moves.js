@@ -395,6 +395,23 @@ let BattleMovedex = {
 		inherit: true,
 		isNonstandard: null,
 	},
+	"healingwish": {
+		inherit: true,
+		desc: "The user faints and the Pokemon brought out to replace it has its HP fully restored along with having any major status condition cured. The new Pokemon is sent out at the end of the turn, and the healing happens before hazards take effect. Fails if the user is the last unfainted Pokemon in its party.",
+		shortDesc: "User faints. Replacement is fully healed.",
+		effect: {
+			duration: 2,
+			onSwitchInPriority: 1,
+			onSwitchIn(target) {
+				if (!target.fainted) {
+					target.heal(target.maxhp);
+					target.setStatus('');
+					this.add('-heal', target, target.getHealth, '[from] move: Healing Wish');
+					target.side.removeSlotCondition(target, 'healingwish');
+				}
+			},
+		},
+	},
 	healorder: {
 		inherit: true,
 		isNonstandard: null,
@@ -547,7 +564,7 @@ let BattleMovedex = {
 	kingsshield: {
 		inherit: true,
 		desc: "The user is protected from most attacks made by other Pokemon during this turn, and Pokemon trying to make contact with the user have their Attack lowered by 2 stages. Non-damaging moves go through this protection. This move has a 1/X chance of being successful, where X starts at 1 and triples each time this move is successfully used. X resets to 1 if this move fails, if the user's last move used is not Baneful Bunker, Detect, Endure, King's Shield, Protect, Quick Guard, Spiky Shield, or Wide Guard, or if it was one of those moves and the user's protection was broken. Fails if the user moves last this turn.",
-		shortDesc: "Protects from attacks. Contact: lowers Atk by 2.",
+		shortDesc: "Protects from damaging attacks. Contact: -2 Atk.",
 		effect: {
 			duration: 1,
 			onStart(target) {
@@ -590,6 +607,7 @@ let BattleMovedex = {
 	lightofruin: {
 		inherit: true,
 		isNonstandard: null,
+		isUnreleased: true,
 	},
 	lightthatburnsthesky: {
 		inherit: true,
@@ -727,6 +745,10 @@ let BattleMovedex = {
 		inherit: true,
 		isNonstandard: null,
 	},
+	powder: {
+		inherit: true,
+		isNonstandard: null,
+	},
 	precipiceblades: {
 		inherit: true,
 		isNonstandard: null,
@@ -799,11 +821,11 @@ let BattleMovedex = {
 		inherit: true,
 		onHit(target) {
 			if (target.side.active.length < 2) return false; // fails in singles
-			let action = this.willMove(target);
+			let action = this.queue.willMove(target);
 			if (!action) return false;
 
 			action.priority = -7.1;
-			this.cancelMove(target);
+			this.queue.cancelMove(target);
 			for (let i = this.queue.length - 1; i >= 0; i--) {
 				if (this.queue[i].choice === 'residual') {
 					this.queue.splice(i, 0, action);

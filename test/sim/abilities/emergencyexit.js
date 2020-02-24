@@ -18,18 +18,58 @@ describe(`Emergency Exit`, function () {
 		const eePokemon = battle.p1.active[0];
 		const foePokemon = battle.p2.active[0];
 		battle.makeChoices('move superfang', 'move superfang');
-		assert.strictEqual(foePokemon.hp, foePokemon.maxhp);
+		assert.equal(foePokemon.hp, foePokemon.maxhp);
 		assert.atMost(eePokemon.hp, eePokemon.maxhp / 2);
-		assert.strictEqual(battle.requestState, 'switch');
+		assert.equal(battle.requestState, 'switch');
 	});
 
-	it(`should not request switch-out if first healed by berry`, function () {
+	it(`should request switch-out at the end of a multi-hit move`, function () {
+		battle = common.createBattle([
+			[{species: "Cinccino", ability: 'skilllink', moves: ['bulletseed']}],
+			[{species: "Golisopod", ability: 'emergencyexit', moves: ['sleeptalk']}, {species: "Clefable", ability: 'Unaware', moves: ['metronome']}],
+		]);
+		battle.makeChoices('move bulletseed', 'move sleeptalk');
+		battle.makeChoices('move bulletseed', 'move sleeptalk');
+		assert.equal(battle.requestState, 'switch');
+	});
+
+	it(`should not request switch-out if attacked and healed by berry`, function () {
 		battle = common.createBattle([
 			[{species: "Golisopod", ability: 'emergencyexit', moves: ['sleeptalk'], item: 'sitrusberry', ivs: EMPTY_IVS}, {species: "Clefable", ability: 'Unaware', moves: ['metronome']}],
 			[{species: "Raticate", ability: 'guts', moves: ['superfang']}],
 		]);
 		battle.makeChoices('move sleeptalk', 'move superfang');
-		assert.strictEqual(battle.requestState, 'move');
+		assert.equal(battle.requestState, 'move');
+	});
+
+	it(`should not request switch-out if fainted`, function () {
+		battle = common.createBattle({gameType: 'doubles'});
+		battle.setPlayer('p1', {team: [
+			{species: 'Vikavolt', item: 'choicespecs', moves: ['thunderbolt']},
+			{species: 'Pyukumuku', moves: ['batonpass']},
+			{species: 'Magikarp', moves: ['splash']},
+		]});
+		battle.setPlayer('p2', {team: [
+			{species: 'Golisopod', ability: 'emergencyexit', moves: ['sleeptalk']},
+			{species: 'Mew', moves: ['sleeptalk']},
+			{species: 'Ditto', moves: ['transform']},
+		]});
+		battle.makeChoices('move thunderbolt 1, move batonpass', 'move sleeptalk, move sleeptalk');
+		assert(!battle.p2.activeRequest.forceSwitch);
+	});
+
+	it(`should not request switch-out after taking residual damage and getting healed by berry`, function () {
+		battle = common.createBattle([
+			[{species: "Golisopod", ability: 'emergencyexit', moves: ['uturn', 'sleeptalk'], item: 'sitrusberry'}, {species: "Magikarp", ability: 'swiftswim', moves: ['splash']}],
+			[{species: "Ferrothorn", ability: 'ironbarbs', moves: ['stealthrock', 'spikes', 'protect']}],
+		]);
+		battle.makeChoices('move uturn', 'move stealthrock');
+		battle.makeChoices('switch 2', '');
+		battle.makeChoices('move splash', 'move spikes');
+		battle.makeChoices('move splash', 'move spikes');
+		battle.makeChoices('move splash', 'move spikes');
+		battle.makeChoices('switch 2', 'move protect');
+		assert.equal(battle.requestState, 'move');
 	});
 
 	it(`should not request switch-out on usage of Substitute`, function () {
@@ -42,7 +82,7 @@ describe(`Emergency Exit`, function () {
 		assert.false.atMost(eePokemon.hp, eePokemon.maxhp / 2);
 		battle.makeChoices('move substitute', 'move thunderbolt');
 		assert.atMost(eePokemon.hp, eePokemon.maxhp / 2);
-		assert.strictEqual(battle.requestState, 'move');
+		assert.equal(battle.requestState, 'move');
 	});
 
 	it(`should prevent Volt Switch after-switches`, function () {
@@ -55,7 +95,7 @@ describe(`Emergency Exit`, function () {
 		assert.atMost(eePokemon.hp, eePokemon.maxhp / 2);
 
 		assert.false.holdsItem(eePokemon);
-		assert.strictEqual(battle.requestState, 'switch');
+		assert.equal(battle.requestState, 'switch');
 
 		battle.makeChoices('default', '');
 		assert.species(battle.p1.active[0], 'Clefable');
@@ -72,7 +112,7 @@ describe(`Emergency Exit`, function () {
 		assert.atMost(eePokemon.hp, eePokemon.maxhp / 2);
 
 		assert.false.holdsItem(eePokemon);
-		assert.strictEqual(battle.requestState, 'switch');
+		assert.equal(battle.requestState, 'switch');
 
 		battle.makeChoices('auto', '');
 		assert.species(battle.p1.active[0], 'Clefable');
@@ -89,7 +129,7 @@ describe(`Emergency Exit`, function () {
 		assert.atMost(eePokemon.hp, eePokemon.maxhp / 2);
 
 		assert.false.holdsItem(eePokemon);
-		assert.strictEqual(battle.requestState, 'switch');
+		assert.equal(battle.requestState, 'switch');
 
 		battle.makeChoices('auto', '');
 		assert.species(battle.p1.active[0], 'Clefable');
@@ -103,6 +143,6 @@ describe(`Emergency Exit`, function () {
 		const eePokemon = battle.p1.active[0];
 		battle.makeChoices('move sleeptalk', 'move thunder');
 		assert.atMost(eePokemon.hp, eePokemon.maxhp / 2);
-		assert.strictEqual(battle.requestState, 'move');
+		assert.equal(battle.requestState, 'move');
 	});
 });
