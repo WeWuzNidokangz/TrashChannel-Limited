@@ -1045,7 +1045,7 @@ let BattleFormats = {
 			}
 
 			// Check that out moveset includes only legal moves or moves that would be legal under STABmons with our new typing
-			const restrictedMoves = this.format.restrictedMoves || [];
+			const restrictedMoves = this.format.restricted || [];
 			if (!move.isZ && !restrictedMoves.includes(move.name)) {
 				if (types.includes(move.type)) return null;
 			}
@@ -1455,7 +1455,7 @@ let BattleFormats = {
 			};
 			if (target && target.set.ability === 'Drizzle') return;
 			let dex = this && this.dex ? this.dex : DexCalculator;
-			let tier = template.tier;
+			let tier = template.tier || 'OU';
 			if (target && target.set.item) {
 				let item = this.dex.getItem(target.set.item);
 				if (item.name === 'Kommonium Z' || item.name === 'Mewnium Z') return;

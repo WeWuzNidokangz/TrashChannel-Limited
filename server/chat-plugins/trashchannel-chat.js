@@ -247,15 +247,15 @@ const commands = {
 		const mixedTemplate = BnBMod.getMixedTemplate(beggarTemplate.name, bitchTemplate.name);
 		mixedTemplate.tier = "BnB";
 		let weighthit = 20;
-		if (mixedTemplate.weightkg >= 200) {
+		if (mixedTemplate.weighthg >= 2000) {
 			weighthit = 120;
-		} else if (mixedTemplate.weightkg >= 100) {
+		} else if (mixedTemplate.weighthg >= 1000) {
 			weighthit = 100;
-		} else if (mixedTemplate.weightkg >= 50) {
+		} else if (mixedTemplate.weighthg >= 500) {
 			weighthit = 80;
-		} else if (mixedTemplate.weightkg >= 25) {
+		} else if (mixedTemplate.weighthg >= 250) {
 			weighthit = 60;
-		} else if (mixedTemplate.weightkg >= 10) {
+		} else if (mixedTemplate.weighthg >= 100) {
 			weighthit = 40;
 		}
 		/** @type {{[k: string]: string}} */
@@ -263,7 +263,7 @@ const commands = {
 			"Dex#": '' + mixedTemplate.num,
 			"Gen": '' + mixedTemplate.gen,
 			"Height": mixedTemplate.heightm + " m",
-			"Weight": mixedTemplate.weightkg + " kg <em>(" + weighthit + " BP)</em>",
+			"Weight": mixedTemplate.weighthg / 10  + " kg <em>(" + weighthit + " BP)</em>",
 			"Dex Colour": mixedTemplate.color,
 		};
 		if (mixedTemplate.eggGroups) details["Egg Group(s)"] = mixedTemplate.eggGroups.join(", ");

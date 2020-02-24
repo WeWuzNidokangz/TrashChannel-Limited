@@ -2780,9 +2780,9 @@ const PM = new QueryProcessManager(module, async query => {
 		case 'learn':
 			return runLearn(query.tar, query.message, query.canAll, query.message);
 		case 'mergedexsearch':
-			return runDexsearch(query.target, query.cmd, query.canAll, query.message, 'gen7mergemons');
+			return runDexsearch(query.tar, query.cmd, query.canAll, query.message, 'gen7mergemons');
 		case 'mergemovesearch':
-			return runMergeMovesearch(query.target, query.cmd, query.canAll, query.message);
+			return runMergeMovesearch(query.tar, query.cmd, query.canAll, query.message);
 		default:
 			return null;
 		}
