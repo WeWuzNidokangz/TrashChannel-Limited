@@ -911,30 +911,27 @@ let BattleFormats = {
 		effectType: 'Rule',
 		name: 'Balanced Hackmons Validation',
 		desc: "Forces Zacian/Zamzenta sets to conform to on-cart behaviour.",
+		onValidateSet(set) {
+			if (set.species === 'Zacian-Crowned' && (toID(set.item) !== 'rustedsword' || toID(set.ability) !== 'intrepidsword')) {
+				return [set.species + " is banned."];
+			}
+		},
 		onChangeSet(set) {
 			const item = toID(set.item);
-			if (set.species === 'Zacian' || set.species === 'Zacian-Crowned') {
-				if (item === 'rustedsword') {
-					set.species = 'Zacian-Crowned';
-					set.ability = 'Intrepid Sword';
-					let ironHead = set.moves.indexOf('ironhead');
-					if (ironHead >= 0) {
-						set.moves[ironHead] = 'behemothblade';
-					}
-				} else {
-					set.species = 'Zacian';
+			if (set.species === 'Zacian' && item === 'rustedsword') {
+				set.species = 'Zacian-Crowned';
+				set.ability = 'Intrepid Sword';
+				let ironHead = set.moves.indexOf('ironhead');
+				if (ironHead >= 0) {
+					set.moves[ironHead] = 'behemothblade';
 				}
 			}
-			if (set.species === 'Zamazenta' || set.species === 'Zamazenta-Crowned') {
-				if (item === 'rustedshield') {
-					set.species = 'Zamazenta-Crowned';
-					set.ability = 'Dauntless Shield';
-					let ironHead = set.moves.indexOf('ironhead');
-					if (ironHead >= 0) {
-						set.moves[ironHead] = 'behemothbash';
-					}
-				} else {
-					set.species = 'Zamazenta';
+			if (set.species === 'Zamazenta' && item === 'rustedshield') {
+				set.species = 'Zamazenta-Crowned';
+				set.ability = 'Dauntless Shield';
+				let ironHead = set.moves.indexOf('ironhead');
+				if (ironHead >= 0) {
+					set.moves[ironHead] = 'behemothbash';
 				}
 			}
 		},
@@ -1298,7 +1295,7 @@ let BattleFormats = {
 			let item = this.dex.getItem(set.item);
 			if (!item.megaEvolves && !['blueorb', 'redorb', 'ultranecroziumz'].includes(item.id)) return;
 			if (template.baseSpecies === item.megaEvolves || (template.baseSpecies === 'Groudon' && item.id === 'redorb') || (template.baseSpecies === 'Kyogre' && item.id === 'blueorb') || (template.species.substr(0, 9) === 'Necrozma-' && item.id === 'ultranecroziumz')) return;
-			let uberStones = format.restrictedStones || [];
+			let uberStones = format.restricted || [];
 			let uberPokemon = format.cannotMega || [];
 			if (uberPokemon.includes(template.name) || set.ability === 'Power Construct' || uberStones.includes(item.name)) return ["" + template.species + " is not allowed to hold " + item.name + "."];
 		},
@@ -1343,13 +1340,15 @@ let BattleFormats = {
 		name: 'Mix and Mega Standard Validation',
 		desc: "Standard validation for Mix and Mega.",
 		onValidateTeam(team, format) {
+			const restrictedPokemon = format.restricted || [];
 			/**@type {{[k: string]: true}} */
 			let itemTable = {};
 			for (const set of team) {
 				let item = this.dex.getItem(set.item);
 				if (!item || !item.megaStone) continue;
 				let template = this.dex.getTemplate(set.species);
-				if (format.banlist.includes('AG') && ['Venusaur', 'Blastoise', 'Zamazenta'].includes(template.baseSpecies)) {
+				if (template.isNonstandard) return [`${template.baseSpecies} does not exist in gen 8.`];
+				if (restrictedPokemon.includes(template.species)) {
 					return [`${template.species} is not allowed to hold ${item.name}.`];
 				}
 				if (itemTable[item.id]) return ["You are limited to one of each mega stone.", "(You have more than one " + item.name + ")"];

@@ -170,28 +170,31 @@ let Formats = [
 		section: "Mashups Spotlight",
 	},
 	{
-		name: "[Gen 8] STAB n Mega",
-		desc: `Pokemon can use any move of their typing and mega evolve with any stone to gain the respective boosts.`,
+		name: "[Gen 8] STAAABmons",
+		desc: `Pokemon can use almost any ability and any move of their typing.`,
 		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3657159/#post-8299984">STAB n Mega Resources</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3657159/#post-8299984">STAAABmons Resources</a>`,
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3656429/">Vanilla STABmons</a>`,
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3658578/">Vanilla STABmons Resources</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3656469/">Vanilla Mix and Mega</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3656414/">Vanilla Almost Any Ability</a>`,
 		],
 
-		mod: 'mixandmega',
+		mod: 'gen8',
 		ruleset: [
-			'Obtainable', 'Species Clause', 'Nickname Clause', 'OHKO Clause', 'Evasion Moves Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Dynamax Clause', 'Sleep Clause Mod', 'Endless Battle Clause', // Mix and Mega
-			'STABmons Move Legality', // STABmons
-			'Mix and Mega Standard Package', // STAB n Mega
+			'Standard', 'STABmons Move Legality', 'Dynamax Clause', // STABmons
+			'!Obtainable Abilities', '2 Ability Clause', // AAA
 		],
 		banlist: [
-			'AG', 'Eternatus', 'Gothitelle', 'Gothorita', 'Zacian', 'Moody', 'Baton Pass', 'Electrify',
-			'Beedrillite', 'Blazikenite', 'Gengarite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite', // Mix and Mega
+			'Kyurem-Black', 'Kyurem-White', 'Lunala', 'Marshadow', 'Melmetal', 'Mewtwo',
+			'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane', 'Reshiram', 'Solgaleo', 'Zekrom',
+			'Dracovish', 'Darmanitan-Galar', 'Eternatus', 'Silvally', 'Zacian', 'Zamazenta', 'King\'s Rock', 'Razor Fang', 'Moody', 'Shadow Tag', 'Baton Pass', // STABmons
+			'Shedinja',
+			'Arena Trap', 'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Gorilla Tactics', 'Huge Power', 'Ice Scales', 'Illusion', 'Imposter', 'Innards Out', 'Intrepid Sword',
+			'Libero', 'Neutralizing Gas', 'Parental Bond', 'Protean', 'Pure Power', 'Simple', 'Stakeout', 'Speed Boost', 'Water Bubble', 'Wonder Guard', // AAA
+			'Terrakion', // STAAABmons
 		],
-		restrictedMoves: [
-			'Acupressure', 'Belly Drum', 'Fishious Rend', 'Shell Smash', 'Shift Gear', 'Spore', // STABmons
-			'Extreme Speed', // STAB n Mega
+		restricted: [
+			'Acupressure', 'Belly Drum', 'Bolt Beak', 'Double Iron Bash', 'Extreme Speed', 'Fishious Rend', 'Shell Smash', 'Shift Gear', 'Spore', // STABmons
 		],
 	},
 	{
@@ -211,35 +214,9 @@ let Formats = [
 			'Camomons Rule', 'Balanced Hackmons Validation', // BH Camomons
 		 ],
 		 banlist: [
-			'Eternatus-Eternamax', 'Comatose + Sleep Talk',
+			'Eternatus-Eternamax', 'Shedinja', 'Comatose + Sleep Talk', 'Double Iron Bash',
 			'Arena Trap', 'Contrary', 'Gorilla Tactics', 'Huge Power', 'Illusion', 'Innards Out', 'Libero', 'Magnet Pull', 'Moody',
-			'Neutralizing Gas', 'Parental Bond', 'Protean', 'Pure Power', 'Shadow Tag', 'Stakeout', 'Water Bubble', 'Wonder Guard', // BH
-		],
-	},
-	{
-		name: "[Gen 8] STAAABmons",
-		desc: `Pokemon can use almost any ability and any move of their typing.`,
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3657159/#post-8299984">STAAABmons Resources</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3656429/">Vanilla STABmons</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3658578/">Vanilla STABmons Resources</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3656414/">Vanilla Almost Any Ability</a>`,
-		],
-
-		mod: 'gen8',
-		ruleset: [
-			'Standard', 'STABmons Move Legality', 'Dynamax Clause', // STABmons
-			'!Obtainable Abilities', '2 Ability Clause', // AAA
-		],
-		banlist: [
-			'Darmanitan-Galar', 'Eternatus', 'Silvally', 'Zacian', 'Zamazenta', 'King\'s Rock', 'Razor Fang', 'Moody', 'Shadow Tag', 'Baton Pass', // STABmons
-			'Shedinja',
-			'Arena Trap', 'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Gorilla Tactics', 'Huge Power', 'Ice Scales', 'Illusion', 'Imposter', 'Innards Out', 'Intrepid Sword',
-			'Libero', 'Neutralizing Gas', 'Parental Bond', 'Protean', 'Pure Power', 'Simple', 'Stakeout', 'Speed Boost', 'Water Bubble', 'Wonder Guard', // AAA
-		],
-		restrictedMoves: [
-			'Acupressure', 'Belly Drum', 'Fishious Rend', 'Shell Smash', 'Shift Gear', 'Spore', // STABmons
-			'Double Iron Bash', // STAAABmons
+			'Neutralizing Gas', 'Parental Bond', 'Protean', 'Psychic Surge', 'Pure Power', 'Shadow Tag', 'Stakeout', 'Water Bubble', 'Wonder Guard', // BH
 		],
 	},
 	{
@@ -258,9 +235,38 @@ let Formats = [
 
 		],
 		banlist: [
-			'Darmanitan-Galar', 'Eternatus', 'Shedinja', 'Zacian', 'Zamazenta',
+			'Kyurem-Black', 'Kyurem-White', 'Lunala', 'Marshadow', 'Melmetal', 'Mewtwo',
+			'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane', 'Reshiram', 'Solgaleo', 'Zekrom',
+			'Dracovish', 'Darmanitan-Galar', 'Eternatus', 'Shedinja', 'Zacian', 'Zamazenta',
 			'Arena Trap', 'Moody', 'Shadow Tag', 'Baton Pass', // Camomons
 		]
+	},
+	{
+		name: "[Gen 8] STAB n Mega",
+		desc: `Pokemon can use any move of their typing and mega evolve with any stone to gain the respective boosts.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3657159/#post-8299984">STAB n Mega Resources</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3656429/">Vanilla STABmons</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3658578/">Vanilla STABmons Resources</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3656469/">Vanilla Mix and Mega</a>`,
+		],
+
+		mod: 'mixandmega',
+		ruleset: [
+			'Obtainable', 'Species Clause', 'Nickname Clause', 'OHKO Clause', 'Evasion Moves Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Dynamax Clause', 'Sleep Clause Mod', 'Endless Battle Clause', // Mix and Mega
+			'STABmons Move Legality', // STABmons
+			'Mix and Mega Standard Package', // STAB n Mega
+		],
+		banlist: [
+			'Eternatus', 'Gothitelle', 'Gothorita', 'Zacian', 'Moody', 'Baton Pass', 'Electrify',
+			'Beedrillite', 'Blazikenite', 'Gengarite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite', // Mix and Mega
+			'Ditto', // STAB n Mega
+		],
+		restricted: [
+			'Kyurem-Black', 'Kyurem-White', 'Lunala', 'Marshadow', 'Melmetal', 'Mewtwo', 'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane', 'Reshiram', 'Solgaleo', 'Zamazenta', 'Zekrom', // Mix and Mega
+			'Acupressure', 'Belly Drum', 'Bolt Beak', 'Double Iron Bash', 'Extreme Speed', 'Fishious Rend', 'Shell Smash', 'Shift Gear', 'Spore', // STABmons
+			'Extreme Speed', 'Double Iron Bash', // STAB n Mega
+		],
 	},
 	{
 		section: "Official OM Mashups (Doubles)",
@@ -347,7 +353,9 @@ let Formats = [
 		banlist: [
 			'DUber', // Doubles OU
 		],
-		restrictedMoves: ['Acupressure', 'Belly Drum', 'Fishious Rend', 'Shell Smash', 'Shift Gear', 'Spore'],
+		restricted: [
+			'Acupressure', 'Belly Drum', 'Bolt Beak', 'Double Iron Bash', 'Extreme Speed', 'Fishious Rend', 'Shell Smash', 'Shift Gear', 'Spore', // STABmons
+		],
 	},
 	{
 		section: "Official OM Mashups (Little Cup)",
@@ -369,7 +377,7 @@ let Formats = [
 			'!Obtainable Abilities', '2 Ability Clause', // AAA
 		],
 		banlist: [
-			'Cherubi', 'Corsola-Galar', 'Gastly', 'Gothita', 'Sneasel', 'Swirlix', 'Moody', 'Baton Pass', // LC
+			'Cherubi', 'Corsola-Galar', 'Drifloon', 'Gastly', 'Gothita', 'Sneasel', 'Swirlix', 'Moody', 'Baton Pass', // LC
 			'Arena Trap', 'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Gorilla Tactics', 'Huge Power', 'Ice Scales', 'Illusion', 'Imposter', 'Innards Out', 'Intrepid Sword',
 			'Libero', 'Moody', 'Neutralizing Gas', 'Parental Bond', 'Protean', 'Pure Power', 'Shadow Tag', 'Simple', 'Stakeout', 'Speed Boost', 'Water Bubble', 'Wonder Guard', // AAA
 		],
@@ -389,12 +397,13 @@ let Formats = [
 		ruleset: [
 			'Little Cup', 'Standard', 'Dynamax Clause', // LC
 			'-Nonexistent', 'OHKO Clause', 'Evasion Moves Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod', 'Endless Battle Clause', // BH
+			'Sneasel', 'Type: Null', // BH LC
 		],
 		banlist: [
 			'Moody', 'Baton Pass', // LC
-			'Eternatus-Eternamax', 'Comatose + Sleep Talk',
+			'Eternatus-Eternamax', 'Shedinja', 'Comatose + Sleep Talk', 'Double Iron Bash',
 			'Arena Trap', 'Contrary', 'Gorilla Tactics', 'Huge Power', 'Illusion', 'Innards Out', 'Libero', 'Magnet Pull', 'Moody',
-			'Neutralizing Gas', 'Parental Bond', 'Protean', 'Pure Power', 'Shadow Tag', 'Stakeout', 'Water Bubble', 'Wonder Guard',  // Balanced Hackmons
+			'Neutralizing Gas', 'Parental Bond', 'Protean', 'Psychic Surge', 'Pure Power', 'Shadow Tag', 'Stakeout', 'Water Bubble', 'Wonder Guard',  // Balanced Hackmons
 			'Balanced Hackmons Validation', // BH LC
 		],
 	},{
@@ -414,7 +423,7 @@ let Formats = [
 			'Camomons Rule', // Camomons Doubles
 		],
 		banlist: [
-			'Cherubi', 'Corsola-Galar', 'Gastly', 'Gothita', 'Sneasel', 'Swirlix', 'Moody', 'Baton Pass', // LC
+			'Cherubi', 'Corsola-Galar', 'Drifloon', 'Gastly', 'Gothita', 'Sneasel', 'Swirlix', 'Vulpix', 'Moody', 'Baton Pass', // LC
 		],
 	},
 	{
@@ -435,9 +444,9 @@ let Formats = [
 			'STABmons Move Legality', // STABmons
 		],
 		banlist: [
-			'Cherubi', 'Corsola-Galar', 'Gastly', 'Gothita', 'Sneasel', 'Swirlix', 'Moody', 'Baton Pass', // LC
+			'Cherubi', 'Corsola-Galar', 'Drifloon', 'Gastly', 'Gothita', 'Sneasel', 'Swirlix', 'Vulpix', 'Moody', 'Baton Pass', // LC
 		],
-		restrictedMoves: ['Acupressure', 'Belly Drum', 'Fishious Rend', 'Shell Smash', 'Shift Gear', 'Spore'],
+		restricted: ['Acupressure', 'Belly Drum', 'Bolt Beak', 'Double Iron Bash', 'Extreme Speed', 'Fishious Rend', 'Shell Smash', 'Shift Gear', 'Spore'],
 	},
 	{
 		section: "Other Mashups",
@@ -469,7 +478,7 @@ let Formats = [
 
 		mod: 'gen7mixandmega',
 		ruleset: ['Obtainable', 'Endless Battle Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Gen 7 Mix and Mega Battle Effects'],
-		restrictedStones: ['Ultranecrozium Z'],
+		restricted: ['Ultranecrozium Z'],
 		cannotMega: [],
 	},
 	{
@@ -526,7 +535,7 @@ let Formats = [
 		mod: 'gen7',
 		ruleset: ['[Gen 7] Ubers', 'STABmons Move Legality'],
 		banlist: ['Arceus', 'Komala', 'Kangaskhan-Mega'],
-		restrictedMoves: ['Acupressure', 'Belly Drum', 'Chatter', 'Geomancy', 'Lovely Kiss', 'Shell Smash', 'Shift Gear', 'Spore', 'Thousand Arrows'],
+		restricted: ['Acupressure', 'Belly Drum', 'Chatter', 'Geomancy', 'Lovely Kiss', 'Shell Smash', 'Shift Gear', 'Spore', 'Thousand Arrows'],
 	},
 	{
 		name: "[Gen 7] STAAABmons",
@@ -546,7 +555,7 @@ let Formats = [
 			'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Huge Power', 'Illusion', 'Imposter', 'Innards Out',
 			'Parental Bond', 'Protean', 'Pure Power', 'Simple', 'Speed Boost', 'Stakeout', 'Water Bubble', 'Wonder Guard', // AAA
 		],
-		restrictedMoves: ['Acupressure', 'Belly Drum', 'Chatter', 'Extreme Speed', 'Geomancy', 'Lovely Kiss', 'Shell Smash', 'Shift Gear', 'Spore', 'Thousand Arrows'],
+		restricted: ['Acupressure', 'Belly Drum', 'Chatter', 'Extreme Speed', 'Geomancy', 'Lovely Kiss', 'Shell Smash', 'Shift Gear', 'Spore', 'Thousand Arrows'],
 		/*restrictedAbilities: [
 			'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Huge Power', 'Illusion', 'Imposter', 'Innards Out',
 			'Parental Bond', 'Protean', 'Pure Power', 'Simple', 'Speed Boost', 'Stakeout', 'Water Bubble', 'Wonder Guard',
@@ -568,14 +577,14 @@ let Formats = [
 			'King\'s Rock', 'Razor Fang', // STABmons
 			'Arceus', 'Kangaskhanite', // STAB n Mega
 		],
-		restrictedStones: ['Beedrillite', 'Blazikenite', 'Mawilite', 'Medichamite', 'Pidgeotite', 'Ultranecrozium Z'],
+		restricted: ['Beedrillite', 'Blazikenite', 'Mawilite', 'Medichamite', 'Pidgeotite', 'Ultranecrozium Z'],
 		cannotMega: [
 			'Archeops', 'Arceus', 'Deoxys', 'Deoxys-Attack', 'Deoxys-Speed', 'Dialga', 'Dragonite', 'Giratina', 'Groudon', 'Ho-Oh', 'Kyogre', 'Kyurem-Black',
 			'Kyurem-White', 'Landorus-Therian', 'Lugia', 'Lunala', 'Marshadow', 'Mewtwo', 'Naganadel', 'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane',
 			'Palkia', 'Pheromosa', 'Rayquaza', 'Regigigas', 'Reshiram', 'Shuckle', 'Slaking', 'Solgaleo', 'Xerneas', 'Yveltal', 'Zekrom', // Mix and Mega
 			'Blacephalon', 'Kartana', 'Silvallly', 'Tapu Koko', 'Tapu Lele', // STAB n Mega
 		],
-		restrictedMoves: ['Acupressure', 'Belly Drum', 'Chatter', 'Geomancy', 'Lovely Kiss', 'Shell Smash', 'Shift Gear', 'Spore', 'Thousand Arrows'],
+		restricted: ['Acupressure', 'Belly Drum', 'Chatter', 'Geomancy', 'Lovely Kiss', 'Shell Smash', 'Shift Gear', 'Spore', 'Thousand Arrows'],
 	},
 	{
 		section: "US/UM Official OM Mashups (Doubles)",
@@ -634,7 +643,7 @@ let Formats = [
 			'Eevium Z', 'Dark Void', 'Gravity ++ Grass Whistle', 'Gravity ++ Hypnosis', 'Gravity ++ Lovely Kiss', 'Gravity ++ Sing', 'Gravity ++ Sleep Powder', // Doubles
 			'Shadow Tag', 'Gengarite', 'Baton Pass', 'Electrify', // MnM
 		],
-		restrictedStones: ['Beedrillite', 'Blazikenite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite'],
+		restricted: ['Beedrillite', 'Blazikenite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite'],
 		cannotMega: [
 			'Arceus', 'Deoxys', 'Deoxys-Attack', 'Deoxys-Speed', 'Dialga', 'Dragonite', 'Giratina', 'Groudon', 'Ho-Oh', 'Jirachi', 'Kyogre', 'Kyurem-Black',
 			'Kyurem-White', 'Lugia', 'Lunala', 'Magearna', 'Marshadow', 'Mewtwo', 'Naganadel', 'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane',
@@ -660,7 +669,7 @@ let Formats = [
 			'DUber', 'Power Construct', 'Eevium Z', 'Dark Void', 'Gravity ++ Grass Whistle', 'Gravity ++ Hypnosis', 'Gravity ++ Lovely Kiss', 'Gravity ++ Sing', 'Gravity ++ Sleep Powder', // Doubles OU
 			'Drizzle', 'Komala', 'Shedinja', 'Silvally', // STABmons Doubles
 		],
-		restrictedMoves: ['Chatter', 'Diamond Storm', 'Geomancy', 'Shell Smash', 'Shift Gear', 'Thousand Arrows'],
+		restricted: ['Chatter', 'Diamond Storm', 'Geomancy', 'Shell Smash', 'Shift Gear', 'Thousand Arrows'],
 	},
 	{
 		section: "US/UM Official OM Mashups (Little Cup)",
@@ -727,7 +736,7 @@ let Formats = [
 			'Eevium Z', 'Baton Pass', 'Dragon Rage', 'Sonic Boom', // LC
 			'Shadow Tag', // STABmons LC
 		],
-		restrictedMoves: ['Acupressure', 'Belly Drum', 'Chatter', 'Extreme Speed', 'Geomancy', 'Lovely Kiss', 'Shell Smash', 'Shift Gear', 'Spore', 'Thousand Arrows'],
+		restricted: ['Acupressure', 'Belly Drum', 'Chatter', 'Extreme Speed', 'Geomancy', 'Lovely Kiss', 'Shell Smash', 'Shift Gear', 'Spore', 'Thousand Arrows'],
 	},
 	{
 		name: "[Gen 7] Mix and Mega LC",
@@ -740,7 +749,7 @@ let Formats = [
 		maxLevel: 5,
 		ruleset: ['Obtainable', 'Standard', 'Team Preview', 'Little Cup', 'Gen 7 Mix and Mega Standard Package'],
 		banlist: ['Eevium Z', 'Baton Pass', 'Dragon Rage', 'Electrify', 'Sonic Boom'],
-		restrictedStones: ['Beedrillite', 'Blazikenite', 'Gengarite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite', 'Ultranecrozium Z'],
+		restricted: ['Beedrillite', 'Blazikenite', 'Gengarite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite', 'Ultranecrozium Z'],
 		cannotMega: [
 			'Dratini', 'Gligar', 'Misdreavus', 'Murkrow', 'Scyther', 'Sneasel', 'Tangela', 'Vulpix',
 		],
@@ -760,7 +769,7 @@ let Formats = [
 		mod: 'gen7mixandmega',
 		ruleset: ['Obtainable', 'Standard', 'Gen 7 Mix and Mega Standard Package', 'Tier Shift Rule', 'Mega Rayquaza Clause', 'Team Preview'],
 		banlist: ['Shadow Tag', 'Gengarite', 'Baton Pass', 'Electrify'],
-		restrictedStones: ['Beedrillite', 'Blazikenite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite', 'Ultranecrozium Z'],
+		restricted: ['Beedrillite', 'Blazikenite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite', 'Ultranecrozium Z'],
 		cannotMega: [
 			'Archeops', 'Arceus', 'Deoxys', 'Deoxys-Attack', 'Deoxys-Speed', 'Dialga', 'Dragonite', 'Giratina', 'Groudon', 'Ho-Oh', 'Kyogre', 'Kyurem-Black',
 			'Kyurem-White', 'Landorus-Therian', 'Lugia', 'Lunala', 'Marshadow', 'Mewtwo', 'Naganadel', 'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane',
@@ -788,7 +797,7 @@ let Formats = [
 			'King\'s Rock', 'Razor Fang', // STABmons
 			'Marowak-Alola', 'Emboar' // STAAABmons RU
 		],
-		restrictedMoves: ['Acupressure', 'Belly Drum', 'Chatter', 'Extreme Speed', 'Geomancy', 'Lovely Kiss', 'Shell Smash', 'Shift Gear', 'Spore', 'Thousand Arrows'],
+		restricted: ['Acupressure', 'Belly Drum', 'Chatter', 'Extreme Speed', 'Geomancy', 'Lovely Kiss', 'Shell Smash', 'Shift Gear', 'Spore', 'Thousand Arrows'],
 		restrictedAbilities: [
 			'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Huge Power', 'Illusion', 'Imposter', 'Innards Out',
 			'Parental Bond', 'Protean', 'Pure Power', 'Simple', 'Speed Boost', 'Stakeout', 'Water Bubble', 'Wonder Guard',
@@ -3409,8 +3418,8 @@ let Formats = [
         forcedLevel: 100,
         ruleset: ['Suicide Cup Standard Package', 'Cancel Mod', 'Evasion Moves Clause', 'HP Percentage Mod', 'Moody Clause', 'Nickname Clause', 'Obtainable', 'Sleep Clause Mod', 'Species Clause', 'Team Preview'],
         banlist: [
-        	'Shedinja', 'Infiltrator', 'Magic Guard', 'Misty Surge', 'Assault Vest', 'Choice Scarf', 'Leppa Berry', 'Explosion',
-            'Final Gambit', 'Healing Wish', 'Lunar Dance', 'Magic Room', 'Memento', 'Misty Terrain', 'Self-Destruct',
+        	'Shedinja', 'Infiltrator', 'Magic Guard', 'Choice Scarf', 'Leppa Berry', 'Explosion',
+            'Final Gambit', 'Healing Wish', 'Lunar Dance', 'Magic Room', 'Memento', 'Self-Destruct',
         ],
     },
 	{
@@ -3466,7 +3475,7 @@ let Formats = [
 		mod: 'gen7mixandmega',
 		ruleset: ['Standard', 'Mega Rayquaza Clause'],
 		banlist: ['Shadow Tag', 'Gengarite', 'Baton Pass', 'Electrify'],
-		restrictedStones: ['Beedrillite', 'Blazikenite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite', 'Ultranecrozium Z'],
+		restricted: ['Beedrillite', 'Blazikenite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite', 'Ultranecrozium Z'],
 		cannotMega: [
 			'Arceus', 'Deoxys', 'Deoxys-Attack', 'Deoxys-Speed', 'Dialga', 'Dragonite', 'Giratina', 'Groudon', 'Ho-Oh', 'Kyogre', 'Kyurem-Black',
 			'Kyurem-White', 'Landorus-Therian', 'Lugia', 'Lunala', 'Marshadow', 'Mewtwo', 'Naganadel', 'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane',
@@ -3488,7 +3497,7 @@ let Formats = [
 			let item = this.dex.getItem(set.item);
 			if (!item.megaEvolves && !['blueorb', 'redorb', 'ultranecroziumz'].includes(item.id)) return;
 			if (template.baseSpecies === item.megaEvolves || (template.baseSpecies === 'Groudon' && item.id === 'redorb') || (template.baseSpecies === 'Kyogre' && item.id === 'blueorb') || (template.species.substr(0, 9) === 'Necrozma-' && item.id === 'ultranecroziumz')) return;
-			let uberStones = format.restrictedStones || [];
+			let uberStones = format.restricted || [];
 			let uberPokemon = format.cannotMega || [];
 			if (uberPokemon.includes(template.name) || set.ability === 'Power Construct' || uberStones.includes(item.name)) return ["" + template.species + " is not allowed to hold " + item.name + "."];
 		},
@@ -3527,7 +3536,7 @@ let Formats = [
 		mod: 'gen7',
 		ruleset: ['[Gen 7] OU', 'STABmons Move Legality'],
 		banlist: ['Aerodactyl', 'Araquanid', 'Blacephalon', 'Kartana', 'Komala', 'Kyurem-Black', 'Porygon-Z', 'Silvally', 'Tapu Koko', 'Tapu Lele', 'Thundurus-Base', 'King\'s Rock', 'Razor Fang'],
-		restrictedMoves: ['Acupressure', 'Belly Drum', 'Chatter', 'Extreme Speed', 'Geomancy', 'Lovely Kiss', 'Shell Smash', 'Shift Gear', 'Spore', 'Thousand Arrows'],
+		restricted: ['Acupressure', 'Belly Drum', 'Chatter', 'Extreme Speed', 'Geomancy', 'Lovely Kiss', 'Shell Smash', 'Shift Gear', 'Spore', 'Thousand Arrows'],
 	},
 	{
 		name: "[Gen 7] Camomons",
@@ -3577,14 +3586,14 @@ let Formats = [
 		mod: 'gen7',
 		ruleset: ['[Gen 7] OU'],
 		banlist: ['Kartana', 'Porygon-Z', 'Battle Bond'],
-		restrictedMoves: [
+		restricted: [
 			'Belly Drum', 'Celebrate', 'Chatter', 'Conversion', 'Extreme Speed', "Forest's Curse", 'Geomancy', 'Happy Hour', 'Hold Hands',
 			'Lovely Kiss', 'Purify', 'Quiver Dance', 'Shell Smash', 'Shift Gear', 'Sketch', 'Spore', 'Sticky Web', 'Trick-or-Treat',
 		],
 		checkLearnset(move, template, lsetData, set) {
 			let problem = this.checkLearnset(move, template, lsetData, set);
 			if (!problem) return null;
-			const restrictedMoves = this.format.restrictedMoves || [];
+			const restrictedMoves = this.format.restricted || [];
 			if (move.isZ || restrictedMoves.includes(move.name)) return problem;
 			// @ts-ignore
 			if (set.sketchMove) return {type: 'oversketched', maxSketches: 1};
@@ -3705,9 +3714,9 @@ let Formats = [
 		mod: 'gen7',
 		ruleset: ['[Gen 7] OU'],
 		banlist: ['Serene Grace'],
-		restrictedMoves: ['Bide', 'Chatter', 'Dynamic Punch', 'Fake Out', 'Frustration', 'Inferno', 'Power Trip', 'Power-Up Punch', 'Pursuit', 'Return', 'Stored Power', 'Zap Cannon'],
+		restricted: ['Bide', 'Chatter', 'Dynamic Punch', 'Fake Out', 'Frustration', 'Inferno', 'Power Trip', 'Power-Up Punch', 'Pursuit', 'Return', 'Stored Power', 'Zap Cannon'],
 		validateSet(set, teamHas) {
-			const restrictedMoves = this.format.restrictedMoves || [];
+			const restrictedMoves = this.format.restricted || [];
 			let item = set.item;
 			let move = this.dex.getMove(set.item);
 			if (!move.exists || move.type === 'Status' || restrictedMoves.includes(move.name) || move.flags['charge'] || move.priority > 0) return this.validateSet(set, teamHas);
@@ -3949,14 +3958,14 @@ let Formats = [
 		mod: 'gen7',
 		ruleset: ['[Gen 7] OU'],
 		banlist: ['Hoopa-Unbound', 'Slaking', 'Regigigas'],
-		restrictedMoves: ['Assist', 'Baneful Bunker', 'Block', 'Copycat', 'Destiny Bond', 'Detect', 'Ingrain', 'King\'s Shield', 'Mat Block', 'Mean Look', 'Metronome', 'Nature Power', 'Parting Shot', 'Protect', 'Roar', 'Skill Swap', 'Spider Web', 'Spiky Shield', 'Whirlwind'],
+		restricted: ['Assist', 'Baneful Bunker', 'Block', 'Copycat', 'Destiny Bond', 'Detect', 'Ingrain', 'King\'s Shield', 'Mat Block', 'Mean Look', 'Metronome', 'Nature Power', 'Parting Shot', 'Protect', 'Roar', 'Skill Swap', 'Spider Web', 'Spiky Shield', 'Whirlwind'],
 		onValidateTeam(team, format, teamHas) {
 			for (let trademark in teamHas.trademarks) {
 				if (teamHas.trademarks[trademark] > 1) return [`You are limited to 1 of each Trademark. (You have ${teamHas.trademarks[trademark]} of ${trademark}).`];
 			}
 		},
 		validateSet(set, teamHas) {
-			const restrictedMoves = this.format.restrictedMoves || [];
+			const restrictedMoves = this.format.restricted || [];
 			// 19/05/06 TrashChannel: Include add-on rules
 			const ruleTable = this.ruleTable;
 			let move = this.dex.getMove(set.ability);
@@ -4256,9 +4265,9 @@ let Formats = [
 		mod: 'gen7linked',
 		ruleset: ['[Gen 7] OU'],
 		banlist: ['Chlorophyll', 'Sand Rush', 'Slush Rush', 'Surge Surfer', 'Swift Swim', 'Unburden', 'King\'s Rock', 'Razor Fang', 'Swampertite'],
-		restrictedMoves: ['Baneful Bunker', 'Bounce', 'Detect', 'Dig', 'Dive', 'Fly', 'Nature\'s Madness', 'Night Shade', 'Phantom Force', 'Protect', 'Seismic Toss', 'Shadow Force', 'Sky Drop', 'Spiky Shield', 'Super Fang'],
+		restricted: ['Baneful Bunker', 'Bounce', 'Detect', 'Dig', 'Dive', 'Fly', 'Nature\'s Madness', 'Night Shade', 'Phantom Force', 'Protect', 'Seismic Toss', 'Shadow Force', 'Sky Drop', 'Spiky Shield', 'Super Fang'],
 		onValidateSet(set, format) {
-			const restrictedMoves = format.restrictedMoves || [];
+			const restrictedMoves = format.restricted || [];
 			let problems = [];
 			for (const [i, moveid] of set.moves.entries()) {
 				let move = this.getMove(moveid);
@@ -4541,7 +4550,7 @@ let Formats = [
 					problems.push("Bitches are limited to " + format.modValueNumberA.toString() + " BST, but " + bitchTemplate.name + " has " + bitchBST.toString() + "!");
 				}
 			}
-			let uberBitches = format.restrictedStones || [];
+			let uberBitches = format.restricted || [];
 			let uberPokemon = format.cannotMega || [];
 			if (uberPokemon.includes(beggarTemplate.name) || set.ability === 'Power Construct' || uberBitches.includes(bitchTemplate.name)) return ["" + beggarTemplate.species + " is not allowed to hold " + bitchTemplate.name + "."];
 			
@@ -5206,7 +5215,7 @@ let Formats = [
 					problems.push("Bitches are limited to " + format.modValueNumberA.toString() + " BST, but " + bitchTemplate.name + " has " + bitchBST.toString() + "!");
 				}
 			}
-			let uberBitches = format.restrictedStones || [];
+			let uberBitches = format.restricted || [];
 			let uberPokemon = format.cannotMega || [];
 			if (uberPokemon.includes(beggarTemplate.name) || set.ability === 'Power Construct' || uberBitches.includes(bitchTemplate.name)) return ["" + beggarTemplate.species + " is not allowed to hold " + bitchTemplate.name + "."];
 			
@@ -5333,7 +5342,7 @@ let Formats = [
 			'Baton Pass', // Megamons
 			'Shadow Tag', 'Gengarite', 'Baton Pass', 'Electrify' // Mix and Mega
 		],
-		restrictedStones: ['Beedrillite', 'Blazikenite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite', 'Ultranecrozium Z'],
+		restricted: ['Beedrillite', 'Blazikenite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite', 'Ultranecrozium Z'],
 		cannotMega: ['Blaziken-Mega', 'Gengar-Mega', 'Mewtwo-Mega-Y', 'Rayquaza-Mega'],
 	},
 	{
@@ -5353,7 +5362,7 @@ let Formats = [
 			'Gen 7 Mix and Mega Battle Effects', // Mix and Mega
 			'Megamons Allow Irregular Megaesques', // Mega and Mega AG
 		],
-		restrictedStones: ['Ultranecrozium Z'],
+		restricted: ['Ultranecrozium Z'],
 		cannotMega: [],
 	},
 	{
@@ -5370,7 +5379,7 @@ let Formats = [
 			'Aerodactyl', 'Araquanid', 'Blacephalon', 'Kartana', 'Komala', 'Kyurem-Black', 'Porygon-Z', 'Silvally', 'Tapu Koko', 'Tapu Lele', 'Thundurus-Base', 'King\'s Rock', 'Razor Fang', // STABmons
 			'Dragonite', 'Latias-Mega', 'Shedinja', 'Kommonium Z', // Camomons
 		],
-		restrictedMoves: [
+		restricted: [
 			'Acupressure', 'Belly Drum', 'Chatter', 'Extreme Speed', 'Geomancy', 'Lovely Kiss', 'Shell Smash', 'Shift Gear', 'Spore', 'Thousand Arrows', // STABmons
 			'V-create', // CRABmons
 		],
@@ -5397,7 +5406,7 @@ let Formats = [
 			'Dragonite', 'Latias-Mega', 'Shedinja', 'Kommonium Z', // Camomons
 			'Marowak-Alola', 'Emboar' // STAAABmons RU
 		],
-		restrictedMoves: [
+		restricted: [
 			'Acupressure', 'Belly Drum', 'Chatter', 'Extreme Speed', 'Geomancy', 'Lovely Kiss', 'Shell Smash', 'Shift Gear', 'Spore', 'Thousand Arrows', // STABmons
 			'V-create', // CRABmons
 		],
