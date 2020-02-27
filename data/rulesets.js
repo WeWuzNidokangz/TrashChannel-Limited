@@ -800,8 +800,39 @@ let BattleFormats = {
 		name: 'STABmons Move Legality',
 		desc: "Allows Pok&eacute;mon to use any move that they or a previous evolution/out-of-battle forme share a type with",
 		checkLearnset(move, template, setSources, set) {
+
+			function logMapElements(value, key, map) {
+				console.log(`m[${key}] = ${value}`);
+			}
+
 			const restrictedMoves = this.format.restricted || [];
-			if (!restrictedMoves.includes(move.name) && !move.isNonstandard && !move.isMax) {
+			let rejectForNonstandard = false;
+			if(move.isNonstandard) {
+				const ruleTable = this.dex.getRuleTable(this.format);
+				//ruleTable.forEach(logMapElements); // Debug
+				switch(move.isNonstandard) {
+					case "Past":
+						rejectForNonstandard = !ruleTable.has('standardnatdex') && !ruleTable.has('+pokemontag:past');
+						break;
+					case "Future":
+						rejectForNonstandard = !ruleTable.has('+pokemontag:future');
+						break;
+					case "Unobtainable":
+						rejectForNonstandard = ruleTable.has('obtainablemoves');
+						break;
+					case "CAP":
+						rejectForNonstandard = !ruleTable.has('+pokemontag:cap');
+						break;
+					case "LGPE":
+						rejectForNonstandard = !ruleTable.has('+pokemontag:lgpe');
+						break;
+					case "Custom":
+						rejectForNonstandard = !ruleTable.has('+pokemontag:custom');
+						break;
+					default: rejectForNonstandard = true; break;
+				}
+			}
+			if (!restrictedMoves.includes(move.name) && !rejectForNonstandard && !move.isMax && !move.isZ) {
 				let dex = this.dex;
 				let types = template.types;
 				let baseTemplate = dex.getTemplate(template.baseSpecies);
