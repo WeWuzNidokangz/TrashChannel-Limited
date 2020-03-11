@@ -71,7 +71,7 @@ let Formats = [
 			}
 		},
 	},
-	/*{
+	{
 		name: "[Gen 7] Partners in Crime: Hackmons Cup",
 		desc: `Randomized teams of level-balanced Pok&eacute;mon where both active ally Pok&eacute;mon share dumb abilities and moves.`,
 		threads: [
@@ -138,7 +138,7 @@ let Formats = [
 				delete ally.m.innate;
 			}
 		},
-	},*/
+	},
 	/*{
 		name: "[Gen 7] Trademarked: Hackmons Cup",
 		desc: `Randomized teams of level-balanced Pok&eacute;mon with random trademarks.`,

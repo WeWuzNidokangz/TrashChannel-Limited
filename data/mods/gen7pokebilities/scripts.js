@@ -9,7 +9,7 @@ exports.BattleScripts = {
 		}
 		let id = toID(name);
 		if (id.startsWith('ability')) return Object.assign(Object.create(this.getAbility(id.slice(7))), {id});
-		return Object.getPrototypeOf(this).getEffect.call(this, name);
+		return Object.getPrototypeOf(this).getEffect.call(this, name, true);
 	},
 	suppressingWeather() {
 		let pokemon;
@@ -51,6 +51,7 @@ exports.BattleScripts = {
 			// 19/08/18 TrashChannel: Previous code did nothing to stats
 			for (let statName in this.storedStats) {
 				if ('hp' === statName) continue;
+				// @ts-ignore
 				this.storedStats[statName] = pokemon.storedStats[statName];
 				//console.log("new " + statName + ": " + this.storedStats[statName].toString() );
 			}
@@ -85,12 +86,16 @@ exports.BattleScripts = {
 				this.battle.add('-transform', this, pokemon);
 			}
 			this.setAbility(pokemon.ability, this, true);
+			// @ts-ignore
 			if (this.innates) {
+				// @ts-ignore
 				for (let innate of this.innates) {
 					this.removeVolatile('ability' + innate);
 				}
 			}
+			// @ts-ignore
 			if (pokemon.innates) {
+				// @ts-ignore
 				for (let innate of pokemon.innates) {
 					this.addVolatile('ability' + innate, this);
 				}

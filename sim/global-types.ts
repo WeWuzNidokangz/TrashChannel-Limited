@@ -1183,7 +1183,7 @@ interface ModdedBattleScriptsData extends Partial<BattleScriptsData> {
 	boost?: (this: Battle, boost: SparseBoostsTable, target: Pokemon, source?: Pokemon | null, effect?: Effect | string | null, isSecondary?: boolean, isSelf?: boolean) => boolean | null | 0
 	debug?: (this: Battle, activity: string) => void
 	getDamage?: (this: Battle, pokemon: Pokemon, target: Pokemon, move: string | number | ActiveMove, suppressMessages: boolean) => number | undefined | null | false
-	getEffect?: (this: Battle, name: string | Effect | null) => Effect
+	getEffect?: (this: ModdedDex, name: string | Effect | null) => Effect
 	init?: (this: ModdedDex) => void
 	modifyDamage?: (this: Battle, baseDamage: number, pokemon: Pokemon, target: Pokemon, move: ActiveMove, suppressMessages?: boolean) => void
 	natureModify?: (this: Battle, stats: StatsTable, set: PokemonSet) => StatsTable

@@ -503,7 +503,19 @@ export class ModdedDex {
 	 * While this function can technically return any kind of effect at
 	 * all, that's not a feature TypeScript needs to know about.
 	 */
-	getEffect(name?: string | Effect | null): PureEffect {
+	getEffect(name?: string | Effect | null, recursiveCall: boolean = false): PureEffect {
+		//#region TrashChannel
+		// 20/03/11 TrashChannel: Testing reimplementation of GetEffect override mods
+		if(!recursiveCall) {
+			const basePath = this.dataDir + '/';
+			const BattleScripts = this.loadDataFile(basePath, 'Scripts');
+
+			if (BattleScripts.getEffect) {
+				return BattleScripts.getEffect.call(this, name);
+			}
+		}
+		//#endregion
+
 		if (!name) return nullEffect;
 		if (typeof name !== 'string') return name as PureEffect;
 
