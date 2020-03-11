@@ -191,10 +191,10 @@ let Formats = [
 			'Shedinja',
 			'Arena Trap', 'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Gorilla Tactics', 'Huge Power', 'Ice Scales', 'Illusion', 'Imposter', 'Innards Out', 'Intrepid Sword',
 			'Libero', 'Neutralizing Gas', 'Parental Bond', 'Protean', 'Pure Power', 'Simple', 'Stakeout', 'Speed Boost', 'Water Bubble', 'Wonder Guard', // AAA
-			'Terrakion', // STAAABmons
+			'Terrakion', 'Keldeo', // STAAABmons
 		],
 		restricted: [
-			'Acupressure', 'Belly Drum', 'Bolt Beak', 'Double Iron Bash', 'Extreme Speed', 'Fishious Rend', 'Shell Smash', 'Shift Gear', 'Spore', // STABmons
+			'Acupressure', 'Belly Drum', 'Bolt Beak', 'Double Iron Bash', 'Extreme Speed', 'Fishious Rend', 'Shell Smash', 'Shift Gear', 'Spore', 'V-create', // STABmons
 		],
 	},
 	{
