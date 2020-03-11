@@ -1534,7 +1534,7 @@ let BattleFormats = {
                 families[pokemon.species].push(set.species);
             }
             for (const family in families) {
-                if (families[family].length > 1) problems.push(`${Chat.toListString(families[family])} are in the same evolutionary family.`);
+                if (families[family].length > 1) problems.push(`${DexCalculator.toListString(families[family])} are in the same evolutionary family.`);
             }
             return problems;
         },

@@ -210,6 +210,17 @@ class DexCalculator {
 			return ele != value;
 		});
 	}
+
+	/**
+	 * Takes an array and turns it into a sentence string by adding commas and the word "and"
+	 * * @param {string[]} arr
+	 */
+	static toListString(arr) {
+		if (!arr.length) return '';
+		if (arr.length === 1) return arr[0];
+		if (arr.length === 2) return `${arr[0]} and ${arr[1]}`;
+		return `${arr.slice(0, -1).join(", ")}, and ${arr.slice(-1)[0]}`;
+	}
 }
 
 module.exports = DexCalculator;
