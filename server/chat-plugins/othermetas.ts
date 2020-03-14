@@ -1,5 +1,4 @@
 // Other Metas plugin by Spandan
-'use strict';
 
 //#region TrashChannel
 const TrashChannelChatSupport = require('../../trashchannel/trashchannel-chatsupport');

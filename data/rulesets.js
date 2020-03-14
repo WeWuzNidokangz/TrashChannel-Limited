@@ -294,6 +294,10 @@ let BattleFormats = {
 			if (!template.nfe || futureGenEvo) {
 				return [set.species + " doesn't have an evolution family."];
 			}
+			// Temporary hack for LC past-gen formats and other mashups
+			if (set.level > 5) {
+				return [`${set.species} can't be above level 5 in Little Cup formats.`];
+			}
 		},
 	},
 	blitz: {
@@ -305,7 +309,7 @@ let BattleFormats = {
 		onBegin() {
 			this.add('rule', 'Blitz: Super-fast timer');
 		},
-		timer: {starting: 15, addPerTurn: 5, maxPerTurn: 15, maxFirstTurn: 30, grace: 30},
+		timer: {starting: 15, addPerTurn: 5, maxPerTurn: 15, maxFirstTurn: 40, grace: 30},
 	},
 	vgctimer: {
 		effectType: 'Rule',
@@ -758,8 +762,9 @@ let BattleFormats = {
 		onValidateSet(set) {
 			let template = this.dex.getTemplate(set.species);
 			if (template.num === 493 && set.evs) {
-				for (let stat in set.evs) {
-					// @ts-ignore
+				/** @type {StatName} */
+				let stat;
+				for (stat in set.evs) {
 					const ev = set.evs[stat];
 					if (ev > 100) {
 						return [
@@ -873,8 +878,21 @@ let BattleFormats = {
 	uunfeclause: {
 		effectType: 'ValidatorRule',
 		name: 'UU NFE Clause',
-		desc: "Bans all NFE Pokemon, except Scyther, from [Gen 3] UU.",
-		// Implemented in mods/gen3/rulesets.js
+		desc: "Bans all NFE Pokemon, except Scyther in Gen 3",
+		onValidateSet(set) {
+			const template = this.dex.getTemplate(set.species || set.name);
+			const feInCurrentGen = template.evos && this.dex.getTemplate(template.evos[0]).gen > this.gen;
+			if (template.nfe && !feInCurrentGen) {
+				if (template.species === 'Scyther' && this.gen === 3) return;
+				return [`${set.species} is banned due to UU NFE Clause.`];
+			}
+		},
+	},
+	mimicglitch: {
+		effectType: 'ValidatorRule',
+		name: 'Mimic Glitch',
+		desc: "Allows any Pokemon with access to Assist, Copycat, Metronome, Mimic, or Transform to gain access to almost any other move.",
+		// Implemented in sim/team-validator.ts
 	},
 // #region TrashChannel Rules
 	/////////////////////////////

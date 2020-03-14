@@ -135,11 +135,16 @@ export const commands: ChatCommands = {
 		if (!target) return;
 		const targetUser = this.targetUser;
 
-		if (!targetUser || !targetUser.connected) return this.errorReply(`User ${this.targetUsername} is not currently online.`);
+		if (!targetUser || !targetUser.connected) {
+			return this.errorReply(`User ${this.targetUsername} is not currently online.`);
+		}
 		if (!(targetUser.id in room.users) && !user.can('addhtml')) {
 			return this.errorReply("You do not have permission to use this command to users who are not in this room.");
 		}
-		if (targetUser.blockPMs && (targetUser.blockPMs === true || !user.authAtLeast(targetUser.blockPMs)) && !user.can('lock')) {
+		if (
+			targetUser.blockPMs &&
+			(targetUser.blockPMs === true || !user.authAtLeast(targetUser.blockPMs)) && !user.can('lock')
+		) {
 			Chat.maybeNotifyBlocked('pm', targetUser, user);
 			return this.errorReply("This user is currently blocking PMs.");
 		}
@@ -174,7 +179,8 @@ export const commands: ChatCommands = {
 		if (!(targetUser.id in room.users) && !user.can('addhtml')) {
 			return this.errorReply("You do not have permission to use this command to users who are not in this room.");
 		}
-		if (targetUser.blockPMs && (targetUser.blockPMs === true || !user.authAtLeast(targetUser.blockPMs)) && !user.can('lock')) {
+		if (targetUser.blockPMs &&
+			(targetUser.blockPMs === true || !user.authAtLeast(targetUser.blockPMs)) && !user.can('lock')) {
 			Chat.maybeNotifyBlocked('pm', targetUser, user);
 			return this.errorReply("This user is currently blocking PMs.");
 		}
@@ -190,7 +196,9 @@ export const commands: ChatCommands = {
 		user.lastPM = targetUser.id;
 	},
 	pmuhtmlhelp: [`/pmuhtml [user], [name], [html] - PMs [html] that can change to [user]. Requires * ~`],
-	pmuhtmlchangehelp: [`/pmuhtmlchange [user], [name], [html] - Changes html that was previously PMed to [user] to [html]. Requires * ~`],
+	pmuhtmlchangehelp: [
+		`/pmuhtmlchange [user], [name], [html] - Changes html that was previously PMed to [user] to [html]. Requires * ~`,
+	],
 
 	nick() {
 		this.sendReply(`||New to the Pokémon Showdown protocol? Your client needs to get a signed assertion from the login server and send /trn`);
@@ -220,6 +228,9 @@ export const commands: ChatCommands = {
 		if (!target) return this.parse('/help hotpatch');
 		if (!this.can('hotpatch')) return;
 
+		if (Monitor.updateServerLock) {
+			return this.errorReply("Wait for /updateserver to finish before hotpatching.");
+		}
 		const lock = Monitor.hotpatchLock;
 		const hotpatches = ['chat', 'formats', 'loginserver', 'punishments', 'dnsbl'];
 		const version = await Monitor.version();
@@ -228,7 +239,7 @@ export const commands: ChatCommands = {
 			(Monitor.hotpatchVersions[patch] ?
 				Monitor.hotpatchVersions[patch] === version :
 				(global.__version && version === global.__version.tree));
-		const requiresForceMessage = `The git work tree has not changed since the last time ${target} was hotpatched (${version && version.slice(0, 8)}), use /forcehotpatch ${target} if you wish to hotpatch anyway.`;
+		const requiresForceMessage = `The git work tree has not changed since the last time ${target} was hotpatched (${version?.slice(0, 8)}), use /forcehotpatch ${target} if you wish to hotpatch anyway.`;
 
 		let patch = target;
 		try {
@@ -323,7 +334,9 @@ export const commands: ChatCommands = {
 				if (lock['validator']) {
 					return this.errorReply(`Hot-patching the validator has been disabled by ${lock['validator'].by} (${lock['validator'].reason})`);
 				}
-				if (lock['formats']) return this.errorReply(`Hot-patching formats has been disabled by ${lock['formats'].by} (${lock['formats'].reason})`);
+				if (lock['formats']) {
+					return this.errorReply(`Hot-patching formats has been disabled by ${lock['formats'].by} (${lock['formats'].reason})`);
+				}
 				if (requiresForce(patch)) return this.errorReply(requiresForceMessage);
 
 				void TeamValidatorAsync.PM.respawn();
@@ -395,7 +408,9 @@ export const commands: ChatCommands = {
 		const validDisable = ['chat', 'battles', 'formats', 'validator', 'tournaments', 'punishments', 'all'];
 
 		if (validDisable.includes(hotpatch)) {
-			if (lock[hotpatch]) return this.errorReply(`Hot-patching ${hotpatch} has already been disabled by ${lock[hotpatch].by} (${lock[hotpatch].reason})`);
+			if (lock[hotpatch]) {
+				return this.errorReply(`Hot-patching ${hotpatch} has already been disabled by ${lock[hotpatch].by} (${lock[hotpatch].reason})`);
+			}
 			lock[hotpatch] = {
 				by: user.name,
 				reason,
@@ -409,7 +424,9 @@ export const commands: ChatCommands = {
 			`|c|${user.getIdentity()}|/log ${user.name} has disabled hot-patching ${hotpatch}. Reason: ${reason}`
 		);
 	},
-	nohotpatchhelp: [`/nohotpatch [chat|formats|battles|validator|tournaments|punishments|all] [reason] - Disables hotpatching the specified part of the simulator. Requires: & ~`],
+	nohotpatchhelp: [
+		`/nohotpatch [chat|formats|battles|validator|tournaments|punishments|all] [reason] - Disables hotpatching the specified part of the simulator. Requires: & ~`,
+	],
 
 	async savelearnsets(target, room, user) {
 		if (!this.can('hotpatch')) return false;
@@ -589,7 +606,9 @@ export const commands: ChatCommands = {
 		const logRoom = Rooms.get('staff') || room;
 		logRoom.roomlog(`${user.name} used /lockdown`);
 	},
-	lockdownhelp: [`/lockdown - locks down the server, which prevents new battles from starting so that the server can eventually be restarted. Requires: ~`],
+	lockdownhelp: [
+		`/lockdown - locks down the server, which prevents new battles from starting so that the server can eventually be restarted. Requires: ~`,
+	],
 
 	autolockdown: 'autolockdownkill',
 	autolockdownkill(target, room, user) {
@@ -597,13 +616,17 @@ export const commands: ChatCommands = {
 		if (Config.autolockdown === undefined) Config.autolockdown = true;
 
 		if (this.meansYes(target)) {
-			if (Config.autolockdown) return this.errorReply("The server is already set to automatically kill itself upon the final battle finishing.");
+			if (Config.autolockdown) {
+				return this.errorReply("The server is already set to automatically kill itself upon the final battle finishing.");
+			}
 			Config.autolockdown = true;
 			this.sendReply("The server is now set to automatically kill itself upon the final battle finishing.");
 			const logRoom = Rooms.get('staff') || room;
 			logRoom.roomlog(`${user.name} used /autolockdownkill on`);
 		} else if (this.meansNo(target)) {
-			if (!Config.autolockdown) return this.errorReply("The server is already set to not automatically kill itself upon the final battle finishing.");
+			if (!Config.autolockdown) {
+				return this.errorReply("The server is already set to not automatically kill itself upon the final battle finishing.");
+			}
 			Config.autolockdown = false;
 			this.sendReply("The server is now set to not automatically kill itself upon the final battle finishing.");
 			const logRoom = Rooms.get('staff') || room;
@@ -645,7 +668,9 @@ export const commands: ChatCommands = {
 			return this.errorReply('/crashfixed - There is no active crash.');
 		}
 
-		const message = cmd === 'crashfixed' ? `<div class="broadcast-green"><b>We fixed the crash without restarting the server!</b></div>` : `<div class="broadcast-green"><b>The server restart was canceled.</b></div>`;
+		const message = cmd === 'crashfixed' ?
+			`<div class="broadcast-green"><b>We fixed the crash without restarting the server!</b></div>` :
+			`<div class="broadcast-green"><b>The server restart was canceled.</b></div>`;
 		if (Rooms.global.lockdown === true) {
 			for (const curRoom of Rooms.rooms.values()) {
 				if (curRoom.roomid !== 'global') curRoom.addRaw(message).update();
@@ -674,7 +699,9 @@ export const commands: ChatCommands = {
 		}
 		Config.emergency = true;
 		for (const curRoom of Rooms.rooms.values()) {
-			if (curRoom.roomid !== 'global') curRoom.addRaw(`<div class="broadcast-red">The server has entered emergency mode. Some features might be disabled or limited.</div>`).update();
+			if (curRoom.roomid !== 'global') {
+				curRoom.addRaw(`<div class="broadcast-red">The server has entered emergency mode. Some features might be disabled or limited.</div>`).update();
+			}
 		}
 
 		const logRoom = Rooms.get('staff') || room;
@@ -689,7 +716,9 @@ export const commands: ChatCommands = {
 		}
 		Config.emergency = false;
 		for (const curRoom of Rooms.rooms.values()) {
-			if (curRoom.roomid !== 'global') curRoom.addRaw(`<div class="broadcast-green"><b>The server is no longer in emergency mode.</b></div>`).update();
+			if (curRoom.roomid !== 'global') {
+				curRoom.addRaw(`<div class="broadcast-green"><b>The server is no longer in emergency mode.</b></div>`).update();
+			}
 		}
 
 		const logRoom = Rooms.get('staff') || room;
@@ -738,7 +767,9 @@ export const commands: ChatCommands = {
 			error => connection.sendTo(room, `Something went wrong while loading ipbans.txt: ${error}`)
 		);
 	},
-	loadbanlisthelp: [`/loadbanlist - Loads the bans located at ipbans.txt. The command is executed automatically at startup. Requires: ~`],
+	loadbanlisthelp: [
+		`/loadbanlist - Loads the bans located at ipbans.txt. The command is executed automatically at startup. Requires: ~`,
+	],
 
 	refreshpage(target, room, user) {
 		if (!this.can('hotpatch')) return false;
@@ -769,7 +800,7 @@ export const commands: ChatCommands = {
 					let log = `[o] ${stdout}[e] ${stderr}`;
 					if (error) log = `[c] ${error.code}\n${log}`;
 					logRoom.roomlog(log);
-					resolve([error && error.code || 0, stdout, stderr]);
+					resolve([error?.code || 0, stdout, stderr]);
 				});
 			});
 		}
@@ -780,13 +811,13 @@ export const commands: ChatCommands = {
 		let [code, stdout, stderr] = await exec(`git fetch`);
 		if (code) throw new Error(`updateserver: Crash while fetching - make sure this is a Git repository`);
 		if (!stdout && !stderr) {
-			Monitor.updateServerLock = false;
 			this.sendReply(`There were no updates.`);
 			[code, stdout, stderr] = await exec('node ../../build');
 			if (stderr) {
 				return this.errorReply(`Crash while rebuilding: ${stderr}`);
 			}
 			this.sendReply(`Rebuilt.`);
+			Monitor.updateServerLock = false;
 			return;
 		}
 
@@ -853,7 +884,7 @@ export const commands: ChatCommands = {
 					let log = `[o] ${stdout}[e] ${stderr}`;
 					if (error) log = `[c] ${error.code}\n${log}`;
 					logRoom.roomlog(log);
-					resolve([error && error.code || 0, stdout, stderr]);
+					resolve([error?.code || 0, stdout, stderr]);
 				});
 			});
 		}
@@ -861,10 +892,12 @@ export const commands: ChatCommands = {
 		if (!user.can('hotpatch')) {
 			return this.errorReply(`/updateserver - Access denied.`);
 		}
+		Monitor.updateServerLock = true;
 		const [, , stderr] = await exec('node ../../build');
 		if (stderr) {
 			return this.errorReply(`Crash while rebuilding: ${stderr}`);
 		}
+		Monitor.updateServerLock = false;
 		this.sendReply(`Rebuilt.`);
 	},
 
@@ -893,11 +926,13 @@ export const commands: ChatCommands = {
 
 		if (!this.broadcasting) this.sendReply(`||>> ${target}`);
 		try {
+			/* eslint-disable no-eval, @typescript-eslint/no-unused-vars */
 			const battle = room.battle;
 			const me = user;
-			// tslint:disable-next-line: no-eval
 			let result = eval(target);
-			if (result && result.then) {
+			/* eslint-enable no-eval, @typescript-eslint/no-unused-vars */
+
+			if (result?.then) {
 				result = `Promise -> ${Chat.stringify(await result)}`;
 			} else {
 				result = Chat.stringify(result);
@@ -919,7 +954,7 @@ export const commands: ChatCommands = {
 			return this.errorReply("/evalbattle - This isn't a battle room.");
 		}
 
-		room.battle.stream.write(`>eval ${target.replace(/\n/g, '\f')}`);
+		void room.battle.stream.write(`>eval ${target.replace(/\n/g, '\f')}`);
 	},
 
 	ebat: 'editbattle',
@@ -958,38 +993,48 @@ export const commands: ChatCommands = {
 		switch (cmd) {
 		case 'hp':
 		case 'h':
-			battle.stream.write(`>eval let p=${getPlayer(targets[0]) + getPokemon(targets[1])};p.sethp(${parseInt(targets[2])});if (p.isActive)battle.add('-damage',p,p.getHealth);`);
+			void battle.stream.write(
+				`>eval let p=${getPlayer(targets[0]) + getPokemon(targets[1])};p.sethp(${parseInt(targets[2])});if (p.isActive)battle.add('-damage',p,p.getHealth);`
+			);
 			break;
 		case 'status':
 		case 's':
-			battle.stream.write(`>eval let pl=${getPlayer(targets[0])};let p=pl${getPokemon(targets[1])};p.setStatus('${toID(targets[2])}');if (!p.isActive){battle.add('','please ignore the above');battle.add('-status',pl.active[0],pl.active[0].status,'[silent]');}`);
+			void battle.stream.write(
+				`>eval let pl=${getPlayer(targets[0])};let p=pl${getPokemon(targets[1])};p.setStatus('${toID(targets[2])}');if (!p.isActive){battle.add('','please ignore the above');battle.add('-status',pl.active[0],pl.active[0].status,'[silent]');}`
+			);
 			break;
 		case 'pp':
-			battle.stream.write(`>eval let pl=${getPlayer(targets[0])};let p=pl${getPokemon(targets[1])};p.moveSlots[p.moves.indexOf('${toID(targets[2])}')].pp = ${parseInt(targets[3])};`);
+			void battle.stream.write(
+				`>eval let pl=${getPlayer(targets[0])};let p=pl${getPokemon(targets[1])};p.moveSlots[p.moves.indexOf('${toID(targets[2])}')].pp = ${parseInt(targets[3])};`
+			);
 			break;
 		case 'boost':
 		case 'b':
-			battle.stream.write(`>eval let p=${getPlayer(targets[0]) + getPokemon(targets[1])};battle.boost({${toID(targets[2])}:${parseInt(targets[3])}},p)`);
+			void battle.stream.write(
+				`>eval let p=${getPlayer(targets[0]) + getPokemon(targets[1])};battle.boost({${toID(targets[2])}:${parseInt(targets[3])}},p)`
+			);
 			break;
 		case 'volatile':
 		case 'v':
-			battle.stream.write(`>eval let p=${getPlayer(targets[0]) + getPokemon(targets[1])};p.addVolatile('${toID(targets[2])}')`);
+			void battle.stream.write(
+				`>eval let p=${getPlayer(targets[0]) + getPokemon(targets[1])};p.addVolatile('${toID(targets[2])}')`
+			);
 			break;
 		case 'sidecondition':
 		case 'sc':
-			battle.stream.write(`>eval let p=${getPlayer(targets[0])}.addSideCondition('${toID(targets[1])}', 'debug')`);
+			void battle.stream.write(`>eval let p=${getPlayer(targets[0])}.addSideCondition('${toID(targets[1])}', 'debug')`);
 			break;
 		case 'fieldcondition': case 'pseudoweather':
 		case 'fc':
-			battle.stream.write(`>eval battle.field.addPseudoWeather('${toID(targets[0])}', 'debug')`);
+			void battle.stream.write(`>eval battle.field.addPseudoWeather('${toID(targets[0])}', 'debug')`);
 			break;
 		case 'weather':
 		case 'w':
-			battle.stream.write(`>eval battle.field.setWeather('${toID(targets[0])}', 'debug')`);
+			void battle.stream.write(`>eval battle.field.setWeather('${toID(targets[0])}', 'debug')`);
 			break;
 		case 'terrain':
 		case 't':
-			battle.stream.write(`>eval battle.field.setTerrain('${toID(targets[0])}', 'debug')`);
+			void battle.stream.write(`>eval battle.field.setTerrain('${toID(targets[0])}', 'debug')`);
 			break;
 		default:
 			this.errorReply(`Unknown editbattle command: ${cmd}`);

@@ -256,6 +256,7 @@ let BattleMovedex = {
 		shortDesc: "High critical hit ratio.",
 		id: "aeroblast",
 		isNonstandard: 'Past',
+		isViable: true,
 		name: "Aeroblast",
 		pp: 5,
 		priority: 0,
@@ -959,8 +960,8 @@ let BattleMovedex = {
 		accuracy: 100,
 		basePower: 60,
 		basePowerCallback(pokemon, target, move) {
-			let damagedByTarget = pokemon.attackedBy.some(p =>
-				p.source === target && p.damage > 0 && p.thisTurn
+			let damagedByTarget = pokemon.attackedBy.some(
+				p => p.source === target && p.damage > 0 && p.thisTurn
 			);
 			if (damagedByTarget) {
 				this.debug('Boosted for getting hit by ' + target);
@@ -1690,6 +1691,7 @@ let BattleMovedex = {
 		shortDesc: "Hits 2 times in one turn.",
 		id: "bonemerang",
 		isNonstandard: "Past",
+		isViable: true,
 		name: "Bonemerang",
 		pp: 10,
 		priority: 0,
@@ -2840,6 +2842,7 @@ let BattleMovedex = {
 		shortDesc: "Nullifies the foe(s) Ability if the foe(s) move first.",
 		id: "coreenforcer",
 		isNonstandard: "Past",
+		isViable: true,
 		name: "Core Enforcer",
 		pp: 10,
 		priority: 0,
@@ -4038,6 +4041,7 @@ let BattleMovedex = {
 		shortDesc: "Lowers the user's Defense and Sp. Def by 1.",
 		id: "dragonascent",
 		isNonstandard: 'Past',
+		isViable: true,
 		name: "Dragon Ascent",
 		pp: 5,
 		priority: 0,
@@ -4139,6 +4143,7 @@ let BattleMovedex = {
 		shortDesc: "No additional effect.",
 		id: "dragonhammer",
 		isNonstandard: "Past",
+		isViable: true,
 		name: "Dragon Hammer",
 		pp: 15,
 		priority: 0,
@@ -5256,6 +5261,7 @@ let BattleMovedex = {
 		shortDesc: "50% chance to raise the user's Sp. Atk by 1.",
 		id: "fierydance",
 		isNonstandard: 'Past',
+		isViable: true,
 		name: "Fiery Dance",
 		pp: 10,
 		priority: 0,
@@ -5786,6 +5792,7 @@ let BattleMovedex = {
 		shortDesc: "Lowers the user's Sp. Atk by 2.",
 		id: "fleurcannon",
 		isNonstandard: 'Past',
+		isViable: true,
 		name: "Fleur Cannon",
 		pp: 5,
 		priority: 0,
@@ -7254,7 +7261,13 @@ let BattleMovedex = {
 			},
 			onSwitchIn(pokemon) {
 				if (pokemon.hasItem('heavydutyboots')) return;
-				let typeMod = this.dex.clampIntRange(pokemon.runEffectiveness(this.dex.getActiveMove('G-Max Steelsurge')), -6, 6);
+				// Ice Face and Disguise correctly get typed damage from Stealth Rock
+				// because Stealth Rock bypasses Substitute.
+				// They don't get typed damage from Steelsurge because Steelsurge doesn't,
+				// so we're going to test the damage of a Steel-type Stealth Rock instead.
+				const steelHazard = this.dex.getActiveMove('Stealth Rock');
+				steelHazard.type = 'Steel';
+				let typeMod = this.dex.clampIntRange(pokemon.runEffectiveness(steelHazard), -6, 6);
 				this.damage(pokemon.maxhp * Math.pow(2, typeMod) / 8);
 			},
 		},
@@ -7401,7 +7414,7 @@ let BattleMovedex = {
 		accuracy: true,
 		basePower: 10,
 		category: "Physical",
-		desc: "Damages opponent(s) by 1/8 of their maximum HP for four turns. Base Power scales with the base move's Base Power.",
+		desc: "Damages opponent(s) by 1/6 of their maximum HP for four turns. Base Power scales with the base move's Base Power.",
 		shortDesc: "Damages foes for 4 turns. BP scales w/ base move.",
 		id: "gmaxvolcalith",
 		isNonstandard: "Unobtainable",
@@ -7422,10 +7435,13 @@ let BattleMovedex = {
 			},
 			onResidual(targetSide) {
 				for (const pokemon of targetSide.active) {
-					this.damage(pokemon.baseMaxhp / 8, pokemon);
+					if (!pokemon.hasType('Rock')) this.damage(pokemon.baseMaxhp / 6, pokemon);
 				}
 			},
 			onEnd(targetSide) {
+				for (const pokemon of targetSide.active) {
+					if (!pokemon.hasType('Rock')) this.damage(pokemon.baseMaxhp / 6, pokemon);
+				}
 				this.add('-sideend', targetSide, 'G-Max Volcalith');
 			},
 		},
@@ -8239,6 +8255,7 @@ let BattleMovedex = {
 		shortDesc: "Has 1/4 recoil.",
 		id: "headcharge",
 		isNonstandard: "Past",
+		isViable: true,
 		name: "Head Charge",
 		pp: 15,
 		priority: 0,
@@ -9289,6 +9306,7 @@ let BattleMovedex = {
 		shortDesc: "Hoopa-U: Lowers user's Def by 1; breaks protect.",
 		id: "hyperspacefury",
 		isNonstandard: 'Past',
+		isViable: true,
 		name: "Hyperspace Fury",
 		pp: 5,
 		priority: 0,
@@ -9507,6 +9525,7 @@ let BattleMovedex = {
 		shortDesc: "Lowers the user's Speed by 1.",
 		id: "icehammer",
 		isNonstandard: 'Past',
+		isViable: true,
 		name: "Ice Hammer",
 		pp: 10,
 		priority: 0,
@@ -9943,6 +9962,7 @@ let BattleMovedex = {
 		shortDesc: "Type varies based on the held Plate.",
 		id: "judgment",
 		isNonstandard: 'Past',
+		isViable: true,
 		name: "Judgment",
 		pp: 10,
 		priority: 0,
@@ -10089,7 +10109,7 @@ let BattleMovedex = {
 		accuracy: 100,
 		basePower: 65,
 		category: "Physical",
-		desc: "If the target is holding an item that can be removed from it, ignoring the Sticky Hold Ability, this move's power is multiplied by 1.5. If the user has not fainted, the target loses its held item. This move cannot remove Z-Crystals, cause Pokemon with the Sticky Hold Ability to lose their held item, cause Pokemon that can Mega Evolve to lose the Mega Stone for their species, or cause a Kyogre, a Groudon, a Giratina, an Arceus, a Genesect, or a Silvally to lose their Blue Orb, Red Orb, Griseous Orb, Plate, Drive, or Memory respectively. Items lost to this move cannot be regained with Recycle or the Harvest Ability.",
+		desc: "If the target is holding an item that can be removed from it, ignoring the Sticky Hold Ability, this move's power is multiplied by 1.5. If the user has not fainted, the target loses its held item. This move cannot cause Pokemon with the Sticky Hold Ability to lose their held item or cause a Kyogre, a Groudon, a Giratina, an Arceus, a Genesect, a Silvally, a Zacian, or a Zamazenta to lose their Blue Orb, Red Orb, Griseous Orb, Plate, Drive, Memory, Rusted Sword, or Rusted Shield respectively. Items lost to this move cannot be regained with Recycle or the Harvest Ability.",
 		shortDesc: "1.5x damage if foe holds an item. Removes item.",
 		id: "knockoff",
 		isViable: true,
@@ -10451,6 +10471,7 @@ let BattleMovedex = {
 		shortDesc: "Has 1/2 recoil.",
 		id: "lightofruin",
 		isNonstandard: 'Past',
+		isViable: true,
 		name: "Light of Ruin",
 		pp: 5,
 		priority: 0,
@@ -10597,6 +10618,7 @@ let BattleMovedex = {
 		shortDesc: "Causes the target to fall asleep.",
 		id: "lovelykiss",
 		isNonstandard: 'Past',
+		isViable: true,
 		name: "Lovely Kiss",
 		pp: 10,
 		priority: 0,
@@ -11007,6 +11029,7 @@ let BattleMovedex = {
 		shortDesc: "Traps and damages the target for 4-5 turns.",
 		id: "magmastorm",
 		isNonstandard: 'Past',
+		isViable: true,
 		name: "Magma Storm",
 		pp: 5,
 		priority: 0,
@@ -12089,6 +12112,7 @@ let BattleMovedex = {
 		shortDesc: "Heals the user by 50% of its max HP.",
 		id: "milkdrink",
 		isNonstandard: 'Past',
+		isViable: true,
 		name: "Milk Drink",
 		pp: 10,
 		priority: 0,
@@ -12149,6 +12173,7 @@ let BattleMovedex = {
 		shortDesc: "User loses 50% max HP. Hits adjacent Pokemon.",
 		id: "mindblown",
 		isNonstandard: 'Past',
+		isViable: true,
 		name: "Mind Blown",
 		pp: 5,
 		priority: 0,
@@ -13106,6 +13131,7 @@ let BattleMovedex = {
 		shortDesc: "User recovers 75% of the damage dealt.",
 		id: "oblivionwing",
 		isNonstandard: 'Past',
+		isViable: true,
 		name: "Oblivion Wing",
 		pp: 10,
 		priority: 0,
@@ -13234,7 +13260,7 @@ let BattleMovedex = {
 		volatileStatus: 'octolock',
 		effect: {
 			onStart(pokemon, source) {
-				this.add('-activate', pokemon, 'move: Octolock', '[of] ' + source);
+				this.add('-start', pokemon, 'move: Octolock', '[of] ' + source);
 			},
 			onResidualOrder: 11,
 			onResidual(pokemon) {
@@ -13244,7 +13270,7 @@ let BattleMovedex = {
 					this.add('-end', pokemon, 'Octolock', '[partiallytrapped]', '[silent]');
 					return;
 				}
-				this.boost({def: -1, spd: -1}, pokemon, source, this.dex.getActiveMove("Octolock"));
+				this.boost({def: -1, spd: -1}, pokemon, source, this.dex.getActiveMove('octolock'));
 			},
 			onTrapPokemon(pokemon) {
 				if (this.effectData.source && this.effectData.source.isActive) pokemon.tryTrap();
@@ -14522,6 +14548,7 @@ let BattleMovedex = {
 		shortDesc: "Lowers the user's Sp. Atk by 2.",
 		id: "psychoboost",
 		isNonstandard: 'Past',
+		isViable: true,
 		name: "Psycho Boost",
 		pp: 5,
 		priority: 0,
@@ -15399,6 +15426,7 @@ let BattleMovedex = {
 		shortDesc: "Type varies based on the user's primary type.",
 		id: "revelationdance",
 		isNonstandard: 'Past',
+		isViable: true,
 		name: "Revelation Dance",
 		pp: 15,
 		priority: 0,
@@ -15418,8 +15446,8 @@ let BattleMovedex = {
 		accuracy: 100,
 		basePower: 60,
 		basePowerCallback(pokemon, target, move) {
-			let damagedByTarget = pokemon.attackedBy.some(p =>
-				p.source === target && p.damage > 0 && p.thisTurn
+			let damagedByTarget = pokemon.attackedBy.some(
+				p => p.source === target && p.damage > 0 && p.thisTurn
 			);
 			if (damagedByTarget) {
 				this.debug('Boosted for getting hit by ' + target);
@@ -15902,6 +15930,7 @@ let BattleMovedex = {
 		shortDesc: "50% chance to burn the target. Thaws user.",
 		id: "sacredfire",
 		isNonstandard: 'Past',
+		isViable: true,
 		name: "Sacred Fire",
 		pp: 5,
 		priority: 0,
@@ -16179,6 +16208,7 @@ let BattleMovedex = {
 		shortDesc: "30% chance to burn adjacent Pokemon.",
 		id: "searingshot",
 		isNonstandard: 'Past',
+		isViable: true,
 		name: "Searing Shot",
 		pp: 5,
 		priority: 0,
@@ -16391,6 +16421,7 @@ let BattleMovedex = {
 		shortDesc: "20% chance to lower the target's Defense by 1.",
 		id: "shadowbone",
 		isNonstandard: 'Past',
+		isViable: true,
 		name: "Shadow Bone",
 		pp: 10,
 		priority: 0,
@@ -16433,6 +16464,7 @@ let BattleMovedex = {
 		shortDesc: "Disappears turn 1. Hits turn 2. Breaks protection.",
 		id: "shadowforce",
 		isNonstandard: 'Past',
+		isViable: true,
 		name: "Shadow Force",
 		pp: 5,
 		priority: 0,
@@ -17724,6 +17756,7 @@ let BattleMovedex = {
 		shortDesc: "High critical hit ratio.",
 		id: "spacialrend",
 		isNonstandard: 'Past',
+		isViable: true,
 		name: "Spacial Rend",
 		pp: 5,
 		priority: 0,
@@ -18252,6 +18285,7 @@ let BattleMovedex = {
 		shortDesc: "30% chance to burn the target.",
 		id: "steameruption",
 		isNonstandard: 'Past',
+		isViable: true,
 		name: "Steam Eruption",
 		pp: 5,
 		priority: 0,
@@ -18767,7 +18801,10 @@ let BattleMovedex = {
 			onStart(target) {
 				this.add('-start', target, 'Substitute');
 				this.effectData.hp = Math.floor(target.maxhp / 4);
-				delete target.volatiles['partiallytrapped'];
+				if (target.volatiles['partiallytrapped']) {
+					this.add('-end', target, target.volatiles['partiallytrapped'].sourceEffect, '[partiallytrapped]', '[silent]');
+					delete target.volatiles['partiallytrapped'];
+				}
 			},
 			onTryPrimaryHitPriority: -1,
 			onTryPrimaryHit(target, source, move) {
@@ -19251,6 +19288,7 @@ let BattleMovedex = {
 		shortDesc: "Raises the user's Sp. Atk by 3.",
 		id: "tailglow",
 		isNonstandard: 'Past',
+		isViable: true,
 		name: "Tail Glow",
 		pp: 20,
 		priority: 0,

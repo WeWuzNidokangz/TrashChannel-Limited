@@ -212,17 +212,17 @@ export class Roomlog {
 		if (!this.roomlogStream) return;
 		const timestamp = Chat.toTimestamp(date).split(' ')[1] + ' ';
 		message = message.replace(/<img[^>]* src="data:image\/png;base64,[^">]+"[^>]*>/g, '');
-		this.roomlogStream.write(timestamp + message + '\n');
+		void this.roomlogStream.write(timestamp + message + '\n');
 	}
 	modlog(message: string) {
 		if (!this.modlogStream) return;
-		this.modlogStream.write('[' + (new Date().toJSON()) + '] ' + message + '\n');
+		void this.modlogStream.write('[' + (new Date().toJSON()) + '] ' + message + '\n');
 	}
-	async rename(newID: RoomID) {
+	async rename(newID: RoomID): Promise<true> {
 		const modlogPath = `logs/modlog`;
 		const roomlogPath = `logs/chat`;
-		const modlogStreamExisted = !!this.modlogStream;
-		const roomlogStreamExisted = !!this.roomlogStream;
+		const modlogStreamExisted = this.modlogStream !== null;
+		const roomlogStreamExisted = this.roomlogStream !== null;
 		await this.destroy();
 		await Promise.all([
 			FS(modlogPath + `/modlog_${this.roomid}.txt`).exists(),
@@ -231,20 +231,23 @@ export class Roomlog {
 			FS(roomlogPath + `/${newID}`).exists(),
 		]).then(([modlogExists, roomlogExists, newModlogExists, newRoomlogExists]) => {
 			return Promise.all([
-				modlogExists && !newModlogExists
-					? FS(modlogPath + `/modlog_${this.roomid}.txt`).rename(modlogPath + `/modlog_${newID}.txt`)
-					: undefined,
-				roomlogExists && !newRoomlogExists
-					? FS(roomlogPath + `/${this.roomid}`).rename(roomlogPath + `/${newID}`)
-					: undefined,
+				modlogExists && !newModlogExists ?
+					FS(modlogPath + `/modlog_${this.roomid}.txt`).rename(modlogPath + `/modlog_${newID}.txt`) :
+					undefined,
+				roomlogExists && !newRoomlogExists ?
+					FS(roomlogPath + `/${this.roomid}`).rename(roomlogPath + `/${newID}`) :
+					undefined,
 			]);
 		});
 		this.roomid = newID;
 		Roomlogs.roomlogs.set(newID, this);
 		if (modlogStreamExisted) {
+			// set modlogStream to undefined (uninitialized) instead of null (disabled)
+			this.modlogStream = undefined;
 			this.setupModlogStream();
 		}
 		if (roomlogStreamExisted) {
+			this.roomlogStream = undefined;
 			await this.setupRoomlogStream(true);
 		}
 		return true;
@@ -261,7 +264,7 @@ export class Roomlog {
 		const time = Date.now();
 		const nextMidnight = new Date(time + 24 * 60 * 60 * 1000);
 		nextMidnight.setHours(0, 0, 1);
-		Roomlogs.rollLogTimer = setTimeout(() => Roomlog.rollLogs(), nextMidnight.getTime() - time);
+		Roomlogs.rollLogTimer = setTimeout(() => void Roomlog.rollLogs(), nextMidnight.getTime() - time);
 	}
 	truncate() {
 		if (!this.autoTruncate) return;

@@ -172,36 +172,7 @@ export class Side {
 			pokemon: [] as AnyObject[],
 		};
 		for (const pokemon of this.pokemon) {
-			const entry: AnyObject = {
-				ident: pokemon.fullname,
-				details: pokemon.details,
-				condition: pokemon.getHealth().secret,
-				active: (pokemon.position < pokemon.side.active.length),
-				stats: {
-					atk: pokemon.baseStoredStats['atk'],
-					def: pokemon.baseStoredStats['def'],
-					spa: pokemon.baseStoredStats['spa'],
-					spd: pokemon.baseStoredStats['spd'],
-					spe: pokemon.baseStoredStats['spe'],
-				},
-				moves: pokemon.moves.map(move => {
-					if (move === 'hiddenpower') {
-						return move + toID(pokemon.hpType) + (this.battle.gen < 6 ? '' : pokemon.hpPower);
-					}
-					if (move === 'frustration' || move === 'return') {
-						const m = this.battle.dex.getMove(move)!;
-						// @ts-ignore - Frustration and Return only require the source Pokemon
-						const basePower = m.basePowerCallback(pokemon);
-						return `${move}${basePower}`;
-					}
-					return move;
-				}),
-				baseAbility: pokemon.baseAbility,
-				item: pokemon.item,
-				pokeball: pokemon.pokeball,
-			};
-			if (this.battle.gen > 6) entry.ability = pokemon.ability;
-			data.pokemon.push(entry);
+			data.pokemon.push(pokemon.getSwitchRequestData());
 		}
 		return data;
 	}
@@ -373,7 +344,7 @@ export class Side {
 		// Parse moveText (name or index)
 		// If the move is not found, the action is invalid without requiring further inspection.
 
-		const requestMoves = pokemon.getRequestData().moves;
+		const requestMoves = pokemon.getMoveRequestData().moves;
 		let moveid = '';
 		let targetType = '';
 		if (autoChoose) moveText = 1;
@@ -593,7 +564,7 @@ export class Side {
 			slot = this.active.length;
 			while (this.choice.switchIns.has(slot) || this.pokemon[slot].fainted) slot++;
 		} else {
-			slot = parseInt(slotText!, 10) - 1;
+			slot = parseInt(slotText!) - 1;
 		}
 		if (isNaN(slot) || slot < 0) {
 			// maybe it's a name/species id!
@@ -666,7 +637,7 @@ export class Side {
 		if (!data) data = `123456`;
 		const positions = (('' + data)
 			.split(data.includes(',') ? ',' : '')
-			.map(datum => parseInt(datum, 10) - 1));
+			.map(datum => parseInt(datum) - 1));
 
 		if (autoFill && this.choice.actions.length >= this.maxTeamSize) return true;
 		if (this.requestState !== 'teampreview') {
@@ -733,7 +704,7 @@ export class Side {
 		let forcedSwitches = 0;
 		let forcedPasses = 0;
 		if (this.battle.requestState === 'switch') {
-			const canSwitchOut = this.active.filter(pokemon => pokemon && pokemon.switchFlag).length;
+			const canSwitchOut = this.active.filter(pokemon => pokemon?.switchFlag).length;
 			const canSwitchIn = this.pokemon.slice(this.active.length).filter(pokemon => pokemon && !pokemon.fainted).length;
 			forcedSwitches = Math.min(canSwitchOut, canSwitchIn);
 			forcedPasses = canSwitchOut - forcedSwitches;
@@ -798,7 +769,7 @@ export class Side {
 					// '2' (since Conversion targets 'self', targetLoc can't be 2).
 					if (/\s(?:-|\+)?[1-3]$/.test(data) && toID(data) !== 'conversion2') {
 						if (targetLoc !== undefined) return error();
-						targetLoc = parseInt(data.slice(-2), 10);
+						targetLoc = parseInt(data.slice(-2));
 						data = data.slice(0, -2).trim();
 					} else if (data.endsWith(' mega')) {
 						if (megaDynaOrZ) return error();
