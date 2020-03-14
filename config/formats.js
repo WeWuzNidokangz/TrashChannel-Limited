@@ -34,16 +34,16 @@ let Formats = [
             `&bullet; <a href="https://www.smogon.com/forums/threads/3633603/">Suicide Cup</a>`,
         ],
 
-		mod: 'gen7suicidecup',
+		mod: 'suicidecup',
 		forcedLevel: 100,
 		team: 'randomSC',
 		ruleset: ['PotD', 'Suicide Cup Standard Package', 'Cancel Mod', 'Evasion Moves Clause', 'HP Percentage Mod', 'Moody Clause', 'Nickname Clause', 'Obtainable', 'Sleep Clause Mod', 'Species Clause'],
 	},
 	{
-		name: "[Gen 7] Mix and Mega: Hackmons Cup",
+		name: "[Gen 8] Mix and Mega: Hackmons Cup",
 		desc: `Randomized teams of level-balanced Pok&eacute;mon with mega stones (and they know how to use 'em!)`,
 
-		mod: 'gen7mixandmega',
+		mod: 'mixandmega',
 		team: 'randomHCMnM',
 		ruleset: ['Obtainable', 'HP Percentage Mod', 'Cancel Mod'],
 		onBegin() {
@@ -72,13 +72,13 @@ let Formats = [
 		},
 	},
 	{
-		name: "[Gen 7] Partners in Crime: Hackmons Cup",
+		name: "[Gen 8] Partners in Crime: Hackmons Cup (Beta)",
 		desc: `Randomized teams of level-balanced Pok&eacute;mon where both active ally Pok&eacute;mon share dumb abilities and moves.`,
 		threads: [
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3618488/">Partners in Crime</a>`,
 		],
 
-		mod: 'gen7pic',
+		mod: 'pic',
 		gameType: 'doubles',
 		team: 'randomHCPiC',
 		ruleset: ['Obtainable', 'HP Percentage Mod', 'Cancel Mod'],
@@ -139,31 +139,31 @@ let Formats = [
 			}
 		},
 	},
-	/*{
-		name: "[Gen 7] Trademarked: Hackmons Cup",
+	{
+		name: "[Gen 8] Trademarked: Hackmons Cup",
 		desc: `Randomized teams of level-balanced Pok&eacute;mon with random trademarks.`,
 
-		mod: 'gen7',
+		mod: 'gen8',
 		team: 'randomHCTM',
 		ruleset: ['Obtainable', 'HP Percentage Mod', 'Cancel Mod'],
-		battle: {
-			getAbility(name) {
-				let move = this.getMove(toID(name));
-				if (!move.exists) return Object.getPrototypeOf(this).getAbility.call(this, name);
+		pokemon: {
+			getAbility() {
+				const move = this.battle.dex.getMove(toID(this.ability));
+				if (!move.exists) return Object.getPrototypeOf(this).getAbility.call(this);
 				return {
 					id: move.id,
 					name: move.name,
 					onStart(pokemon) {
 						this.add('-activate', pokemon, 'ability: ' + move.name);
-						this.useMove(move.id, pokemon);
+						this.useMove(move, pokemon);
 					},
 					toString() {
-						return ""; // for useMove
+						return "";
 					},
 				};
 			},
 		},
-	},*/
+	},
 	// Mashups Spotlight
 	///////////////////////////////////////////////////////////////////
 	{
@@ -2988,6 +2988,7 @@ let Formats = [
 		],
 
 		mod: 'gen5',
+		challengeShow: false,
 		searchShow: false,
 		ruleset: ['[Gen 5] NU'],
 		banlist: [
@@ -3484,6 +3485,7 @@ let Formats = [
 		name: "[Gen 7 Let's Go] Custom Game",
 
 		mod: 'letsgo',
+		challengeShow: false,
 		searchShow: false,
 		canUseRandomTeam: true,
 		debug: true,
@@ -3625,12 +3627,106 @@ let Formats = [
 		name: "[Gen 8] 350 Cup",
 		desc: "Pok&eacute;mon with a base stat total of 350 or lower get their stats doubled. &bullet; <a href=\"https://www.smogon.com/forums/threads/350-cup.3656554/\">350 Cup</a>",
 		mod: 'gen8',
-		ruleset: ['[Gen 8] Ubers', '350 Cup Rule'],
+		ruleset: ['[Gen 8] Ubers', '350 Cup Rule', 'Dynamax Clause'],
 		banlist: [
 			'Shadow Tag', 'Arena Trap', // Abilities
 			'Eviolite', 'Light Ball', // Items
 			'Rufflet​', 'Pawniard​', // Pokemon
 		],
+	},
+	{
+		name: "[Gen 8] Pokebilities (Beta)",
+		desc: `Pok&eacute;mon have all of their released Abilities simultaneously.`,
+
+		mod: 'pokebilities',
+		ruleset: ['[Gen 8] OU'],
+		banlist: ['Bibarel', 'Bidoof', 'Diglett', 'Dugtrio', 'Excadrill', 'Glalie', 'Gothita', 'Gothitelle', 'Gothorita', 'Octillery', 'Porygon-Z', 'Remoraid', 'Smeargle', 'Snorunt', 'Trapinch', 'Wobbuffet', 'Wynaut'],
+		onBegin() {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let pokemon of allPokemon) {
+				if (pokemon.ability === toID(pokemon.template.abilities['S'])) {
+					continue;
+				}
+				// @ts-ignore
+				pokemon.innates = Object.keys(pokemon.template.abilities).filter(key => key !== 'S' && (key !== 'H' || !pokemon.template.unreleasedHidden)).map(key => toID(pokemon.template.abilities[key])).filter(ability => ability !== pokemon.ability);
+			}
+		},
+		onSwitchInPriority: 2,
+		onSwitchIn(pokemon) {
+			if (pokemon.innates) pokemon.innates.forEach(innate => pokemon.addVolatile("ability" + innate, pokemon));
+		},
+		onAfterMega(pokemon) {
+			Object.keys(pokemon.volatiles).filter(innate => innate.startsWith('ability')).forEach(innate => pokemon.removeVolatile(innate));
+			pokemon.innates = undefined;
+		},
+	},
+	{
+		name: "[Gen 8] Partners in Crime (Beta)",
+		desc: `Doubles-based metagame where both active ally Pok&eacute;mon share abilities and moves.`,
+
+		mod: 'pic',
+		gameType: 'doubles',
+		ruleset: ['[Gen 7] Doubles OU', 'Sleep Clause Mod'],
+		banlist: [
+			'Kangaskhanite', 'Mawilite', 'Medichamite',
+			'Huge Power', 'Imposter', 'Normalize', 'Pure Power', 'Wonder Guard', 'Mimic', 'Sketch', 'Sweet Scent', 'Transform',
+		],
+		onSwitchInPriority: 2,
+		onSwitchIn(pokemon) {
+			if (this.sides[0].active.every(ally => ally && !ally.fainted)) {
+				let p1a = this.sides[0].active[0], p1b = this.sides[0].active[1];
+				if (p1a.ability !== p1b.ability) {
+					let p1aInnate = 'ability' + p1b.ability;
+					p1a.volatiles[p1aInnate] = {id: p1aInnate, target: p1a};
+					let p1bInnate = 'ability' + p1a.ability;
+					p1b.volatiles[p1bInnate] = {id: p1bInnate, target: p1b};
+				}
+			}
+			if (this.sides[1].active.every(ally => ally && !ally.fainted)) {
+				let p2a = this.sides[1].active[0], p2b = this.sides[1].active[1];
+				if (p2a.ability !== p2b.ability) {
+					let p2a_innate = 'ability' + p2b.ability;
+					p2a.volatiles[p2a_innate] = {id: p2a_innate, target: p2a};
+					let p2b_innate = 'ability' + p2a.ability;
+					p2b.volatiles[p2b_innate] = {id: p2b_innate, target: p2b};
+				}
+			}
+			let ally = pokemon.side.active.find(ally => ally && ally !== pokemon && !ally.fainted);
+			if (ally && ally.ability !== pokemon.ability) {
+				if (!pokemon.m.innate) {
+					pokemon.m.innate = 'ability' + ally.ability;
+					delete pokemon.volatiles[pokemon.m.innate];
+					pokemon.addVolatile(pokemon.m.innate);
+				}
+				if (!ally.m.innate) {
+					ally.m.innate = 'ability' + pokemon.ability;
+					delete ally.volatiles[ally.m.innate];
+					ally.addVolatile(ally.m.innate);
+				}
+			}
+		},
+		onSwitchOut(pokemon) {
+			if (pokemon.m.innate) {
+				pokemon.removeVolatile(pokemon.m.innate);
+				delete pokemon.m.innate;
+			}
+			let ally = pokemon.side.active.find(ally => ally && ally !== pokemon && !ally.fainted);
+			if (ally && ally.m.innate) {
+				ally.removeVolatile(ally.m.innate);
+				delete ally.m.innate;
+			}
+		},
+		onFaint(pokemon) {
+			if (pokemon.m.innate) {
+				pokemon.removeVolatile(pokemon.m.innate);
+				delete pokemon.m.innate;
+			}
+			let ally = pokemon.side.active.find(ally => ally && ally !== pokemon && !ally.fainted);
+			if (ally && ally.m.innate) {
+				ally.removeVolatile(ally.m.innate);
+				delete ally.m.innate;
+			}
+		},
 	},
 	{
 		name: "[Gen 7] Mix and Mega",
@@ -4116,7 +4212,7 @@ let Formats = [
 			return pokemon;
 		},
 	},
-	{
+	/*{
 		name: "[Gen 7] Trademarked",
 		desc: `Pok&eacute;mon may use any Status move as an Ability, excluding those that are banned.`,
 		threads: [
@@ -4141,7 +4237,7 @@ let Formats = [
 			if( ruleTable.has('-illegal') ) {
 				if (restrictedMoves.includes(move.name)) return this.validateSet(set, teamHas);
 			}
-			let TeamValidator = /** @type {new(format: string | Format) => Validator} */ (this.constructor);
+			let TeamValidator = (this.constructor);
 			let customRules = this.format.customRules || [];
 			if (!customRules.includes('ignoreillegalabilities')) customRules.push('ignoreillegalabilities');
 			let validator = new TeamValidator(Dex.getFormat(this.format.id + '@@@' + customRules.join(',')));
@@ -4174,7 +4270,7 @@ let Formats = [
                 };
             },
         },
-	},
+	},*/
 	{
 		name: "[Gen 7] Ultimate Z",
 		desc: `Use any type of Z-Crystal on any move and as many times per battle as desired.`,
@@ -4197,7 +4293,7 @@ let Formats = [
 			return problems;
 		},
 	},
-	{
+	/*{
 		name: "[Gen 7] Inheritance",
 		desc: `Pok&eacute;mon may use the ability and moves of another, as long as they forfeit their own learnset.`,
 		threads: [
@@ -4353,7 +4449,7 @@ let Formats = [
 			// Place volatiles on the Pokémon to show the donor details.
 			this.add('-start', pokemon, donorTemplate.species, '[silent]');
 		},
-	},
+	},*/
 	{
 		name: "[Gen 7] Nature Swap",
 		desc: `Pok&eacute;mon have their base stats swapped depending on their nature.`,
@@ -4593,7 +4689,6 @@ let Formats = [
 
 		mod: 'gen7pic',
 		gameType: 'doubles',
-		searchShow: false,
 		ruleset: ['[Gen 7] Doubles OU', 'Sleep Clause Mod'],
 		banlist: [
 			'Kangaskhanite', 'Mawilite', 'Medichamite',

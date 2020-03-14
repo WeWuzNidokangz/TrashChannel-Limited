@@ -2,7 +2,6 @@
 
 /**@type {ModdedBattleScriptsData} */
 exports.BattleScripts = {
-	inherit: 'gen7',
 	getEffect(name) {
 		if (name && typeof name !== 'string') {
 			return name;

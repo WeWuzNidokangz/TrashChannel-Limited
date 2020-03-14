@@ -16,9 +16,8 @@ class RandomMnMTeams extends RandomTeams {
 		
 		for( let item of Object.keys(BattleItems) ) {
 			//console.log("BattleItems[item].name: " + BattleItems[item].name);
-			if( (BattleItems[item].megaStone) ||
-				("Blue Orb" == BattleItems[item].name) || 
-				("Red Orb" == BattleItems[item].name) )
+			if( (BattleItems[item].megaStone) &&
+				("Crucibellite" !== BattleItems[item].name) )
 			{
 				console.log("Push mega item: " + BattleItems[item].name);
 				itemPool.push( BattleItems[item].id );
