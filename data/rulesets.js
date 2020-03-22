@@ -922,7 +922,7 @@ let BattleFormats = {
 		name: '350 Cup Rule',
 		desc: "The mod for 350 Cup: Pok&eacute;mon with a base stat total of 350 or lower get their stats doubled.",
         onModifyTemplate: function (template, target, source, effect) {
-			//console.log('r350cuprule: onModifyTemplate');
+			//console.log('350cuprule: onModifyTemplate');
             let bst = 0;
             Object.values(template.baseStats).forEach(stat => {
                 bst += stat;

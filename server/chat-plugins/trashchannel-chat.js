@@ -124,8 +124,8 @@ const commands = {
 		// Deepclone template to avoid permanently altering the original
 		let cloneTemplate = DexCalculator.deepClone(template);
 
-		cloneTemplate = Rulesets['r350cuprule'].onModifyTemplate(cloneTemplate, null);
-		if(!cloneTemplate) return this.errorReply(`r350cuprule.onModifyTemplate failed on this Pokemon.`);
+		cloneTemplate = Rulesets['350cuprule'].onModifyTemplate(cloneTemplate, null);
+		if(!cloneTemplate) return this.errorReply(`350cuprule.onModifyTemplate failed on this Pokemon.`);
 		cloneTemplate = Rulesets['tiershiftrule'].onModifyTemplate(cloneTemplate, null, null, 'dummy'); // Set dummy effect to bypass internal validation
 		if(!cloneTemplate) return this.errorReply(`tiershiftrule.onModifyTemplate failed on this Pokemon.`);
 
