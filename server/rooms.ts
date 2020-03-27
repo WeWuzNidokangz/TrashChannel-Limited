@@ -55,6 +55,10 @@ interface BattleRoomTable {
 	minElo?: 'tour' | number;
 }
 
+interface UserTable {
+	[userid: string]: User;
+}
+
 export type Room = GlobalRoom | GameRoom | ChatRoom;
 type Poll = import('./chat-plugins/poll').Poll;
 type Announcement = import('./chat-plugins/announcements').Announcement;
@@ -62,7 +66,7 @@ type Tournament = import('./tournaments/index').Tournament;
 
 export abstract class BasicRoom {
 	readonly type: 'chat' | 'battle' | 'global';
-	readonly users: {[userid: string]: User};
+	readonly users: UserTable;
 	/**
 	 * Scrollback log. This is the log that's sent to users when
 	 * joining the room. Should roughly match what's on everyone's
@@ -450,7 +454,7 @@ export class GlobalRoom extends BasicRoom {
 	 */
 	readonly staffAutojoinList: RoomID[];
 	readonly ladderIpLog: WriteStream;
-	readonly users: {[userid: string]: User};
+	readonly users: UserTable;
 	readonly reportUserStatsInterval: NodeJS.Timeout;
 	readonly modlogStream: WriteStream;
 	lockdown: boolean | 'pre' | 'ddos';
@@ -1159,10 +1163,10 @@ export class BasicChatRoom extends BasicRoom {
 		this.log.modlog(message);
 		return this;
 	}
-	hideText(userids: ID[]) {
-		const cleared = this.log.clearText(userids);
+	hideText(userids: ID[], lineCount = 0) {
+		const cleared = this.log.clearText(userids, lineCount);
 		for (const userid of cleared) {
-			this.send(`|unlink|hide|${userid}`);
+			this.send(`|unlink|hide|${userid}|${lineCount}`);
 		}
 		this.update();
 	}

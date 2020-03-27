@@ -78,6 +78,28 @@ export const commands: ChatCommands = {
 		if (!target) return this.parse('/help dexsearch');
 		const targetGen = parseInt(cmd[cmd.length - 1]);
 		if (targetGen) target += `, maxgen${targetGen}`;
+		if (targetGen && targetGen === 5) {
+			const targArray = target.split(',');
+			for (const [i, arg] of targArray.entries()) {
+				if (arg.includes('|')) {
+					const orArray = arg.split('|');
+					for (const [j, a] of orArray.entries()) {
+						if (toID(a) === 'pu') {
+							orArray.splice(j, 1);
+							orArray.push('untiered');
+							continue;
+						}
+					}
+					targArray[i] = orArray.join('|');
+				} else {
+					if (toID(arg) === 'pu') {
+						targArray.splice(i, 1);
+						targArray.push('untiered');
+					}
+				}
+			}
+			target = targArray.join(',');
+		}
 		if (cmd === 'nds') target += ', natdex';
 		return runSearch({
 			tar: target,
@@ -445,7 +467,7 @@ function runDexsearch(target: string, cmd: string, canAll: boolean, message: str
 		uber: 'Uber', ubers: 'Uber', ou: 'OU',
 		uubl: 'UUBL', uu: 'UU',
 		rubl: 'RUBL', ru: 'RU',
-		nubl: 'NUBL', nu: 'NU',
+		nubl: 'NUBL', nu: 'NU', untiered: '(NU)',
 		publ: 'PUBL', pu: 'PU', zu: '(PU)',
 		nfe: 'NFE',
 		lcuber: 'LC Uber', lcubers: 'LC Uber', lc: 'LC',
@@ -827,32 +849,32 @@ function runDexsearch(target: string, cmd: string, canAll: boolean, message: str
 	}
 	if (!maxGen) maxGen = 8;
 	const mod = Dex.mod('gen' + maxGen);
-	const dex: {[k: string]: Template} = {};
+	const dex: {[k: string]: Species} = {};
 	for (const pokemon in mod.data.Pokedex) {
-		const template = mod.getTemplate(pokemon);
+		const species = mod.getSpecies(pokemon);
 		const megaSearchResult = (
-			megaSearch === null || (megaSearch === true && template.isMega) ||
-			(megaSearch === false && !template.isMega)
+			megaSearch === null || (megaSearch === true && species.isMega) ||
+			(megaSearch === false && !species.isMega)
 		);
 		const gmaxSearchResult = (
-			gmaxSearch === null || (gmaxSearch === true && template.isGigantamax) ||
-			(gmaxSearch === false && !template.isGigantamax)
+			gmaxSearch === null || (gmaxSearch === true && species.isGigantamax) ||
+			(gmaxSearch === false && !species.isGigantamax)
 		);
 		if (
-			template.gen <= maxGen &&
+			species.gen <= maxGen &&
 			(
 				(
 					nationalSearch &&
-					template.isNonstandard &&
-					!["Custom", "Glitch", "Pokestar"].includes(template.isNonstandard)
+					species.isNonstandard &&
+					!["Custom", "Glitch", "Pokestar"].includes(species.isNonstandard)
 				) ||
-				(template.tier !== 'Unreleased' && template.tier !== 'Illegal')
+				(species.tier !== 'Unreleased' && species.tier !== 'Illegal')
 			) &&
-			(!template.tier.startsWith("CAP") || capSearch) &&
+			(!species.tier.startsWith("CAP") || capSearch) &&
 			megaSearchResult &&
 			gmaxSearchResult
 		) {
-			dex[pokemon] = template;
+			dex[pokemon] = species;
 		}
 	}
 
@@ -886,7 +908,7 @@ function runDexsearch(target: string, cmd: string, canAll: boolean, message: str
 
 			if (alts.tiers && Object.keys(alts.tiers).length) {
 				let tier = dex[mon].tier;
-				if (tier[0] === '(' && tier !== '(PU)') tier = tier.slice(1, -1);
+				if (tier[0] === '(' && tier !== '(PU)' && tier !== '(NU)') tier = tier.slice(1, -1);
 				if (tier === 'New') tier = 'OU';
 				if (alts.tiers[tier]) continue;
 				if (Object.values(alts.tiers).includes(false) && alts.tiers[tier] !== false) continue;
@@ -897,13 +919,14 @@ function runDexsearch(target: string, cmd: string, canAll: boolean, message: str
 				if (
 					alts.tiers.LC &&
 					!dex[mon].prevo &&
-					dex[mon].evos.some(evo => mod.getTemplate(evo).gen <= mod.gen) &&
-					!format.banlist.includes(dex[mon].species) &&
-					!format.banlist.includes(dex[mon].species + "-Base")
+					dex[mon].evos.some(evo => mod.getSpecies(evo).gen <= mod.gen) &&
+					!format.banlist.includes(dex[mon].name) &&
+					!format.banlist.includes(dex[mon].name + "-Base")
 				) {
-					if (dex[mon].eventPokemon && dex[mon].eventOnly) {
+					const lsetData = Dex.getLearnsetData(dex[mon].id);
+					if (lsetData.exists && lsetData.eventData && lsetData.eventOnly) {
 						let validEvents = 0;
-						for (const event of dex[mon].eventPokemon!) {
+						for (const event of lsetData.eventData) {
 							if (event.level && event.level <= 5) validEvents++;
 						}
 						if (validEvents > 0) continue;
@@ -1026,11 +1049,11 @@ function runDexsearch(target: string, cmd: string, canAll: boolean, message: str
 	}
 	let results: string[] = [];
 	for (const mon of Object.keys(dex).sort()) {
-		const isAlola = dex[mon].forme === "Alola" && dex[mon].species !== "Pikachu-Alola";
+		const isAlola = dex[mon].forme === "Alola" && dex[mon].name !== "Pikachu-Alola";
 		const allowGmax = (gmaxSearch || tierSearch);
 		if (!isAlola && dex[mon].baseSpecies && results.includes(dex[mon].baseSpecies)) continue;
 		if (dex[mon].isGigantamax && !allowGmax) continue;
-		results.push(dex[mon].species);
+		results.push(dex[mon].name);
 	}
 
 	if (randomOutput && randomOutput < results.length) {
@@ -1044,8 +1067,8 @@ function runDexsearch(target: string, cmd: string, canAll: boolean, message: str
 			const stat = sort.slice(0, -1);
 			const direction = sort.slice(-1);
 			results.sort((a, b) => {
-				const mon1 = mod.getTemplate(a);
-				const mon2 = mod.getTemplate(b);
+				const mon1 = mod.getSpecies(a);
+				const mon2 = mod.getSpecies(b);
 				let monStat1 = 0;
 				let monStat2 = 0;
 				if (stat === 'bst') {
@@ -1260,16 +1283,16 @@ function runMovesearch(target: string, cmd: string, canAll: boolean, message: st
 				continue;
 			}
 
-			const template = Dex.getTemplate(target);
-			if (template.exists) {
+			const species = Dex.getSpecies(target);
+			if (species.exists) {
 				if (parameters.length > 1) return {reply: "A Pok\u00e9mon learnset cannot have alternative parameters."};
-				if (targetMons.some(mon => mon.name === template.name && isNotSearch !== mon.shouldBeExcluded)) {
+				if (targetMons.some(mon => mon.name === species.name && isNotSearch !== mon.shouldBeExcluded)) {
 					return {reply: "A search cannot both exclude and include the same Pok\u00e9mon."};
 				}
-				if (targetMons.some(mon => mon.name === template.name)) {
+				if (targetMons.some(mon => mon.name === species.name)) {
 					return {reply: "A search should not include a Pok\u00e9mon twice."};
 				}
-				targetMons.push({name: template.name, shouldBeExcluded: isNotSearch});
+				targetMons.push({name: species.name, shouldBeExcluded: isNotSearch});
 				orGroup.skip = true;
 				continue;
 			}
@@ -1443,17 +1466,19 @@ function runMovesearch(target: string, cmd: string, canAll: boolean, message: st
 	if (!maxGen) maxGen = 8;
 	const mod = Dex.mod('gen' + maxGen);
 
-	const getFullLearnsetOfPokemon = (template: Template) => {
-		let usedTemplate = Dex.deepClone(template);
-		if (!usedTemplate.learnset) {
-			usedTemplate = Dex.deepClone(mod.getTemplate(usedTemplate.baseSpecies));
-			usedTemplate.learnset = Dex.deepClone(usedTemplate.learnset || {});
+	const getFullLearnsetOfPokemon = (species: Species) => {
+		let usedSpecies: Species = Dex.deepClone(species);
+		let usedSpeciesLearnset: LearnsetData = Dex.deepClone(Dex.getLearnsetData(usedSpecies.id));
+		if (!usedSpeciesLearnset.learnset) {
+			usedSpecies = Dex.deepClone(mod.getSpecies(usedSpecies.baseSpecies));
+			usedSpeciesLearnset.learnset = Dex.deepClone(mod.getLearnsetData(usedSpecies.id).learnset || {});
 		}
-		const lsetData = new Set(Object.keys(usedTemplate.learnset));
+		const lsetData = new Set(Object.keys(usedSpeciesLearnset.learnset!));
 
-		while (usedTemplate.prevo) {
-			usedTemplate = Dex.deepClone(mod.getTemplate(usedTemplate.prevo));
-			for (const move in usedTemplate.learnset) {
+		while (usedSpecies.prevo) {
+			usedSpecies = Dex.deepClone(mod.getSpecies(usedSpecies.prevo));
+			usedSpeciesLearnset = Dex.deepClone(mod.getLearnsetData(usedSpecies.id));
+			for (const move in usedSpeciesLearnset.learnset) {
 				lsetData.add(move);
 			}
 		}
@@ -1466,8 +1491,8 @@ function runMovesearch(target: string, cmd: string, canAll: boolean, message: st
 	const validMoves = new Set(Object.keys(Dex.data.Movedex));
 	validMoves.delete('magikarpsrevenge');
 	for (const mon of targetMons) {
-		const template = mod.getTemplate(mon.name);
-		const lsetData = getFullLearnsetOfPokemon(template);
+		const species = mod.getSpecies(mon.name);
+		const lsetData = getFullLearnsetOfPokemon(species);
 		// This pokemon's learnset needs to be excluded, so we perform a difference operation
 		// on the valid moveset and this pokemon's moveset.
 		if (mon.shouldBeExcluded) {
@@ -2671,21 +2696,21 @@ function runLearn(target: string, cmd: string, canAll: boolean, message: string)
 	}
 	const validator = TeamValidator.get(format);
 
-	const template = validator.dex.getTemplate(targets.shift());
-	const setSources = validator.allSources(template);
+	const species = validator.dex.getSpecies(targets.shift());
+	const setSources = validator.allSources(species);
 	const set: Partial<PokemonSet> = {
-		name: template.baseSpecies,
-		species: template.species,
+		name: species.baseSpecies,
+		species: species.name,
 		level: cmd === 'learn5' ? 5 : 100,
 	};
 	const all = (cmd === 'learnall');
 
-	if (!template.exists || template.id === 'missingno') {
-		return {error: `Pok\u00e9mon '${template.id}' not found.`};
+	if (!species.exists || species.id === 'missingno') {
+		return {error: `Pok\u00e9mon '${species.id}' not found.`};
 	}
 
-	if (template.gen > gen) {
-		return {error: `${template.name} didn't exist yet in generation ${gen}.`};
+	if (species.gen > gen) {
+		return {error: `${species.name} didn't exist yet in generation ${gen}.`};
 	}
 
 	if (!targets.length) {
@@ -2707,7 +2732,7 @@ function runLearn(target: string, cmd: string, canAll: boolean, message: string)
 		if (move.gen > gen) {
 			return {error: `${move.name} didn't exist yet in generation ${gen}.`};
 		}
-		const checkLsetProblem = validator.checkLearnset(move, template, setSources, set);
+		const checkLsetProblem = validator.checkLearnset(move, species, setSources, set);
 		if (checkLsetProblem !== null && Object.keys(checkLsetProblem).length) {
 			lsetProblem = Object.create(null);
 			for (const i in checkLsetProblem) {
@@ -2718,24 +2743,24 @@ function runLearn(target: string, cmd: string, canAll: boolean, message: string)
 		}
 	}
 	const lsetProblems = validator.reconcileLearnset(
-		template, setSources, lsetProblem ? lsetProblem : null, template.species
+		species, setSources, lsetProblem ? lsetProblem : null, species.name
 	);
 	const problems: string[] = [];
 	if (lsetProblems) problems.push(...lsetProblems);
 	let sources: string[] = setSources.sources.map(source => {
 		if (source.charAt(1) !== 'E') return source;
-		const fathers = validator.findEggMoveFathers(source, template, setSources, true);
+		const fathers = validator.findEggMoveFathers(source, species, setSources, true);
 		if (!fathers) return '';
 		return source + ':' + fathers.join(',');
 	}).filter(Boolean);
 	if (setSources.sources.length && !sources.length) {
-		problems.push(`${template.name} doesn't have a valid father for its egg moves (${setSources.limitedEggMoves!.join(', ')})`);
+		problems.push(`${species.name} doesn't have a valid father for its egg moves (${setSources.limitedEggMoves!.join(', ')})`);
 	}
 	let buffer = `In ${formatName}, `;
 	if (setSources.isHidden) {
-		buffer += `${template.abilities['H'] || 'HA'} `;
+		buffer += `${species.abilities['H'] || 'HA'} `;
 	}
-	buffer += `${template.name}` + (problems.length ? ` <span class="message-learn-cannotlearn">can't</span> learn ` : ` <span class="message-learn-canlearn">can</span> learn `) + Chat.toListString(moveNames);
+	buffer += `${species.name}` + (problems.length ? ` <span class="message-learn-cannotlearn">can't</span> learn ` : ` <span class="message-learn-canlearn">can</span> learn `) + Chat.toListString(moveNames);
 	if (!problems.length) {
 		const sourceNames: {[k: string]: string} = {
 			'7V': "virtual console transfer from gen 1-2", '8V': "Pok&eacute;mon Home transfer from LGPE", E: "", S: "event", D: "dream world", X: "traded-back ", Y: "traded-back event",
@@ -2772,7 +2797,7 @@ function runLearn(target: string, cmd: string, canAll: boolean, message: string)
 					}
 				}
 
-				if (source.slice(0, 2) === '5E' && template.maleOnlyHidden) {
+				if (source.slice(0, 2) === '5E' && species.maleOnlyHidden) {
 					buffer += " (no hidden ability)";
 				}
 			}
@@ -2795,7 +2820,7 @@ function runLearn(target: string, cmd: string, canAll: boolean, message: string)
 			}
 		}
 		if (setSources.babyOnly && sourcesBefore) {
-			buffer += `<li>must be obtained as ` + Dex.getTemplate(setSources.babyOnly).species;
+			buffer += `<li>must be obtained as ` + Dex.getSpecies(setSources.babyOnly).name;
 		}
 		buffer += "</ul>";
 	} else if (targets.length > 1 || problems.length > 1) {

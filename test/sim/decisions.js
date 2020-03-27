@@ -585,10 +585,10 @@ describe('Choices', function () {
 				{species: "Charmander", ability: 'blaze', moves: ['scratch']},
 				{species: "Charizard", ability: 'blaze', moves: ['scratch']},
 			]]);
-			battle.makeChoices('move tackle 1, move tackle 2', 'move scratch 2, move scratch 1');
+			battle.makeChoices('move tackle +1, move tackle +2', 'move scratch +2, move scratch +1');
 
 			const logText = battle.inputLog.join('\n');
-			const subString = '>p1 move tackle 1, move tackle 2\n>p2 move scratch 2, move scratch 1';
+			const subString = '>p1 move tackle +1, move tackle +2\n>p2 move scratch +2, move scratch +1';
 			assert(logText.includes(subString), `${logText} does not include ${subString}`);
 		});
 
@@ -600,10 +600,10 @@ describe('Choices', function () {
 				{species: "Charmander", ability: 'blaze', moves: ['scratch']},
 				{species: "Charizard", ability: 'blaze', moves: ['scratch']},
 			]]);
-			battle.makeChoices('move magnitude, move rockslide', 'move scratch 1, move scratch 1');
+			battle.makeChoices('move magnitude, move rockslide', 'move scratch +1, move scratch +1');
 
 			const logText = battle.inputLog.join('\n');
-			const subString = '>p1 move magnitude, move rockslide\n>p2 move scratch 1, move scratch 1';
+			const subString = '>p1 move magnitude, move rockslide\n>p2 move scratch +1, move scratch +1';
 			assert(logText.includes(subString), `${logText} does not include ${subString}`);
 		});
 
@@ -998,8 +998,8 @@ describe('Choice extensions', function () {
 				battle.makeChoices('switch 3', 'switch 2');
 
 				assert.equal(battle.turn, 2);
-				assert.equal(battle.p1.active[0].template.species, 'Chikorita');
-				assert.equal(battle.p2.active[0].template.species, 'Charmander');
+				assert.equal(battle.p1.active[0].species.name, 'Chikorita');
+				assert.equal(battle.p2.active[0].species.name, 'Charmander');
 			});
 
 			it(`should support to ${mode} pass decisions on double switch requests`, function () {

@@ -214,7 +214,7 @@ export class PageContext extends MessageContext {
 		this.title = 'Page';
 	}
 
-	can(permission: string, target: string | User | null = null, room: BasicChatRoom | null = null) {
+	can(permission: string, target: string | User | null = null, room: Room | null = null) {
 		if (!this.user.can(permission, target, room)) {
 			this.send(`<h2>Permission denied.</h2>`);
 			return false;
@@ -555,7 +555,7 @@ export class CommandContext extends MessageContext {
 		return true;
 	}
 
-	checkSlowchat(room: BasicChatRoom | null | undefined, user: User) {
+	checkSlowchat(room: Room | null | undefined, user: User) {
 		if (!room || !room.slowchat) return true;
 		if (user.can('broadcast', null, room)) return true;
 		const lastActiveSeconds = (Date.now() - user.lastMessageTime) / 1000;
@@ -726,7 +726,7 @@ export class CommandContext extends MessageContext {
 	statusfilter(status: string) {
 		return Chat.statusfilter(status, this.user);
 	}
-	can(permission: string, target: string | User | null = null, room: BasicChatRoom | null = null) {
+	can(permission: string, target: string | User | null = null, room: Room | null = null) {
 		if (!this.user.can(permission, target, room)) {
 			this.errorReply(this.cmdToken + this.fullCmd + " - Access denied.");
 			return false;
@@ -1337,7 +1337,7 @@ export const Chat = new class {
 		let [translated, keyLabels, valLabels] = entry || ["", [], []];
 		if (!translated) translated = trString;
 
-		// Replace the gaps in the template string
+		// Replace the gaps in the species string
 		if (keys.length) {
 			let reconstructed = '';
 
@@ -1551,7 +1551,7 @@ export const Chat = new class {
 	}
 
 	/**
-	 * Template string tag function for escaping HTML
+	 * Species string tag function for escaping HTML
 	 */
 	html(strings: TemplateStringsArray, ...args: any) {
 		let buf = strings[0];
@@ -1718,54 +1718,54 @@ export const Chat = new class {
 		return htmlContent;
 	}
 
-	getDataPokemonHTML(template: Template, gen = 7, tier = '') {
-		if (typeof template === 'string') template = Object.assign({}, Dex.getTemplate(template));
+	getDataPokemonHTML(species: Species, gen = 7, tier = '') {
+		if (typeof species === 'string') species = Dex.deepClone(Dex.getSpecies(species));
 		let buf = '<li class="result">';
-		buf += '<span class="col numcol">' + (tier || template.tier) + '</span> ';
-		buf += `<span class="col iconcol"><psicon pokemon="${template.id}"/></span> `;
-		buf += `<span class="col pokemonnamecol" style="white-space:nowrap"><a href="https://${Config.routes.dex}/pokemon/${template.id}" target="_blank">${template.species}</a></span> `;
+		buf += '<span class="col numcol">' + (tier || species.tier) + '</span> ';
+		buf += `<span class="col iconcol"><psicon pokemon="${species.id}"/></span> `;
+		buf += `<span class="col pokemonnamecol" style="white-space:nowrap"><a href="https://${Config.routes.dex}/pokemon/${species.id}" target="_blank">${species.name}</a></span> `;
 		buf += '<span class="col typecol">';
-		if (template.types) {
-			for (const type of template.types) {
+		if (species.types) {
+			for (const type of species.types) {
 				buf += `<img src="https://${Config.routes.client}/sprites/types/${type}.png" alt="${type}" height="14" width="32">`;
 			}
 		}
 		buf += '</span> ';
 		if (gen >= 3) {
 			buf += '<span style="float:left;min-height:26px">';
-			if (template.abilities['1'] && (gen >= 4 || Dex.getAbility(template.abilities['1']).gen === 3)) {
-				buf += '<span class="col twoabilitycol">' + template.abilities['0'] + '<br />' + template.abilities['1'] + '</span>';
+			if (species.abilities['1'] && (gen >= 4 || Dex.getAbility(species.abilities['1']).gen === 3)) {
+				buf += '<span class="col twoabilitycol">' + species.abilities['0'] + '<br />' + species.abilities['1'] + '</span>';
 			} else {
-				buf += '<span class="col abilitycol">' + template.abilities['0'] + '</span>';
+				buf += '<span class="col abilitycol">' + species.abilities['0'] + '</span>';
 			}
-			if (template.abilities['H'] && template.abilities['S']) {
-				buf += '<span class="col twoabilitycol' + (template.unreleasedHidden ? ' unreleasedhacol' : '') + '"><em>' + template.abilities['H'] + '<br />(' + template.abilities['S'] + ')</em></span>';
-			} else if (template.abilities['H']) {
-				buf += '<span class="col abilitycol' + (template.unreleasedHidden ? ' unreleasedhacol' : '') + '"><em>' + template.abilities['H'] + '</em></span>';
-			} else if (template.abilities['S']) {
+			if (species.abilities['H'] && species.abilities['S']) {
+				buf += '<span class="col twoabilitycol' + (species.unreleasedHidden ? ' unreleasedhacol' : '') + '"><em>' + species.abilities['H'] + '<br />(' + species.abilities['S'] + ')</em></span>';
+			} else if (species.abilities['H']) {
+				buf += '<span class="col abilitycol' + (species.unreleasedHidden ? ' unreleasedhacol' : '') + '"><em>' + species.abilities['H'] + '</em></span>';
+			} else if (species.abilities['S']) {
 				// special case for Zygarde
-				buf += '<span class="col abilitycol"><em>(' + template.abilities['S'] + ')</em></span>';
+				buf += '<span class="col abilitycol"><em>(' + species.abilities['S'] + ')</em></span>';
 			} else {
 				buf += '<span class="col abilitycol"></span>';
 			}
 			buf += '</span>';
 		}
 		let bst = 0;
-		for (const baseStat of Object.values(template.baseStats)) {
+		for (const baseStat of Object.values(species.baseStats)) {
 			bst += baseStat;
 		}
 		buf += '<span style="float:left;min-height:26px">';
-		buf += '<span class="col statcol"><em>HP</em><br />' + template.baseStats.hp + '</span> ';
-		buf += '<span class="col statcol"><em>Atk</em><br />' + template.baseStats.atk + '</span> ';
-		buf += '<span class="col statcol"><em>Def</em><br />' + template.baseStats.def + '</span> ';
+		buf += '<span class="col statcol"><em>HP</em><br />' + species.baseStats.hp + '</span> ';
+		buf += '<span class="col statcol"><em>Atk</em><br />' + species.baseStats.atk + '</span> ';
+		buf += '<span class="col statcol"><em>Def</em><br />' + species.baseStats.def + '</span> ';
 		if (gen <= 1) {
-			bst -= template.baseStats.spd;
-			buf += '<span class="col statcol"><em>Spc</em><br />' + template.baseStats.spa + '</span> ';
+			bst -= species.baseStats.spd;
+			buf += '<span class="col statcol"><em>Spc</em><br />' + species.baseStats.spa + '</span> ';
 		} else {
-			buf += '<span class="col statcol"><em>SpA</em><br />' + template.baseStats.spa + '</span> ';
-			buf += '<span class="col statcol"><em>SpD</em><br />' + template.baseStats.spd + '</span> ';
+			buf += '<span class="col statcol"><em>SpA</em><br />' + species.baseStats.spa + '</span> ';
+			buf += '<span class="col statcol"><em>SpD</em><br />' + species.baseStats.spd + '</span> ';
 		}
-		buf += '<span class="col statcol"><em>Spe</em><br />' + template.baseStats.spe + '</span> ';
+		buf += '<span class="col statcol"><em>Spe</em><br />' + species.baseStats.spe + '</span> ';
 		buf += '<span class="col bstcol"><em>BST<br />' + bst + '</em></span> ';
 		buf += '</span>';
 		buf += '</li>';

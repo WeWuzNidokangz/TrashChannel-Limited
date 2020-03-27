@@ -52,6 +52,7 @@ const PUNISHMENTS = [
 	'KICKBATTLE', 'TICKETBAN', 'UNTICKETBAN', 'HIDETEXT', 'HIDEALTSTEXT', 'REDIRECT',
 	'NOTE', 'MAFIAHOSTBAN', 'MAFIAUNHOSTBAN', 'GIVEAWAYBAN', 'GIVEAWAYUNBAN',
 	'TOUR BAN', 'TOUR UNBAN', 'AUTOLOCK', 'AUTONAMELOCK', 'NAMELOCK', 'UNNAMELOCK',
+	'AUTOBAN', 'MONTHLOCK',
 ];
 const PUNISHMENTS_REGEX_STRING = `\\b(${PUNISHMENTS.join('|')}):.*`;
 
@@ -288,7 +289,7 @@ async function getModlog(
 	maxLines = 20, onlyPunishments = false, timed = false
 ) {
 	const startTime = Date.now();
-	const targetRoom = Rooms.search(roomid) as BasicChatRoom;
+	const targetRoom = Rooms.search(roomid);
 	const user = connection.user;
 
 	// permission checking
@@ -303,7 +304,9 @@ async function getModlog(
 	}
 
 	const hideIps = !user.can('lock');
-	const addModlogLinks = Config.modloglink && (user.group !== ' ' || (targetRoom && targetRoom.isPrivate !== true));
+	const addModlogLinks = !!(
+		Config.modloglink && (user.group !== ' ' || (targetRoom && targetRoom.isPrivate !== true))
+	);
 
 	if (searchString.length > MAX_QUERY_LENGTH) {
 		connection.popup(`Your search query must be shorter than ${MAX_QUERY_LENGTH} characters.`);
@@ -319,11 +322,9 @@ async function getModlog(
 	let roomidList;
 	// handle this here so the child process doesn't have to load rooms data
 	if (roomid === 'public') {
-		const isPublicRoom = (
-			(room: Room) =>
-				!(room.isPrivate || room.battle || room.isPersonal || room.roomid === 'global')
-		);
-		roomidList = [...Rooms.rooms.values()].filter(isPublicRoom).map(room => room.roomid);
+		roomidList = [...Rooms.rooms.values()].filter(
+			room => !(room.isPrivate || room.battle || room.isPersonal || room.roomid === 'global')
+		).map(room => room.roomid);
 	} else {
 		roomidList = [roomid];
 	}

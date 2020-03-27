@@ -106,7 +106,7 @@ async function importGen(gen: Generation, index: string) {
 	const dex = Dex.forFormat(`gen${gen}ou`);
 	for (const id in dex.data.Pokedex) {
 		if (!eligible(dex, id as ID)) continue;
-		imports.push(importSmogonSets(dex.getTemplate(id).name, gen, smogonSetsByFormat, numByFormat));
+		imports.push(importSmogonSets(dex.getSpecies(id).name, gen, smogonSetsByFormat, numByFormat));
 	}
 	for (const source in THIRD_PARTY_SOURCES) {
 		thirdPartySetsByFormat[source] =
@@ -130,17 +130,18 @@ async function importGen(gen: Generation, index: string) {
 			}
 		}
 
-		const [u, count] = getStatisticsURL(index, format);
+		const stats = getStatisticsURL(index, format);
+		if (!stats) continue;
 		try {
-			const statistics = smogon.Statistics.process(await request(u));
-			const sets = importUsageBasedSets(gen, format, statistics, count);
+			const statistics = smogon.Statistics.process(await request(stats.url));
+			const sets = importUsageBasedSets(gen, format, statistics, stats.count);
 			if (Object.keys(sets).length) {
 				data[format.id] = data[format.id] || {};
 				data[format.id]['smogon.com/stats'] = sets;
 			}
 			data[format.id] = data[format.id] || {};
 		} catch (err) {
-			error(`${u} = ${err}`);
+			error(`${stats.url} = ${err}`);
 		}
 	}
 
@@ -151,25 +152,25 @@ function eligible(dex: ModdedDex, id: ID) {
 	const gen = toGen(dex, id);
 	if (!gen || gen > dex.gen) return false;
 
-	const template = dex.getTemplate(id);
-	if (['Mega', 'Primal', 'Ultra'].some(f => template.forme.startsWith(f))) return true;
+	const species = dex.getSpecies(id);
+	if (['Mega', 'Primal', 'Ultra'].some(f => species.forme.startsWith(f))) return true;
 
 	// Species with formes distinct enough to merit inclusion
 	const unique = ['darmanitan', 'meloetta', 'greninja', 'zygarde'];
 	// Too similar to their base forme/species to matter
 	const similar = ['pichu', 'pikachu', 'genesect', 'basculin', 'magearna', 'keldeo', 'vivillon'];
 
-	if (template.battleOnly && !unique.some(f => id.startsWith(f))) return false;
+	if (species.battleOnly && !unique.some(f => id.startsWith(f))) return false;
 
 	// Most of these don't have analyses
-	const capNFE = template.isNonstandard === 'CAP' && template.nfe;
+	const capNFE = species.isNonstandard === 'CAP' && species.nfe;
 
 	return !id.endsWith('totem') && !capNFE && !similar.some(f => id.startsWith(f) && id !== f);
 }
 
 // TODO: Fix dex data such that CAP mons have a correct gen set
 function toGen(dex: ModdedDex, name: string): Generation | undefined {
-	const pokemon = dex.getTemplate(name);
+	const pokemon = dex.getSpecies(name);
 	if (pokemon.isNonstandard === 'LGPE') return 7;
 	if (!pokemon.exists || (pokemon.isNonstandard && pokemon.isNonstandard !== 'CAP')) return undefined;
 
@@ -268,9 +269,9 @@ function toStatsTable(stats?: StatsTable, elide = 0) {
 
 function fixedAbility(dex: ModdedDex, pokemon: string, ability?: string) {
 	if (dex.gen <= 2) return undefined;
-	const template = dex.getTemplate(pokemon);
-	if (ability && !['Mega', 'Primal', 'Ultra'].some(f => template.forme.startsWith(f))) return ability;
-	return template.abilities[0];
+	const species = dex.getSpecies(pokemon);
+	if (ability && !['Mega', 'Primal', 'Ultra'].some(f => species.forme.startsWith(f))) return ability;
+	return species.abilities[0];
 }
 
 function validSet(
@@ -307,7 +308,7 @@ function skip(dex: ModdedDex, format: Format, pokemon: string, set: DeepPartial<
 	if (pokemon === 'Kyogre-Primal' && set.item !== 'Blue Orb' && !(bh && gen === 7)) return true;
 	if (bh) return false; // Everying else is legal or will get stripped by the team validator anyway
 
-	if (dex.getTemplate(pokemon).forme.startsWith('Mega')) {
+	if (dex.getSpecies(pokemon).forme.startsWith('Mega')) {
 		if (pokemon === 'Rayquaza-Mega') {
 			return format.id.includes('ubers') || !hasMove('Dragon Ascent');
 		} else {
@@ -356,11 +357,11 @@ function toPokemonSet(dex: ModdedDex, format: Format, pokemon: string, set: Deep
 	copy.ability = copy.ability || 'None';
 
 	// The validator is picky about megas having already evolved or battle only formes
-	const template = dex.getTemplate(pokemon);
-	const mega = ['Mega', 'Primal', 'Ultra'].some(f => template.forme.startsWith(f));
-	if (template.battleOnly || (mega && !format.id.includes('balancedhackmons'))) {
-		copy.species = template.inheritsFrom || template.baseSpecies;
-		copy.ability = dex.getTemplate(copy.species).abilities[0];
+	const species = dex.getSpecies(pokemon);
+	const mega = ['Mega', 'Primal', 'Ultra'].some(f => species.forme.startsWith(f));
+	if (species.battleOnly || (mega && !format.id.includes('balancedhackmons'))) {
+		copy.species = dex.getOutOfBattleSpecies(species);
+		copy.ability = dex.getSpecies(copy.species).abilities[0];
 	}
 	return copy;
 }
@@ -434,10 +435,11 @@ function getLevel(format: Format, level = 0) {
 	return level > maxForcedLevel ? maxForcedLevel : level;
 }
 
-export function getStatisticsURL(index: string, format: Format): [string, number] {
+export function getStatisticsURL(index: string, format: Format): {url: string, count: number} | undefined {
 	const current = index.includes(format.id);
-	const {date, count} = smogon.Statistics.latestDate(format.id, !current)!;
-	return [smogon.Statistics.url(date, format.id, current || 1500), count];
+	const latest = smogon.Statistics.latestDate(format.id, !current);
+	if (!latest) return undefined;
+	return {url: smogon.Statistics.url(latest.date, format.id, current || 1500), count: latest.count};
 }
 
 // TODO: Use bigram matrix, bucketed spreads and generative validation logic for more realistic sets
@@ -450,6 +452,7 @@ function importUsageBasedSets(gen: Generation, format: Format, statistics: smogo
 		const stats = statistics.data[pokemon];
 		if (eligible(dex, toID(pokemon)) && stats.usage >= threshold) {
 			const set: DeepPartial<PokemonSet> = {
+				level: getLevel(format),
 				moves: (top(stats.Moves, 4) as string[]).map(m => dex.getMove(m).name).filter(m => m),
 			};
 			if (gen >= 2 && format.id !== 'gen7letsgoou') {
@@ -541,7 +544,7 @@ async function importThirdPartySets(
 		}
 		let num = 0;
 		for (const mon in json) {
-			const pokemon = dex.getTemplate(mon).name;
+			const pokemon = dex.getSpecies(mon).name;
 			if (!eligible(dex, toID(pokemon))) continue;
 
 			for (const name in json[mon]) {

@@ -899,7 +899,7 @@ export class Battle {
 				status: item, callback, statusData: pokemon.itemData, end: pokemon.clearItem, thing: pokemon,
 			}, callbackName));
 		}
-		const species = pokemon.baseTemplate;
+		const species = pokemon.baseSpecies;
 		// @ts-ignore - dynamic lookup
 		callback = species[callbackName];
 		if (callback !== undefined) {
@@ -1466,10 +1466,10 @@ export class Battle {
 				if (this.gen > 2) {
 					for (const source of pokemon.side.foe.active) {
 						if (!source || source.fainted) continue;
-						const template = (source.illusion || source).template;
-						if (!template.abilities) continue;
-						for (const abilitySlot in template.abilities) {
-							const abilityName = template.abilities[abilitySlot as keyof TemplateAbility];
+						const species = (source.illusion || source).species;
+						if (!species.abilities) continue;
+						for (const abilitySlot in species.abilities) {
+							const abilityName = species.abilities[abilitySlot as keyof SpeciesAbility];
 							if (abilityName === source.ability) {
 								// pokemon event was already run above so we don't need
 								// to run it again.
@@ -1479,7 +1479,7 @@ export class Battle {
 							if ((ruleTable.has('+hackmons') || !ruleTable.has('obtainableabilities')) && !this.format.team) {
 								// hackmons format
 								continue;
-							} else if (abilitySlot === 'H' && template.unreleasedHidden) {
+							} else if (abilitySlot === 'H' && species.unreleasedHidden) {
 								// unreleased hidden ability
 								continue;
 							}
@@ -1538,7 +1538,6 @@ export class Battle {
 			}
 			const turnsLeftText = (turnsLeft === 1 ? `1 turn` : `${turnsLeft} turns`);
 			this.add('bigerror', `You will auto-tie if the battle doesn't end in ${turnsLeftText} (on turn 1000).`);
-			if (Config.allowrequestingties) this.hint("If you want to tie earlier, consider using `/offertie`.");
 		}
 
 		// Are all Pokemon on every side stale, with at least one side containing an externally stale Pokemon?
@@ -2153,7 +2152,7 @@ export class Battle {
 			// The "???" type never gets STAB
 			// Not even if you Roost in Gen 4 and somehow manage to use
 			// Struggle in the same turn.
-			// (On second thought, it might be easier to get a Missingno.)
+			// (On second thought, it might be easier to get a MissingNo.)
 			baseDamage = this.modify(baseDamage, move.stab || 1.5);
 		}
 		// types
