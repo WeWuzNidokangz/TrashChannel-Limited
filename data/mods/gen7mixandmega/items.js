@@ -5,19 +5,19 @@ let BattleItems = {
 	blueorb: {
 		inherit: true,
 		onSwitchIn(pokemon) {
-			if (pokemon.isActive && !pokemon.template.isPrimal) {
+			if (pokemon.isActive && !pokemon.species.isPrimal) {
 				this.insertQueue({pokemon: pokemon, choice: 'runPrimal'});
 			}
 		},
 		onPrimal(pokemon) {
-			/**@type {Template} */
+			/**@type {Species} */
 			// @ts-ignore
-			let template = this.getMixedTemplate(pokemon.m.originalSpecies, 'Kyogre-Primal');
+			let species = this.getMixedSpecies(pokemon.m.originalSpecies, 'Kyogre-Primal');
 			if (pokemon.m.originalSpecies === 'Kyogre') {
-				pokemon.formeChange(template, this.effect, true);
+				pokemon.formeChange(species, this.effect, true);
 			} else {
-				pokemon.formeChange(template, this.effect, true);
-				pokemon.baseTemplate = template;
+				pokemon.formeChange(species, this.effect, true);
+				pokemon.baseSpecies = species;
 				this.add('-start', pokemon, 'Blue Orb', '[silent]');
 			}
 		},
@@ -28,29 +28,29 @@ let BattleItems = {
 	redorb: {
 		inherit: true,
 		onSwitchIn(pokemon) {
-			if (pokemon.isActive && !pokemon.template.isPrimal) {
+			if (pokemon.isActive && !pokemon.species.isPrimal) {
 				this.insertQueue({pokemon: pokemon, choice: 'runPrimal'});
 			}
 		},
 		onPrimal(pokemon) {
-			/**@type {Template} */
+			/**@type {Species} */
 			// @ts-ignore
-			let template = this.getMixedTemplate(pokemon.m.originalSpecies, 'Groudon-Primal');
+			let species = this.getMixedSpecies(pokemon.m.originalSpecies, 'Groudon-Primal');
 			if (pokemon.m.originalSpecies === 'Groudon') {
-				pokemon.formeChange(template, this.effect, true);
+				pokemon.formeChange(species, this.effect, true);
 			} else {
-				pokemon.formeChange(template, this.effect, true);
-				pokemon.baseTemplate = template;
+				pokemon.formeChange(species, this.effect, true);
+				pokemon.baseSpecies = species;
 				this.add('-start', pokemon, 'Red Orb', '[silent]');
-				let apparentSpecies = pokemon.illusion ? pokemon.illusion.template.species : pokemon.m.originalSpecies;
-				let oTemplate = this.dex.getTemplate(apparentSpecies);
+				let apparentSpecies = pokemon.illusion ? pokemon.illusion.species.name : pokemon.m.originalSpecies;
+				let oSpecies = this.dex.getSpecies(apparentSpecies);
 				if (pokemon.illusion) {
-					let types = oTemplate.types;
+					let types = oSpecies.types;
 					if (types.length > 1 || types[types.length - 1] !== 'Fire') {
 						this.add('-start', pokemon, 'typechange', (types[0] !== 'Fire' ? types[0] + '/' : '') + 'Fire', '[silent]');
 					}
-				} else if (oTemplate.types.length !== pokemon.template.types.length || oTemplate.types[1] !== pokemon.template.types[1]) {
-					this.add('-start', pokemon, 'typechange', pokemon.template.types.join('/'), '[silent]');
+				} else if (oSpecies.types.length !== pokemon.species.types.length || oSpecies.types[1] !== pokemon.species.types[1]) {
+					this.add('-start', pokemon, 'typechange', pokemon.species.types.join('/'), '[silent]');
 				}
 			}
 		},

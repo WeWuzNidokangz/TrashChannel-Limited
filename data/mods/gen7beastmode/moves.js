@@ -38,7 +38,7 @@ let BattleMovedex = {
 			let currentHPProp = source.hp / source.maxhp;
 			console.log("source.hp: "+ source.hp.toString() +" source.maxhp: "+source.maxhp.toString());
 
-			// Generate new beast mode template for this move
+			// Generate new beast mode species for this move
 			const generator = new BeastModeTeams('gen7randombattle', this.prng);
 			let set = generator.beastModeTransformation(move.id, source);
 			source.formeChange(set.species, source.getItem(), false);
@@ -76,11 +76,11 @@ let BattleMovedex = {
 			}
 
 			// Recover HP to maintain proportion
-			let pokemonTemplate = source.template;
-			let newMaxHP = pokemonTemplate.baseStats.hp;
+			let pokemonSpecies = source.species;
+			let newMaxHP = pokemonSpecies.baseStats.hp;
 			if( 0 == newMaxHP ) newMaxHP = 1;
 			if( newMaxHP != oMaxHP ) {
-				let newMaxHP = Math.floor(Math.floor(2 * pokemonTemplate.baseStats.hp + source.set.ivs['hp'] + Math.floor(source.set.evs['hp'] / 4) + 100) * source.level / 100 + 10);
+				let newMaxHP = Math.floor(Math.floor(2 * pokemonSpecies.baseStats.hp + source.set.ivs['hp'] + Math.floor(source.set.evs['hp'] / 4) + 100) * source.level / 100 + 10);
 				source.hp = Math.floor(currentHPProp * newMaxHP);
 				this.add('-heal', source, source.getHealth, '[silent]');
 			}

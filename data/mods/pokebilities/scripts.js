@@ -30,14 +30,14 @@ exports.BattleScripts = {
 			return this.ability === ability || !!this.volatiles['ability' + ability];
 		},
 		transformInto(pokemon, effect) {
-			let template = pokemon.template;
+			let species = pokemon.species;
 			if (pokemon.fainted || pokemon.illusion || (pokemon.volatiles['substitute'] && this.battle.gen >= 5)) {
 				return false;
 			}
-			if (!template.abilities || (pokemon && pokemon.transformed && this.battle.gen >= 2) || (this.transformed && this.battle.gen >= 5)) {
+			if (!species.abilities || (pokemon && pokemon.transformed && this.battle.gen >= 2) || (this.transformed && this.battle.gen >= 5)) {
 				return false;
 			}
-			if (!this.formeChange(template)) {
+			if (!this.formeChange(species)) {
 				return false;
 			}
 			this.transformed = true;

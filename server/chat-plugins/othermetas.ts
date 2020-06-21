@@ -89,8 +89,8 @@ export const commands: ChatCommands = {
 		const mod = stoneName[1];
 		if (mod && toID(mod) in Dex.dexes) dex = Dex.mod(toID(mod));
 		const stone = getMegaStone(stoneName[0], mod);
-		const template = dex.getTemplate(sep[0]);
-		TrashChannelChatSupport.mixandmegainternal(this, template, stoneName[0], mod, "");
+		const species = dex.getSpecies(sep[0]);
+		TrashChannelChatSupport.mixandmegainternal(this, species, stoneName[0], mod, "");
 	},
 	mixandmegahelp: [
 		`/mnm <pokemon> @ <mega stone>[, generation] - Shows the Mix and Mega evolved Pokemon's type and stats.`,

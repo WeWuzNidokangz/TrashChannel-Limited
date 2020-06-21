@@ -8,14 +8,14 @@ class RandomBnBTeams extends RandomTeams {
 		let team = this.randomHCTeam();
 
 		// Load pokedex
-		/**@type {{[k: string]: TemplateData}} */
+		/**@type {{[k: string]: SpeciesData}} */
 		let BattlePokedex = POKEDEX.BattlePokedex;
 
 		/**@type {string[]} */
 		let bitchPool = [];
 		
 		for( let bitch of Object.keys(BattlePokedex) ) {
-			bitchPool.push( BattlePokedex[bitch].species );
+			bitchPool.push( BattlePokedex[bitch].name );
 		}
 		
 		/**@type {number} */

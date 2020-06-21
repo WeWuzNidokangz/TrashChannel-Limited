@@ -134,20 +134,20 @@ class DexCalculator {
 	}
 
 	/**
-	 * @param {Template} template
+	 * @param {Species} species
 	 * @return {Set<string>}
 	 */
-	static getFullLearnsetOfPokemon(template) {
-		if (!template.learnset) {
-			template = Dex.getTemplate(template.baseSpecies);
+	static getFullLearnsetOfPokemon(species) {
+		if (!species.learnset) {
+			species = Dex.getSpecies(species.baseSpecies);
 			// @ts-ignore
-			template.learnset = template.learnset || {};
+			species.learnset = species.learnset || {};
 		}
-		const lsetData = new Set(Object.keys(template.learnset));
+		const lsetData = new Set(Object.keys(species.learnset));
 
-		while (template.prevo) {
-			template = Dex.getTemplate(template.prevo);
-			for (const move in template.learnset) {
+		while (species.prevo) {
+			species = Dex.getSpecies(species.prevo);
+			for (const move in species.learnset) {
 				lsetData.add(move);
 			}
 		}
@@ -156,12 +156,12 @@ class DexCalculator {
 	};
 
 	/**
-	 * @param {Template} template
+	 * @param {Species} species
 	 * @param {String} type
 	 * @return {Array} array
 	 */
-	static getMovesPokemonLearnsOfType(template, type) {
-		const lsetData = DexCalculator.getFullLearnsetOfPokemon(template);
+	static getMovesPokemonLearnsOfType(species, type) {
+		const lsetData = DexCalculator.getFullLearnsetOfPokemon(species);
 
 		// Get full move data for learnset moves
 		/**@type {Move[]} */

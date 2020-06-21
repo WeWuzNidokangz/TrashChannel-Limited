@@ -7,7 +7,7 @@ exports.BattleScripts = {
 		let item = pokemon.getItem();
 		if (!skipChecks) {
 			if (!item.zMove) return;
-			if (item.zMoveUser && !item.zMoveUser.includes(pokemon.template.species)) return;
+			if (item.zMoveUser && !item.zMoveUser.includes(pokemon.species.name)) return;
 			let moveData = pokemon.getMoveData(move);
 			if (!moveData || !moveData.pp) return; // Draining the PP of the base move prevents the corresponding Z-move from being used.
 		}
@@ -47,7 +47,7 @@ exports.BattleScripts = {
 	canZMove(pokemon) {
 		let item = pokemon.getItem();
 		if (!item.zMove) return;
-		if (item.zMoveUser && !item.zMoveUser.includes(pokemon.template.species)) return;
+		if (item.zMoveUser && !item.zMoveUser.includes(pokemon.species.name)) return;
 		let atLeastOne = false;
 		let mustStruggle = true;
 		/**@type {AnyObject?[]} */

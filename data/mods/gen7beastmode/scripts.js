@@ -11,20 +11,20 @@ let BattleScripts = {
 	init() {
 		// Generate a beast mode move for every pokemon
 		let beastModeBaseMove = this.data.Movedex['beastmodebase'];
-		/**@type {Template} */
-		let modMoveTemplate;
+		/**@type {Species} */
+		let modMoveSpecies;
 		for (let modMoveId in this.data.Pokedex) {
 			//console.log('Generating beast mode move for Pokemon with modMoveId: '+ modMoveId);
 
 			let modMove = DexCalculator.deepClone(beastModeBaseMove);
-			modMoveTemplate = this.getTemplate(modMoveId);
+			modMoveSpecies = this.getSpecies(modMoveId);
 
 			// Base move name on source Pokemon
 			modMove.id = modMoveId;
-			modMove.name = 'Beast Pact: ' + modMoveTemplate.name;
+			modMove.name = 'Beast Pact: ' + modMoveSpecies.name;
 
 			// Make CAP and non-existent Pokemon into isNonstandard moves
-			if(modMoveTemplate.num < 1) {
+			if(modMoveSpecies.num < 1) {
 				modMove.isNonstandard = true;
 			}
 

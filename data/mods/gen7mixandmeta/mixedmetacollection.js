@@ -26,13 +26,13 @@ let MixedMetaCollection = {
 			}*/
 
 			// Check item-based mega evos
-			let template = global.Dex.getTemplate(set.species || set.name);
+			let species = global.Dex.getSpecies(set.species || set.name);
 			let item = global.Dex.getItem(set.item);
 			if (!item.megaEvolves && !['blueorb', 'redorb', 'ultranecroziumz'].includes(item.id)) return undefined; // Native mega-evos
-			if (template.baseSpecies === item.megaEvolves ||
-				(template.baseSpecies === 'Groudon' && item.id === 'redorb') ||
-				(template.baseSpecies === 'Kyogre' && item.id === 'blueorb') ||
-				(template.species.substr(0, 9) === 'Necrozma-' && item.id === 'ultranecroziumz')) return undefined;
+			if (species.baseSpecies === item.megaEvolves ||
+				(species.baseSpecies === 'Groudon' && item.id === 'redorb') ||
+				(species.baseSpecies === 'Kyogre' && item.id === 'blueorb') ||
+				(species.name.substr(0, 9) === 'Necrozma-' && item.id === 'ultranecroziumz')) return undefined;
 			return `holding the non-native Mega item ${set.item}`; // Item-based mega-evo
 		},
 	},

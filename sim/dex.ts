@@ -1024,9 +1024,9 @@ export class ModdedDex {
 			case 'move':
 				//#region TrashChannel
 				// 18/11/24 TrashChannel: Needed to avoid dupes from Pokemon names used as moves in Beast Mode
-				const template: Template = this.getTemplate(id) as Template;
-				if(undefined !== template) {
-					if(template.exists) continue;
+				const species: Species = this.getSpecies(id) as Species;
+				if(undefined !== species) {
+					if(species.exists) continue;
 				}
 				table = this.data.Movedex;
 				//#endregion
@@ -1645,18 +1645,18 @@ export class ModdedDex {
 
 	generateMegaStoneName(pokemonName: string): string {
 		let baseName = pokemonName;
-		let template = this.getTemplate(pokemonName);
-		if(!template.exists) return '???';
+		let species = this.getSpecies(pokemonName);
+		if(!species.exists) return '???';
 		
 		/** @type {string | null} */
 		let stoneName = null;
-		baseName = template.name;
-		let baseTemplate = this.getTemplate(template.baseSpecies);
+		baseName = species.name;
+		let baseSpecies = this.getSpecies(species.baseSpecies);
 		for(let item in this.data.Items) {
-			if( this.data.Items[item].megaEvolves === baseTemplate.name ) {
-				if(template.isMega) {
+			if( this.data.Items[item].megaEvolves === baseSpecies.name ) {
+				if(species.isMega) {
 					stoneName = 'Mega ' + this.data.Items[item].name;
-					let lastLetter = template.name.substr( template.name.length-2, template.name.length-1 );
+					let lastLetter = species.name.substr( species.name.length-2, species.name.length-1 );
 					if('a' !== lastLetter) { // X/Y split mega case
 						stoneName += ' ' + lastLetter;
 					}
@@ -1668,8 +1668,8 @@ export class ModdedDex {
 			}
 		}
 
-		if(template.isPrimal) {
-			stoneName = 'Primal ' + baseTemplate.name; 
+		if(species.isPrimal) {
+			stoneName = 'Primal ' + baseSpecies.name; 
 		}
 
 		if(null === stoneName) {
@@ -1696,15 +1696,15 @@ export class ModdedDex {
 		return stoneName.substr( 0, stoneName.length-3 ) + 'ite';
 	}
 
-	calcActiveAbilitySlot(species: string | Template, ability: string): string {
+	calcActiveAbilitySlot(species: string | Species, ability: string): string {
 		let id = toID(species || '');
-		let template = this.getTemplate(id);
+		let species = this.getSpecies(id);
 		let abilityId = toID(ability || '');
 		let abilitySlot = '0'; // Fallback to standard ability slot if we're in a meta that allows illegal abilities
-		for (let abilityItr in template.abilities) {
-			//console.log("Ability slot: "+ abilityItr.toString() +" instance: "+this.ability.toString()+" template: "+toID(oTemplate.abilities[abilityItr]).toString());
+		for (let abilityItr in species.abilities) {
+			//console.log("Ability slot: "+ abilityItr.toString() +" instance: "+this.ability.toString()+" species: "+toID(oSpecies.abilities[abilityItr]).toString());
 			// @ts-ignore
-			if(abilityId !== toID(template.abilities[abilityItr])) continue;
+			if(abilityId !== toID(species.abilities[abilityItr])) continue;
 			abilitySlot = abilityItr;
 			break;
 		}

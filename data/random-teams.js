@@ -1588,34 +1588,34 @@ class RandomTeams {
 	}
 
 	/**
-	 * @param {string | Template} template
+	 * @param {string | Species} species
 	 * @param {number} [slot]
 	 * @param {RandomTeamsTypes.TeamDetails} [teamDetails]
 	 * @param {boolean} [isDoubles]
 	 * @return {RandomTeamsTypes.RandomSet}
 	 */
-	suicideCupRandomSet(template, slot = 1, teamDetails = {}, isDoubles = false) {
-		template = this.dex.getTemplate(template);
-		let baseTemplate = template;
-		let species = template.species;
+	suicideCupRandomSet(species, slot = 1, teamDetails = {}, isDoubles = false) {
+		species = this.dex.getSpecies(species);
+		let baseSpecies = species;
+		let forme = species.name;
 
-		if (!template.exists || ((!isDoubles || !template.randomDoubleBattleMoves) && !template.randomBattleMoves && !template.learnset)) {
+		if (!species.exists || ((!isDoubles || !species.randomDoubleBattleMoves) && !species.randomBattleMoves && !species.learnset)) {
 			// GET IT? UNOWN? BECAUSE WE CAN'T TELL WHAT THE POKEMON IS
-			template = this.dex.getTemplate('unown');
+			species = this.dex.getSpecies('unown');
 
-			let err = new Error('Template incompatible with random battles: ' + species);
+			let err = new Error('Species incompatible with random battles: ' + forme);
 			Monitor.crashlog(err, 'The randbat set generator');
 		}
 
 		const allowedMega = ['Absol', 'Gengar', 'Banette'];
 
-		if (template.battleOnly) {
-			// Only change the species. The template has custom moves, and may have different typing and requirements.
-			species = template.baseSpecies;
+		if (species.battleOnly) {
+			// Only change the species. The species has custom moves, and may have different typing and requirements.
+			forme = species.baseSpecies;
 		}
-		let battleForme = this.checkBattleForme(template);
-		if (battleForme && battleForme.randomBattleMoves && template.otherFormes && (battleForme.isMega ? !teamDetails.megaStone && allowedMega.includes(template.name) : this.random(2))) {
-			template = this.dex.getTemplate(template.otherFormes.length >= 2 ? this.sample(template.otherFormes) : template.otherFormes[0]);
+		let battleForme = this.checkBattleForme(species);
+		if (battleForme && battleForme.randomBattleMoves && species.otherFormes && (battleForme.isMega ? !teamDetails.megaStone && allowedMega.includes(species.name) : this.random(2))) {
+			species = this.dex.getSpecies(species.otherFormes.length >= 2 ? this.sample(species.otherFormes) : species.otherFormes[0]);
 		}
 
 		// Load Suicide Cup useful moves array
@@ -1632,7 +1632,7 @@ class RandomTeams {
 		}
 		let nSCUMTierCount = SCUsefulMoves.length;
 
-		let movePool = baseTemplate.learnset ? Object.keys(baseTemplate.learnset) : []; // Directly use the learnset as a movepool
+		let movePool = baseSpecies.learnset ? Object.keys(baseSpecies.learnset) : []; // Directly use the learnset as a movepool
 		/**@type {string[]} */
 		let moves = [];
 		let ability = '';
@@ -1655,20 +1655,20 @@ class RandomTeams {
 		};
 		/**@type {{[k: string]: true}} */
 		let hasType = {};
-		hasType[template.types[0]] = true;
-		if (template.types[1]) {
-			hasType[template.types[1]] = true;
+		hasType[species.types[0]] = true;
+		if (species.types[1]) {
+			hasType[species.types[1]] = true;
 		}
 		/**@type {{[k: string]: true}} */
 		let hasAbility = {};
-		hasAbility[template.abilities[0]] = true;
-		if (template.abilities[1]) {
+		hasAbility[species.abilities[0]] = true;
+		if (species.abilities[1]) {
 			// @ts-ignore
-			hasAbility[template.abilities[1]] = true;
+			hasAbility[species.abilities[1]] = true;
 		}
-		if (template.abilities['H']) {
+		if (species.abilities['H']) {
 			// @ts-ignore
-			hasAbility[template.abilities['H']] = true;
+			hasAbility[species.abilities['H']] = true;
 		}
 		let availableHP = 0;
 		for (const moveid of movePool) {
@@ -1750,7 +1750,7 @@ class RandomTeams {
 		// ** ABILITY **
 		/**@type {[string, string | undefined, string | undefined]} */
 		// @ts-ignore
-		let abilities = Object.values(baseTemplate.abilities);
+		let abilities = Object.values(baseSpecies.abilities);
 		abilities.sort((a, b) => this.dex.getAbility(b).rating - this.dex.getAbility(a).rating);
 		let ability0 = this.dex.getAbility(abilities[0]);
 		let ability1 = this.dex.getAbility(abilities[1]);
@@ -1845,9 +1845,9 @@ class RandomTeams {
 				} else if (ability === 'Ice Body' || ability === 'Slush Rush' || ability === 'Snow Cloak') {
 					rejectAbility = !teamDetails['hail'];
 				} else if (ability === 'Lightning Rod') {
-					rejectAbility = template.types.includes('Ground');
+					rejectAbility = species.types.includes('Ground');
 				} else if (ability === 'Limber') {
-					rejectAbility = template.types.includes('Electric');
+					rejectAbility = species.types.includes('Electric');
 				} else if (ability === 'Poison Heal') {
 					rejectAbility = true;
 				} else if (ability === 'Prankster') {
@@ -1855,9 +1855,9 @@ class RandomTeams {
 				} else if (ability === 'Sand Force' || ability === 'Sand Rush' || ability === 'Sand Veil') {
 					rejectAbility = !teamDetails['sand'];
 				} else if (ability === 'Scrappy') {
-					rejectAbility = !template.types.includes('Normal');
+					rejectAbility = !species.types.includes('Normal');
 				} else if (ability === 'Serene Grace') {
-					rejectAbility = !counter['serenegrace'] || template.species === 'Blissey';
+					rejectAbility = !counter['serenegrace'] || species.name === 'Blissey';
 				}
 
 				if (rejectAbility) {
@@ -1935,13 +1935,13 @@ class RandomTeams {
 		else { // Pick Black Sludge or Toxic Orb
 			item = this.randomChance(1, 2) ? 'Black Sludge' : 'Toxic Orb';
 		}
-		if (template.requiredItems) {
+		if (species.requiredItems) {
 			// @ts-ignore
-			if (template.baseSpecies === 'Arceus' && (hasMove['judgment'] || !counter[template.types[0]] || teamDetails.zMove)) {
+			if (species.baseSpecies === 'Arceus' && (hasMove['judgment'] || !counter[species.types[0]] || teamDetails.zMove)) {
 				// Judgment doesn't change type with Z-Crystals
-				item = template.requiredItems[0];
+				item = species.requiredItems[0];
 			} else {
-				item = this.sample(template.requiredItems);
+				item = this.sample(species.requiredItems);
 			}
 		}
 		// Trick / Switcheroo: Give a healing item to switch onto opponent instead
@@ -1957,10 +1957,10 @@ class RandomTeams {
 		let level = 100;
 
 		// Prepare optimal HP for dying to percentage-based damage
-		let nInBattleHP = Math.floor(Math.floor(2 * template.baseStats.hp + ivs.hp + Math.floor(evs.hp / 4) + 100) * level / 100 + 10);
+		let nInBattleHP = Math.floor(Math.floor(2 * species.baseStats.hp + ivs.hp + Math.floor(evs.hp / 4) + 100) * level / 100 + 10);
 		while ( ( 0 !== ( nInBattleHP % 8 ) ) && ( ivs.hp < 31 ) ) {
 			ivs.hp++;
-			nInBattleHP = Math.floor(Math.floor(2 * template.baseStats.hp + ivs.hp + Math.floor(evs.hp / 4) + 100) * level / 100 + 10);
+			nInBattleHP = Math.floor(Math.floor(2 * species.baseStats.hp + ivs.hp + Math.floor(evs.hp / 4) + 100) * level / 100 + 10);
 		}
 		if (hasMove['trickroom']) {
 			evs.spe = 0;
@@ -1973,9 +1973,9 @@ class RandomTeams {
 		// FIXME: Natures
 
 		return {
-			name: template.baseSpecies,
-			species: species,
-			gender: template.gender,
+			name: species.baseSpecies,
+			species: forme,
+			gender: species.gender,
 			moves: moves,
 			ability: ability,
 			evs: evs,
@@ -1997,13 +1997,13 @@ class RandomTeams {
 
 		let pokemonPool = [];
 		for (let id in this.dex.data.FormatsData) {
-			let template = this.dex.getTemplate(id);
+			let species = this.dex.getSpecies(id);
 			if (isMonotype) {
-				let types = template.types;
-				if (template.battleOnly) types = this.dex.getTemplate(template.baseSpecies).types;
+				let types = species.types;
+				if (species.battleOnly) types = this.dex.getSpecies(species.baseSpecies).types;
 				if (types.indexOf(type) < 0) continue;
 			}
-			if (template.gen <= this.gen && !template.isMega && !template.isPrimal && !template.isNonstandard && template.randomBattleMoves) {
+			if (species.gen <= this.gen && !species.isMega && !species.isPrimal && !species.isNonstandard && species.randomBattleMoves) {
 				pokemonPool.push(id);
 			}
 		}
@@ -2011,7 +2011,7 @@ class RandomTeams {
 		// PotD stuff
 		let potd;
 		if (global.Config && Config.potd && this.dex.getRuleTable(this.format).has('potd')) {
-			potd = this.dex.getTemplate(Config.potd);
+			potd = this.dex.getSpecies(Config.potd);
 		}
 
 		/**@type {{[k: string]: number}} */
@@ -2026,14 +2026,14 @@ class RandomTeams {
 		let teamDetails = {};
 
 		while (pokemonPool.length && pokemon.length < 6) {
-			let template = this.dex.getTemplate(this.sampleNoReplace(pokemonPool));
-			if (!template.exists) continue;
+			let species = this.dex.getSpecies(this.sampleNoReplace(pokemonPool));
+			if (!species.exists) continue;
 
 			// Limit to one of each species (Species Clause)
-			if (baseFormes[template.baseSpecies]) continue;
+			if (baseFormes[species.baseSpecies]) continue;
 
 			// Adjust rate for species with multiple formes
-			switch (template.baseSpecies) {
+			switch (species.baseSpecies) {
 			case 'Arceus': case 'Silvally':
 				if (this.randomChance(17, 18)) continue;
 				break;
@@ -2054,9 +2054,9 @@ class RandomTeams {
 				break;
 			}
 
-			let tier = template.tier;
+			let tier = species.tier;
 
-			let types = template.types;
+			let types = species.types;
 
 			if (!isMonotype) {
 				// Limit two of any type
@@ -2073,13 +2073,13 @@ class RandomTeams {
 			if (potd && potd.exists) {
 				// The Pokemon of the Day belongs in slot 2
 				if (pokemon.length === 1) {
-					template = potd;
-				} else if (template.species === potd.species) {
+					species = potd;
+				} else if (species.name === potd.name) {
 					continue; // No thanks, I've already got it
 				}
 			}
 
-			let set = this.suicideCupRandomSet(template, pokemon.length, teamDetails, this.format.gameType !== 'singles');
+			let set = this.suicideCupRandomSet(species, pokemon.length, teamDetails, this.format.gameType !== 'singles');
 
 			// Illusion shouldn't be the last Pokemon of the team
 			if (set.ability === 'Illusion' && pokemon.length > 4) continue;
@@ -2110,7 +2110,7 @@ class RandomTeams {
 			}
 
 			// Now that our Pokemon has passed all checks, we can increment our counters
-			baseFormes[template.baseSpecies] = 1;
+			baseFormes[species.baseSpecies] = 1;
 
 			// Increment type counters
 			for (const type of types) {

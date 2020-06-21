@@ -6,28 +6,28 @@ const POKEDEX = require('./../../pokedex');
 class BeastModeTeams extends RandomTeams {
 
 	/**
-	 * @param {string | Template} beastTemplate
+	 * @param {string | Species} beastSpecies
 	 * @param {Pokemon} userPokemon
 	 * @param {boolean} [isDoubles]
 	 * @return {RandomTeamsTypes.RandomSet}
 	 */
-	beastModeTransformation(beastTemplate, userPokemon, isDoubles = false) {
-		beastTemplate = this.getTemplate(beastTemplate);
-		let baseTemplate = beastTemplate;
-		let species = beastTemplate.species;
+	beastModeTransformation(beastSpecies, userPokemon, isDoubles = false) {
+		beastSpecies = this.getSpecies(beastSpecies);
+		let baseSpecies = beastSpecies;
+		let species = beastSpecies.species;
 
-		if (!beastTemplate.exists || ((!isDoubles || !beastTemplate.randomDoubleBattleMoves) && !beastTemplate.randomBattleMoves && !beastTemplate.learnset)) {
-			let err = new Error('Template incompatible with random battles: ' + species);
+		if (!beastSpecies.exists || ((!isDoubles || !beastSpecies.randomDoubleBattleMoves) && !beastSpecies.randomBattleMoves && !beastSpecies.learnset)) {
+			let err = new Error('Species incompatible with random battles: ' + species);
 			require('./../../../lib/crashlogger')(err, 'The randbat set generator');
 		}
 
-		let battleForme = this.checkBattleForme(beastTemplate);
-		if (battleForme && battleForme.randomBattleMoves && beastTemplate.otherFormes) {
-			beastTemplate = this.getTemplate(beastTemplate.otherFormes.length >= 2 ? this.sample(beastTemplate.otherFormes) : beastTemplate.otherFormes[0]);
+		let battleForme = this.checkBattleForme(beastSpecies);
+		if (battleForme && battleForme.randomBattleMoves && beastSpecies.otherFormes) {
+			beastSpecies = this.getSpecies(beastSpecies.otherFormes.length >= 2 ? this.sample(beastSpecies.otherFormes) : beastSpecies.otherFormes[0]);
 		}
 
-		const randMoves = !isDoubles ? beastTemplate.randomBattleMoves : beastTemplate.randomDoubleBattleMoves || beastTemplate.randomBattleMoves;
-		let movePool = (randMoves ? randMoves.slice() : beastTemplate.learnset ? Object.keys(beastTemplate.learnset) : []);
+		const randMoves = !isDoubles ? beastSpecies.randomBattleMoves : beastSpecies.randomDoubleBattleMoves || beastSpecies.randomBattleMoves;
+		let movePool = (randMoves ? randMoves.slice() : beastSpecies.learnset ? Object.keys(beastSpecies.learnset) : []);
 		/**@type {string[]} */
 		let moves = [];
 		let ability = '';
@@ -68,20 +68,20 @@ class BeastModeTeams extends RandomTeams {
 
 		/**@type {{[k: string]: true}} */
 		let hasType = {};
-		hasType[beastTemplate.types[0]] = true;
-		if (beastTemplate.types[1]) {
-			hasType[beastTemplate.types[1]] = true;
+		hasType[beastSpecies.types[0]] = true;
+		if (beastSpecies.types[1]) {
+			hasType[beastSpecies.types[1]] = true;
 		}
 		/**@type {{[k: string]: true}} */
 		let hasAbility = {};
-		hasAbility[beastTemplate.abilities[0]] = true;
-		if (beastTemplate.abilities[1]) {
+		hasAbility[beastSpecies.abilities[0]] = true;
+		if (beastSpecies.abilities[1]) {
 			// @ts-ignore
-			hasAbility[beastTemplate.abilities[1]] = true;
+			hasAbility[beastSpecies.abilities[1]] = true;
 		}
-		if (beastTemplate.abilities['H']) {
+		if (beastSpecies.abilities['H']) {
 			// @ts-ignore
-			hasAbility[beastTemplate.abilities['H']] = true;
+			hasAbility[beastSpecies.abilities['H']] = true;
 		}
 		let availableHP = 0;
 		for (const moveid of movePool) {
@@ -141,7 +141,7 @@ class BeastModeTeams extends RandomTeams {
 
 		// Moveset modifications
 		if (hasMove['autotomize'] && hasMove['heavyslam']) {
-			if (beastTemplate.id === 'celesteela') {
+			if (beastSpecies.id === 'celesteela') {
 				moves[moves.indexOf('heavyslam')] = 'flashcannon';
 			} else {
 				moves[moves.indexOf('autotomize')] = 'rockpolish';
@@ -154,7 +154,7 @@ class BeastModeTeams extends RandomTeams {
 
 		/**@type {[string, string | undefined, string | undefined]} */
 		// @ts-ignore
-		let abilities = Object.values(baseTemplate.abilities);
+		let abilities = Object.values(baseSpecies.abilities);
 		abilities.sort((a, b) => this.getAbility(b).rating - this.getAbility(a).rating);
 		let ability0 = this.getAbility(abilities[0]);
 		let ability1 = this.getAbility(abilities[1]);
@@ -190,13 +190,13 @@ class BeastModeTeams extends RandomTeams {
 			ability = ability0.name;
 		}
 
-		if (beastTemplate.requiredItems) {
+		if (beastSpecies.requiredItems) {
 			// @ts-ignore
-			if (beastTemplate.baseSpecies === 'Arceus' && (hasMove['judgment'] || !counter[beastTemplate.types[0]])) {
+			if (beastSpecies.baseSpecies === 'Arceus' && (hasMove['judgment'] || !counter[beastSpecies.types[0]])) {
 				// Judgment doesn't change type with Z-Crystals
-				item = beastTemplate.requiredItems[0];
+				item = beastSpecies.requiredItems[0];
 			} else {
-				item = this.sample(beastTemplate.requiredItems);
+				item = this.sample(beastSpecies.requiredItems);
 			}
 		}
 		let level = userPokemon.level;
@@ -204,7 +204,7 @@ class BeastModeTeams extends RandomTeams {
 		item = userPokemon.item; // Not sure about this but...
 
 		return {
-			name: beastTemplate.baseSpecies,
+			name: beastSpecies.baseSpecies,
 			species: species,
 			gender: gender,
 			moves: moves,

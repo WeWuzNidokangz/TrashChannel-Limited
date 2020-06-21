@@ -1893,7 +1893,7 @@ export class Pokemon {
 
 //#region TrashChannel
 	calcActiveAbilitySlot() {
-		return this.battle.dex.calcActiveAbilitySlot(this.template, this.ability);
+		return this.battle.dex.calcActiveAbilitySlot(this.species, this.ability);
 	}
 //#endregion
 }

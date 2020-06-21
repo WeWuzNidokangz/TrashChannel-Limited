@@ -117,8 +117,8 @@ let BattleScripts = {
 		}
 
 		// 19/05/06: Re-implement standard runMegaEvo, but prevent MnM megas from being disabled by regular single megaevo usage
-		const templateid = pokemon.canMegaEvo || pokemon.canUltraBurst;
-		if (!templateid) return false;
+		const speciesid = pokemon.canMegaEvo || pokemon.canUltraBurst;
+		if (!speciesid) return false;
 		const side = pokemon.side;
 
 		// Pokémon affected by Sky Drop cannot mega evolve. Enforce it here for now.
@@ -128,7 +128,7 @@ let BattleScripts = {
 			}
 		}
 
-		pokemon.formeChange(templateid, pokemon.getItem(), true);
+		pokemon.formeChange(speciesid, pokemon.getItem(), true);
 
 		// Limit one mega evolution
 		let wasMega = pokemon.canMegaEvo;
@@ -147,31 +147,31 @@ let BattleScripts = {
 		this.runEvent('AfterMega', pokemon);
 		return true;
 	},
-	getMixedTemplate(originalSpecies, megaSpecies) { // Can only enter from MnM (for now)
+	getMixedSpecies(originalSpecies, megaSpecies) { // Can only enter from MnM (for now)
 		// Load MnM script functions
 		/**@type {ModdedBattleScriptsData} */
 		let MnMScript = require(MNM_SCRIPTS).BattleScripts;
 
-		if(undefined !== MnMScript.getMixedTemplate) {
-			return MnMScript.getMixedTemplate.call(this, originalSpecies, megaSpecies);
+		if(undefined !== MnMScript.getMixedSpecies) {
+			return MnMScript.getMixedSpecies.call(this, originalSpecies, megaSpecies);
 		}
 	},
-	getMegaDeltas(megaTemplate) { // Can only enter from MnM (for now)
+	getMegaDeltas(megaSpecies) { // Can only enter from MnM (for now)
 		// Load MnM script functions
 		/**@type {ModdedBattleScriptsData} */
 		let MnMScript = require(MNM_SCRIPTS).BattleScripts;
 
 		if(undefined !== MnMScript.getMegaDeltas) {
-			return MnMScript.getMegaDeltas.call(this, megaTemplate);
+			return MnMScript.getMegaDeltas.call(this, megaSpecies);
 		}
 	},
-	doGetMixedTemplate(templateOrTemplateName, deltas) { // Can only enter from MnM (for now)
+	doGetMixedSpecies(speciesOrSpeciesName, deltas) { // Can only enter from MnM (for now)
 		// Load MnM script functions
 		/**@type {ModdedBattleScriptsData} */
 		let MnMScript = require(MNM_SCRIPTS).BattleScripts;
 
-		if(undefined !== MnMScript.doGetMixedTemplate) {
-			return MnMScript.doGetMixedTemplate.call(this, templateOrTemplateName, deltas);
+		if(undefined !== MnMScript.doGetMixedSpecies) {
+			return MnMScript.doGetMixedSpecies.call(this, speciesOrSpeciesName, deltas);
 		}
 	},
 };

@@ -9,29 +9,29 @@ let BattleScripts = {
 	inherit: 'gen7',
 	init() {
 		for (let id in this.data.Items) {
-			let bitchTemplate = this.getTemplate(id);
-			if (!bitchTemplate.exists) continue;
+			let bitchSpecies = this.getSpecies(id);
+			if (!bitchSpecies.exists) continue;
 			this.modData('Items', id).onTakeItem = false;
 		}
 	},
 	canMegaEvo(pokemon) {
-		if (pokemon.template.isMega || pokemon.template.isPrimal) return null;
-		let bitchTemplate = this.dex.getTemplate(pokemon.item);
-		if (bitchTemplate.exists) { // Bitch and beggar
-			return bitchTemplate.id;
+		if (pokemon.species.isMega || pokemon.species.isPrimal) return null;
+		let bitchSpecies = this.dex.getSpecies(pokemon.item);
+		if (bitchSpecies.exists) { // Bitch and beggar
+			return bitchSpecies.id;
 		}
 		
 		// Regular mega evo case: have to copy and paste code from data/scripts.js for now
-		let altForme = pokemon.baseTemplate.otherFormes && this.dex.getTemplate(pokemon.baseTemplate.otherFormes[0]);
+		let altForme = pokemon.baseSpecies.otherFormes && this.dex.getSpecies(pokemon.baseSpecies.otherFormes[0]);
 		let item = pokemon.getItem();
 		if (altForme && altForme.isMega && altForme.requiredMove && pokemon.baseMoves.includes(toID(altForme.requiredMove)) && !item.zMove) return altForme.species;
-		if (item.megaEvolves !== pokemon.baseTemplate.baseSpecies || item.megaStone === pokemon.species) {
+		if (item.megaEvolves !== pokemon.baseSpecies.baseSpecies || item.megaStone === pokemon.species) {
 			return null;
 		}
 		return item.megaStone;
 	},
 	runMegaEvo(pokemon) {
-		if (pokemon.template.isMega || pokemon.template.isPrimal) return false;
+		if (pokemon.species.isMega || pokemon.species.isPrimal) return false;
 
 		const isUltraBurst = !pokemon.canMegaEvo;
 		const side = pokemon.side;
@@ -43,16 +43,16 @@ let BattleScripts = {
 			}
 		}
 
-		// Take care of regular megaevo case first (this.dex.getTemplate(pokemon.canMegaEvo).exists is true on Mega Stones!)
+		// Take care of regular megaevo case first (this.dex.getSpecies(pokemon.canMegaEvo).exists is true on Mega Stones!)
 		let item = pokemon.getItem();
 		let isBeggarEvo = !pokemon.getItem().exists;
 
 		//console.log( 'isBeggarEvo: '+ isBeggarEvo.toString() +' pokemon.canMegaEvo: '+ pokemon.canMegaEvo.toString() );
 		if(!isBeggarEvo) {
-			const templateid = pokemon.canMegaEvo || pokemon.canUltraBurst;
-			if (!templateid) return false;
+			const speciesid = pokemon.canMegaEvo || pokemon.canUltraBurst;
+			if (!speciesid) return false;
 
-			pokemon.formeChange(templateid, pokemon.getItem(), true);
+			pokemon.formeChange(speciesid, pokemon.getItem(), true);
 
 			// Limit one mega evolution
 			let wasMega = pokemon.canMegaEvo;
@@ -78,30 +78,30 @@ let BattleScripts = {
 
 		// Bitch and Beggar case
 		let bitchSpecies = pokemon.canMegaEvo || pokemon.canUltraBurst;
-		/**@type {Template} */
+		/**@type {Species} */
 		// @ts-ignore
-		const template = this.getMixedTemplate(pokemon.m.originalSpecies, bitchSpecies);
+		const species = this.getMixedSpecies(pokemon.m.originalSpecies, bitchSpecies);
 		
 		// Update ability for slot
-		let oTemplate = this.dex.getTemplate(pokemon.template);
+		let oSpecies = this.dex.getSpecies(pokemon.species);
 		let oAbilitySlot = pokemon.calcActiveAbilitySlot();
 		// @ts-ignore
-		template.abilities = {'0': template.abilities[oAbilitySlot]};
+		species.abilities = {'0': species.abilities[oAbilitySlot]};
 
 		// Graphical volatiles
 		// @ts-ignore
-		pokemon.formeChange(template, pokemon.getItem(), true);
+		pokemon.formeChange(species, pokemon.getItem(), true);
 		// @ts-ignore
 		this.add('-start', pokemon, this.dex.generateMegaStoneName(bitchSpecies), '[silent]');
-		if (oTemplate.types.length !== pokemon.template.types.length || oTemplate.types[1] !== pokemon.template.types[1]) {
-			this.add('-start', pokemon, 'typechange', pokemon.template.types.join('/'), '[silent]');
+		if (oSpecies.types.length !== pokemon.species.types.length || oSpecies.types[1] !== pokemon.species.types[1]) {
+			this.add('-start', pokemon, 'typechange', pokemon.species.types.join('/'), '[silent]');
 		}
 
 		// Recover HP to maintain proportion
-		let newMaxHP = template.baseStats.hp;
+		let newMaxHP = species.baseStats.hp;
 		if( 0 == newMaxHP ) newMaxHP = 1;
 		if( newMaxHP != oMaxHP ) {
-			let newMaxHP = Math.floor(Math.floor(2 * template.baseStats['hp'] + pokemon.set.ivs['hp'] + Math.floor(pokemon.set.evs['hp'] / 4) + 100) * pokemon.level / 100 + 10);
+			let newMaxHP = Math.floor(Math.floor(2 * species.baseStats['hp'] + pokemon.set.ivs['hp'] + Math.floor(pokemon.set.evs['hp'] / 4) + 100) * pokemon.level / 100 + 10);
 			pokemon.hp = Math.floor(currentHPProp * newMaxHP);
 			pokemon.maxhp = Math.floor(newMaxHP);
 			// Proportional HP remains the same so heal effect seems unnecessary
@@ -113,75 +113,75 @@ let BattleScripts = {
 		this.runEvent('AfterMega', pokemon);
 		return true;
 	},
-	getMixedTemplate(originalSpecies, bitchSpecies) {
-		//console.log("originalSpecies: "+ originalSpecies.toString());
-		//console.log("bitchSpecies: "+ bitchSpecies.toString());
+	getMixedSpecies(originalForme, bitchForme) {
+		//console.log("originalForme: "+ originalForme.toString());
+		//console.log("bitchForme: "+ bitchForme.toString());
 		let context = (typeof Dex != 'undefined') ? Dex : this.dex;
-		let originalTemplate = context.getTemplate(originalSpecies);
-		let bitchTemplate = context.getTemplate(bitchSpecies);
-		/**@type {{abilities: TemplateAbility, baseStats: {[k: string]: number}, weightkg: number, originalMega: string, requiredItem: string | undefined, type?: string, isMega?: boolean, isPrimal?: boolean}} */
+		let originalSpecies = context.getSpecies(originalForme);
+		let bitchSpecies = context.getSpecies(bitchForme);
+		/**@type {{abilities: SpeciesAbility, baseStats: {[k: string]: number}, weightkg: number, originalMega: string, requiredItem: string | undefined, type?: string, isMega?: boolean, isPrimal?: boolean}} */
 		let deltas = {
-			abilities: bitchTemplate.abilities,
-			baseStats: bitchTemplate.baseStats,
-			weightkg: bitchTemplate.weightkg,
-			originalMega: bitchTemplate.species,
-			requiredItem: bitchTemplate.id,
+			abilities: bitchSpecies.abilities,
+			baseStats: bitchSpecies.baseStats,
+			weightkg: bitchSpecies.weightkg,
+			originalMega: bitchSpecies.species,
+			requiredItem: bitchSpecies.id,
 		};
-		//console.log("bitch length: " + bitchTemplate.types.length );
-		//console.log("beggar length: " + originalTemplate.types.length );
-		if (bitchTemplate.types.length > originalTemplate.types.length) {
-			deltas.type = bitchTemplate.types[1];
-		} else if (bitchTemplate.types.length < originalTemplate.types.length) {
-			deltas.type = (undefined !== originalTemplate.types[1]) ? originalTemplate.types[1] : originalTemplate.types[0];
-		} else if ( (undefined !== bitchTemplate.types[1]) && (bitchTemplate.types[1] !== originalTemplate.types[1]) ) {
-			deltas.type = bitchTemplate.types[1];
+		//console.log("bitch length: " + bitchSpecies.types.length );
+		//console.log("beggar length: " + originalSpecies.types.length );
+		if (bitchSpecies.types.length > originalSpecies.types.length) {
+			deltas.type = bitchSpecies.types[1];
+		} else if (bitchSpecies.types.length < originalSpecies.types.length) {
+			deltas.type = (undefined !== originalSpecies.types[1]) ? originalSpecies.types[1] : originalSpecies.types[0];
+		} else if ( (undefined !== bitchSpecies.types[1]) && (bitchSpecies.types[1] !== originalSpecies.types[1]) ) {
+			deltas.type = bitchSpecies.types[1];
 		}
-		if (bitchTemplate.isMega) deltas.isMega = true;
-		if (bitchTemplate.isPrimal) deltas.isPrimal = true;
+		if (bitchSpecies.isMega) deltas.isMega = true;
+		if (bitchSpecies.isPrimal) deltas.isPrimal = true;
 
 		// @ts-ignore
-		let template = this.doGetMixedTemplate(originalTemplate, deltas);
-		return template;
+		let species = this.doGetMixedSpecies(originalSpecies, deltas);
+		return species;
 	},
-	doGetMixedTemplate(template, deltas) {
+	doGetMixedSpecies(speciesOrForme, deltas) {
 		if (!deltas) throw new TypeError("Must specify deltas!");
 		let context = (typeof Dex != 'undefined') ? Dex : this.dex;
-		if (!template || typeof template === 'string') template = context.getTemplate(template);
-		template = DexCalculator.deepClone(template);
+		if (!speciesOrForme || typeof speciesOrForme === 'string') speciesOrForme = context.getSpecies(speciesOrForme);
+		let species = DexCalculator.deepClone(speciesOrForme);
 		// Generate ability mapping: take bitch's ability for slot if it exists,
 		// otherwise fallback to standard ability
-		for (let abilityItr in template.abilities) {
+		for (let abilityItr in species.abilities) {
 			// @ts-ignore
-			if (!template.abilities[abilityItr]) continue;
+			if (!species.abilities[abilityItr]) continue;
 			
-			console.log("Ability slot: "+ abilityItr.toString() +" replacing: "+ template.abilities[abilityItr] +" with: "+ deltas.abilities[abilityItr]);
+			console.log("Ability slot: "+ abilityItr.toString() +" replacing: "+ species.abilities[abilityItr] +" with: "+ deltas.abilities[abilityItr]);
 			if(undefined !== deltas.abilities[abilityItr]) {
 				// @ts-ignore
-				template.abilities[abilityItr] = deltas.abilities[abilityItr];
+				species.abilities[abilityItr] = deltas.abilities[abilityItr];
 			}
 			else {
 				// @ts-ignore
-				template.abilities[abilityItr] = deltas.abilities['0'];
+				species.abilities[abilityItr] = deltas.abilities['0'];
 			}
 		}
-		if (template.types[0] === deltas.type) {
-			template.types = [deltas.type];
+		if (species.types[0] === deltas.type) {
+			species.types = [deltas.type];
 		} else if (deltas.type) {
-			template.types = [template.types[0], deltas.type];
+			species.types = [species.types[0], deltas.type];
 		}
-		let baseStats = template.baseStats;
+		let baseStats = species.baseStats;
 		// @ts-ignore
-		template.baseStats = {};
+		species.baseStats = {};
 		for (let statName in baseStats) {
 			// @ts-ignore
-			template.baseStats[statName] = DexCalculator.clampIntRange(baseStats[statName] + deltas.baseStats[statName], 1, 255);
+			species.baseStats[statName] = DexCalculator.clampIntRange(baseStats[statName] + deltas.baseStats[statName], 1, 255);
 		}
-		template.weighthg = Math.max(1, template.weighthg + deltas.weighthg);
-		template.originalMega = deltas.originalMega;
-		template.requiredItem = deltas.requiredItem;
-		if (deltas.isMega) template.isMega = true;
-		if (deltas.isPrimal) template.isPrimal = true;
-		return template;
+		species.weighthg = Math.max(1, species.weighthg + deltas.weighthg);
+		species.originalMega = deltas.originalMega;
+		species.requiredItem = deltas.requiredItem;
+		if (deltas.isMega) species.isMega = true;
+		if (deltas.isPrimal) species.isPrimal = true;
+		return species;
 	},
 };
 

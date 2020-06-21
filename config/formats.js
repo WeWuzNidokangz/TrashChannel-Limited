@@ -48,26 +48,26 @@ let Formats = [
 		ruleset: ['Obtainable', 'HP Percentage Mod', 'Cancel Mod'],
 		onBegin() {
 			for (const pokemon of this.getAllPokemon()) {
-				pokemon.m.originalSpecies = pokemon.baseTemplate.species;
+				pokemon.m.originalSpecies = pokemon.baseSpecies.species;
 			}
 		},
 		onSwitchIn(pokemon) {
 			// @ts-ignore
-			let oMegaTemplate = this.dex.getTemplate(pokemon.template.originalMega);
-			if (oMegaTemplate.exists && pokemon.m.originalSpecies !== oMegaTemplate.baseSpecies) {
+			let oMegaSpecies = this.dex.getSpecies(pokemon.species.originalMega);
+			if (oMegaSpecies.exists && pokemon.m.originalSpecies !== oMegaSpecies.baseSpecies) {
 				// Place volatiles on the Pokémon to show its mega-evolved condition and details
-				this.add('-start', pokemon, oMegaTemplate.requiredItem || oMegaTemplate.requiredMove, '[silent]');
-				let oTemplate = this.dex.getTemplate(pokemon.m.originalSpecies);
-				if (oTemplate.types.length !== pokemon.template.types.length || oTemplate.types[1] !== pokemon.template.types[1]) {
-					this.add('-start', pokemon, 'typechange', pokemon.template.types.join('/'), '[silent]');
+				this.add('-start', pokemon, oMegaSpecies.requiredItem || oMegaSpecies.requiredMove, '[silent]');
+				let oSpecies = this.dex.getSpecies(pokemon.m.originalSpecies);
+				if (oSpecies.types.length !== pokemon.species.types.length || oSpecies.types[1] !== pokemon.species.types[1]) {
+					this.add('-start', pokemon, 'typechange', pokemon.species.types.join('/'), '[silent]');
 				}
 			}
 		},
 		onSwitchOut(pokemon) {
 			// @ts-ignore
-			let oMegaTemplate = this.dex.getTemplate(pokemon.template.originalMega);
-			if (oMegaTemplate.exists && pokemon.m.originalSpecies !== oMegaTemplate.baseSpecies) {
-				this.add('-end', pokemon, oMegaTemplate.requiredItem || oMegaTemplate.requiredMove, '[silent]');
+			let oMegaSpecies = this.dex.getSpecies(pokemon.species.originalMega);
+			if (oMegaSpecies.exists && pokemon.m.originalSpecies !== oMegaSpecies.baseSpecies) {
+				this.add('-end', pokemon, oMegaSpecies.requiredItem || oMegaSpecies.requiredMove, '[silent]');
 			}
 		},
 	},
@@ -861,11 +861,11 @@ let Formats = [
 		onBegin() {
 			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
 			for (let pokemon of allPokemon) {
-				if (pokemon.ability === toID(pokemon.template.abilities['S'])) {
+				if (pokemon.ability === toID(pokemon.species.abilities['S'])) {
 					continue;
 				}
 				// @ts-ignore
-				pokemon.innates = Object.keys(pokemon.template.abilities).filter(key => key !== 'S' && (key !== 'H' || !pokemon.template.unreleasedHidden)).map(key => toID(pokemon.template.abilities[key])).filter(ability => ability !== pokemon.ability);
+				pokemon.innates = Object.keys(pokemon.species.abilities).filter(key => key !== 'S' && (key !== 'H' || !pokemon.species.unreleasedHidden)).map(key => toID(pokemon.species.abilities[key])).filter(ability => ability !== pokemon.ability);
 			}
 		},
 		onSwitchInPriority: 2,
@@ -1799,11 +1799,11 @@ let Formats = [
 		onValidateSet(set, format) {
 			let restrictedAbilities = format.restrictedAbilities || [];
 			if (restrictedAbilities.includes(set.ability)) {
-				let template = this.dex.getTemplate(set.species || set.name);
+				let species = this.dex.getSpecies(set.species || set.name);
 				let legalAbility = false;
-				for (let i in template.abilities) {
+				for (let i in species.abilities) {
 					// @ts-ignore
-					if (set.ability === template.abilities[i]) legalAbility = true;
+					if (set.ability === species.abilities[i]) legalAbility = true;
 				}
 				if (!legalAbility) return ['The ability ' + set.ability + ' is banned on Pok\u00e9mon that do not naturally have it.'];
 			}
@@ -3586,11 +3586,11 @@ let Formats = [
 			const validator = new TeamValidator(dex.getFormat(`${this.format.id}@@@${customRules.join(',')}`));
 			const moves = set.moves;
 			set.moves = [ability.id];
-			set.ability = dex.getTemplate(set.species).abilities['0'];
+			set.ability = dex.getSpecies(set.species).abilities['0'];
 			let problems = validator.validateSet(set, {}) || [];
 			if (problems.length) return problems;
 			set.moves = moves;
-			set.ability = dex.getTemplate(set.species).abilities['0'];
+			set.ability = dex.getSpecies(set.species).abilities['0'];
 			problems = problems.concat(validator.validateSet(set, teamHas) || []);
 			set.ability = ability.id;
 			if (!teamHas.trademarks) teamHas.trademarks = {};
@@ -3636,11 +3636,11 @@ let Formats = [
 		onBegin() {
 			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
 			for (let pokemon of allPokemon) {
-				if (pokemon.ability === toID(pokemon.template.abilities['S'])) {
+				if (pokemon.ability === toID(pokemon.species.abilities['S'])) {
 					continue;
 				}
 				// @ts-ignore
-				pokemon.innates = Object.keys(pokemon.template.abilities).filter(key => key !== 'S' && (key !== 'H' || !pokemon.template.unreleasedHidden)).map(key => toID(pokemon.template.abilities[key])).filter(ability => ability !== pokemon.ability);
+				pokemon.innates = Object.keys(pokemon.species.abilities).filter(key => key !== 'S' && (key !== 'H' || !pokemon.species.unreleasedHidden)).map(key => toID(pokemon.species.abilities[key])).filter(ability => ability !== pokemon.ability);
 			}
 		},
 		onSwitchInPriority: 2,
@@ -3749,36 +3749,36 @@ let Formats = [
 			}
 		},
 		onValidateSet(set, format) {
-			let template = this.dex.getTemplate(set.species || set.name);
+			let species = this.dex.getSpecies(set.species || set.name);
 			let item = this.dex.getItem(set.item);
 			if (!item.megaEvolves && !['blueorb', 'redorb', 'ultranecroziumz'].includes(item.id)) return;
-			if (template.baseSpecies === item.megaEvolves || (template.baseSpecies === 'Groudon' && item.id === 'redorb') || (template.baseSpecies === 'Kyogre' && item.id === 'blueorb') || (template.species.substr(0, 9) === 'Necrozma-' && item.id === 'ultranecroziumz')) return;
+			if (species.baseSpecies === item.megaEvolves || (species.baseSpecies === 'Groudon' && item.id === 'redorb') || (species.baseSpecies === 'Kyogre' && item.id === 'blueorb') || (species.name.substr(0, 9) === 'Necrozma-' && item.id === 'ultranecroziumz')) return;
 			let uberStones = format.restricted || [];
 			let uberPokemon = format.cannotMega || [];
-			if (uberPokemon.includes(template.name) || set.ability === 'Power Construct' || uberStones.includes(item.name)) return ["" + template.species + " is not allowed to hold " + item.name + "."];
+			if (uberPokemon.includes(species.name) || set.ability === 'Power Construct' || uberStones.includes(item.name)) return ["" + species.name + " is not allowed to hold " + item.name + "."];
 		},
 		onBegin() {
 			for (const pokemon of this.getAllPokemon()) {
-				pokemon.m.originalSpecies = pokemon.baseTemplate.species;
+				pokemon.m.originalSpecies = pokemon.baseSpecies.species;
 			}
 		},
 		onSwitchIn(pokemon) {
 			// @ts-ignore
-			let oMegaTemplate = this.dex.getTemplate(pokemon.template.originalMega);
-			if (oMegaTemplate.exists && pokemon.m.originalSpecies !== oMegaTemplate.baseSpecies) {
+			let oMegaSpecies = this.dex.getSpecies(pokemon.species.originalMega);
+			if (oMegaSpecies.exists && pokemon.m.originalSpecies !== oMegaSpecies.baseSpecies) {
 				// Place volatiles on the Pokémon to show its mega-evolved condition and details
-				this.add('-start', pokemon, oMegaTemplate.requiredItem || oMegaTemplate.requiredMove, '[silent]');
-				let oTemplate = this.dex.getTemplate(pokemon.m.originalSpecies);
-				if (oTemplate.types.length !== pokemon.template.types.length || oTemplate.types[1] !== pokemon.template.types[1]) {
-					this.add('-start', pokemon, 'typechange', pokemon.template.types.join('/'), '[silent]');
+				this.add('-start', pokemon, oMegaSpecies.requiredItem || oMegaSpecies.requiredMove, '[silent]');
+				let oSpecies = this.dex.getSpecies(pokemon.m.originalSpecies);
+				if (oSpecies.types.length !== pokemon.species.types.length || oSpecies.types[1] !== pokemon.species.types[1]) {
+					this.add('-start', pokemon, 'typechange', pokemon.species.types.join('/'), '[silent]');
 				}
 			}
 		},
 		onSwitchOut(pokemon) {
 			// @ts-ignore
-			let oMegaTemplate = this.dex.getTemplate(pokemon.template.originalMega);
-			if (oMegaTemplate.exists && pokemon.m.originalSpecies !== oMegaTemplate.baseSpecies) {
-				this.add('-end', pokemon, oMegaTemplate.requiredItem || oMegaTemplate.requiredMove, '[silent]');
+			let oMegaSpecies = this.dex.getSpecies(pokemon.species.originalMega);
+			if (oMegaSpecies.exists && pokemon.m.originalSpecies !== oMegaSpecies.baseSpecies) {
+				this.add('-end', pokemon, oMegaSpecies.requiredItem || oMegaSpecies.requiredMove, '[silent]');
 			}
 		},
 	},
@@ -3846,8 +3846,8 @@ let Formats = [
 			'Belly Drum', 'Celebrate', 'Chatter', 'Conversion', 'Extreme Speed', "Forest's Curse", 'Geomancy', 'Happy Hour', 'Hold Hands',
 			'Lovely Kiss', 'Purify', 'Quiver Dance', 'Shell Smash', 'Shift Gear', 'Sketch', 'Spore', 'Sticky Web', 'Trick-or-Treat',
 		],
-		checkLearnset(move, template, lsetData, set) {
-			let problem = this.checkLearnset(move, template, lsetData, set);
+		checkLearnset(move, species, lsetData, set) {
+			let problem = this.checkLearnset(move, species, lsetData, set);
 			if (!problem) return null;
 			const restrictedMoves = this.format.restricted || [];
 			if (move.isZ || restrictedMoves.includes(move.name)) return problem;
@@ -3921,22 +3921,22 @@ let Formats = [
 			let types = /** @type {string[]} */ ([]);
 			for (const [i, set] of team.entries()) {
 				let item = this.dex.getItem(set.item);
-				let template = this.dex.getTemplate(set.species);
-				if (!template.exists) return [`The Pok\u00e9mon "${set.name || set.species}" does not exist.`];
+				let species = this.dex.getSpecies(set.species);
+				if (!species.exists) return [`The Pok\u00e9mon "${set.name || set.species}" does not exist.`];
 				if (i === 0) {
-					types = template.types;
-					if (template.species.substr(0, 9) === 'Necrozma-' && item.id === 'ultranecroziumz') types = ['Psychic'];
-					if (item.megaStone && template.species === item.megaEvolves) {
-						template = this.dex.getTemplate(item.megaStone);
-						let baseTemplate = this.dex.getTemplate(item.megaEvolves);
-						types = baseTemplate.types.filter(type => template.types.includes(type));
+					types = species.types;
+					if (species.name.substr(0, 9) === 'Necrozma-' && item.id === 'ultranecroziumz') types = ['Psychic'];
+					if (item.megaStone && species.name === item.megaEvolves) {
+						species = this.dex.getSpecies(item.megaStone);
+						let baseSpecies = this.dex.getSpecies(item.megaEvolves);
+						types = baseSpecies.types.filter(type => species.types.includes(type));
 					}
 					// 18/10/08 TrashChannel: Since this is already an ubers-based meta,
 					// we shouldn't need to check the gods for any additional bans
 				} else {
 					// 18/10/08 TrashChannel: Avoid using OU validator as it interferes with mashups
 					// followerbanlist: ['Uber', 'Arena Trap', 'Power Construct', 'Shadow Tag', 'Baton Pass'],
-					if ("Uber" == template.tier) { // Ban ubers
+					if ("Uber" == species.tier) { // Ban ubers
 						problemsArray.push("You can't use an Ubers pokemon as a follower!");
 					}
 					let followerBannedAbilities = ['Arena Trap', 'Power Construct', 'Shadow Tag'];
@@ -3948,12 +3948,12 @@ let Formats = [
 						}
 					}
 					// Baton Pass is also banned on Ubers, so we move it to general banlist
-					let followerTypes = template.types;
-					if (item.megaStone && template.species === item.megaEvolves) {
-						template = this.dex.getTemplate(item.megaStone);
-						let baseTemplate = this.dex.getTemplate(item.megaEvolves);
-						if (baseTemplate.types.some(type => types.includes(type)) && template.types.some(type => types.includes(type))) {
-							followerTypes = baseTemplate.types.concat(template.types).filter(type => template.types.concat(baseTemplate.types).includes(type));
+					let followerTypes = species.types;
+					if (item.megaStone && species.name === item.megaEvolves) {
+						species = this.dex.getSpecies(item.megaStone);
+						let baseSpecies = this.dex.getSpecies(item.megaEvolves);
+						if (baseSpecies.types.some(type => types.includes(type)) && species.types.some(type => types.includes(type))) {
+							followerTypes = baseSpecies.types.concat(species.types).filter(type => species.types.concat(baseSpecies.types).includes(type));
 						}
 					}
 				}
@@ -3980,14 +3980,14 @@ let Formats = [
 			let problems = this.validateSet(set, teamHas) || [];
 			set.item = item;
 			// @ts-ignore
-			if (this.format.checkLearnset.call(this, move, this.dex.getTemplate(set.species))) problems.push(`${set.species} can't learn ${move.name}.`);
+			if (this.format.checkLearnset.call(this, move, this.dex.getSpecies(set.species))) problems.push(`${set.species} can't learn ${move.name}.`);
 			// @ts-ignore
 			if (move.secondaries && move.secondaries.some(secondary => secondary.boosts && secondary.boosts.accuracy < 0)) problems.push(`${set.name || set.species}'s move ${move.name} can't be used as an item.`);
 			return problems.length ? problems : null;
 		},
-		checkLearnset(move, template, lsetData, set) {
+		checkLearnset(move, species, lsetData, set) {
 			if (move.id === 'beatup' || move.id === 'fakeout' || move.damageCallback || move.multihit) return {type: 'invalid'};
-			return this.checkLearnset(move, template, lsetData, set);
+			return this.checkLearnset(move, species, lsetData, set);
 		},
 		onValidateTeam(team, format) {
 			/**@type {{[k: string]: true}} */
@@ -4119,11 +4119,11 @@ let Formats = [
 		onBegin() {
 			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
 			for (let pokemon of allPokemon) {
-				if (pokemon.ability === toID(pokemon.template.abilities['S'])) {
+				if (pokemon.ability === toID(pokemon.species.abilities['S'])) {
 					continue;
 				}
 				// @ts-ignore
-				pokemon.innates = Object.keys(pokemon.template.abilities).filter(key => key !== 'S' && (key !== 'H' || !pokemon.template.unreleasedHidden)).map(key => toID(pokemon.template.abilities[key])).filter(ability => ability !== pokemon.ability);
+				pokemon.innates = Object.keys(pokemon.species.abilities).filter(key => key !== 'S' && (key !== 'H' || !pokemon.species.unreleasedHidden)).map(key => toID(pokemon.species.abilities[key])).filter(ability => ability !== pokemon.ability);
 			}
 		},
 		onSwitchInPriority: 2,
@@ -4161,14 +4161,14 @@ let Formats = [
 		onBeforeSwitchIn(pokemon) {
 			let allies = pokemon.side.pokemon.splice(1);
 			pokemon.side.pokemonLeft = 1;
-			let template = this.dex.deepClone(pokemon.baseTemplate);
+			let species = this.dex.deepClone(pokemon.baseSpecies);
 			pokemon.item = allies[0].item;
-			template.abilities = allies[1].baseTemplate.abilities;
+			species.abilities = allies[1].baseSpecies.abilities;
 			pokemon.ability = pokemon.baseAbility = allies[1].ability;
 
 			// Stats
-			template.baseStats = allies[2].baseTemplate.baseStats;
-			pokemon.hp = pokemon.maxhp = template.maxHP = allies[2].maxhp;
+			species.baseStats = allies[2].baseSpecies.baseStats;
+			pokemon.hp = pokemon.maxhp = species.maxHP = allies[2].maxhp;
 			pokemon.set.evs = allies[2].set.evs;
 			pokemon.set.nature = allies[2].getNature().name;
 			// @ts-ignore
@@ -4178,7 +4178,7 @@ let Formats = [
 
 			// @ts-ignore
 			pokemon.moveSlots = pokemon.baseMoveSlots = allies[3].baseMoveSlots.slice(0, 2).concat(allies[4].baseMoveSlots.slice(2)).filter((move, index, moveSlots) => moveSlots.find(othermove => othermove.id === move.id) === move);
-			pokemon.setTemplate(template);
+			pokemon.setSpecies(species);
 		},
 	},
 	{
@@ -4191,16 +4191,16 @@ let Formats = [
 		mod: 'gen7',
 		ruleset: ['[Gen 7] Ubers'],
 		banlist: ['Uber > 1', 'Uber ++ Arena Trap', 'Uber ++ Power Construct', 'Blissey', 'Chansey', 'Deoxys-Attack', 'Gengar-Mega', 'Mawile-Mega', 'Medicham-Mega', 'Sableye-Mega', 'Toxapex', 'Huge Power', 'Pure Power', 'Shadow Tag', 'Baton Pass'],
-		onModifyTemplate(template, target, source, effect) {
+		onModifySpecies(species, target, source, effect) {
 			if (source || !target || !target.side) return;
 			let uber = target.side.team.find(set => {
 				let item = this.dex.getItem(set.item);
-				return set.ability === 'Arena Trap' || set.ability === 'Power Construct' || this.dex.getTemplate(item.megaEvolves === set.species ? item.megaStone : set.species).tier === 'Uber';
+				return set.ability === 'Arena Trap' || set.ability === 'Power Construct' || this.dex.getSpecies(item.megaEvolves === set.species ? item.megaStone : set.species).tier === 'Uber';
 			}) || target.side.team[0];
 			let stat = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'][target.side.team.indexOf(target.set)];
-			let pokemon = this.dex.deepClone(template);
+			let pokemon = this.dex.deepClone(species);
 			// @ts-ignore
-			pokemon.baseStats[stat] = this.dex.getTemplate(uber.species).baseStats[stat];
+			pokemon.baseStats[stat] = this.dex.getSpecies(uber.species).baseStats[stat];
 			return pokemon;
 		},
 	},
@@ -4285,161 +4285,6 @@ let Formats = [
 			return problems;
 		},
 	},
-	/*{
-		name: "[Gen 7] Inheritance",
-		desc: `Pok&eacute;mon may use the ability and moves of another, as long as they forfeit their own learnset.`,
-		threads: [
-			`&bullet; <a href="http://www.smogon.com/forums/threads/3592844/">Inheritance</a>`,
-		],
-
-		mod: 'gen7',
-		ruleset: ['[Gen 7] OU'],
-		banlist: [
-			'Blacephalon', 'Chansey', 'Cresselia', 'Hoopa-Unbound', 'Kartana', 'Kyurem-Black', 'Regigigas', 'Shedinja', 'Slaking', 'Gyaradosite',
-			'Huge Power', 'Imposter', 'Innards Out', 'Pure Power', 'Speed Boost', 'Water Bubble', 'Assist', 'Chatter', 'Shell Smash',
-		],
-		// @ts-ignore
-		getEvoFamily(species) {
-			let template = Dex.getTemplate(species);
-			while (template.prevo) {
-				template = Dex.getTemplate(template.prevo);
-			}
-			return template.speciesid;
-		},
-		validateSet(set, teamHas) {
-			const ruleTable = this.ruleTable;
-
-			// @ts-ignore
-			if (!this.format.abilityMap) {
-				let abilityMap = Object.create(null);
-				for (let speciesid in Dex.data.Pokedex) {
-					let pokemon = Dex.getTemplate(speciesid);
-					if (pokemon.num < 1) continue;
-					if( ruleTable.has('-pokemon:murkrow') ) {
-						if (pokemon.species === 'Murkrow') continue;
-					}
-					if( ruleTable.has('-pokemon:smeargle') ) {
-						if (pokemon.species === 'Smeargle') continue;
-					}
-					if (pokemon.requiredItem || pokemon.requiredMove) continue;
-					for (const key of Object.values(pokemon.abilities)) {
-						let abilityId = toID(key);
-						if (abilityMap[abilityId]) {
-							abilityMap[abilityId][pokemon.evos ? 'push' : 'unshift'](speciesid);
-						} else {
-							abilityMap[abilityId] = [speciesid];
-						}
-					}
-				}
-				// @ts-ignore
-				this.format.abilityMap = abilityMap;
-			}
-
-			let problem = this.validateForme(set);
-			if (problem.length) return problem;
-
-			let template = Dex.getTemplate(set.species);
-			if( ruleTable.has('-nonexistent') ) {
-				if (!template.exists || template.isNonstandard) return [`The Pok\u00e9mon "${set.species}" does not exist.`];
-			}
-			if( ruleTable.has('-unreleased') ) {
-				if (template.isUnreleased) return [`${template.species} is unreleased.`];
-			}
-
-			let megaTemplate = Dex.getTemplate(Dex.getItem(set.item).megaStone);
-			if( ruleTable.has('-pokemontag:uber') ) {
-				if (template.tier === 'Uber' || megaTemplate.tier === 'Uber' || this.format.banlist.includes(template.species)) return [`${megaTemplate.tier === 'Uber' ? megaTemplate.species : template.species} is banned.`];
-			}
-
-			let name = set.name;
-
-			let ability = Dex.getAbility(set.ability);
-			if (!ability.exists || ability.isNonstandard) return [`${name} needs to have a valid ability.`];
-			// @ts-ignore
-			let pokemonWithAbility = this.format.abilityMap[ability.id];
-			if (!pokemonWithAbility) return [`"${set.ability}" is not available on a legal Pok\u00e9mon.`];
-
-			// @ts-ignore
-			this.format.debug = true;
-
-			let canonicalSource = ''; // Specific for the basic implementation of Donor Clause (see onValidateTeam).
-			// @ts-ignore
-			let validSources = set.abilitySources = []; // Evolution families
-
-			for (const donor of pokemonWithAbility) {
-				let donorTemplate = Dex.getTemplate(donor);
-				// @ts-ignore
-				let evoFamily = this.format.getEvoFamily(donorTemplate);
-
-				if (validSources.includes(evoFamily)) continue;
-
-				set.species = donorTemplate.species;
-				const problems = this.validateSet(set, teamHas) || [];
-
-				if (!problems.length) {
-					canonicalSource = donorTemplate.species;
-					validSources.push(evoFamily);
-				}
-				if (validSources.length > 1) {
-					// Specific for the basic implementation of Donor Clause (see onValidateTeam).
-					break;
-				}
-			}
-			// @ts-ignore
-			this.format.debug = false;
-
-			set.name = name;
-			set.species = template.species;
-			if (!validSources.length) {
-				if (pokemonWithAbility.length > 1) return [`${name}'s set is illegal.`];
-				return [`${name} has an illegal set with an ability from ${Dex.getTemplate(pokemonWithAbility[0]).name}.`];
-			}
-
-			// Protocol: Include the data of the donor species in the `ability` data slot.
-			// Afterwards, we are going to reset it to what the user intended. :]
-			set.ability = `${set.ability}0${canonicalSource}`;
-		},
-		onValidateTeam(team, format) {
-			// Donor Clause
-			let evoFamilyLists = [];
-			for (const set of team) {
-				// @ts-ignore
-				if (!set.abilitySources) continue;
-				// @ts-ignore
-				evoFamilyLists.push(set.abilitySources.map(format.getEvoFamily));
-			}
-
-			// Checking actual full incompatibility would require expensive algebra.
-			// Instead, we only check the trivial case of multiple Pokémon only legal for exactly one family. FIXME?
-			let requiredFamilies = Object.create(null);
-			for (const evoFamilies of evoFamilyLists) {
-				if (evoFamilies.length !== 1) continue;
-				let [familyId] = evoFamilies;
-				if (!(familyId in requiredFamilies)) requiredFamilies[familyId] = 1;
-				requiredFamilies[familyId]++;
-				if (requiredFamilies[familyId] > 2) return [`You are limited to up to two inheritances from each evolution family by the Donor Clause.`, `(You inherit more than twice from ${this.dex.getTemplate(familyId).species}).`];
-			}
-		},
-		onBegin() {
-			for (const pokemon of this.p1.pokemon.concat(this.p2.pokemon)) {
-				if (pokemon.baseAbility.includes('0')) {
-					let donor = pokemon.baseAbility.split('0')[1];
-					// @ts-ignore
-					pokemon.donor = toID(donor);
-					// @ts-ignore
-					pokemon.baseAbility = pokemon.baseAbility.split('0')[0];
-					pokemon.ability = pokemon.baseAbility;
-				}
-			}
-		},
-		onSwitchIn(pokemon) {
-			if (!pokemon.m.donor) return;
-			let donorSpecies = this.dex.getSpecies(pokemon.m.donor);
-			if (!donorSpecies.exists) return;
-			// Place volatiles on the Pokémon to show the donor details.
-			this.add('-start', pokemon, donorSpecies.name, '[silent]');
-		},
-	},*/
 	{
 		name: "[Gen 7] Nature Swap",
 		desc: `Pok&eacute;mon have their base stats swapped depending on their nature.`,
@@ -4463,18 +4308,18 @@ let Formats = [
 				return stats;
 			},
 		},
-		onModifyTemplate(template, target, source, effect) {
+		onModifySpecies(species, target, source, effect) {
 			if (!target) return;
 			if (effect && ['imposter', 'transform'].includes(effect.id)) return;
 			let nature = this.getNature(target.set.nature);
-			if (!nature.plus) return template;
-			let newStats = Object.assign({}, template.baseStats);
+			if (!nature.plus) return species;
+			let newStats = Object.assign({}, species.baseStats);
 			let swap = newStats[nature.plus];
 			// @ts-ignore
 			newStats[nature.plus] = newStats[nature.minus];
 			// @ts-ignore
 			newStats[nature.minus] = swap;
-			return Object.assign({}, template, {baseStats: newStats});
+			return Object.assign({}, species, {baseStats: newStats});
 		},
 	},
 	{
@@ -4487,9 +4332,9 @@ let Formats = [
 		mod: 'gen7',
 		ruleset: ['[Gen 7] OU'],
 		banlist: ['Regigigas', 'Shedinja', 'Slaking', 'Smeargle', 'Imposter', 'Huge Power', 'Pure Power'],
-		checkLearnset(move, template, lsetData, set) {
+		checkLearnset(move, species, lsetData, set) {
 			// @ts-ignore
-			return set.follower ? null : this.checkLearnset(move, template, lsetData, set);
+			return set.follower ? null : this.checkLearnset(move, species, lsetData, set);
 		},
 		validateSet(set, teamHas) {
 			if (!teamHas.leader) {
@@ -4501,7 +4346,7 @@ let Formats = [
 			leader.species = teamHas.leader;
 			let problems = this.validateSet(leader, teamHas);
 			if (problems) return problems;
-			set.ability = this.dex.getTemplate(set.species || set.name).abilities['0'];
+			set.ability = this.dex.getSpecies(set.species || set.name).abilities['0'];
 			// @ts-ignore
 			set.follower = true;
 			problems = this.validateSet(set, teamHas);
@@ -4553,98 +4398,98 @@ let Formats = [
 			}
 			if (!Object.getOwnPropertyNames(nameTable).length) return ["Cross Evolution works using nicknames - your team has exactly 0. (If this was intentional, add a nickname to one Pokémon that isn't the name of a Pokémon species.)"];
 		},
-		checkLearnset(move, template, lsetData, set) {
+		checkLearnset(move, species, lsetData, set) {
 			// @ts-ignore
-			if (!set.template || !set.crossTemplate) return this.checkLearnset(move, template, lsetData, set);
+			if (!set.species || !set.crossSpecies) return this.checkLearnset(move, species, lsetData, set);
 			// @ts-ignore
-			let problem = this.checkLearnset(move, set.template);
+			let problem = this.checkLearnset(move, set.species);
 			if (!problem) return null;
 			// @ts-ignore
 			if (!set.crossMovesLeft) return problem;
 			// @ts-ignore
-			if (this.checkLearnset(move, set.crossTemplate)) return problem;
+			if (this.checkLearnset(move, set.crossSpecies)) return problem;
 			// @ts-ignore
 			set.crossMovesLeft--;
 			return null;
 		},
 		validateSet(set, teamHas) {
-			let crossTemplate = this.dex.getTemplate(set.name);
+			let crossSpecies = this.dex.getSpecies(set.name);
 			let onChangeSet = this.dex.getFormat('Pokemon').onChangeSet;
 			let problems = onChangeSet ? onChangeSet.call(this.dex, set, this.format) : null;
 			if (problems && problems.length) return problems;
-			if (!crossTemplate.exists || crossTemplate.isNonstandard) return this.validateSet(set, teamHas);
-			let template = this.dex.getTemplate(set.species);
-			if (!template.exists || template.isNonstandard || template === crossTemplate) return this.validateSet(set, teamHas);
-			if (!template.nfe) return ["" + template.species + " cannot cross evolve because it doesn't evolve."];
-			if (crossTemplate.battleOnly || crossTemplate.isUnreleased || !crossTemplate.prevo) return ["" + template.species + " cannot cross evolve into " + crossTemplate.species + " because it isn't an evolution."];
-			if (template.species === 'Sneasel' || crossTemplate.species === 'Shedinja' || crossTemplate.species === 'Solgaleo' || crossTemplate.species === 'Lunala') return ["" + template.species + " cannot cross evolve into " + crossTemplate.species + " because it is banned."];
-			let crossPrevoTemplate = this.dex.getTemplate(crossTemplate.prevo);
-			if (!crossPrevoTemplate.prevo !== !template.prevo) return ["" + template.species + " cannot cross into " + crossTemplate.species + " because they are not consecutive evolutionary stages."];
+			if (!crossSpecies.exists || crossSpecies.isNonstandard) return this.validateSet(set, teamHas);
+			let species = this.dex.getSpecies(set.species);
+			if (!species.exists || species.isNonstandard || species === crossSpecies) return this.validateSet(set, teamHas);
+			if (!species.nfe) return ["" + species.name + " cannot cross evolve because it doesn't evolve."];
+			if (crossSpecies.battleOnly || crossSpecies.isUnreleased || !crossSpecies.prevo) return ["" + species.name + " cannot cross evolve into " + crossSpecies.name + " because it isn't an evolution."];
+			if (species.name === 'Sneasel' || crossSpecies.name === 'Shedinja' || crossSpecies.name === 'Solgaleo' || crossSpecies.name === 'Lunala') return ["" + species.name + " cannot cross evolve into " + crossSpecies.name + " because it is banned."];
+			let crossPrevoSpecies = this.dex.getSpecies(crossSpecies.prevo);
+			if (!crossPrevoSpecies.prevo !== !species.prevo) return ["" + species.name + " cannot cross into " + crossSpecies.name + " because they are not consecutive evolutionary stages."];
 
 			// Make sure no stat is too high/low to cross evolve to
 			let stats = {'hp': 'HP', 'atk': 'Attack', 'def': 'Defense', 'spa': 'Special Attack', 'spd': 'Special Defense', 'spe': 'Speed'};
-			for (let statid in template.baseStats) {
+			for (let statid in species.baseStats) {
 				// @ts-ignore
-				let evoStat = template.baseStats[statid] + crossTemplate.baseStats[statid] - crossPrevoTemplate.baseStats[statid];
+				let evoStat = species.baseStats[statid] + crossSpecies.baseStats[statid] - crossPrevoSpecies.baseStats[statid];
 				if (evoStat < 1) {
 					// @ts-ignore
-					return ["" + template.species + " cannot cross evolve to " + crossTemplate.species + " because its " + stats[statid] + " would be too low."];
+					return ["" + species.name + " cannot cross evolve to " + crossSpecies.name + " because its " + stats[statid] + " would be too low."];
 				} else if (evoStat > 255) {
 					// @ts-ignore
-					return ["" + template.species + " cannot cross evolve to " + crossTemplate.species + " because its " + stats[statid] + " would be too high."];
+					return ["" + species.name + " cannot cross evolve to " + crossSpecies.name + " because its " + stats[statid] + " would be too high."];
 				}
 			}
 
 			// Ability test
 			let ability = this.dex.getAbility(set.ability);
-			if ((ability.name !== 'Huge Power' && ability.name !== 'Pure Power' && ability.name !== 'Shadow Tag') || Object.values(template.abilities).includes(ability.name)) set.species = crossTemplate.species;
+			if ((ability.name !== 'Huge Power' && ability.name !== 'Pure Power' && ability.name !== 'Shadow Tag') || Object.values(species.abilities).includes(ability.name)) set.species = crossSpecies.name;
 
 			// @ts-ignore
-			set.template = template;
+			set.species = species;
 			// @ts-ignore
-			set.crossTemplate = crossTemplate;
+			set.crossSpecies = crossSpecies;
 			// @ts-ignore
 			set.crossMovesLeft = 2;
 			problems = this.validateSet(set, teamHas);
-			set.name = crossTemplate.species;
-			set.species = template.species;
+			set.name = crossSpecies.name;
+			set.species = species.name;
 			return problems;
 		},
-		onModifyTemplate(template, target, source, effect) {
+		onModifySpecies(species, target, source, effect) {
 			if (!target) return;
 			if (effect && ['imposter', 'transform'].includes(effect.id)) return;
 			if (target.set.name === target.set.species) return;
-			let crossTemplate = this.dex.getTemplate(target.set.name);
-			if (!crossTemplate.exists) return;
-			if (template.battleOnly || !template.nfe) return;
-			if (crossTemplate.battleOnly || crossTemplate.isUnreleased || !crossTemplate.prevo) return;
-			let crossPrevoTemplate = this.dex.getTemplate(crossTemplate.prevo);
-			if (!crossPrevoTemplate.prevo !== !template.prevo) return;
+			let crossSpecies = this.dex.getSpecies(target.set.name);
+			if (!crossSpecies.exists) return;
+			if (species.battleOnly || !species.nfe) return;
+			if (crossSpecies.battleOnly || crossSpecies.isUnreleased || !crossSpecies.prevo) return;
+			let crossPrevoSpecies = this.dex.getSpecies(crossSpecies.prevo);
+			if (!crossPrevoSpecies.prevo !== !species.prevo) return;
 
-			let mixedTemplate = this.dex.deepClone(template);
-			mixedTemplate.baseSpecies = mixedTemplate.species = template.species + '-' + crossTemplate.species;
-			mixedTemplate.weightkg = Math.max(0.1, +(template.weightkg + crossTemplate.weightkg - crossPrevoTemplate.weightkg).toFixed(1));
-			mixedTemplate.nfe = false;
-			mixedTemplate.evos = [];
-			mixedTemplate.eggGroups = crossTemplate.eggGroups;
-			mixedTemplate.abilities = crossTemplate.abilities;
+			let mixedSpecies = this.dex.deepClone(species);
+			mixedSpecies.baseSpecies = mixedSpecies.species = species.name + '-' + crossSpecies.name;
+			mixedSpecies.weightkg = Math.max(0.1, +(species.weightkg + crossSpecies.weightkg - crossPrevoSpecies.weightkg).toFixed(1));
+			mixedSpecies.nfe = false;
+			mixedSpecies.evos = [];
+			mixedSpecies.eggGroups = crossSpecies.eggGroups;
+			mixedSpecies.abilities = crossSpecies.abilities;
 
-			for (let statid in template.baseStats) {
+			for (let statid in species.baseStats) {
 				// @ts-ignore
-				mixedTemplate.baseStats[statid] = template.baseStats[statid] + crossTemplate.baseStats[statid] - crossPrevoTemplate.baseStats[statid];
+				mixedSpecies.baseStats[statid] = species.baseStats[statid] + crossSpecies.baseStats[statid] - crossPrevoSpecies.baseStats[statid];
 				// @ts-ignore
-				if (mixedTemplate.baseStats[statid] < 1 || mixedTemplate.baseStats[statid] > 255) return;
+				if (mixedSpecies.baseStats[statid] < 1 || mixedSpecies.baseStats[statid] > 255) return;
 			}
 
-			if (crossTemplate.types[0] !== crossPrevoTemplate.types[0]) mixedTemplate.types[0] = crossTemplate.types[0];
-			if (crossTemplate.types[1] !== crossPrevoTemplate.types[1]) mixedTemplate.types[1] = crossTemplate.types[1] || crossTemplate.types[0];
-			if (mixedTemplate.types[0] === mixedTemplate.types[1]) mixedTemplate.types.length = 1;
+			if (crossSpecies.types[0] !== crossPrevoSpecies.types[0]) mixedSpecies.types[0] = crossSpecies.types[0];
+			if (crossSpecies.types[1] !== crossPrevoSpecies.types[1]) mixedSpecies.types[1] = crossSpecies.types[1] || crossSpecies.types[0];
+			if (mixedSpecies.types[0] === mixedSpecies.types[1]) mixedSpecies.types.length = 1;
 
-			return mixedTemplate;
+			return mixedSpecies;
 		},
 		onBegin() {
 			for (const pokemon of this.getAllPokemon()) {
-				pokemon.baseTemplate = pokemon.template;
+				pokemon.baseSpecies = pokemon.species;
 			}
 		},
 	},
@@ -4775,37 +4620,37 @@ let Formats = [
 			/**@type {{[k: string]: true}} */
 			let itemTable = {};
 			for (const set of team) {
-				let bitchTemplate = this.dex.getTemplate(set.item);
+				let bitchSpecies = this.dex.getSpecies(set.item);
 				if (this.dex.getRuleTable(this.format).has('-AG') ) {
-					if(['Venusaur', 'Blastoise', 'Zamazenta'].includes(template.baseSpecies)) {
-						return [`${template.species} is not allowed to hold ${item.name}.`];
+					if(['Venusaur', 'Blastoise', 'Zamazenta'].includes(species.baseSpecies)) {
+						return [`${species.name} is not allowed to hold ${item.name}.`];
 					}
-					if (!bitchTemplate.exists) continue;
-					if (itemTable[bitchTemplate.id]) return ["You are limited to one of each Bitch.", "(You have more than one " + bitchTemplate.name + ")"];
+					if (!bitchSpecies.exists) continue;
+					if (itemTable[bitchSpecies.id]) return ["You are limited to one of each Bitch.", "(You have more than one " + bitchSpecies.name + ")"];
 				}
-				itemTable[bitchTemplate.id] = true;
+				itemTable[bitchSpecies.id] = true;
 			}
 		},
 		onValidateSet(set, format, setHas, teamHas, ruleTable) {
 			//console.log('BnB: val ');
 			//console.log('format.modValueNumberA: '+format.modValueNumberA.toString());
 
-			let beggarTemplate = this.dex.getTemplate(set.species || set.name);
-			let bitchTemplate = this.dex.getTemplate(set.item);
+			let beggarSpecies = this.dex.getSpecies(set.species || set.name);
+			let bitchSpecies = this.dex.getSpecies(set.item);
 			//console.log('bitch: '+set.item);
-			if(!bitchTemplate.exists) return;
+			if(!bitchSpecies.exists) return;
 
 			let problems = [];
-			let bitchBST = this.dex.calcBST(bitchTemplate.baseStats);
+			let bitchBST = this.dex.calcBST(bitchSpecies.baseStats);
 			//console.log('bitchBST: '+bitchBST.toString());
 			if(format.modValueNumberA) {
 				if(bitchBST > format.modValueNumberA) {
-					problems.push("Bitches are limited to " + format.modValueNumberA.toString() + " BST, but " + bitchTemplate.name + " has " + bitchBST.toString() + "!");
+					problems.push("Bitches are limited to " + format.modValueNumberA.toString() + " BST, but " + bitchSpecies.name + " has " + bitchBST.toString() + "!");
 				}
 			}
 			let uberBitches = format.restricted || [];
 			let uberPokemon = format.cannotMega || [];
-			if (uberPokemon.includes(beggarTemplate.name) || set.ability === 'Power Construct' || uberBitches.includes(bitchTemplate.name)) return ["" + beggarTemplate.species + " is not allowed to hold " + bitchTemplate.name + "."];
+			if (uberPokemon.includes(beggarSpecies.name) || set.ability === 'Power Construct' || uberBitches.includes(bitchSpecies.name)) return ["" + beggarSpecies.species + " is not allowed to hold " + bitchSpecies.name + "."];
 			
 			// Load BnB mod functions
 			/**@type {ModdedBattleScriptsData | null} */
@@ -4824,11 +4669,11 @@ let Formats = [
 				return problems;
 			}
 
-			const mixedTemplate = BnBMod.getMixedTemplate(beggarTemplate.name, bitchTemplate.baseSpecies);
-			let oAbilitySlot = this.dex.calcActiveAbilitySlot(beggarTemplate, set.ability);
+			const mixedSpecies = BnBMod.getMixedSpecies(beggarSpecies.name, bitchSpecies.baseSpecies);
+			let oAbilitySlot = this.dex.calcActiveAbilitySlot(beggarSpecies, set.ability);
 			//console.log("oAbilitySlot: " + oAbilitySlot);
 			// @ts-ignore
-			let postBeggarAbilityName = mixedTemplate.abilities[oAbilitySlot];
+			let postBeggarAbilityName = mixedSpecies.abilities[oAbilitySlot];
 			let postBeggarAbilityId = toID(postBeggarAbilityName);
 			//console.log("postBeggarAbilityId: " + postBeggarAbilityId);
 			let abilityTest = '-ability:'+postBeggarAbilityId;
@@ -4838,41 +4683,41 @@ let Formats = [
 				if( rule === abilityTest ) {
 					//console.log("BnB rule IN ");
 					problems.push("If "+set.name+" beggar-evolves with the ability "+ set.ability + ", it will gain the banned ability "
-						+ postBeggarAbilityName + " from its bitch "+ bitchTemplate.name + ".");
+						+ postBeggarAbilityName + " from its bitch "+ bitchSpecies.name + ".");
 				}
 			});
 			let restrictedAbilities = format.restrictedAbilities || [];
 			if (restrictedAbilities.includes(postBeggarAbilityId)) {
 				//console.log("BnB restriction IN ");
 				problems.push("If "+set.name+" beggar-evolves with the ability "+ set.ability + ", it will gain the restricted ability "
-					+ postBeggarAbilityName + " from its bitch "+ bitchTemplate.name + ".");
+					+ postBeggarAbilityName + " from its bitch "+ bitchSpecies.name + ".");
 			}
 			return problems;
 		},
 		onBegin() {
 			for (const pokemon of this.getAllPokemon()) {
-				pokemon.m.originalSpecies = pokemon.baseTemplate.species;
+				pokemon.m.originalSpecies = pokemon.baseSpecies.name;
 			}
 		},
 		onSwitchIn(pokemon) {
 			// Take care of non-BnB case
-			let bitchTemplate = this.dex.getTemplate(pokemon.item);
-			if(!bitchTemplate.exists) return;
+			let bitchSpecies = this.dex.getSpecies(pokemon.item);
+			if(!bitchSpecies.exists) return;
 			if (null === pokemon.canMegaEvo) {
 				// Place volatiles on the Pokémon to show its beggar-evolved condition and details
 				let bitchSpecies = pokemon.item;
 				this.add('-start', pokemon, this.dex.generateMegaStoneName(bitchSpecies), '[silent]');
-				let oTemplate = this.dex.getTemplate(pokemon.m.originalSpecies);
-				if (oTemplate.types.length !== pokemon.template.types.length || oTemplate.types[1] !== pokemon.template.types[1]) {
-					this.add('-start', pokemon, 'typechange', pokemon.template.types.join('/'), '[silent]');
+				let oSpecies = this.dex.getSpecies(pokemon.m.originalSpecies);
+				if (oSpecies.types.length !== pokemon.species.types.length || oSpecies.types[1] !== pokemon.species.types[1]) {
+					this.add('-start', pokemon, 'typechange', pokemon.species.types.join('/'), '[silent]');
 				}
 			}
 		},
 		onSwitchOut(pokemon) {
 			// @ts-ignore
-			let oMegaTemplate = this.dex.getTemplate(pokemon.template.originalMega);
-			if (oMegaTemplate.exists && pokemon.m.originalSpecies !== oMegaTemplate.baseSpecies) {
-				this.add('-end', pokemon, oMegaTemplate.requiredItem || oMegaTemplate.requiredMove, '[silent]');
+			let oMegaSpecies = this.dex.getSpecies(pokemon.species.originalMega);
+			if (oMegaSpecies.exists && pokemon.m.originalSpecies !== oMegaSpecies.baseSpecies) {
+				this.add('-end', pokemon, oMegaSpecies.requiredItem || oMegaSpecies.requiredMove, '[silent]');
 			}
 		},
 	},
@@ -4887,28 +4732,28 @@ let Formats = [
 		team: 'randomHCBnB',
 		onBegin() {
 			for (const pokemon of this.getAllPokemon()) {
-				pokemon.m.originalSpecies = pokemon.baseTemplate.species;
+				pokemon.m.originalSpecies = pokemon.baseSpecies.species;
 			}
 		},
 		onSwitchIn(pokemon) {
 			// Take care of non-BnB case
-			let bitchTemplate = this.dex.getTemplate(pokemon.item);
-			if(!bitchTemplate.exists) return;
+			let bitchSpecies = this.dex.getSpecies(pokemon.item);
+			if(!bitchSpecies.exists) return;
 			if (null === pokemon.canMegaEvo) {
 				// Place volatiles on the Pokémon to show its beggar-evolved condition and details
 				let bitchSpecies = pokemon.item;
 				this.add('-start', pokemon, this.dex.generateMegaStoneName(bitchSpecies), '[silent]');
-				let oTemplate = this.dex.getTemplate(pokemon.m.originalSpecies);
-				if (oTemplate.types.length !== pokemon.template.types.length || oTemplate.types[1] !== pokemon.template.types[1]) {
-					this.add('-start', pokemon, 'typechange', pokemon.template.types.join('/'), '[silent]');
+				let oSpecies = this.dex.getSpecies(pokemon.m.originalSpecies);
+				if (oSpecies.types.length !== pokemon.species.types.length || oSpecies.types[1] !== pokemon.species.types[1]) {
+					this.add('-start', pokemon, 'typechange', pokemon.species.types.join('/'), '[silent]');
 				}
 			}
 		},
 		onSwitchOut(pokemon) {
 			// @ts-ignore
-			let oMegaTemplate = this.dex.getTemplate(pokemon.template.originalMega);
-			if (oMegaTemplate.exists && pokemon.m.originalSpecies !== oMegaTemplate.baseSpecies) {
-				this.add('-end', pokemon, oMegaTemplate.requiredItem || oMegaTemplate.requiredMove, '[silent]');
+			let oMegaSpecies = this.dex.getSpecies(pokemon.species.originalMega);
+			if (oMegaSpecies.exists && pokemon.m.originalSpecies !== oMegaSpecies.baseSpecies) {
+				this.add('-end', pokemon, oMegaSpecies.requiredItem || oMegaSpecies.requiredMove, '[silent]');
 			}
 		},
 	},
@@ -5056,18 +4901,18 @@ let Formats = [
 			let problems = [];
 
 			// Calc set data
-			let template = Dex.getTemplate(set.species || set.name);
+			let species = Dex.getSpecies(set.species || set.name);
 			let isNativeMega = false;
 			let item = Dex.getItem(set.item);
-			let sCorrectTier = template.tier;
-			if (set.item && item.megaStone && (item.megaEvolves === template.baseSpecies)) {
-				let megaTemplate = Dex.getTemplate(item.megaStone);
-				if(template.species !== template.baseSpecies) {
-					let baseTemplate = Dex.getTemplate(template.baseSpecies);
-					set.ability = baseTemplate.abilities[0]; // Avoid pre/post-mega ability mismatch inside validateSetInternal
-					template = megaTemplate;
+			let sCorrectTier = species.tier;
+			if (set.item && item.megaStone && (item.megaEvolves === species.baseSpecies)) {
+				let megaSpecies = Dex.getSpecies(item.megaStone);
+				if(species.name !== species.baseSpecies) {
+					let baseSpecies = Dex.getSpecies(species.baseSpecies);
+					set.ability = baseSpecies.abilities[0]; // Avoid pre/post-mega ability mismatch inside validateSetInternal
+					species = megaSpecies;
 				}
-				sCorrectTier = megaTemplate.tier;
+				sCorrectTier = megaSpecies.tier;
 				isNativeMega = true;
 			}
 			let setTierEnum = global.DexCalculator.calcTierEnumeration(sCorrectTier);
@@ -5075,9 +4920,9 @@ let Formats = [
 			console.log("sCorrectTier: " + sCorrectTier);
 			console.log("setTierEnum: " + setTierEnum.toString());
 			let setBst = 0;
-			for (let stat in template.baseStats) {
+			for (let stat in species.baseStats) {
 				// @ts-ignore
-				setBst += template.baseStats[stat];
+				setBst += species.baseStats[stat];
 			}
 
 			// Load MxM mod functions
@@ -5159,7 +5004,7 @@ let Formats = [
 				console.log("metaTierEnum: " + metaTierEnum.toString());
 				if( metaTierEnum > setTierEnum ) {
 					const problemText = 
-					`${template.name} is in the tier ${template.tier}, `+
+					`${species.name} is in the tier ${species.tier}, `+
 					`but the meta ${metaFormat.name} has a ${mixedMetaValue.weightTier} tier restriction.`
 					currentMetaWeightingProblems.push( problemText );
 					console.log(problemText);
@@ -5170,7 +5015,7 @@ let Formats = [
 					console.log("mixedMetaValue.bstLimit: " + mixedMetaValue.bstLimit.toString());
 					if( ( mixedMetaValue.bstLimit >= 0 ) && ( setBst > mixedMetaValue.bstLimit ) ) {
 						const problemText = 
-						`${template.name} has a BST of ${setBst}, `+
+						`${species.name} has a BST of ${setBst}, `+
 						`but the meta ${metaFormat.name} has a ${mixedMetaValue.bstLimit} BST limit.`
 						currentMetaWeightingProblems.push(problemText);
 						console.log(problemText);
@@ -5270,16 +5115,16 @@ let Formats = [
 				}
 			}
 		},
-		onModifyTemplate(template, pokemon, source) {
-			let pokemonTemplate = this.dex.deepClone(template);
-			if(!pokemon) return pokemonTemplate;
+		onModifySpecies(species, pokemon, source) {
+			let pokemonSpecies = this.dex.deepClone(species);
+			if(!pokemon) return pokemonSpecies;
 			if(pokemon.meta) {
 				let metaFormat = this.dex.getFormat(pokemon.meta);
-				if(metaFormat.onModifyTemplate) {
-					pokemonTemplate = metaFormat.onModifyTemplate.call(this, pokemonTemplate, pokemon, source);
+				if(metaFormat.onModifySpecies) {
+					pokemonSpecies = metaFormat.onModifySpecies.call(this, pokemonSpecies, pokemon, source);
 				}
 			}
-			return pokemonTemplate;
+			return pokemonSpecies;
 		},
 		onSwitchIn(pokemon) {
 			if(pokemon.meta) {
@@ -5316,18 +5161,18 @@ let Formats = [
 			//console.info(this);
 
 			// Calc set data
-			let template = this.dex.getTemplate(set.species || set.name);
+			let species = this.dex.getSpecies(set.species || set.name);
 			let isNativeMega = false;
 			let item = this.dex.getItem(set.item);
-			let sCorrectTier = template.tier;
-			if (set.item && item.megaStone && (item.megaEvolves === template.baseSpecies)) {
-				let megaTemplate = Dex.getTemplate(item.megaStone);
-				if(template.species !== template.baseSpecies) {
-					let baseTemplate = Dex.getTemplate(template.baseSpecies);
-					set.ability = baseTemplate.abilities[0]; // Avoid pre/post-mega ability mismatch inside validateSetInternal
-					template = megaTemplate;
+			let sCorrectTier = species.tier;
+			if (set.item && item.megaStone && (item.megaEvolves === species.baseSpecies)) {
+				let megaSpecies = Dex.getSpecies(item.megaStone);
+				if(species.name !== species.baseSpecies) {
+					let baseSpecies = Dex.getSpecies(species.baseSpecies);
+					set.ability = baseSpecies.abilities[0]; // Avoid pre/post-mega ability mismatch inside validateSetInternal
+					species = megaSpecies;
 				}
-				sCorrectTier = megaTemplate.tier;
+				sCorrectTier = megaSpecies.tier;
 				isNativeMega = true;
 			}
 			let setTierEnum = global.DexCalculator.calcTierEnumeration(sCorrectTier);
@@ -5335,9 +5180,9 @@ let Formats = [
 			console.log("sCorrectTier: " + sCorrectTier);
 			console.log("setTierEnum: " + setTierEnum.toString());
 			let setBst = 0;
-			for (let stat in template.baseStats) {
+			for (let stat in species.baseStats) {
 				// @ts-ignore
-				setBst += template.baseStats[stat];
+				setBst += species.baseStats[stat];
 			}
 
 			// Load MxM mod functions
@@ -5445,32 +5290,32 @@ let Formats = [
 			/**@type {{[k: string]: true}} */
 			let itemTable = {};
 			for (const set of team) {
-				let bitchTemplate = this.dex.getTemplate(set.item);
-				if (!bitchTemplate.exists) continue;
-				if (itemTable[bitchTemplate.id]) return ["You are limited to one of each Bitch.", "(You have more than one " + bitchTemplate.name + ")"];
-				itemTable[bitchTemplate.id] = true;
+				let bitchSpecies = this.dex.getSpecies(set.item);
+				if (!bitchSpecies.exists) continue;
+				if (itemTable[bitchSpecies.id]) return ["You are limited to one of each Bitch.", "(You have more than one " + bitchSpecies.name + ")"];
+				itemTable[bitchSpecies.id] = true;
 			}
 		},
 		onValidateSet(set, format, setHas, teamHas, ruleTable) {
 			//console.log('BnB: val ');
 			//console.log('format.modValueNumberA: '+format.modValueNumberA.toString());
 
-			let beggarTemplate = this.dex.getTemplate(set.species || set.name);
-			let bitchTemplate = this.dex.getTemplate(set.item);
+			let beggarSpecies = this.dex.getSpecies(set.species || set.name);
+			let bitchSpecies = this.dex.getSpecies(set.item);
 			//console.log('bitch: '+set.item);
-			if(!bitchTemplate.exists) return;
+			if(!bitchSpecies.exists) return;
 
 			let problems = [];
-			let bitchBST = this.dex.calcBST(bitchTemplate.baseStats);
+			let bitchBST = this.dex.calcBST(bitchSpecies.baseStats);
 			//console.log('bitchBST: '+bitchBST.toString());
 			if(format.modValueNumberA) {
 				if(bitchBST > format.modValueNumberA) {
-					problems.push("Bitches are limited to " + format.modValueNumberA.toString() + " BST, but " + bitchTemplate.name + " has " + bitchBST.toString() + "!");
+					problems.push("Bitches are limited to " + format.modValueNumberA.toString() + " BST, but " + bitchSpecies.name + " has " + bitchBST.toString() + "!");
 				}
 			}
 			let uberBitches = format.restricted || [];
 			let uberPokemon = format.cannotMega || [];
-			if (uberPokemon.includes(beggarTemplate.name) || set.ability === 'Power Construct' || uberBitches.includes(bitchTemplate.name)) return ["" + beggarTemplate.species + " is not allowed to hold " + bitchTemplate.name + "."];
+			if (uberPokemon.includes(beggarSpecies.name) || set.ability === 'Power Construct' || uberBitches.includes(bitchSpecies.name)) return ["" + beggarSpecies.species + " is not allowed to hold " + bitchSpecies.name + "."];
 			
 			// Load BnB mod functions
 			/**@type {ModdedBattleScriptsData | null} */
@@ -5489,11 +5334,11 @@ let Formats = [
 				return problems;
 			}
 
-			const mixedTemplate = BnBMod.getMixedTemplate(beggarTemplate.name, bitchTemplate.baseSpecies);
-			let oAbilitySlot = this.dex.calcActiveAbilitySlot(beggarTemplate, set.ability);
+			const mixedSpecies = BnBMod.getMixedSpecies(beggarSpecies.name, bitchSpecies.baseSpecies);
+			let oAbilitySlot = this.dex.calcActiveAbilitySlot(beggarSpecies, set.ability);
 			//console.log("oAbilitySlot: " + oAbilitySlot);
 			// @ts-ignore
-			let postBeggarAbilityName = mixedTemplate.abilities[oAbilitySlot];
+			let postBeggarAbilityName = mixedSpecies.abilities[oAbilitySlot];
 			let postBeggarAbilityId = toID(postBeggarAbilityName);
 			//console.log("postBeggarAbilityId: " + postBeggarAbilityId);
 			let abilityTest = '-ability:'+postBeggarAbilityId;
@@ -5503,41 +5348,41 @@ let Formats = [
 				if( rule === abilityTest ) {
 					//console.log("BnB rule IN ");
 					problems.push("If "+set.name+" beggar-evolves with the ability "+ set.ability + ", it will gain the banned ability "
-						+ postBeggarAbilityName + " from its bitch "+ bitchTemplate.name + ".");
+						+ postBeggarAbilityName + " from its bitch "+ bitchSpecies.name + ".");
 				}
 			});
 			let restrictedAbilities = format.restrictedAbilities || [];
 			if (restrictedAbilities.includes(postBeggarAbilityId)) {
 				//console.log("BnB restriction IN ");
 				problems.push("If "+set.name+" beggar-evolves with the ability "+ set.ability + ", it will gain the restricted ability "
-					+ postBeggarAbilityName + " from its bitch "+ bitchTemplate.name + ".");
+					+ postBeggarAbilityName + " from its bitch "+ bitchSpecies.name + ".");
 			}
 			return problems;
 		},
 		onBegin() {
 			for (const pokemon of this.getAllPokemon()) {
-				pokemon.m.originalSpecies = pokemon.baseTemplate.species;
+				pokemon.m.originalSpecies = pokemon.baseSpecies.species;
 			}
 		},
 		onSwitchIn(pokemon) {
 			// Take care of non-BnB case
-			let bitchTemplate = this.dex.getTemplate(pokemon.item);
-			if(!bitchTemplate.exists) return;
+			let bitchSpecies = this.dex.getSpecies(pokemon.item);
+			if(!bitchSpecies.exists) return;
 			if (null === pokemon.canMegaEvo) {
 				// Place volatiles on the Pokémon to show its beggar-evolved condition and details
 				let bitchSpecies = pokemon.item;
 				this.add('-start', pokemon, this.dex.generateMegaStoneName(bitchSpecies), '[silent]');
-				let oTemplate = this.dex.getTemplate(pokemon.m.originalSpecies);
-				if (oTemplate.types.length !== pokemon.template.types.length || oTemplate.types[1] !== pokemon.template.types[1]) {
-					this.add('-start', pokemon, 'typechange', pokemon.template.types.join('/'), '[silent]');
+				let oSpecies = this.dex.getSpecies(pokemon.m.originalSpecies);
+				if (oSpecies.types.length !== pokemon.species.types.length || oSpecies.types[1] !== pokemon.species.types[1]) {
+					this.add('-start', pokemon, 'typechange', pokemon.species.types.join('/'), '[silent]');
 				}
 			}
 		},
 		onSwitchOut(pokemon) {
 			// @ts-ignore
-			let oMegaTemplate = this.dex.getTemplate(pokemon.template.originalMega);
-			if (oMegaTemplate.exists && pokemon.m.originalSpecies !== oMegaTemplate.baseSpecies) {
-				this.add('-end', pokemon, oMegaTemplate.requiredItem || oMegaTemplate.requiredMove, '[silent]');
+			let oMegaSpecies = this.dex.getSpecies(pokemon.species.originalMega);
+			if (oMegaSpecies.exists && pokemon.m.originalSpecies !== oMegaSpecies.baseSpecies) {
+				this.add('-end', pokemon, oMegaSpecies.requiredItem || oMegaSpecies.requiredMove, '[silent]');
 			}
 		},
 	},

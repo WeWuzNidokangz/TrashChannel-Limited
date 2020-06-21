@@ -53,20 +53,20 @@ class TrashChannelChatSupport {
 
 	/**
 	 * @param {CommandContext} commandContext
-	 * @param {Template} template
+	 * @param {Species} species
 	 * @param {string} stoneName
 	 * @param {string} mod
 	 * @param {string} tierTextSuffix
 	 * @return {Object}
 	 */
-	static mixandmegainternal(commandContext, template, stoneName, mod, tierTextSuffix) {
+	static mixandmegainternal(commandContext, species, stoneName, mod, tierTextSuffix) {
 		let dex = Dex;
 		if (mod && toID(mod) in Dex.dexes) dex = Dex.mod(toID(mod));
 		let stone = TrashChannelChatSupport.getMegaStone(stoneName);
 		if (!stone || (dex.gen >= 8 && ['redorb', 'blueorb'].includes(stone.id))) return commandContext.errorReply(`Error: Mega Stone not found.`);
-		if (!template) return commandContext.errorReply(`Error: Pokemon not found.`);
-		if (!template.exists) return commandContext.errorReply(`Error: Pokemon not found.`);
-		if (template.isMega || template.name === 'Necrozma-Ultra') { // Mega Pokemon and Ultra Necrozma cannot be mega evolved
+		if (!species) return commandContext.errorReply(`Error: Pokemon not found.`);
+		if (!species.exists) return commandContext.errorReply(`Error: Pokemon not found.`);
+		if (species.isMega || species.name === 'Necrozma-Ultra') { // Mega Pokemon and Ultra Necrozma cannot be mega evolved
 			commandContext.errorReply(`Warning: You cannot mega evolve Mega Pokemon and Ultra Necrozma in Mix and Mega.`);
 		}
 		let banlist = Dex.getFormat('gen8mixandmega').banlist;
@@ -74,94 +74,94 @@ class TrashChannelChatSupport {
 			commandContext.errorReply(`Warning: ${stone.name} is banned from Mix and Mega.`);
 		}
 		let restrictedStones = Dex.getFormat('gen8mixandmega').restrictedStones || [];
-		if (restrictedStones.includes(stone.name) && template.name !== stone.megaEvolves) {
+		if (restrictedStones.includes(stone.name) && species.name !== stone.megaEvolves) {
 			commandContext.errorReply(`Warning: ${stone.name} is restricted to ${stone.megaEvolves} in Mix and Mega.`);
 		}
 		let cannotMega = Dex.getFormat('gen8mixandmega').cannotMega || [];
-		if (cannotMega.includes(template.name) && template.name !== stone.megaEvolves && !template.isMega) { // Separate messages because there's a difference between being already mega evolved / NFE and being banned from mega evolving
-			commandContext.errorReply(`Warning: ${template.name} is banned from mega evolving with a non-native mega stone in Mix and Mega.`);
+		if (cannotMega.includes(species.name) && species.name !== stone.megaEvolves && !species.isMega) { // Separate messages because there's a difference between being already mega evolved / NFE and being banned from mega evolving
+			commandContext.errorReply(`Warning: ${species.name} is banned from mega evolving with a non-native mega stone in Mix and Mega.`);
 		}
-		if (['Multitype', 'RKS System'].includes(template.abilities['0']) && !['Arceus', 'Silvally'].includes(template.name)) {
-			commandContext.errorReply(`Warning: ${template.name} is required to hold ${template.baseSpecies === 'Arceus' && template.requiredItems ? 'either ' + template.requiredItems[0] + ' or ' + template.requiredItems[1] : template.requiredItem}.`);
+		if (['Multitype', 'RKS System'].includes(species.abilities['0']) && !['Arceus', 'Silvally'].includes(species.name)) {
+			commandContext.errorReply(`Warning: ${species.name} is required to hold ${species.baseSpecies === 'Arceus' && species.requiredItems ? 'either ' + species.requiredItems[0] + ' or ' + species.requiredItems[1] : species.requiredItem}.`);
 		}
-		if (toID(stoneName) === 'dragonascent' && !['smeargle', 'rayquaza', 'rayquazamega'].includes(toID(template.name))) {
+		if (toID(stoneName) === 'dragonascent' && !['smeargle', 'rayquaza', 'rayquazamega'].includes(toID(species.name))) {
 			commandContext.errorReply(`Warning: Only Pokemon with access to Dragon Ascent can mega evolve with Mega Rayquaza's traits.`);
 		}
 		// Fake Pokemon and Mega Stones
-		if (template.isNonstandard === "CAP") {
-			commandContext.errorReply(`Warning: ${template.name} is not a real Pokemon and is therefore not usable in Mix and Mega.`);
+		if (species.isNonstandard === "CAP") {
+			commandContext.errorReply(`Warning: ${species.name} is not a real Pokemon and is therefore not usable in Mix and Mega.`);
 		}
 		if (stone.isNonstandard === "CAP") {
 			commandContext.errorReply(`Warning: ${stone.name} is a fake mega stone created by the CAP Project and is restricted to the CAP ${stone.megaEvolves}.`);
 		}
-		let baseTemplate = Dex.getTemplate(stone.megaEvolves);
-		let megaTemplate = Dex.getTemplate(stone.megaStone);
+		let baseSpecies = Dex.getSpecies(stone.megaEvolves);
+		let megaSpecies = Dex.getSpecies(stone.megaStone);
 		if (stone.id === 'redorb') { // Orbs do not have 'Item.megaStone' or 'Item.megaEvolves' properties.
-			megaTemplate = Dex.getTemplate("Groudon-Primal");
-			baseTemplate = Dex.getTemplate("Groudon");
+			megaSpecies = Dex.getSpecies("Groudon-Primal");
+			baseSpecies = Dex.getSpecies("Groudon");
 		} else if (stone.id === 'blueorb') {
-			megaTemplate = Dex.getTemplate("Kyogre-Primal");
-			baseTemplate = Dex.getTemplate("Kyogre");
+			megaSpecies = Dex.getSpecies("Kyogre-Primal");
+			baseSpecies = Dex.getSpecies("Kyogre");
 		}
 		/** @type {{baseStats: {[k: string]: number}, weighthg: number, type?: string}} */
 		let deltas = {
 			baseStats: {},
-			weighthg: megaTemplate.weighthg - baseTemplate.weighthg,
+			weighthg: megaSpecies.weighthg - baseSpecies.weighthg,
 		};
-		for (let statId in megaTemplate.baseStats) {
+		for (let statId in megaSpecies.baseStats) {
 			// @ts-ignore
-			deltas.baseStats[statId] = megaTemplate.baseStats[statId] - baseTemplate.baseStats[statId];
+			deltas.baseStats[statId] = megaSpecies.baseStats[statId] - baseSpecies.baseStats[statId];
 		}
-		if (megaTemplate.types.length > baseTemplate.types.length) {
-			deltas.type = megaTemplate.types[1];
-		} else if (megaTemplate.types.length < baseTemplate.types.length) {
-			deltas.type = dex.gen >= 8 ? 'mono' : megaTemplate.types[0];
-		} else if (megaTemplate.types[1] !== baseTemplate.types[1]) {
-			deltas.type = megaTemplate.types[1];
+		if (megaSpecies.types.length > baseSpecies.types.length) {
+			deltas.type = megaSpecies.types[1];
+		} else if (megaSpecies.types.length < baseSpecies.types.length) {
+			deltas.type = dex.gen >= 8 ? 'mono' : megaSpecies.types[0];
+		} else if (megaSpecies.types[1] !== baseSpecies.types[1]) {
+			deltas.type = megaSpecies.types[1];
 		}
 		//////////////////////////////////////////
-		let mixedTemplate = Dex.deepClone(template);
-		mixedTemplate.abilities = Dex.deepClone(megaTemplate.abilities);
-		if (mixedTemplate.types[0] === deltas.type) { // Add any type gains
-			mixedTemplate.types = [deltas.type];
+		let mixedSpecies = Dex.deepClone(species);
+		mixedSpecies.abilities = Dex.deepClone(megaSpecies.abilities);
+		if (mixedSpecies.types[0] === deltas.type) { // Add any type gains
+			mixedSpecies.types = [deltas.type];
 		} else if (deltas.type === 'mono') {
-			mixedTemplate.types = [mixedTemplate.types[0]];
+			mixedSpecies.types = [mixedSpecies.types[0]];
 		} else if (deltas.type) {
-			mixedTemplate.types = [mixedTemplate.types[0], deltas.type];
+			mixedSpecies.types = [mixedSpecies.types[0], deltas.type];
 		}
-		for (let statName in template.baseStats) { // Add the changed stats and weight
-			mixedTemplate.baseStats[statName] = Dex.clampIntRange(mixedTemplate.baseStats[statName] + deltas.baseStats[statName], 1, 255);
+		for (let statName in species.baseStats) { // Add the changed stats and weight
+			mixedSpecies.baseStats[statName] = Dex.clampIntRange(mixedSpecies.baseStats[statName] + deltas.baseStats[statName], 1, 255);
 		}
-		mixedTemplate.weighthg = Math.max(1, template.weighthg + deltas.weighthg);
-		mixedTemplate.tier = "MnM";
+		mixedSpecies.weighthg = Math.max(1, species.weighthg + deltas.weighthg);
+		mixedSpecies.tier = "MnM";
 		//#region TrashChannel
 		if(tierTextSuffix) {
-			mixedTemplate.tier += tierTextSuffix;
+			mixedSpecies.tier += tierTextSuffix;
 		}
 		//#endregion
 		let weighthit = 20;
-		if (mixedTemplate.weighthg >= 2000) {
+		if (mixedSpecies.weighthg >= 2000) {
 			weighthit = 120;
-		} else if (mixedTemplate.weighthg >= 1000) {
+		} else if (mixedSpecies.weighthg >= 1000) {
 			weighthit = 100;
-		} else if (mixedTemplate.weighthg >= 500) {
+		} else if (mixedSpecies.weighthg >= 500) {
 			weighthit = 80;
-		} else if (mixedTemplate.weighthg >= 250) {
+		} else if (mixedSpecies.weighthg >= 250) {
 			weighthit = 60;
-		} else if (mixedTemplate.weighthg >= 100) {
+		} else if (mixedSpecies.weighthg >= 100) {
 			weighthit = 40;
 		}
 		/** @type {{[k: string]: string}} */
 		let details = {
-			"Dex#": '' + mixedTemplate.num,
-			"Gen": '' + mixedTemplate.gen,
-			"Height": mixedTemplate.heightm + " m",
-			"Weight": mixedTemplate.weighthg / 10 + " kg <em>(" + weighthit + " BP)</em>",
-			"Dex Colour": mixedTemplate.color,
+			"Dex#": '' + mixedSpecies.num,
+			"Gen": '' + mixedSpecies.gen,
+			"Height": mixedSpecies.heightm + " m",
+			"Weight": mixedSpecies.weighthg / 10 + " kg <em>(" + weighthit + " BP)</em>",
+			"Dex Colour": mixedSpecies.color,
 		};
-		if (mixedTemplate.eggGroups) details["Egg Group(s)"] = mixedTemplate.eggGroups.join(", ");
+		if (mixedSpecies.eggGroups) details["Egg Group(s)"] = mixedSpecies.eggGroups.join(", ");
 		details['<font color="#686868">Does Not Evolve</font>'] = "";
-		commandContext.sendReply(`|raw|${Chat.getDataPokemonHTML(mixedTemplate)}`);
+		commandContext.sendReply(`|raw|${Chat.getDataPokemonHTML(mixedSpecies)}`);
 		commandContext.sendReply('|raw|<font size="1">' + Object.keys(details).map(detail => {
 			if (details[detail] === '') return detail;
 			return '<font color="#686868">' + detail + ':</font> ' + details[detail];
@@ -170,17 +170,17 @@ class TrashChannelChatSupport {
 
 	/**
 	 * @param {CommandContext} commandContext
-	 * @param {Template} template
+	 * @param {Species} species
 	 * @param {string} stoneName
 	 * @param {string} tierTextSuffix
 	 * @return {Object}
 	 */
-	static gen7mixandmegainternal(commandContext, template, stoneName, tierTextSuffix) {
+	static gen7mixandmegainternal(commandContext, species, stoneName, tierTextSuffix) {
 		let stone = TrashChannelChatSupport.getMegaStone(stoneName);
 		if (!stone.exists) return commandContext.errorReply(`Error: Mega Stone not found.`);
-		if (!template) return commandContext.errorReply(`Error: Pokemon not found.`);
-		if (!template.exists) return commandContext.errorReply(`Error: Pokemon not found.`);
-		if (template.isMega || template.name === 'Necrozma-Ultra') { // Mega Pokemon and Ultra Necrozma cannot be mega evolved
+		if (!species) return commandContext.errorReply(`Error: Pokemon not found.`);
+		if (!species.exists) return commandContext.errorReply(`Error: Pokemon not found.`);
+		if (species.isMega || species.name === 'Necrozma-Ultra') { // Mega Pokemon and Ultra Necrozma cannot be mega evolved
 			commandContext.errorReply(`Warning: You cannot mega evolve Mega Pokemon and Ultra Necrozma in Mix and Mega.`);
 		}
 		let banlist = Dex.getFormat('gen7mixandmega').banlist;
@@ -188,95 +188,95 @@ class TrashChannelChatSupport {
 			commandContext.errorReply(`Warning: ${stone.name} is banned from Mix and Mega.`);
 		}
 		let restrictedStones = Dex.getFormat('gen7mixandmega').restrictedStones || [];
-		if (restrictedStones.includes(stone.name) && template.name !== stone.megaEvolves) {
+		if (restrictedStones.includes(stone.name) && species.name !== stone.megaEvolves) {
 			commandContext.errorReply(`Warning: ${stone.name} is restricted to ${stone.megaEvolves} in Mix and Mega.`);
 		}
 		let cannotMega = Dex.getFormat('gen7mixandmega').cannotMega || [];
-		if (cannotMega.includes(template.name) && template.name !== stone.megaEvolves && !template.isMega) { // Separate messages because there's a difference between being already mega evolved / NFE and being banned from mega evolving
-			commandContext.errorReply(`Warning: ${template.name} is banned from mega evolving with a non-native mega stone in Mix and Mega.`);
+		if (cannotMega.includes(species.name) && species.name !== stone.megaEvolves && !species.isMega) { // Separate messages because there's a difference between being already mega evolved / NFE and being banned from mega evolving
+			commandContext.errorReply(`Warning: ${species.name} is banned from mega evolving with a non-native mega stone in Mix and Mega.`);
 		}
-		if (['Multitype', 'RKS System'].includes(template.abilities['0']) && !['Arceus', 'Silvally'].includes(template.name)) {
-			commandContext.errorReply(`Warning: ${template.name} is required to hold ${template.baseSpecies === 'Arceus' && template.requiredItems ? 'either ' + template.requiredItems[0] + ' or ' + template.requiredItems[1] : template.requiredItem}.`);
+		if (['Multitype', 'RKS System'].includes(species.abilities['0']) && !['Arceus', 'Silvally'].includes(species.name)) {
+			commandContext.errorReply(`Warning: ${species.name} is required to hold ${species.baseSpecies === 'Arceus' && species.requiredItems ? 'either ' + species.requiredItems[0] + ' or ' + species.requiredItems[1] : species.requiredItem}.`);
 		}
 		if (stone.isUnreleased) {
 			commandContext.errorReply(`Warning: ${stone.name} is unreleased and is not usable in current Mix and Mega.`);
 		}
-		if (toID(stoneName) === 'dragonascent' && !['smeargle', 'rayquaza', 'rayquazamega'].includes(toID(template.name))) {
+		if (toID(stoneName) === 'dragonascent' && !['smeargle', 'rayquaza', 'rayquazamega'].includes(toID(species.name))) {
 			commandContext.errorReply(`Warning: Only Pokemon with access to Dragon Ascent can mega evolve with Mega Rayquaza's traits.`);
 		}
 		// Fake Pokemon and Mega Stones
-		if (template.isNonstandard) {
-			commandContext.errorReply(`Warning: ${template.name} is not a real Pokemon and is therefore not usable in Mix and Mega.`);
+		if (species.isNonstandard) {
+			commandContext.errorReply(`Warning: ${species.name} is not a real Pokemon and is therefore not usable in Mix and Mega.`);
 		}
 		if (stone.isNonstandard) {
 			commandContext.errorReply(`Warning: ${stone.name} is a fake mega stone created by the CAP Project and is restricted to the CAP ${stone.megaEvolves}.`);
 		}
-		let baseTemplate = Dex.getTemplate(stone.megaEvolves);
-		let megaTemplate = Dex.getTemplate(stone.megaStone);
+		let baseSpecies = Dex.getSpecies(stone.megaEvolves);
+		let megaSpecies = Dex.getSpecies(stone.megaStone);
 		if (stone.id === 'redorb') { // Orbs do not have 'Item.megaStone' or 'Item.megaEvolves' properties.
-			megaTemplate = Dex.getTemplate("Groudon-Primal");
-			baseTemplate = Dex.getTemplate("Groudon");
+			megaSpecies = Dex.getSpecies("Groudon-Primal");
+			baseSpecies = Dex.getSpecies("Groudon");
 		} else if (stone.id === 'blueorb') {
-			megaTemplate = Dex.getTemplate("Kyogre-Primal");
-			baseTemplate = Dex.getTemplate("Kyogre");
+			megaSpecies = Dex.getSpecies("Kyogre-Primal");
+			baseSpecies = Dex.getSpecies("Kyogre");
 		}
 		/** @type {{baseStats: {[k: string]: number}, weighthg: number, type?: string}} */
 		let deltas = {
 			baseStats: {},
-			weighthg: megaTemplate.weighthg - baseTemplate.weighthg,
+			weighthg: megaSpecies.weighthg - baseSpecies.weighthg,
 		};
-		for (let statId in megaTemplate.baseStats) {
+		for (let statId in megaSpecies.baseStats) {
 			// @ts-ignore
-			deltas.baseStats[statId] = megaTemplate.baseStats[statId] - baseTemplate.baseStats[statId];
+			deltas.baseStats[statId] = megaSpecies.baseStats[statId] - baseSpecies.baseStats[statId];
 		}
-		if (megaTemplate.types.length > baseTemplate.types.length) {
-			deltas.type = megaTemplate.types[1];
-		} else if (megaTemplate.types.length < baseTemplate.types.length) {
-			deltas.type = baseTemplate.types[0];
-		} else if (megaTemplate.types[1] !== baseTemplate.types[1]) {
-			deltas.type = megaTemplate.types[1];
+		if (megaSpecies.types.length > baseSpecies.types.length) {
+			deltas.type = megaSpecies.types[1];
+		} else if (megaSpecies.types.length < baseSpecies.types.length) {
+			deltas.type = baseSpecies.types[0];
+		} else if (megaSpecies.types[1] !== baseSpecies.types[1]) {
+			deltas.type = megaSpecies.types[1];
 		}
 		//////////////////////////////////////////
-		let mixedTemplate = Dex.deepClone(template);
-		mixedTemplate.abilities = Object.assign({}, megaTemplate.abilities);
-		if (mixedTemplate.types[0] === deltas.type) { // Add any type gains
-			mixedTemplate.types = [deltas.type];
+		let mixedSpecies = Dex.deepClone(species);
+		mixedSpecies.abilities = Object.assign({}, megaSpecies.abilities);
+		if (mixedSpecies.types[0] === deltas.type) { // Add any type gains
+			mixedSpecies.types = [deltas.type];
 		} else if (deltas.type) {
-			mixedTemplate.types = [mixedTemplate.types[0], deltas.type];
+			mixedSpecies.types = [mixedSpecies.types[0], deltas.type];
 		}
-		for (let statName in template.baseStats) { // Add the changed stats and weight
-			mixedTemplate.baseStats[statName] = Dex.clampIntRange(mixedTemplate.baseStats[statName] + deltas.baseStats[statName], 1, 255);
+		for (let statName in species.baseStats) { // Add the changed stats and weight
+			mixedSpecies.baseStats[statName] = Dex.clampIntRange(mixedSpecies.baseStats[statName] + deltas.baseStats[statName], 1, 255);
 		}
-		mixedTemplate.weighthg = Math.max(1, template.weighthg + deltas.weighthg);
-		mixedTemplate.tier = "MnM";
+		mixedSpecies.weighthg = Math.max(1, species.weighthg + deltas.weighthg);
+		mixedSpecies.tier = "MnM";
 		//#region TrashChannel
 		if(tierTextSuffix) {
-			mixedTemplate.tier += tierTextSuffix;
+			mixedSpecies.tier += tierTextSuffix;
 		}
 		//#endregion
 		let weighthit = 20;
-		if (mixedTemplate.weighthg >= 2000) {
+		if (mixedSpecies.weighthg >= 2000) {
 			weighthit = 120;
-		} else if (mixedTemplate.weighthg >= 1000) {
+		} else if (mixedSpecies.weighthg >= 1000) {
 			weighthit = 100;
-		} else if (mixedTemplate.weighthg >= 500) {
+		} else if (mixedSpecies.weighthg >= 500) {
 			weighthit = 80;
-		} else if (mixedTemplate.weighthg >= 250) {
+		} else if (mixedSpecies.weighthg >= 250) {
 			weighthit = 60;
-		} else if (mixedTemplate.weighthg >= 100) {
+		} else if (mixedSpecies.weighthg >= 100) {
 			weighthit = 40;
 		}
 		/** @type {{[k: string]: string}} */
 		let details = {
-			"Dex#": '' + mixedTemplate.num,
-			"Gen": '' + mixedTemplate.gen,
-			"Height": mixedTemplate.heightm + " m",
-			"Weight": mixedTemplate.weighthg / 10 + " kg <em>(" + weighthit + " BP)</em>",
-			"Dex Colour": mixedTemplate.color,
+			"Dex#": '' + mixedSpecies.num,
+			"Gen": '' + mixedSpecies.gen,
+			"Height": mixedSpecies.heightm + " m",
+			"Weight": mixedSpecies.weighthg / 10 + " kg <em>(" + weighthit + " BP)</em>",
+			"Dex Colour": mixedSpecies.color,
 		};
-		if (mixedTemplate.eggGroups) details["Egg Group(s)"] = mixedTemplate.eggGroups.join(", ");
+		if (mixedSpecies.eggGroups) details["Egg Group(s)"] = mixedSpecies.eggGroups.join(", ");
 		details['<font color="#686868">Does Not Evolve</font>'] = "";
-		commandContext.sendReply(`|raw|${Chat.getDataPokemonHTML(mixedTemplate)}`);
+		commandContext.sendReply(`|raw|${Chat.getDataPokemonHTML(mixedSpecies)}`);
 		commandContext.sendReply('|raw|<font size="1">' + Object.keys(details).map(detail => {
 			if (details[detail] === '') return detail;
 			return '<font color="#686868">' + detail + ':</font> ' + details[detail];

@@ -945,21 +945,21 @@ let BattleFormats = {
 		effectType: 'Rule',
 		name: '350 Cup Rule',
 		desc: "The mod for 350 Cup: Pok&eacute;mon with a base stat total of 350 or lower get their stats doubled.",
-        onModifyTemplate: function (template, target, source, effect) {
-			//console.log('350cuprule: onModifyTemplate');
+        onModifySpecies: function (species, target, source, effect) {
+			//console.log('350cuprule: onModifySpecies');
             let bst = 0;
-            Object.values(template.baseStats).forEach(stat => {
+            Object.values(species.baseStats).forEach(stat => {
                 bst += stat;
             });
 			if (bst <= 350) {
 				let dex = this && this.dex ? this.dex : DexCalculator;
-				let pokemon = dex.deepClone(template);
+				let pokemon = dex.deepClone(species);
 				for (let i in pokemon.baseStats) {
 					pokemon.baseStats[i] *= 2;
 				}
 				return pokemon;
 			}
-            return template;
+            return species;
         },
 	},
 	aaarestrictionsvalidation: {
@@ -969,11 +969,11 @@ let BattleFormats = {
         onValidateSet(set, format) {
 			let restrictedAbilities = format.restrictedAbilities || [];
 			if (restrictedAbilities.includes(set.ability)) {
-				let template = this.dex.getTemplate(set.species || set.name);
+				let species = this.dex.getSpecies(set.species || set.name);
 				let legalAbility = false;
-				for (let i in template.abilities) {
+				for (let i in species.abilities) {
 					// @ts-ignore
-					if (set.ability === template.abilities[i]) legalAbility = true;
+					if (set.ability === species.abilities[i]) legalAbility = true;
 				}
 				if (!legalAbility) return ['The ability ' + set.ability + ' is banned on Pok\u00e9mon that do not naturally have it.'];
 			}
@@ -991,10 +991,10 @@ let BattleFormats = {
 		effectType: 'Rule',
 		name: 'Averagemons Rule',
 		desc: "The mod for Averagemons: Every Pok&eacute;mon, including formes, has base 100 in every stat.",
-		onModifyTemplate: function (template, target, source, effect) {
+		onModifySpecies: function (species, target, source, effect) {
 			if (!effect) return;
 			let dex = this && this.dex ? this.dex : DexCalculator;
-			let pokemon = dex.deepClone(template);
+			let pokemon = dex.deepClone(species);
 			pokemon.baseStats = {hp: 100, atk: 100, def: 100, spa: 100, spd: 100, spe: 100};
 			return pokemon;
 		},
@@ -1032,13 +1032,13 @@ let BattleFormats = {
 		effectType: 'Rule',
 		name: 'Camomons Rule',
 		desc: "The mod for Camomons: Pok&eacute;mon change type to match their first two moves.",
-		onModifyTemplate(template, target, source, effect) {
-			//console.log('camomonsrule: onModifyTemplate');
+		onModifySpecies(species, target, source, effect) {
+			//console.log('camomonsrule: onModifySpecies');
 			if (!target) return; // Chat command
 			//console.log('passed target');
 			if (effect && ['imposter', 'transform'].includes(effect.id)) return;
 			let types = [...new Set(target.baseMoveSlots.slice(0, 2).map(move => this.dex.getMove(move.id).type))];
-			return Object.assign({}, template, {types: types});
+			return Object.assign({}, species, {types: types});
 		},
 		onSwitchIn: function (pokemon) {
 			//console.log('camomonsrule: onSwitchIn');
@@ -1065,10 +1065,10 @@ let BattleFormats = {
 		effectType: 'ValidatorRule',
 		name: 'CRABmons Move Legality',
 		desc: "Allows Pok&eacute;mon to use any move that they or a they share a type with in a Camomons environment",
-		checkLearnset(move, template, lsetData, set) {
-			// Get template
+		checkLearnset(move, species, lsetData, set) {
+			// Get species
 			let dex = this.dex;
-			let baseTemplate = dex.getTemplate(template.baseSpecies);
+			let baseSpecies = dex.getSpecies(species.baseSpecies);
 
 			// Determine target typing
 			let types = [...new Set(set.moves.slice(0, 2).map(moveId => dex.getMove(moveId).type))];
@@ -1078,16 +1078,16 @@ let BattleFormats = {
 				// Check that under these conditions, we learn native moves that could give us that typing normally
 				let typesetArray = Array();
 				for( let nTypeItr=0; nTypeItr<2; ++nTypeItr ) {
-					typesetArray[nTypeItr] = DexCalculator.getMovesPokemonLearnsOfType(baseTemplate, types[nTypeItr]);
+					typesetArray[nTypeItr] = DexCalculator.getMovesPokemonLearnsOfType(baseSpecies, types[nTypeItr]);
 					if( typesetArray[nTypeItr].length > 0 ) continue;
 					// Reject early if we get zero moves of that type
-					return this.checkLearnset(move, template, lsetData, set);
+					return this.checkLearnset(move, species, lsetData, set);
 				}
 
 				// Same type case
 				if( types[0] === types[1] ) {
 					if( 1 === typesetArray[0].length ) { // Reject early if we don't learn sufficient moves from the type to fill out both slots
-						return this.checkLearnset(move, template, lsetData, set);
+						return this.checkLearnset(move, species, lsetData, set);
 					}
 				}
 
@@ -1103,7 +1103,7 @@ let BattleFormats = {
 					sMoveA = typeALset[nMvAItr];
 					// Check if we should reject for not learning move A independently
 					hypotheticalSet.moves = [sMoveA];
-					if( null !== this.checkLearnset(sMoveA, template, lsetData, hypotheticalSet) ) {
+					if( null !== this.checkLearnset(sMoveA, species, lsetData, hypotheticalSet) ) {
 						continue;
 					}
 					// Operate interior loop on a deep clone of B that can't have a duplicate of the current move from A
@@ -1112,13 +1112,13 @@ let BattleFormats = {
 						sMoveB = typeBLsetTemp[nMvBItr];
 						// Check if we should reject for not learning move A independently
 						hypotheticalSet.moves = [sMoveB];
-						if( null !== this.checkLearnset(sMoveB, template, lsetData, hypotheticalSet) ) {
+						if( null !== this.checkLearnset(sMoveB, species, lsetData, hypotheticalSet) ) {
 							typeBLset = DexCalculator.arrayRemove(typeBLset, sMoveB); // No point checking this in further loops
 							continue;
 						}
 						// Check if we should reject for not learning moves A and B together
 						hypotheticalSet.moves = [sMoveA, sMoveB];
-						if( null !== this.checkLearnset(sMoveA, template, lsetData, hypotheticalSet) ) {
+						if( null !== this.checkLearnset(sMoveA, species, lsetData, hypotheticalSet) ) {
 							continue;
 						}
 						// We have located a valid hypothetical moveset that could give us the specified typing
@@ -1129,7 +1129,7 @@ let BattleFormats = {
 				}
 
 				if(!bFoundViableLearnPattern) {
-					return this.checkLearnset(move, template, lsetData, set);
+					return this.checkLearnset(move, species, lsetData, set);
 				}
 			}
 
@@ -1138,7 +1138,7 @@ let BattleFormats = {
 			if (!move.isZ && !restrictedMoves.includes(move.name)) {
 				if (types.includes(move.type)) return null;
 			}
-			return this.checkLearnset(move, template, lsetData, set);
+			return this.checkLearnset(move, species, lsetData, set);
 		},
 		unbanlist: [ // Deal with this hot garbage hack from Pokemon rule that should have been fixed months ago
 			'Chansey + Charm + Seismic Toss', 'Chansey + Charm + Psywave',
@@ -1152,17 +1152,17 @@ let BattleFormats = {
 		desc: "Megamons: make mega formes legal as base Pokemon.",
 		onChangeSet(set, format) {
 			let item = this.dex.getItem(set.item);
-			let template = this.dex.getTemplate(set.species);
+			let species = this.dex.getSpecies(set.species);
 			let problems = [];
 			let totalEV = 0;
 			let allowCAP = !!(format && this.dex.getRuleTable(format).has('allowcap'));
 
 			if (set.species === set.name) delete set.name;
-			if (template.gen > this.gen) {
+			if (species.gen > this.gen) {
 				problems.push(set.species + ' does not exist in gen ' + this.gen + '.');
 			}
-			if (template.gen && template.gen !== this.gen && template.tier === 'Illegal') {
-				problems.push(set.species + ' does not exist outside of gen ' + template.gen + '.');
+			if (species.gen && species.gen !== this.gen && species.tier === 'Illegal') {
+				problems.push(set.species + ' does not exist outside of gen ' + species.gen + '.');
 			}
 			/**@type {Ability} */
 			// @ts-ignore
@@ -1193,8 +1193,8 @@ let BattleFormats = {
 				problems.push((set.name || set.species) + ' is higher than level 100.');
 			}
 
-			if (!allowCAP || !template.tier.startsWith('CAP')) {
-				if (template.isNonstandard && template.num > -5000) {
+			if (!allowCAP || !species.tier.startsWith('CAP')) {
+				if (species.isNonstandard && species.num > -5000) {
 					problems.push(set.species + ' does not exist.');
 				}
 			}
@@ -1228,7 +1228,7 @@ let BattleFormats = {
 			// everything after this line only happens if we're doing legality enforcement
 
 			// Pokestar studios
-			if (template.num <= -5000 && template.isNonstandard) {
+			if (species.num <= -5000 && species.isNonstandard) {
 				problems.push(`${set.species} cannot be obtained by legal means.`);
 			}
 
@@ -1237,9 +1237,9 @@ let BattleFormats = {
 				problems.push((set.name || set.species) + " has more than 510 total EVs.");
 			}
 
-			if (template.gender) {
-				if (set.gender !== template.gender) {
-					set.gender = template.gender;
+			if (species.gender) {
+				if (set.gender !== species.gender) {
+					set.gender = species.gender;
 				}
 			} else {
 				if (set.gender !== 'M' && set.gender !== 'F') {
@@ -1248,10 +1248,10 @@ let BattleFormats = {
 			}
 
 			// Legendary Pokemon must have at least 3 perfect IVs in gen 6
-			let baseTemplate = this.dex.getTemplate(template.baseSpecies);
-			if (set.ivs && this.gen >= 6 && (baseTemplate.gen >= 6 || format.requirePentagon) && (template.eggGroups[0] === 'Undiscovered' || template.species === 'Manaphy') && !template.prevo && !template.nfe &&
+			let baseSpecies = this.dex.getSpecies(species.baseSpecies);
+			if (set.ivs && this.gen >= 6 && (baseSpecies.gen >= 6 || format.requirePentagon) && (species.eggGroups[0] === 'Undiscovered' || species.species === 'Manaphy') && !species.prevo && !species.nfe &&
 				// exceptions
-				template.species !== 'Unown' && template.baseSpecies !== 'Pikachu' && (template.baseSpecies !== 'Diancie' || !set.shiny)) {
+				species.species !== 'Unown' && species.baseSpecies !== 'Pikachu' && (species.baseSpecies !== 'Diancie' || !set.shiny)) {
 				let perfectIVs = 0;
 				for (let i in set.ivs) {
 					// @ts-ignore
@@ -1276,64 +1276,64 @@ let BattleFormats = {
 			}
 			set.moves = moves;
 
-			let battleForme = template.battleOnly && template.species;
+			let battleForme = species.battleOnly && species.species;
 			// 19/07/14 TrashChannel: Option to pass non-mega analogous behaviour like Primal Reversion and Ultra Burst
 			let allowIrregularMegaesques = !!(format && this.dex.getRuleTable(format).has('megamonsallowirregularmegaesques'));
-			if (battleForme && !template.isMega) {
-				if (template.requiredAbility && set.ability !== template.requiredAbility) {
-					problems.push("" + template.species + " transforms in-battle with " + template.requiredAbility + "."); // Darmanitan-Zen, Zygarde-Complete
+			if (battleForme && !species.isMega) {
+				if (species.requiredAbility && set.ability !== species.requiredAbility) {
+					problems.push("" + species.species + " transforms in-battle with " + species.requiredAbility + "."); // Darmanitan-Zen, Zygarde-Complete
 				}
-				if (template.requiredItems && !allowIrregularMegaesques) {
-					if (template.species === 'Necrozma-Ultra') {
+				if (species.requiredItems && !allowIrregularMegaesques) {
+					if (species.species === 'Necrozma-Ultra') {
 						problems.push(`Necrozma-Ultra must start the battle as Necrozma-Dawn-Wings or Necrozma-Dusk-Mane holding Ultranecrozium Z.`); // Necrozma-Ultra transforms from one of two formes, and neither one is the base forme
-					} else if (!template.requiredItems.includes(item.name)) {
-						problems.push(`${template.species} transforms in-battle with ${Chat.plural(template.requiredItems.length, "either ") + template.requiredItems.join(" or ")}.`); // Mega or Primal
+					} else if (!species.requiredItems.includes(item.name)) {
+						problems.push(`${species.species} transforms in-battle with ${Chat.plural(species.requiredItems.length, "either ") + species.requiredItems.join(" or ")}.`); // Mega or Primal
 					}
 				}
-				if (template.requiredMove && set.moves.indexOf(toID(template.requiredMove)) < 0 &&
-				   (!allowIrregularMegaesques || ('dragonascent' !== toID(template.requiredMove)))) { // 19/07/14 TrashChannel: Allow Rayquaza-Mega without Dragon Ascent as an irregular megaesque
-					problems.push(`${template.species} transforms in-battle with ${template.requiredMove}.`); // Meloetta-Pirouette, Rayquaza-Mega
+				if (species.requiredMove && set.moves.indexOf(toID(species.requiredMove)) < 0 &&
+				   (!allowIrregularMegaesques || ('dragonascent' !== toID(species.requiredMove)))) { // 19/07/14 TrashChannel: Allow Rayquaza-Mega without Dragon Ascent as an irregular megaesque
+					problems.push(`${species.species} transforms in-battle with ${species.requiredMove}.`); // Meloetta-Pirouette, Rayquaza-Mega
 				}
 				if (!format.noChangeForme &&
-				   (!allowIrregularMegaesques || !template.requiredItems)) { // 19/07/14 TrashChannel: Prevent irregular megaesques from being reverted on battle start
+				   (!allowIrregularMegaesques || !species.requiredItems)) { // 19/07/14 TrashChannel: Prevent irregular megaesques from being reverted on battle start
 					//console.log("Replacing (battle): " + set.species.toString());
-					set.species = template.baseSpecies; // Fix battle-only forme
+					set.species = species.baseSpecies; // Fix battle-only forme
 				}
 			} else {
-				if (template.requiredAbility && set.ability !== template.requiredAbility) {
-					problems.push(`${(set.name || set.species)} needs the ability ${template.requiredAbility}.`); // No cases currently.
+				if (species.requiredAbility && set.ability !== species.requiredAbility) {
+					problems.push(`${(set.name || set.species)} needs the ability ${species.requiredAbility}.`); // No cases currently.
 				}
-				if (template.requiredItems && !template.requiredItems.includes(item.name) && !template.isMega) {
-					problems.push(`${(set.name || set.species)} needs to hold ${Chat.plural(template.requiredItems.length, "either ") + template.requiredItems.join(" or ")}.`); // Memory/Drive/Griseous Orb/Plate/Z-Crystal - Forme mismatch
+				if (species.requiredItems && !species.requiredItems.includes(item.name) && !species.isMega) {
+					problems.push(`${(set.name || set.species)} needs to hold ${Chat.plural(species.requiredItems.length, "either ") + species.requiredItems.join(" or ")}.`); // Memory/Drive/Griseous Orb/Plate/Z-Crystal - Forme mismatch
 				}
-				if (template.requiredMove && set.moves.indexOf(toID(template.requiredMove)) < 0 &&
-				   (!allowIrregularMegaesques || ('dragonascent' !== toID(template.requiredMove)))) { // 19/07/14 TrashChannel: Allow Rayquaza-Mega without Dragon Ascent as an irregular megaesque
-					problems.push(`${(set.name || set.species)} needs to have the move ${template.requiredMove}.`); // Keldeo-Resolute
+				if (species.requiredMove && set.moves.indexOf(toID(species.requiredMove)) < 0 &&
+				   (!allowIrregularMegaesques || ('dragonascent' !== toID(species.requiredMove)))) { // 19/07/14 TrashChannel: Allow Rayquaza-Mega without Dragon Ascent as an irregular megaesque
+					problems.push(`${(set.name || set.species)} needs to have the move ${species.requiredMove}.`); // Keldeo-Resolute
 				}
 
 				// Mismatches between the set forme (if not base) and the item signature forme will have been rejected already.
 				// It only remains to assign the right forme to a set with the base species (Arceus/Genesect/Giratina/Silvally).
-				if (item.forcedForme && template.species === this.dex.getTemplate(item.forcedForme).baseSpecies && !format.noChangeForme) {
+				if (item.forcedForme && species.species === this.dex.getSpecies(item.forcedForme).baseSpecies && !format.noChangeForme) {
 					//console.log("Replacing (item): " + set.species.toString());
 					set.species = item.forcedForme;
 				}
 			}
 
-			if (set.species !== template.species) {
+			if (set.species !== species.species) {
 				// Autofixed forme.
-				template = this.dex.getTemplate(set.species);
+				species = this.dex.getSpecies(set.species);
 
 				if (!this.dex.getRuleTable(format).has('ignoreillegalabilities') && !format.noChangeAbility) {
 					// Ensure that the ability is (still) legal.
 					let legalAbility = false;
-					for (let i in template.abilities) {
+					for (let i in species.abilities) {
 						// @ts-ignore
-						if (template.abilities[i] !== set.ability) continue;
+						if (species.abilities[i] !== set.ability) continue;
 						legalAbility = true;
 						break;
 					}
 					if (!legalAbility) { // Default to first ability.
-						set.ability = template.abilities['0'];
+						set.ability = species.abilities['0'];
 					}
 				}
 			}
@@ -1342,7 +1342,7 @@ let BattleFormats = {
 		},
 		onSwitchIn(pokemon) {
 			let item = pokemon.getItem();
-			if (item.megaEvolves && pokemon.template.species === item.megaEvolves) {
+			if (item.megaEvolves && pokemon.species.name === item.megaEvolves) {
 				pokemon.canMegaEvo = item.megaStone;
 			}
 		},
@@ -1383,13 +1383,13 @@ let BattleFormats = {
 			}
 		},
 		onValidateSet(set, format) {
-			let template = this.dex.getTemplate(set.species || set.name);
+			let species = this.dex.getSpecies(set.species || set.name);
 			let item = this.dex.getItem(set.item);
 			if (!item.megaEvolves && !['blueorb', 'redorb', 'ultranecroziumz'].includes(item.id)) return;
-			if (template.baseSpecies === item.megaEvolves || (template.baseSpecies === 'Groudon' && item.id === 'redorb') || (template.baseSpecies === 'Kyogre' && item.id === 'blueorb') || (template.species.substr(0, 9) === 'Necrozma-' && item.id === 'ultranecroziumz')) return;
+			if (species.baseSpecies === item.megaEvolves || (species.baseSpecies === 'Groudon' && item.id === 'redorb') || (species.baseSpecies === 'Kyogre' && item.id === 'blueorb') || (species.species.substr(0, 9) === 'Necrozma-' && item.id === 'ultranecroziumz')) return;
 			let uberStones = format.restricted || [];
 			let uberPokemon = format.cannotMega || [];
-			if (uberPokemon.includes(template.name) || set.ability === 'Power Construct' || uberStones.includes(item.name)) return ["" + template.species + " is not allowed to hold " + item.name + "."];
+			if (uberPokemon.includes(species.name) || set.ability === 'Power Construct' || uberStones.includes(item.name)) return ["" + species.species + " is not allowed to hold " + item.name + "."];
 		},
 	},
 	gen7mixandmegabattleeffects: {
@@ -1398,26 +1398,26 @@ let BattleFormats = {
 		desc: "Battle effects for Gen 7 Mix and Mega (insufficient to run MnM without mod, crashes when called though Mix and Meta).",
 		onBegin() {
 			for (const pokemon of this.getAllPokemon()) {
-				pokemon.m.originalSpecies = pokemon.baseTemplate.species;
+				pokemon.m.originalSpecies = pokemon.baseSpecies.species;
 			}
 		},
 		onSwitchIn(pokemon) {
 			// @ts-ignore
-			let oMegaTemplate = this.dex.getTemplate(pokemon.template.originalMega);
-			if (oMegaTemplate.exists && pokemon.m.originalSpecies !== oMegaTemplate.baseSpecies) {
+			let oMegaSpecies = this.dex.getSpecies(pokemon.species.originalMega);
+			if (oMegaSpecies.exists && pokemon.m.originalSpecies !== oMegaSpecies.baseSpecies) {
 				// Place volatiles on the Pokémon to show its mega-evolved condition and details
-				this.add('-start', pokemon, oMegaTemplate.requiredItem || oMegaTemplate.requiredMove, '[silent]');
-				let oTemplate = this.dex.getTemplate(pokemon.m.originalSpecies);
-				if (oTemplate.types.length !== pokemon.template.types.length || oTemplate.types[1] !== pokemon.template.types[1]) {
-					this.add('-start', pokemon, 'typechange', pokemon.template.types.join('/'), '[silent]');
+				this.add('-start', pokemon, oMegaSpecies.requiredItem || oMegaSpecies.requiredMove, '[silent]');
+				let oSpecies = this.dex.getSpecies(pokemon.m.originalSpecies);
+				if (oSpecies.types.length !== pokemon.species.types.length || oSpecies.types[1] !== pokemon.species.types[1]) {
+					this.add('-start', pokemon, 'typechange', pokemon.species.types.join('/'), '[silent]');
 				}
 			}
 		},
 		onSwitchOut(pokemon) {
 			// @ts-ignore
-			let oMegaTemplate = this.dex.getTemplate(pokemon.template.originalMega);
-			if (oMegaTemplate.exists && pokemon.m.originalSpecies !== oMegaTemplate.baseSpecies) {
-				this.add('-end', pokemon, oMegaTemplate.requiredItem || oMegaTemplate.requiredMove, '[silent]');
+			let oMegaSpecies = this.dex.getSpecies(pokemon.species.originalMega);
+			if (oMegaSpecies.exists && pokemon.m.originalSpecies !== oMegaSpecies.baseSpecies) {
+				this.add('-end', pokemon, oMegaSpecies.requiredItem || oMegaSpecies.requiredMove, '[silent]');
 			}
 		},
 	},
@@ -1438,10 +1438,10 @@ let BattleFormats = {
 			for (const set of team) {
 				let item = this.dex.getItem(set.item);
 				if (!item || !item.megaStone) continue;
-				let template = this.dex.getTemplate(set.species);
-				if (template.isNonstandard) return [`${template.baseSpecies} does not exist in gen 8.`];
-				if (restrictedPokemon.includes(template.species)) {
-					return [`${template.species} is not allowed to hold ${item.name}.`];
+				let species = this.dex.getSpecies(set.species);
+				if (species.isNonstandard) return [`${species.baseSpecies} does not exist in gen 8.`];
+				if (restrictedPokemon.includes(species.species)) {
+					return [`${species.species} is not allowed to hold ${item.name}.`];
 				}
 				if (itemTable[item.id]) return ["You are limited to one of each mega stone.", "(You have more than one " + item.name + ")"];
 				itemTable[item.id] = true;
@@ -1454,26 +1454,26 @@ let BattleFormats = {
 		desc: "Battle effects for Mix and Mega (insufficient to run MnM without mod, crashes when called though Mix and Meta).",
 		onBegin() {
 			for (const pokemon of this.getAllPokemon()) {
-				pokemon.m.originalSpecies = pokemon.baseTemplate.species;
+				pokemon.m.originalSpecies = pokemon.baseSpecies.species;
 			}
 		},
 		onSwitchIn(pokemon) {
 			// @ts-ignore
-			let oMegaTemplate = this.dex.getTemplate(pokemon.template.originalMega);
-			if (oMegaTemplate.exists && pokemon.m.originalSpecies !== oMegaTemplate.baseSpecies) {
+			let oMegaSpecies = this.dex.getSpecies(pokemon.species.originalMega);
+			if (oMegaSpecies.exists && pokemon.m.originalSpecies !== oMegaSpecies.baseSpecies) {
 				// Place volatiles on the Pokémon to show its mega-evolved condition and details
-				this.add('-start', pokemon, oMegaTemplate.requiredItem || oMegaTemplate.requiredMove, '[silent]');
-				let oTemplate = this.dex.getTemplate(pokemon.m.originalSpecies);
-				if (oTemplate.types.length !== pokemon.template.types.length || oTemplate.types[1] !== pokemon.template.types[1]) {
-					this.add('-start', pokemon, 'typechange', pokemon.template.types.join('/'), '[silent]');
+				this.add('-start', pokemon, oMegaSpecies.requiredItem || oMegaSpecies.requiredMove, '[silent]');
+				let oSpecies = this.dex.getSpecies(pokemon.m.originalSpecies);
+				if (oSpecies.types.length !== pokemon.species.types.length || oSpecies.types[1] !== pokemon.species.types[1]) {
+					this.add('-start', pokemon, 'typechange', pokemon.species.types.join('/'), '[silent]');
 				}
 			}
 		},
 		onSwitchOut(pokemon) {
 			// @ts-ignore
-			let oMegaTemplate = this.dex.getTemplate(pokemon.template.originalMega);
-			if (oMegaTemplate.exists && pokemon.m.originalSpecies !== oMegaTemplate.baseSpecies) {
-				this.add('-end', pokemon, oMegaTemplate.requiredItem || oMegaTemplate.requiredMove, '[silent]');
+			let oMegaSpecies = this.dex.getSpecies(pokemon.species.originalMega);
+			if (oMegaSpecies.exists && pokemon.m.originalSpecies !== oMegaSpecies.baseSpecies) {
+				this.add('-end', pokemon, oMegaSpecies.requiredItem || oMegaSpecies.requiredMove, '[silent]');
 			}
 		},
 	},
@@ -1490,11 +1490,11 @@ let BattleFormats = {
 		onBegin() {
 			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
 			for (let pokemon of allPokemon) {
-				if (pokemon.ability === toID(pokemon.template.abilities['S'])) {
+				if (pokemon.ability === toID(pokemon.species.abilities['S'])) {
 					continue;
 				}
 				// @ts-ignore
-				pokemon.innates = Object.keys(pokemon.template.abilities).filter(key => key !== 'S' && (key !== 'H' || !pokemon.template.unreleasedHidden)).map(key => toID(pokemon.template.abilities[key])).filter(ability => ability !== pokemon.ability);
+				pokemon.innates = Object.keys(pokemon.species.abilities).filter(key => key !== 'S' && (key !== 'H' || !pokemon.species.unreleasedHidden)).map(key => toID(pokemon.species.abilities[key])).filter(ability => ability !== pokemon.ability);
 			}
 		},
 		onSwitchInPriority: 2,
@@ -1510,10 +1510,10 @@ let BattleFormats = {
 		effectType: 'Rule',
 		name: 'Reversed Rule',
 		desc: "The mod for Reversed: Every Pok&eacute;mon has its base Atk and Sp. Atk stat, as well as its base Def and Sp. Def stat, swapped.",
-		onModifyTemplate: function (template, target, source, effect) {
+		onModifySpecies: function (species, target, source, effect) {
 			if (!effect) return;
 			let dex = this && this.dex ? this.dex : DexCalculator;
-			let pokemon = dex.deepClone(template);
+			let pokemon = dex.deepClone(species);
 			const atk = pokemon.baseStats.atk;
 			const def = pokemon.baseStats.def;
 			pokemon.baseStats.atk = pokemon.baseStats.spa;
@@ -1527,10 +1527,10 @@ let BattleFormats = {
 		effectType: 'Rule',
 		name: 'Tier Shift Rule',
 		desc: "The mod for Tier Shift: Pokemon get a +10 boost to each stat per tier below OU they are in. UU gets +10, RU +20, NU +30, and PU +40.",
-        onModifyTemplate(template, target, source, effect) {
-			//console.log('tiershiftrule: onModifyTemplate');
+        onModifySpecies(species, target, source, effect) {
+			//console.log('tiershiftrule: onModifySpecies');
 			if (!effect) return;
-			if (!template.abilities) return false;
+			if (!species.abilities) return false;
 			/** @type {{[tier: string]: number}} */
 			const boosts = {
 				'UU': 10,
@@ -1546,18 +1546,18 @@ let BattleFormats = {
 			};
 			if (target && target.set.ability === 'Drizzle') return;
 			let dex = this && this.dex ? this.dex : DexCalculator;
-			let tier = template.tier || 'OU';
+			let tier = species.tier || 'OU';
 			if (target && target.set.item) {
 				let item = this.dex.getItem(target.set.item);
 				if (item.name === 'Kommonium Z' || item.name === 'Mewnium Z') return;
-				if (item.megaEvolves === template.species) tier = this.dex.getTemplate(item.megaStone).tier;
+				if (item.megaEvolves === species.name) tier = this.dex.getSpecies(item.megaStone).tier;
 			}
 			if (target && target.set.moves.includes('auroraveil')) tier = 'UU';
 			if (target && target.set.ability === 'Drought') tier = 'RU';
 
 			if (tier[0] === '(') tier = tier.slice(1, -1);
 			if (!(tier in boosts)) return;
-			let pokemon = dex.deepClone(template);
+			let pokemon = dex.deepClone(species);
 			//console.info(pokemon.baseStats);
 			let boost = boosts[tier];
 			//console.log("boost: " + boost.toString());
@@ -1583,12 +1583,12 @@ let BattleFormats = {
             if (team.length !== 6) problems.push(`Your team cannot have less than 6 Pok\u00e9mon.`);
             let families = {};
             for (const set of team) {
-                let pokemon = this.dex.getTemplate(set.species);
-                if (pokemon.baseSpecies) pokemon = this.dex.getTemplate(pokemon.baseSpecies);
+                let pokemon = this.dex.getSpecies(set.species);
+                if (pokemon.baseSpecies) pokemon = this.dex.getSpecies(pokemon.baseSpecies);
                 if (pokemon.prevo) {
-                    pokemon = this.dex.getTemplate(pokemon.prevo);
+                    pokemon = this.dex.getSpecies(pokemon.prevo);
                     if (pokemon.prevo) {
-                        pokemon = this.dex.getTemplate(pokemon.prevo);
+                        pokemon = this.dex.getSpecies(pokemon.prevo);
                     }
                 }
                 if (!families[pokemon.species]) families[pokemon.species] = [];

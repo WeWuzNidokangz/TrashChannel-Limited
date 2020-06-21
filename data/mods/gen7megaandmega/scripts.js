@@ -28,9 +28,9 @@ let BattleScripts = {
 		// Mega and Mega: Ignore regular quick return for post-mega formes
 
 		const isUltraBurst = !pokemon.canMegaEvo;
-		/**@type {Template} */
+		/**@type {Species} */
 		// @ts-ignore
-		const template = this.getMixedTemplate(pokemon.m.originalSpecies, pokemon.canMegaEvo || pokemon.canUltraBurst);
+		const species = this.getMixedSpecies(pokemon.m.originalSpecies, pokemon.canMegaEvo || pokemon.canUltraBurst);
 		const side = pokemon.side;
 
 		// Pokémon affected by Sky Drop cannot Mega Evolve. Enforce it here for now.
@@ -42,16 +42,16 @@ let BattleScripts = {
 
 		// Do we have a proper sprite for it?
 		// @ts-ignore assert non-null pokemon.canMegaEvo
-		if (isUltraBurst || this.dex.getTemplate(pokemon.canMegaEvo).baseSpecies === pokemon.m.originalSpecies) {
-			pokemon.formeChange(template, pokemon.getItem(), true);
+		if (isUltraBurst || this.dex.getSpecies(pokemon.canMegaEvo).baseSpecies === pokemon.m.originalSpecies) {
+			pokemon.formeChange(species, pokemon.getItem(), true);
 		} else {
-			let oTemplate = this.dex.getTemplate(pokemon.m.originalSpecies);
+			let oSpecies = this.dex.getSpecies(pokemon.m.originalSpecies);
 			// @ts-ignore
-			let oMegaTemplate = this.dex.getTemplate(template.originalMega);
-			pokemon.formeChange(template, pokemon.getItem(), true);
-			this.add('-start', pokemon, oMegaTemplate.requiredItem || oMegaTemplate.requiredMove, '[silent]');
-			if (oTemplate.types.length !== pokemon.template.types.length || oTemplate.types[1] !== pokemon.template.types[1]) {
-				this.add('-start', pokemon, 'typechange', pokemon.template.types.join('/'), '[silent]');
+			let oMegaSpecies = this.dex.getSpecies(species.originalMega);
+			pokemon.formeChange(species, pokemon.getItem(), true);
+			this.add('-start', pokemon, oMegaSpecies.requiredItem || oMegaSpecies.requiredMove, '[silent]');
+			if (oSpecies.types.length !== pokemon.species.types.length || oSpecies.types[1] !== pokemon.species.types[1]) {
+				this.add('-start', pokemon, 'typechange', pokemon.species.types.join('/'), '[silent]');
 			}
 		}
 
@@ -59,61 +59,61 @@ let BattleScripts = {
 		if (isUltraBurst) pokemon.canUltraBurst = null;
 		return true;
 	},
-	getMixedTemplate(originalSpecies, megaSpecies) {
-		let originalTemplate = this.dex.getTemplate(originalSpecies);
-		let megaTemplate = this.dex.getTemplate(megaSpecies);
+	getMixedSpecies(originalSpecies, megaSpecies) {
+		let originalSpecies = this.dex.getSpecies(originalSpecies);
+		let megaSpecies = this.dex.getSpecies(megaSpecies);
 
 		// Mega and Mega: Ignore regular quick return for post-mega formes
 		// @ts-ignore
-		let deltas = this.getMegaDeltas(megaTemplate);
+		let deltas = this.getMegaDeltas(megaSpecies);
 		// @ts-ignore
-		let template = this.doGetMixedTemplate(originalTemplate, deltas);
-		return template;
+		let species = this.doGetMixedSpecies(originalSpecies, deltas);
+		return species;
 	},
-	getMegaDeltas(megaTemplate) {
-		let baseTemplate = this.dex.getTemplate(megaTemplate.baseSpecies);
+	getMegaDeltas(megaSpecies) {
+		let baseSpecies = this.dex.getSpecies(megaSpecies.baseSpecies);
 		/**@type {{ability: string, baseStats: {[k: string]: number}, weightkg: number, originalMega: string, requiredItem: string | undefined, type?: string, isMega?: boolean, isPrimal?: boolean}} */
 		let deltas = {
-			ability: megaTemplate.abilities['0'],
+			ability: megaSpecies.abilities['0'],
 			baseStats: {},
-			weightkg: megaTemplate.weightkg - baseTemplate.weightkg,
-			originalMega: megaTemplate.species,
-			requiredItem: megaTemplate.requiredItem,
+			weightkg: megaSpecies.weightkg - baseSpecies.weightkg,
+			originalMega: megaSpecies.name,
+			requiredItem: megaSpecies.requiredItem,
 		};
-		for (let statId in megaTemplate.baseStats) {
+		for (let statId in megaSpecies.baseStats) {
 			// @ts-ignore
-			deltas.baseStats[statId] = megaTemplate.baseStats[statId] - baseTemplate.baseStats[statId];
+			deltas.baseStats[statId] = megaSpecies.baseStats[statId] - baseSpecies.baseStats[statId];
 		}
-		if (megaTemplate.types.length > baseTemplate.types.length) {
-			deltas.type = megaTemplate.types[1];
-		} else if (megaTemplate.types.length < baseTemplate.types.length) {
-			deltas.type = baseTemplate.types[0];
-		} else if (megaTemplate.types[1] !== baseTemplate.types[1]) {
-			deltas.type = megaTemplate.types[1];
+		if (megaSpecies.types.length > baseSpecies.types.length) {
+			deltas.type = megaSpecies.types[1];
+		} else if (megaSpecies.types.length < baseSpecies.types.length) {
+			deltas.type = baseSpecies.types[0];
+		} else if (megaSpecies.types[1] !== baseSpecies.types[1]) {
+			deltas.type = megaSpecies.types[1];
 		}
-		if (megaTemplate.isMega) deltas.isMega = true;
-		if (megaTemplate.isPrimal) deltas.isPrimal = true;
+		if (megaSpecies.isMega) deltas.isMega = true;
+		if (megaSpecies.isPrimal) deltas.isPrimal = true;
 		return deltas;
 	},
-	doGetMixedTemplate(templateOrTemplateName, deltas) {
+	doGetMixedSpecies(speciesOrSpeciesName, deltas) {
 		if (!deltas) throw new TypeError("Must specify deltas!");
-		let template = this.dex.deepClone(this.dex.getTemplate(templateOrTemplateName));
-		template.abilities = {'0': deltas.ability};
-		if (template.types[0] === deltas.type) {
-			template.types = [deltas.type];
+		let species = this.dex.deepClone(this.dex.getSpecies(speciesOrSpeciesName));
+		species.abilities = {'0': deltas.ability};
+		if (species.types[0] === deltas.type) {
+			species.types = [deltas.type];
 		} else if (deltas.type) {
-			template.types = [template.types[0], deltas.type];
+			species.types = [species.types[0], deltas.type];
 		}
-		let baseStats = template.baseStats;
+		let baseStats = species.baseStats;
 		for (let statName in baseStats) {
 			baseStats[statName] = this.dex.clampIntRange(baseStats[statName] + deltas.baseStats[statName], 1, 255);
 		}
-		template.weighthg = Math.max(1, template.weighthg + deltas.weighthg);
-		template.originalMega = deltas.originalMega;
-		template.requiredItem = deltas.requiredItem;
-		if (deltas.isMega) template.isMega = true;
-		if (deltas.isPrimal) template.isPrimal = true;
-		return template;
+		species.weighthg = Math.max(1, species.weighthg + deltas.weighthg);
+		species.originalMega = deltas.originalMega;
+		species.requiredItem = deltas.requiredItem;
+		if (deltas.isMega) species.isMega = true;
+		if (deltas.isPrimal) species.isPrimal = true;
+		return species;
 	},
 };
 

@@ -1966,12 +1966,12 @@ function runMergeMovesearch(target: string, cmd: string, canAll: boolean, messag
 				continue;
 			}
 
-			const template = Dex.getTemplate(target);
-			if (template.exists) {
+			const species = Dex.getSpecies(target);
+			if (species.exists) {
 				if (parameters.length > 1) return {reply: "A Pok\u00e9mon learnset cannot have alternative parameters."};
-				if (targetMons.some(mon => mon.name === template.name && isNotSearch !== mon.shouldBeExcluded)) return {reply: "A search cannot both exclude and include the same Pok\u00e9mon."};
-				if (targetMons.some(mon => mon.name === template.name)) return {reply: "A search should not include a Pok\u00e9mon twice."};
-				targetMons.push({name: template.name, shouldBeExcluded: isNotSearch});
+				if (targetMons.some(mon => mon.name === species.name && isNotSearch !== mon.shouldBeExcluded)) return {reply: "A search cannot both exclude and include the same Pok\u00e9mon."};
+				if (targetMons.some(mon => mon.name === species.name)) return {reply: "A search should not include a Pok\u00e9mon twice."};
+				targetMons.push({name: species.name, shouldBeExcluded: isNotSearch});
 				orGroup.skip = true;
 				continue;
 			}
@@ -2135,25 +2135,25 @@ function runMergeMovesearch(target: string, cmd: string, canAll: boolean, messag
 	if (!maxGen) maxGen = 8;
 	const mod = Dex.mod('gen' + maxGen);
 
-	const getTemplateMergeLearnset = (template: Template, mergeLearnsets: DexTable<{learnset: {[k: string]: MoveSource[]}}>) => {
-		let templateID = toID(template.name);
-		if (!(templateID in mergeLearnsets)) return null;
-		return mergeLearnsets[templateID].learnset;
+	const getSpeciesMergeLearnset = (species: Species, mergeLearnsets: DexTable<{learnset: {[k: string]: MoveSource[]}}>) => {
+		let speciesID = toID(species.name);
+		if (!(speciesID in mergeLearnsets)) return null;
+		return mergeLearnsets[speciesID].learnset;
 	}
 
-	const getFullMergeLearnsetOfPokemon = (template: Template, mergeLearnsets: DexTable<{learnset: {[k: string]: MoveSource[]}}>) => {
+	const getFullMergeLearnsetOfPokemon = (species: Species, mergeLearnsets: DexTable<{learnset: {[k: string]: MoveSource[]}}>) => {
 		//console.log(mergeLearnsets);
-		let mergeLearnset = getTemplateMergeLearnset(template, mergeLearnsets);
+		let mergeLearnset = getSpeciesMergeLearnset(species, mergeLearnsets);
 		if (!mergeLearnset) {
-			template = Dex.getTemplate(template.baseSpecies);
-			mergeLearnset = getTemplateMergeLearnset(template, mergeLearnsets) || {};
+			species = Dex.getSpecies(species.baseSpecies);
+			mergeLearnset = getSpeciesMergeLearnset(species, mergeLearnsets) || {};
 		}
 		//console.log(mergeLearnset);
 		const lsetData = new Set(Object.keys(mergeLearnset));
 
-		while (template.prevo) {
-			template = Dex.getTemplate(template.prevo);
-			mergeLearnset = getTemplateMergeLearnset(template, mergeLearnsets);
+		while (species.prevo) {
+			species = Dex.getSpecies(species.prevo);
+			mergeLearnset = getSpeciesMergeLearnset(species, mergeLearnsets);
 			for (const move in mergeLearnset) {
 				lsetData.add(move);
 			}
@@ -2167,8 +2167,8 @@ function runMergeMovesearch(target: string, cmd: string, canAll: boolean, messag
 	const validMoves = new Set(Object.keys(Dex.data.Movedex));
 	validMoves.delete('magikarpsrevenge');
 	for (const mon of targetMons) {
-		const template = Dex.getTemplate(mon.name);
-		const lsetData = getFullMergeLearnsetOfPokemon(template, mergeLearnsets);
+		const species = Dex.getSpecies(mon.name);
+		const lsetData = getFullMergeLearnsetOfPokemon(species, mergeLearnsets);
 		// This pokemon's learnset needs to be excluded, so we perform a difference operation on the valid moveset and this pokemon's moveset.
 		if (mon.shouldBeExcluded) {
 			for (const move of lsetData) {

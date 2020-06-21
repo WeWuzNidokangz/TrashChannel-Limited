@@ -1378,7 +1378,7 @@ interface ModdedBattleScriptsData extends Partial<BattleScriptsData> {
 	canZMove?: (this: Battle, pokemon: Pokemon) => ZMoveOptions | void;
 
 	//#region TrashChannel
-	getAbilityMapping?: (this: Battle, pokemon: Pokemon) => TemplateAbility;
+	getAbilityMapping?: (this: Battle, pokemon: Pokemon) => SpeciesAbility;
 	//#endregion
 }
 

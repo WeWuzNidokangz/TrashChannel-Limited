@@ -104,8 +104,8 @@ const commands = {
 	'350cuptiershift': function (target, room, user) {
 		if (!this.runBroadcast()) return;
 		if (!toID(target)) return this.parse('/help 350tiershift');
-		let template = Object.assign({}, Dex.getTemplate(target));
-		if (!template.exists) return this.errorReply("Error: Pokemon not found.");
+		let species = Object.assign({}, Dex.getSpecies(target));
+		if (!species.exists) return this.errorReply("Error: Pokemon not found.");
 
 		//console.log('RULESETS: ' + RULESETS);
 
@@ -121,15 +121,15 @@ const commands = {
 			}
 		}
 
-		// Deepclone template to avoid permanently altering the original
-		let cloneTemplate = DexCalculator.deepClone(template);
+		// Deepclone species to avoid permanently altering the original
+		let cloneSpecies = DexCalculator.deepClone(species);
 
-		cloneTemplate = Rulesets['350cuprule'].onModifyTemplate(cloneTemplate, null);
-		if(!cloneTemplate) return this.errorReply(`350cuprule.onModifyTemplate failed on this Pokemon.`);
-		cloneTemplate = Rulesets['tiershiftrule'].onModifyTemplate(cloneTemplate, null, null, 'dummy'); // Set dummy effect to bypass internal validation
-		if(!cloneTemplate) return this.errorReply(`tiershiftrule.onModifyTemplate failed on this Pokemon.`);
+		cloneSpecies = Rulesets['350cuprule'].onModifySpecies(cloneSpecies, null);
+		if(!cloneSpecies) return this.errorReply(`350cuprule.onModifySpecies failed on this Pokemon.`);
+		cloneSpecies = Rulesets['tiershiftrule'].onModifySpecies(cloneSpecies, null, null, 'dummy'); // Set dummy effect to bypass internal validation
+		if(!cloneSpecies) return this.errorReply(`tiershiftrule.onModifySpecies failed on this Pokemon.`);
 
-		this.sendReply(`|html|${Chat.getDataPokemonHTML(cloneTemplate)}`);
+		this.sendReply(`|html|${Chat.getDataPokemonHTML(cloneSpecies)}`);
 	},
 	'350cuptiershifthelp': [`/350ts OR /350tiershift OR /350cuptiershift <pokemon> - Shows the base stats that a Pokemon would have in a mashup including 350 Cup and Tier Shift.`],
 
@@ -141,7 +141,7 @@ const commands = {
 		if (!this.runBroadcast()) return;
 		if (!toID(target) || !target.includes('@')) return this.parse('/help mixandmegatiershift');
 		let sep = target.split('@');
-		let template = Dex.getTemplate(sep[0]);
+		let species = Dex.getSpecies(sep[0]);
 
 		// Load rulesets
 		/**@type {{[k: string]: FormatsData}} */
@@ -155,11 +155,11 @@ const commands = {
 			}
 		}
 
-		let cloneTemplate = DexCalculator.deepClone(template);
-		cloneTemplate = Rulesets['tiershiftrule'].onModifyTemplate(cloneTemplate, null, null, 'dummy'); // Set dummy effect to bypass internal validation
-		if(!cloneTemplate) return this.errorReply(`tiershiftrule.onModifyTemplate failed on this Pokemon.`);
+		let cloneSpecies = DexCalculator.deepClone(species);
+		cloneSpecies = Rulesets['tiershiftrule'].onModifySpecies(cloneSpecies, null, null, 'dummy'); // Set dummy effect to bypass internal validation
+		if(!cloneSpecies) return this.errorReply(`tiershiftrule.onModifySpecies failed on this Pokemon.`);
 
-		TrashChannelChatSupport.mixandmegainternal(this, cloneTemplate, sep[1], "TS");
+		TrashChannelChatSupport.mixandmegainternal(this, cloneSpecies, sep[1], "TS");
 	},
 	mixandmegatiershifthelp: [`/mnmts <pokemon> @ <mega stone> - Shows the Tier Shifted Mix and Mega evolved Pokemon's type and stats.`],
 
@@ -169,26 +169,26 @@ const commands = {
 		if (!this.runBroadcast()) return;
 		if (!toID(target) || !target.includes('@')) return this.parse('/help bitchandbeggar');
 		let sep = target.split('@');
-		let bitchTemplate = Dex.getTemplate(sep[1]);
-		let beggarTemplate = Object.assign({}, Dex.getTemplate(sep[0]));
-		if (!bitchTemplate.exists) return this.errorReply(`Error: Bitch Pokemon not found.`);
-		if (!beggarTemplate.exists) return this.errorReply(`Error: Beggar Pokemon not found.`);
-		if (beggarTemplate.isMega || beggarTemplate.name === 'Necrozma-Ultra') { // Mega Pokemon and Ultra Necrozma cannot be beggar evolved
+		let bitchSpecies = Dex.getSpecies(sep[1]);
+		let beggarSpecies = Object.assign({}, Dex.getSpecies(sep[0]));
+		if (!bitchSpecies.exists) return this.errorReply(`Error: Bitch Pokemon not found.`);
+		if (!beggarSpecies.exists) return this.errorReply(`Error: Beggar Pokemon not found.`);
+		if (beggarSpecies.isMega || beggarSpecies.name === 'Necrozma-Ultra') { // Mega Pokemon and Ultra Necrozma cannot be beggar evolved
 			this.errorReply(`Warning: You cannot beggar evolve Mega Pokemon and Ultra Necrozma in Bitch and Beggar.`);
 		}
 		let banlist = Dex.getFormat('gen8bitchandbeggar').banlist;
-		if (banlist.includes(bitchTemplate.name)) {
-			this.errorReply(`Warning: ${bitchTemplate.name} is banned from Bitch and Beggar.`);
+		if (banlist.includes(bitchSpecies.name)) {
+			this.errorReply(`Warning: ${bitchSpecies.name} is banned from Bitch and Beggar.`);
 		}
 		let cannotMega = Dex.getFormat('gen8bitchandbeggar').cannotMega || [];
-		if (cannotMega.includes(beggarTemplate.name) && beggarTemplate.name !== bitchTemplate.megaEvolves && !beggarTemplate.isMega) { // Separate messages because there's a difference between being already beggar evolved / NFE and being banned from beggar evolving
-			this.errorReply(`Warning: ${beggarTemplate.name} is banned from beggar evolving in Bitch and Beggar.`);
+		if (cannotMega.includes(beggarSpecies.name) && beggarSpecies.name !== bitchSpecies.megaEvolves && !beggarSpecies.isMega) { // Separate messages because there's a difference between being already beggar evolved / NFE and being banned from beggar evolving
+			this.errorReply(`Warning: ${beggarSpecies.name} is banned from beggar evolving in Bitch and Beggar.`);
 		}
-		if (['Multitype', 'RKS System'].includes(beggarTemplate.abilities['0']) && !['Arceus', 'Silvally'].includes(beggarTemplate.name)) {
-			this.errorReply(`Warning: ${beggarTemplate.name} is required to hold ${beggarTemplate.baseSpecies === 'Arceus' && beggarTemplate.requiredItems ? 'either ' + beggarTemplate.requiredItems[0] + ' or ' + beggarTemplate.requiredItems[1] : beggarTemplate.requiredItem}.`);
+		if (['Multitype', 'RKS System'].includes(beggarSpecies.abilities['0']) && !['Arceus', 'Silvally'].includes(beggarSpecies.name)) {
+			this.errorReply(`Warning: ${beggarSpecies.name} is required to hold ${beggarSpecies.baseSpecies === 'Arceus' && beggarSpecies.requiredItems ? 'either ' + beggarSpecies.requiredItems[0] + ' or ' + beggarSpecies.requiredItems[1] : beggarSpecies.requiredItem}.`);
 		}
-		if (bitchTemplate.isUnreleased) {
-			this.errorReply(`Warning: ${bitchTemplate.name} is unreleased and is not usable in current Bitch and Beggar.`);
+		if (bitchSpecies.isUnreleased) {
+			this.errorReply(`Warning: ${bitchSpecies.name} is unreleased and is not usable in current Bitch and Beggar.`);
 		}
 		
 		// Load formats
@@ -205,7 +205,7 @@ const commands = {
 
 		// BnB BST limit
 		if(Formats) {
-			let bitchBST = Dex.calcBST(bitchTemplate.baseStats);
+			let bitchBST = Dex.calcBST(bitchSpecies.baseStats);
 			/**@type {FormatsData} */
 			let BnBFormat = null;
 			for(let nFrmItr=0; nFrmItr<Formats.length; ++nFrmItr) {
@@ -217,17 +217,17 @@ const commands = {
 			if( null != BnBFormat ) {
 				let bitchBSTLimit = BnBFormat.modValueNumberA;
 				if(bitchBST > bitchBSTLimit) {
-					this.errorReply(`Bitches are limited to ` + bitchBSTLimit.toString() + ` BST, but ` + bitchTemplate.name + ` has ` + bitchBST.toString() + `.`);
+					this.errorReply(`Bitches are limited to ` + bitchBSTLimit.toString() + ` BST, but ` + bitchSpecies.name + ` has ` + bitchBST.toString() + `.`);
 				}
 			}
 		}
 		// Fake Pokemon and Mega Stones
-		if (beggarTemplate.isNonstandard === "CAP") {
-			this.errorReply(`Warning: ${beggarTemplate.name} is not a real Pokemon and is therefore not usable in Bitch and Beggar.`);
+		if (beggarSpecies.isNonstandard === "CAP") {
+			this.errorReply(`Warning: ${beggarSpecies.name} is not a real Pokemon and is therefore not usable in Bitch and Beggar.`);
 		}
 		// Actually can be used with CAP
-		if (bitchTemplate.isNonstandard === "CAP") {
-			this.errorReply(`Warning: ${bitchTemplate.name} is a fake bitch created by the CAP Project and is restricted to CAP mashups.`);
+		if (bitchSpecies.isNonstandard === "CAP") {
+			this.errorReply(`Warning: ${bitchSpecies.name} is a fake bitch created by the CAP Project and is restricted to CAP mashups.`);
 		}
 
 		// Load BnB mod functions
@@ -244,31 +244,31 @@ const commands = {
 		if(!BnBMod) return this.errorReply(`BITCHANDBEGGARMOD not found.`);
 
 		// Do beggar evo calcs
-		const mixedTemplate = BnBMod.getMixedTemplate(beggarTemplate.name, bitchTemplate.name);
-		mixedTemplate.tier = "BnB";
+		const mixedSpecies = BnBMod.getMixedSpecies(beggarSpecies.name, bitchSpecies.name);
+		mixedSpecies.tier = "BnB";
 		let weighthit = 20;
-		if (mixedTemplate.weighthg >= 2000) {
+		if (mixedSpecies.weighthg >= 2000) {
 			weighthit = 120;
-		} else if (mixedTemplate.weighthg >= 1000) {
+		} else if (mixedSpecies.weighthg >= 1000) {
 			weighthit = 100;
-		} else if (mixedTemplate.weighthg >= 500) {
+		} else if (mixedSpecies.weighthg >= 500) {
 			weighthit = 80;
-		} else if (mixedTemplate.weighthg >= 250) {
+		} else if (mixedSpecies.weighthg >= 250) {
 			weighthit = 60;
-		} else if (mixedTemplate.weighthg >= 100) {
+		} else if (mixedSpecies.weighthg >= 100) {
 			weighthit = 40;
 		}
 		/** @type {{[k: string]: string}} */
 		let details = {
-			"Dex#": '' + mixedTemplate.num,
-			"Gen": '' + mixedTemplate.gen,
-			"Height": mixedTemplate.heightm + " m",
-			"Weight": mixedTemplate.weighthg / 10  + " kg <em>(" + weighthit + " BP)</em>",
-			"Dex Colour": mixedTemplate.color,
+			"Dex#": '' + mixedSpecies.num,
+			"Gen": '' + mixedSpecies.gen,
+			"Height": mixedSpecies.heightm + " m",
+			"Weight": mixedSpecies.weighthg / 10  + " kg <em>(" + weighthit + " BP)</em>",
+			"Dex Colour": mixedSpecies.color,
 		};
-		if (mixedTemplate.eggGroups) details["Egg Group(s)"] = mixedTemplate.eggGroups.join(", ");
+		if (mixedSpecies.eggGroups) details["Egg Group(s)"] = mixedSpecies.eggGroups.join(", ");
 		details['<font color="#686868">Does Not Evolve</font>'] = "";
-		this.sendReply(`|raw|${Chat.getDataPokemonHTML(mixedTemplate)}`);
+		this.sendReply(`|raw|${Chat.getDataPokemonHTML(mixedSpecies)}`);
 		this.sendReply('|raw|<font size="1">' + Object.keys(details).map(detail => {
 			if (details[detail] === '') return detail;
 			return '<font color="#686868">' + detail + ':</font> ' + details[detail];
