@@ -310,7 +310,7 @@ exports.BattleScripts = {
 				const moveAction = this.queue.splice(moveIndex, 1)[0];
 				// @ts-ignore
 				moveAction.mega = 'done';
-				this.insertQueue(moveAction, true);
+				this.queue.insertChoice(moveAction, true);
 			}
 			return false;
 		case 'beforeTurnMove': {

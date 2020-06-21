@@ -6,7 +6,7 @@ let BattleItems = {
 		inherit: true,
 		onSwitchIn(pokemon) {
 			if (pokemon.isActive && !pokemon.species.isPrimal) {
-				this.insertQueue({pokemon: pokemon, choice: 'runPrimal'});
+				this.queue.insertChoice({pokemon: pokemon, choice: 'runPrimal'});
 			}
 		},
 		onPrimal(pokemon) {
@@ -29,7 +29,7 @@ let BattleItems = {
 		inherit: true,
 		onSwitchIn(pokemon) {
 			if (pokemon.isActive && !pokemon.species.isPrimal) {
-				this.insertQueue({pokemon: pokemon, choice: 'runPrimal'});
+				this.queue.insertChoice({pokemon: pokemon, choice: 'runPrimal'});
 			}
 		},
 		onPrimal(pokemon) {

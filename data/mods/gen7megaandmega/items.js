@@ -6,7 +6,7 @@ let BattleItems = {
 		inherit: true,
 		onSwitchIn(pokemon) { // 19/07/14 TrashChannel: Allow real Primal Pokemon to revert again, but only once
 			if (pokemon.isActive && !pokemon.m.hasActivatedPrimalOrb) {
-				this.insertQueue({pokemon: pokemon, choice: 'runPrimal'});
+				this.queue.insertChoice({pokemon: pokemon, choice: 'runPrimal'});
 				pokemon.m.hasActivatedPrimalOrb = true;
 			}
 		},
@@ -31,7 +31,7 @@ let BattleItems = {
 		inherit: true,
 		onSwitchIn(pokemon) { // 19/07/14 TrashChannel: Allow real Primal Pokemon to revert again, but only once
 			if (pokemon.isActive && !pokemon.m.hasActivatedPrimalOrb) {
-				this.insertQueue({pokemon: pokemon, choice: 'runPrimal'});
+				this.queue.insertChoice({pokemon: pokemon, choice: 'runPrimal'});
 				pokemon.m.hasActivatedPrimalOrb = true;
 			}
 		},
