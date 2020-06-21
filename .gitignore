@@ -1,5 +1,5 @@
 /config/*
-!/config/formats.js
+!/config/formats.ts
 !/config/usergroups.csv
 /logs/*
 /node_modules

@@ -275,11 +275,13 @@ export class TeamValidator {
 				problems = problems.concat(setProblems);
 			}
 			if (options.removeNicknames) {
+				const species = dex.getSpecies(set.species);
 				let crossSpecies: Species;
 				if (format.name === '[Gen 8] Cross Evolution' && (crossSpecies = dex.getSpecies(set.name)).exists) {
 					set.name = crossSpecies.name;
 				} else {
-					set.name = dex.getSpecies(set.species).baseSpecies;
+					set.name = species.baseSpecies;
+					if (species.baseSpecies === 'Unown') set.species = 'Unown';
 				}
 			}
 		}
@@ -336,7 +338,14 @@ export class TeamValidator {
 		}
 
 		let species = dex.getSpecies(set.species);
-		set.species = Dex.getForme(set.species);
+		set.species = species.name;
+		if (set.name && set.name.length > 18) {
+			if (set.name === set.species) {
+				set.name = species.baseSpecies;
+			} else {
+				problems.push(`Nickname "${set.name}" too long (should be 18 characters or fewer)`);
+			}
+		}
 		set.name = dex.getName(set.name);
 		let item = dex.getItem(Dex.getString(set.item));
 		set.item = item.name;
@@ -367,11 +376,6 @@ export class TeamValidator {
 			problems.push((set.name || set.species) + ' is higher than level 100.');
 		}
 
-		const nameSpecies = dex.getSpecies(set.name);
-		if (nameSpecies.exists && nameSpecies.name.toLowerCase() === set.name.toLowerCase()) {
-			// Name must not be the name of another pokemon
-			set.name = '';
-		}
 		set.name = set.name || species.baseSpecies;
 		let name = set.species;
 		if (set.species !== set.name && species.baseSpecies !== set.name) {
@@ -649,7 +653,7 @@ export class TeamValidator {
 				legal = true;
 				break;
 			}
-			if (!legal && species.id === 'celebi' && dex.gen >= 7 && !this.validateSource(set, '7V', setSources, species)) {
+			if (!legal && species.gen <= 2 && dex.gen >= 7 && !this.validateSource(set, '7V', setSources, species)) {
 				legal = true;
 			}
 			if (!legal) {
@@ -731,6 +735,18 @@ export class TeamValidator {
 		}
 		if (format.onValidateSet) {
 			problems = problems.concat(format.onValidateSet.call(this, set, format, setHas, teamHas, ruleTable) || []);
+		}
+
+		const nameSpecies = dex.getSpecies(set.name);
+		if (nameSpecies.exists && nameSpecies.name.toLowerCase() === set.name.toLowerCase()) {
+			// nickname is the name of a species
+			if (nameSpecies.baseSpecies === species.baseSpecies) {
+				set.name = species.baseSpecies;
+			} else if (nameSpecies.name !== species.name && nameSpecies.name !== species.baseSpecies) {
+				// nickname species doesn't match actual species
+				// Nickname Clause
+				problems.push(`${name} must not be nicknamed a different Pokémon species than what it actually is.`);
+			}
 		}
 
 		if (!problems.length) {
@@ -845,9 +861,7 @@ export class TeamValidator {
 			if (dex.gen > 1 && !species.gender) {
 				// Gen 2 gender is calculated from the Atk DV.
 				// High Atk DV <-> M. The meaning of "high" depends on the gender ratio.
-				let genderThreshold = species.genderRatio.F * 16;
-				if (genderThreshold === 4) genderThreshold = 5;
-				if (genderThreshold === 8) genderThreshold = 7;
+				const genderThreshold = species.genderRatio.F * 16;
 
 				const expectedGender = (atkDV >= genderThreshold ? 'M' : 'F');
 				if (set.gender && set.gender !== expectedGender) {
@@ -894,8 +908,17 @@ export class TeamValidator {
 			}
 		} else { // EVs
 			for (const stat in set.evs) {
-				if (set.evs[stat as 'hp'] > 255) {
+				if (set.evs[stat as StatName] > 255) {
 					problems.push(`${name} has more than 255 EVs in ${statTable[stat as 'hp']}.`);
+				}
+			}
+			if (dex.gen <= 2) {
+				if (set.evs.spa !== set.evs.spd) {
+					if (dex.gen === 2) {
+						problems.push(`${name} has different SpA and SpD EVs, which is not possible in Gen 2.`);
+					} else {
+						set.evs.spd = set.evs.spa;
+					}
 				}
 			}
 		}
@@ -998,6 +1021,7 @@ export class TeamValidator {
 				generation: 5,
 				level: 10,
 				from: 'Gen 5 Dream World',
+				isHidden: true,
 			};
 		} else if (source.charAt(1) === 'E') {
 			if (this.findEggMoveFathers(source, species, setSources)) {
@@ -1039,10 +1063,13 @@ export class TeamValidator {
 		let eggGroups = species.eggGroups;
 		if (species.id === 'nidoqueen' || species.id === 'nidorina') {
 			eggGroups = dex.getSpecies('nidoranf').eggGroups;
+		} else if (dex !== this.dex) {
+			// Gen 1 tradeback; grab the egg groups from Gen 2
+			eggGroups = dex.getSpecies(species.id).eggGroups;
 		}
 		if (eggGroups[0] === 'Undiscovered') eggGroups = dex.getSpecies(species.evos[0]).eggGroups;
 		if (eggGroups[0] === 'Undiscovered' || !eggGroups.length) {
-			throw new Error(`${species.name} has no egg groups`);
+			throw new Error(`${species.name} has no egg groups for source ${source}`);
 		}
 		// no chainbreeding necessary if the father can be Smeargle
 		if (!getAll && eggGroups.includes('Field')) return true;
@@ -1138,29 +1165,44 @@ export class TeamValidator {
 		const problems = [];
 		const item = dex.getItem(set.item);
 		const species = dex.getSpecies(set.species);
-		const battleForme = species.battleOnly && species.name;
 
-		if (battleForme) {
+		if (species.name === 'Necrozma-Ultra') {
+			const whichMoves = (set.moves.includes('sunsteelstrike') ? 1 : 0) +
+				(set.moves.includes('moongeistbeam') ? 2 : 0);
+			if (item.name !== 'Ultranecrozium Z') {
+				// Necrozma-Ultra transforms from one of two formes, and neither one is the base forme
+				problems.push(`Necrozma-Ultra must start the battle holding Ultranecrozium Z.`);
+			} else if (whichMoves === 1) {
+				set.species = 'Necrozma-Dusk-Mane';
+			} else if (whichMoves === 2) {
+				set.species = 'Necrozma-Dawn-Wings';
+			} else {
+				problems.push(`Necrozma-Ultra must start the battle as Necrozma-Dusk-Mane or Necrozma-Dawn-Wings holding Ultranecrozium Z. Please specify which Necrozma it should start as.`);
+			}
+		} else if (species.name === 'Zygarde-Complete') {
+			problems.push(`Zygarde-Complete must start the battle as Zygarde or Zygarde-10% with Power Construct. Please specify which Zygarde it should start as.`);
+		} else if (species.battleOnly) {
 			if (species.requiredAbility && set.ability !== species.requiredAbility) {
-				// Darmanitan-Zen, Zygarde-Complete
-				problems.push(`${species.name} transforms in-battle with ${species.requiredAbility}.`);
+				// Darmanitan-Zen
+				problems.push(`${species.name} transforms in-battle with ${species.requiredAbility}, please fix its ability.`);
 			}
 			if (species.requiredItems) {
-				if (species.name === 'Necrozma-Ultra') {
-					// Necrozma-Ultra transforms from one of two formes, and neither one is the base forme
-					problems.push(`Necrozma-Ultra must start the battle as Necrozma-Dawn-Wings or Necrozma-Dusk-Mane holding Ultranecrozium Z.`);
-				} else if (!species.requiredItems.includes(item.name)) {
+				if (!species.requiredItems.includes(item.name)) {
 					// Mega or Primal
-					problems.push(`${species.name} transforms in-battle with ${species.requiredItem}.`);
+					problems.push(`${species.name} transforms in-battle with ${species.requiredItem}, please fix its item.`);
 				}
 			}
 			if (species.requiredMove && !set.moves.includes(toID(species.requiredMove))) {
 				// Meloetta-Pirouette, Rayquaza-Mega
-				problems.push(`${species.name} transforms in-battle with ${species.requiredMove}.`);
+				problems.push(`${species.name} transforms in-battle with ${species.requiredMove}, please fix its moves.`);
 			}
 			if (!species.isGigantamax) {
+				if (typeof species.battleOnly !== 'string') {
+					// Ultra Necrozma and Complete Zygarde are already checked above
+					throw new Error(`${species.name} should have a string battleOnly`);
+				}
 				// Set to out-of-battle forme
-				set.species = dex.getOutOfBattleSpecies(species);
+				set.species = species.battleOnly;
 			}
 		} else {
 			if (species.requiredAbility) {
@@ -1171,12 +1213,26 @@ export class TeamValidator {
 				if (dex.gen >= 8 && (species.baseSpecies === 'Arceus' || species.baseSpecies === 'Silvally')) {
 					// Arceus/Silvally formes in gen 8 only require the item with Multitype/RKS System
 					if (set.ability === species.abilities[0]) {
-						problems.push(`${name} needs to hold ${species.requiredItems.join(' or ')}.`);
+						problems.push(
+							`${name} needs to hold ${species.requiredItems.join(' or ')}.`,
+							`(It will revert to its Normal forme if you remove the item or give it a different item.)`
+						);
 					}
 				} else {
 					// Memory/Drive/Griseous Orb/Plate/Z-Crystal - Forme mismatch
-					problems.push(`${name} needs to hold ${species.requiredItems.join(' or ')}.`);
+					const baseSpecies = Dex.getSpecies(species.changesFrom);
+					problems.push(
+						`${name} needs to hold ${species.requiredItems.join(' or ')} to be in its ${species.forme} forme.`,
+						`(It will revert to its ${baseSpecies.baseForme} forme if you remove the item or give it a different item.)`
+					);
 				}
+			}
+			if (species.requiredMove && !set.moves.includes(toID(species.requiredMove))) {
+				const baseSpecies = Dex.getSpecies(species.changesFrom);
+				problems.push(
+					`${name} needs to know the move ${species.requiredMove} to be in its ${species.forme} forme.`,
+					`(It will revert to its ${baseSpecies.baseForme} forme if it forgets the move.)`
+				);
 			}
 
 			// Mismatches between the set forme (if not base) and the item signature forme will have been rejected already.
@@ -1285,6 +1341,11 @@ export class TeamValidator {
 		}
 		if (banReason === '') return null;
 
+		banReason = ruleTable.check('pokemontag:allpokemon');
+		if (banReason) {
+			return `${species.name} is not in the list of allowed pokemon.`;
+		}
+
 		// obtainability
 		if (tierSpecies.isNonstandard) {
 			banReason = ruleTable.check('pokemontag:' + toID(tierSpecies.isNonstandard));
@@ -1306,22 +1367,6 @@ export class TeamValidator {
 				return `${tierSpecies.name} does not exist in this game.`;
 			}
 			if (banReason === '') return null;
-		} else if (tierSpecies.isUnreleased) {
-			let isUnreleased: boolean | 'Past' = tierSpecies.isUnreleased;
-			if (isUnreleased === 'Past' && this.minSourceGen < dex.gen) isUnreleased = false;
-
-			if (isUnreleased) {
-				banReason = ruleTable.check('unreleased', setHas);
-				if (banReason) {
-					return `${tierSpecies.name} is unreleased.`;
-				}
-				if (banReason === '') return null;
-			}
-		}
-
-		banReason = ruleTable.check('pokemontag:allpokemon');
-		if (banReason) {
-			return `${species.name} is not in the list of allowed pokemon.`;
 		}
 
 		return null;
@@ -1339,14 +1384,24 @@ export class TeamValidator {
 		}
 		if (banReason === '') return null;
 
+		banReason = ruleTable.check('pokemontag:allitems');
+		if (banReason) {
+			return `${set.name}'s item ${item.name} is not in the list of allowed items.`;
+		}
+
 		// obtainability
 		if (item.isNonstandard) {
 			banReason = ruleTable.check('pokemontag:' + toID(item.isNonstandard));
 			if (banReason) {
+				if (item.isNonstandard === 'Unobtainable') {
+					return `${item.name} is not obtainable without hacking or glitches.`;
+				}
 				return `${set.name}'s item ${item.name} is tagged ${item.isNonstandard}, which is ${banReason}.`;
 			}
 			if (banReason === '') return null;
+		}
 
+		if (item.isNonstandard && item.isNonstandard !== 'Unobtainable') {
 			banReason = ruleTable.check('nonexistent', setHas);
 			if (banReason) {
 				if (['Past', 'Future'].includes(item.isNonstandard)) {
@@ -1355,17 +1410,6 @@ export class TeamValidator {
 				return `${set.name}'s item ${item.name} does not exist in this game.`;
 			}
 			if (banReason === '') return null;
-		} else if (item.isUnreleased) {
-			banReason = ruleTable.check('unreleased', setHas);
-			if (banReason) {
-				return `${set.name}'s item ${item.name} is unreleased.`;
-			}
-			if (banReason === '') return null;
-		}
-
-		banReason = ruleTable.check('pokemontag:allitems');
-		if (banReason) {
-			return `${set.name}'s item ${item.name} is not in the list of allowed items.`;
 		}
 
 		return null;
@@ -1383,14 +1427,28 @@ export class TeamValidator {
 		}
 		if (banReason === '') return null;
 
+		if (ruleTable.isBanned('nonexistent') && typeof move.isMax === 'string') {
+			return `${set.name}'s move ${move.name} is not obtainable without Gigantamaxing ${move.isMax}.`;
+		}
+
+		banReason = ruleTable.check('pokemontag:allmoves');
+		if (banReason) {
+			return `${set.name}'s move ${move.name} is not in the list of allowed moves.`;
+		}
+
 		// obtainability
 		if (move.isNonstandard) {
 			banReason = ruleTable.check('pokemontag:' + toID(move.isNonstandard));
 			if (banReason) {
+				if (move.isNonstandard === 'Unobtainable') {
+					return `${move.name} is not obtainable without hacking or glitches.`;
+				}
 				return `${set.name}'s move ${move.name} is tagged ${move.isNonstandard}, which is ${banReason}.`;
 			}
 			if (banReason === '') return null;
+		}
 
+		if (move.isNonstandard && move.isNonstandard !== 'Unobtainable') {
 			banReason = ruleTable.check('nonexistent', setHas);
 			if (banReason) {
 				if (['Past', 'Future'].includes(move.isNonstandard)) {
@@ -1399,11 +1457,6 @@ export class TeamValidator {
 				return `${set.name}'s move ${move.name} does not exist in this game.`;
 			}
 			if (banReason === '') return null;
-		}
-
-		banReason = ruleTable.check('pokemontag:allmoves');
-		if (banReason) {
-			return `${set.name}'s move ${move.name} is not in the list of allowed moves.`;
 		}
 
 		return null;
@@ -1420,6 +1473,11 @@ export class TeamValidator {
 			return `${set.name}'s ability ${ability.name} is ${banReason}.`;
 		}
 		if (banReason === '') return null;
+
+		banReason = ruleTable.check('pokemontag:allabilities');
+		if (banReason) {
+			return `${set.name}'s ability ${ability.name} is not in the list of allowed abilities.`;
+		}
 
 		// obtainability
 		if (ability.isNonstandard) {
@@ -1439,11 +1497,6 @@ export class TeamValidator {
 			if (banReason === '') return null;
 		}
 
-		banReason = ruleTable.check('pokemontag:allabilities');
-		if (banReason) {
-			return `${set.name}'s ability ${ability.name} is not in the list of allowed abilities.`;
-		}
-
 		return null;
 	}
 
@@ -1460,6 +1513,7 @@ export class TeamValidator {
 		const dex = this.dex;
 		let name = set.species;
 		const species = dex.getSpecies(set.species);
+		const maxSourceGen = this.ruleTable.has('allowtradeback') ? 2 : dex.gen;
 		if (!eventSpecies) eventSpecies = species;
 		if (set.name && set.species !== set.name && species.baseSpecies !== set.name) name = `${set.name} (${set.species})`;
 
@@ -1469,11 +1523,11 @@ export class TeamValidator {
 
 		const problems = [];
 
-		if (this.minSourceGen > eventData.generation) {
+		if (dex.gen < 8 && this.minSourceGen > eventData.generation) {
 			if (fastReturn) return true;
 			problems.push(`This format requires Pokemon from gen ${this.minSourceGen} or later and ${name} is from gen ${eventData.generation}${etc}.`);
 		}
-		if (dex.gen < eventData.generation) {
+		if (maxSourceGen < eventData.generation) {
 			if (fastReturn) return true;
 			problems.push(`This format is in gen ${dex.gen} and ${name} is from gen ${eventData.generation}${etc}.`);
 		}
@@ -1701,8 +1755,8 @@ export class TeamValidator {
 		const dex = this.dex;
 		if (!setSources.size()) throw new Error(`Bad sources passed to checkLearnset`);
 
-		const moveid = toID(move);
-		move = dex.getMove(moveid);
+		move = dex.getMove(move);
+		const moveid = move.id;
 		const baseSpecies = dex.getSpecies(s);
 		let species: Species | null = baseSpecies;
 
@@ -1743,15 +1797,22 @@ export class TeamValidator {
 			if (dex.gen <= 2 && species.gen === 1) tradebackEligible = true;
 			const lsetData = dex.getLearnsetData(species.id);
 			if (!lsetData.learnset) {
-				if (species.baseSpecies !== species.name) {
+				if ((species.changesFrom || species.baseSpecies) !== species.name) {
 					// forme without its own learnset
-					species = dex.getSpecies(species.baseSpecies);
+					species = dex.getSpecies(species.changesFrom || species.baseSpecies);
 					// warning: formes with their own learnset, like Wormadam, should NOT
 					// inherit from their base forme unless they're freely switchable
 					continue;
 				}
+				if (species.isNonstandard) {
+					// It's normal for a nonstandard species not to have learnset data
+
+					// Formats should replace the `Obtainable Moves` rule if they want to
+					// allow pokemon without learnsets.
+					return {type: 'invalid'};
+				}
 				// should never happen
-				break;
+				throw new Error(`Species with no learnset data: ${species.id}`);
 			}
 			const checkingPrevo = species.baseSpecies !== s.baseSpecies;
 			if (checkingPrevo && !moveSources.size()) {
@@ -1764,7 +1825,11 @@ export class TeamValidator {
 				sometimesPossible = true;
 				let lset = lsetData.learnset[moveid];
 				if (moveid === 'sketch' || !lset || species.id === 'smeargle') {
-					if (move.noSketch || move.isZ) return {type: 'invalid'};
+					// The logic behind this comes from the idea that a Pokemon that learns Sketch
+					// should be able to Sketch any move before transferring into Generation 8.
+					if (move.noSketch || move.isZ || move.isMax || (move.gen > 7 && !this.format.id.includes('nationaldex'))) {
+						return {type: 'invalid'};
+					}
 					lset = lsetData.learnset['sketch'];
 					sketch = true;
 				}
@@ -1831,22 +1896,16 @@ export class TeamValidator {
 					}
 
 					// Gen 8 egg moves can be taught to any pokemon from any source
-					if (learned === '8E') learned = '8T';
-
-					if ('LMTR'.includes(learned.charAt(1))) {
+					if (learned === '8E' || 'LMTR'.includes(learned.charAt(1))) {
 						if (learnedGen === dex.gen && learned.charAt(1) !== 'R') {
 							// current-gen level-up, TM or tutor moves:
 							//   always available
-							if (babyOnly) setSources.babyOnly = babyOnly;
+							if (learned !== '8E' && babyOnly) setSources.babyOnly = babyOnly;
 							if (!moveSources.moveEvoCarryCount) return null;
 						}
 						// past-gen level-up, TM, or tutor moves:
 						//   available as long as the source gen was or was before this gen
 						if (learned.charAt(1) === 'R') {
-							if (baseSpecies.name === 'Pikachu-Gmax') {
-								// Volt Tackle is weird (from egg, but not an egg move), and Pikachu-Gmax can't learn it
-								continue;
-							}
 							moveSources.restrictedMove = moveid;
 						}
 						limit1 = false;
@@ -1970,9 +2029,11 @@ export class TeamValidator {
 			species = this.dex.getSpecies(species.prevo);
 			if (species.gen > Math.max(2, this.dex.gen)) return null;
 			return species;
-		} else if (species.inheritsFrom) {
+		} else if (species.changesFrom && species.baseSpecies !== 'Kyurem') {
 			// For Pokemon like Rotom, Necrozma, and Gmax formes whose movesets are extensions are their base formes
-			return this.dex.getSpecies(species.inheritsFrom);
+			return this.dex.getSpecies(species.changesFrom);
+		} else if (species.baseSpecies === 'Pumpkaboo') {
+			return this.dex.getSpecies('Pumpkaboo');
 		}
 		return null;
 	}
