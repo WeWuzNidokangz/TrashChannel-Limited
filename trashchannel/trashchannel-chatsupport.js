@@ -130,7 +130,9 @@ class TrashChannelChatSupport {
 			mixedSpecies.types = [mixedSpecies.types[0], deltas.type];
 		}
 		for (let statName in species.baseStats) { // Add the changed stats and weight
-			mixedSpecies.baseStats[statName] = Dex.clampIntRange(mixedSpecies.baseStats[statName] + deltas.baseStats[statName], 1, 255);
+			mixedSpecies.baseStats[statName] = Utils.clampIntRange(
+				mixedSpecies.baseStats[statName] + deltas.baseStats[statName], 1, 255
+			);
 		}
 		mixedSpecies.weighthg = Math.max(1, species.weighthg + deltas.weighthg);
 		mixedSpecies.tier = "MnM";
