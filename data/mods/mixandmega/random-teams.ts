@@ -1,15 +1,9 @@
-'use strict';
-
-const RandomTeams = require('./../../../data/random-teams');
-const ITEMS = require('./../../../data/items');
+import RandomTeams from '../../random-teams';
+import {BattleItems} from './../../../.data-dist/items';
 
 class RandomMnMTeams extends RandomTeams {
 	randomHCMnMTeam() {
 		let team = this.randomHCTeam();
-
-		// Load items
-		/**@type {{[k: string]: ItemData}} */
-		let BattleItems = ITEMS.BattleItems;
 
 		/**@type {string[]} */
 		let itemPool = [];
@@ -19,8 +13,8 @@ class RandomMnMTeams extends RandomTeams {
 			if( (BattleItems[item].megaStone) &&
 				("Crucibellite" !== BattleItems[item].name) )
 			{
-				console.log("Push mega item: " + BattleItems[item].name);
-				itemPool.push( BattleItems[item].id );
+				//console.log("Push mega item: " + BattleItems[item].name);
+				itemPool.push( toID(BattleItems[item].name) );
 			}
 		}
 		
@@ -38,4 +32,4 @@ class RandomMnMTeams extends RandomTeams {
 	}
 }
 
-module.exports = RandomMnMTeams;
+export default RandomMnMTeams;

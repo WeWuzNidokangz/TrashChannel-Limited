@@ -1,11 +1,8 @@
-'use strict';
-
-const DexCalculator = require('../../../trashchannel/dex-calculator');
+import {DexCalculator} from '../../../.trashchannel-dist/dex-calculator';
 
 // 18/10/27 TrashChannel: Based on mixandmega/scripts.js
 
-/**@type {ModdedBattleScriptsData} */
-let BattleScripts = {
+export const BattleScripts: ModdedBattleScriptsData = {
 	init() {
 		for (let id in this.data.Items) {
 			let bitchSpecies = this.getSpecies(id);
@@ -15,11 +12,12 @@ let BattleScripts = {
 	},
 	canMegaEvo(pokemon) {
 		if (pokemon.species.isMega || pokemon.species.isPrimal) return null;
+
 		let bitchSpecies = this.dex.getSpecies(pokemon.item);
 		if (bitchSpecies.exists) { // Bitch and beggar
 			return bitchSpecies.id;
 		}
-		
+
 		// Regular mega evo is no longer supported in Gen 8 (could add back for Natdex, etc later)
 		return null;
 	},
@@ -112,12 +110,12 @@ let BattleScripts = {
 		let context = (typeof Dex != 'undefined') ? Dex : this.dex;
 		let originalSpecies = context.getSpecies(originalForme);
 		let bitchSpecies = context.getSpecies(bitchForme);
-		/**@type {{abilities: SpeciesAbility, baseStats: {[k: string]: number}, weightkg: number, originalMega: string, requiredItem: string | undefined, type?: string, isMega?: boolean, isPrimal?: boolean}} */
+		/**@type {{abilities: SpeciesAbility, baseStats: {[k: string]: number}, weighthg: number, originalMega: string, requiredItem: string | undefined, type?: string, isMega?: boolean, isPrimal?: boolean}} */
 		let deltas = {
 			abilities: bitchSpecies.abilities,
 			baseStats: bitchSpecies.baseStats,
-			weightkg: bitchSpecies.weightkg,
-			originalMega: bitchSpecies.species,
+			weighthg: bitchSpecies.weighthg,
+			originalMega: bitchSpecies.name,
 			requiredItem: bitchSpecies.id,
 		};
 		//console.log("bitch length: " + bitchSpecies.types.length );
@@ -177,5 +175,3 @@ let BattleScripts = {
 		return species;
 	},
 };
-
-exports.BattleScripts = BattleScripts;

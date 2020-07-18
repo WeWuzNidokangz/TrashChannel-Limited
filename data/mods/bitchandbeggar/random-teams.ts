@@ -1,15 +1,9 @@
-'use strict';
-
-const RandomTeams = require('../../random-teams');
-const POKEDEX = require('../../pokedex');
+import RandomTeams from '../../random-teams';
+import {BattlePokedex} from '../../pokedex';
 
 class RandomBnBTeams extends RandomTeams {
 	randomHCBnBTeam() {
 		let team = this.randomHCTeam();
-
-		// Load pokedex
-		/**@type {{[k: string]: SpeciesData}} */
-		let BattlePokedex = POKEDEX.BattlePokedex;
 
 		/**@type {string[]} */
 		let bitchPool = [];
@@ -29,4 +23,4 @@ class RandomBnBTeams extends RandomTeams {
 	}
 }
 
-module.exports = RandomBnBTeams;
+export default RandomBnBTeams;

@@ -9,24 +9,8 @@
  * @license MIT license
  */
 
-'use strict';
-
-//const fs = require('fs');
-//const path = require('path');
-
-class DexCalculator {
-	constructor() {
-
-	}
-
-	/**
-	 * Forces num to be an integer (between min and max).
-	 * @param {any} num
-	 * @param {number=} min
-	 * @param {number=} max
-	 * @return {number}
-	 */
-	static clampIntRange(num, min, max) {
+export const DexCalculator = new class DexCalculator {
+	clampIntRange(num: any, min: number, max: number) {
 		if (typeof num !== 'number') num = 0;
 		num = Math.floor(num);
 		if (min !== undefined && num < min) num = min;
@@ -34,27 +18,19 @@ class DexCalculator {
 		return num;
 	}
 
-	/**
-	 * @param {any} obj
-	 * @return {any}
-	 */
-	static deepClone(obj) {
+	deepClone(obj: any): any {
 		if (obj === null || typeof obj !== 'object') return obj;
 		// @ts-ignore
-		if (Array.isArray(obj)) return obj.map(prop => DexCalculator.deepClone(prop));
+		if (Array.isArray(obj)) return obj.map(prop => this.deepClone(prop));
 		const clone = Object.create(Object.getPrototypeOf(obj));
 		for (const key of Object.keys(obj)) {
 			// @ts-ignore
-			clone[key] = DexCalculator.deepClone(obj[key]);
+			clone[key] = this.deepClone(obj[key]);
 		}
 		return clone;
 	}
 
-	/**
-	 * @param {string} character
-	 * @return {boolean}
-	 */
-	static isVowel(character) {
+	isVowel(character: string) {
 		switch(character) {
 			case 'a':
 			case 'e':
@@ -67,27 +43,19 @@ class DexCalculator {
 		return false;
 	}
 
-	/**
-	 * @param {number} length
-	 * @return {any[]}
-	 */
-	static createArray(length) {
+	createArray(length: number) {
 		var arr = new Array(length || 0),
 			i = length;
 	
 		if (arguments.length > 1) {
 			var args = Array.prototype.slice.call(arguments, 1);
-			while(i--) arr[length-1 - i] = DexCalculator.createArray.apply(this, args);
+			while(i--) arr[length-1 - i] = this.createArray.apply(this, args);
 		}
 	
 		return arr;
 	}
 
-	/**
-	 * @param {string} tier
-	 * @return {number}
-	 */
-	static calcTierEnumeration(tier) {
+	calcTierEnumeration(tier: string) {
 		const tierEnums = {
 			'ag': 0,
 			'uber': 1,
@@ -114,30 +82,18 @@ class DexCalculator {
 		return tierEnum;
 	}
 
-	/**
-	 * @param {string} tierA
-	 * @param {string} tierB
-	 * @return {boolean}
-	 */
-	static tierALessThanOrEqualToB(tierA, tierB) {
-		return (DexCalculator.calcTierEnumeration(tierA) < DexCalculator.calcTierEnumeration(tierB));
+	tierALessThanOrEqualToB(tierA: string, tierB: string) {
+		return (this.calcTierEnumeration(tierA) < this.calcTierEnumeration(tierB));
 	}
 
-	/**
-	 * @param {Array} array
-	 */
-	static shuffleArray(array) {
+	shuffleArray(array: Array<any>) {
 		for (let i = array.length - 1; i > 0; i--) {
 			const j = Math.floor(Math.random() * (i + 1));
 			[array[i], array[j]] = [array[j], array[i]];
 		}
 	}
 
-	/**
-	 * @param {Species} species
-	 * @return {Set<string>}
-	 */
-	static getFullLearnsetOfPokemon(species) {
+	getFullLearnsetOfPokemon(species: Species) {
 		if (!species.learnset) {
 			species = Dex.getSpecies(species.baseSpecies);
 			// @ts-ignore
@@ -155,13 +111,8 @@ class DexCalculator {
 		return lsetData;
 	};
 
-	/**
-	 * @param {Species} species
-	 * @param {String} type
-	 * @return {Array} array
-	 */
-	static getMovesPokemonLearnsOfType(species, type) {
-		const lsetData = DexCalculator.getFullLearnsetOfPokemon(species);
+	getMovesPokemonLearnsOfType(species: Species, type: String) {
+		const lsetData = this.getFullLearnsetOfPokemon(species);
 
 		// Get full move data for learnset moves
 		/**@type {Move[]} */
@@ -185,11 +136,8 @@ class DexCalculator {
 	/**
 	 * Remove an element from an unsorted array significantly faster
 	 * than .splice
-	 *
-	 * @param {any[]} list
-	 * @param {number} index
 	 */
-	static fastPop(list, index) {
+	fastPop(list: any[], index: number) {
 		// If an array doesn't need to be in order, replacing the
 		// element at the given index with the removed element
 		// is much, much faster than using list.splice(index, 1).
@@ -200,11 +148,7 @@ class DexCalculator {
 		return element;
 	}
 
-	/**
-	 * @param {any[]} list
-	 * @param {any} value
-	 */
-	static arrayRemove(list, value) {
+	arrayRemove(list: any[], value: any) {
 		// @ts-ignore
 		return list.filter(function(ele) {
 			return ele != value;
@@ -213,14 +157,11 @@ class DexCalculator {
 
 	/**
 	 * Takes an array and turns it into a sentence string by adding commas and the word "and"
-	 * * @param {string[]} arr
 	 */
-	static toListString(arr) {
+	toListString(arr: string[]) {
 		if (!arr.length) return '';
 		if (arr.length === 1) return arr[0];
 		if (arr.length === 2) return `${arr[0]} and ${arr[1]}`;
 		return `${arr.slice(0, -1).join(", ")}, and ${arr.slice(-1)[0]}`;
 	}
-}
-
-module.exports = DexCalculator;
+};

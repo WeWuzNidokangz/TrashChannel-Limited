@@ -1,7 +1,10 @@
 // Note: These are the rules that formats use
 // The list of formats is stored in config/formats.js
 
-const DexCalculator = require('../trashchannel/dex-calculator');
+// #region TrashChannel Rules
+import {Utils} from './../lib/utils';
+import {DexCalculator} from '../.trashchannel-dist/dex-calculator';
+// #endregion TrashChannel Rules
 
 export const BattleFormats: {[k: string]: FormatsData} = {
 
@@ -1546,19 +1549,20 @@ export const BattleFormats: {[k: string]: FormatsData} = {
 		desc: "Standard validation for Mix and Mega.",
 		onValidateTeam(team, format) {
 			const restrictedPokemon = format.restricted || [];
-			/**@type {{[k: string]: true}} */
-			let itemTable = {};
-			for (const set of team) {
-				let item = this.dex.getItem(set.item);
-				if (!item || !item.megaStone) continue;
-				let species = this.dex.getSpecies(set.species);
-				if (species.isNonstandard) return [`${species.baseSpecies} does not exist in gen 8.`];
-				if (restrictedPokemon.includes(species.species)) {
-					return [`${species.species} is not allowed to hold ${item.name}.`];
-				}
-				if (itemTable[item.id]) return ["You are limited to one of each mega stone.", "(You have more than one " + item.name + ")"];
-				itemTable[item.id] = true;
-			}
+            const itemTable = new Set<ID>();
+            for (const set of team) {
+                const item = this.dex.getItem(set.item);
+                if (!item || !item.megaStone) continue;
+                const species = this.dex.getSpecies(set.species);
+                if (species.isNonstandard) return [`${species.baseSpecies} does not exist in gen 8.`];
+                if (restrictedPokemon.includes(species.name)) {
+                    return [`${species.name} is not allowed to hold ${item.name}.`];
+                }
+                if (itemTable.has(item.id)) {
+                    return [`You are limited to one of each mega stone.`, `(You have more than one ${item.name})`];
+                }
+                itemTable.add(item.id);
+            }
 		},
 	},
 	mixandmegabattleeffects: {
@@ -1567,8 +1571,8 @@ export const BattleFormats: {[k: string]: FormatsData} = {
 		desc: "Battle effects for Mix and Mega (insufficient to run MnM without mod, crashes when called though Mix and Meta).",
 		onBegin() {
 			for (const pokemon of this.getAllPokemon()) {
-				pokemon.m.originalSpecies = pokemon.baseSpecies.species;
-			}
+                pokemon.m.originalSpecies = pokemon.baseSpecies.name;
+            }
 		},
 		onSwitchIn(pokemon) {
 			// @ts-ignore
@@ -1676,7 +1680,7 @@ export const BattleFormats: {[k: string]: FormatsData} = {
 			//console.log("boost: " + boost.toString());
 			for (let statName in pokemon.baseStats) {
 				if (statName === 'hp') continue;
-				pokemon.baseStats[statName] = dex.clampIntRange(pokemon.baseStats[statName] + boost, 1, 255);
+				pokemon.baseStats[statName] = Utils.clampIntRange(pokemon.baseStats[statName] + boost, 1, 255);
 			}
 			//console.info(pokemon.baseStats);
 			return pokemon;
@@ -1696,16 +1700,16 @@ export const BattleFormats: {[k: string]: FormatsData} = {
             if (team.length !== 6) problems.push(`Your team cannot have less than 6 Pok\u00e9mon.`);
             let families = {};
             for (const set of team) {
-                let pokemon = this.dex.getSpecies(set.species);
-                if (pokemon.baseSpecies) pokemon = this.dex.getSpecies(pokemon.baseSpecies);
-                if (pokemon.prevo) {
-                    pokemon = this.dex.getSpecies(pokemon.prevo);
-                    if (pokemon.prevo) {
-                        pokemon = this.dex.getSpecies(pokemon.prevo);
+                let species = this.dex.getSpecies(set.species);
+                if (species.baseSpecies) species = this.dex.getSpecies(species.baseSpecies);
+                if (species.prevo) {
+	                species = this.dex.getSpecies(species.prevo);
+                    if (species.prevo) {
+	                	species = this.dex.getSpecies(species.prevo);
                     }
                 }
-                if (!families[pokemon.species]) families[pokemon.species] = [];
-                families[pokemon.species].push(set.species);
+                if (!families[species.name]) families[species.name] = [];
+                families[species.name].push(set.species);
             }
             for (const family in families) {
                 if (families[family].length > 1) problems.push(`${DexCalculator.toListString(families[family])} are in the same evolutionary family.`);

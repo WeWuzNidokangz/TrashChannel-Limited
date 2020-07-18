@@ -1627,8 +1627,8 @@ export class ModdedDex {
 		return stoneName.substr( 0, stoneName.length-3 ) + 'ite';
 	}
 
-	calcActiveAbilitySlot(species: string | Species, ability: string): string {
-		let id = toID(species || '');
+	calcActiveAbilitySlot(speciesName: string | Species, ability: string): string {
+		let id = toID(speciesName || '');
 		let species = this.getSpecies(id);
 		let abilityId = toID(ability || '');
 		let abilitySlot = '0'; // Fallback to standard ability slot if we're in a meta that allows illegal abilities

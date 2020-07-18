@@ -6,23 +6,15 @@
  * @license MIT
  */
 
-'use strict';
+import {DexCalculator} from '../../.trashchannel-dist/dex-calculator';
+import {TrashChannelChatSupport} from '../../.trashchannel-dist/trashchannel-chatsupport';
 
-const fs = require('fs');
-const path = require('path');
+import {BattleFormats as Rulesets} from '../../.data-dist/rulesets';
+import {Formats} from '../../.config-dist/formats';
 
-const DexCalculator = require('../../trashchannel/dex-calculator');
-const TrashChannelChatSupport = require('../../trashchannel/trashchannel-chatsupport');
+import {BattleScripts as BnBMod} from '../../.data-dist/mods/bitchandbeggar/scripts';
 
-const RULESETS = path.resolve(__dirname, '../../data/rulesets');
-const FORMATS = path.resolve(__dirname, '../../config/formats');
-
-const BITCHANDBEGGARMOD = path.resolve(__dirname, '../../data/mods/bitchandbeggar/scripts');
-
-const MAX_PROCESSES = 1;
-const RESULTS_MAX_LENGTH = 10;
-
-function escapeHTML(str) {
+function escapeHTML(str: string) {
 	if (!str) return '';
 	return ('' + str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;').replace(/\//g, '&#x2f;');
 }
@@ -30,11 +22,9 @@ function escapeHTML(str) {
 /** @typedef {(this: CommandContext, target: string, room: ChatRoom, user: User, connection: Connection, cmd: string, message: string) => (void)} ChatHandler */
 /** @typedef {{[k: string]: ChatHandler | string | true | string[] | ChatCommands}} ChatCommands */
 
-/** @type {ChatCommands} */
-const commands = {
+export const commands: ChatCommands = {
 	// DEBUG
 	'!forcebattle': true,
-	forcebattle: 'forcebattle',
 	forcebattle: function (target, room, user, connection, cmd, message) {
 		if(!user.isStaff) {
 			return this.popupReply(`Only staff can use forcebattle.`);
@@ -107,20 +97,6 @@ const commands = {
 		let species = Object.assign({}, Dex.getSpecies(target));
 		if (!species.exists) return this.errorReply("Error: Pokemon not found.");
 
-		//console.log('RULESETS: ' + RULESETS);
-
-		// Load rulesets
-		/**@type {{[k: string]: FormatsData}} */
-		let Rulesets;
-		try {
-			Rulesets = require(RULESETS).BattleFormats;
-		} catch (e) {
-			console.log('e.code: ' + e.code);
-			if (e.code !== 'MODULE_NOT_FOUND' && e.code !== 'ENOENT') {
-				throw e;
-			}
-		}
-
 		// Deepclone species to avoid permanently altering the original
 		let cloneSpecies = DexCalculator.deepClone(species);
 
@@ -142,18 +118,6 @@ const commands = {
 		if (!toID(target) || !target.includes('@')) return this.parse('/help mixandmegatiershift');
 		let sep = target.split('@');
 		let species = Dex.getSpecies(sep[0]);
-
-		// Load rulesets
-		/**@type {{[k: string]: FormatsData}} */
-		let Rulesets;
-		try {
-			Rulesets = require(RULESETS).BattleFormats;
-		} catch (e) {
-			console.log('e.code: ' + e.code);
-			if (e.code !== 'MODULE_NOT_FOUND' && e.code !== 'ENOENT') {
-				throw e;
-			}
-		}
 
 		let cloneSpecies = DexCalculator.deepClone(species);
 		cloneSpecies = Rulesets['tiershiftrule'].onModifySpecies(cloneSpecies, null, null, 'dummy'); // Set dummy effect to bypass internal validation
@@ -190,18 +154,6 @@ const commands = {
 		if (bitchSpecies.isUnreleased) {
 			this.errorReply(`Warning: ${bitchSpecies.name} is unreleased and is not usable in current Bitch and Beggar.`);
 		}
-		
-		// Load formats
-		/**@type {{[k: string]: FormatsData}} */
-		let Formats;
-		try {
-			Formats = require(FORMATS).Formats;
-		} catch (e) {
-			console.log('e.code: ' + e.code);
-			if (e.code !== 'MODULE_NOT_FOUND' && e.code !== 'ENOENT') {
-				throw e;
-			}
-		}
 
 		// BnB BST limit
 		if(Formats) {
@@ -231,17 +183,7 @@ const commands = {
 		}
 
 		// Load BnB mod functions
-		/**@type {ModdedBattleScriptsData} */
-		let BnBMod;
-		try {
-			BnBMod = require(BITCHANDBEGGARMOD).BattleScripts;
-		} catch (e) {
-			console.log('e.code: ' + e.code);
-			if (e.code !== 'MODULE_NOT_FOUND' && e.code !== 'ENOENT') {
-				throw e;
-			}
-		}
-		if(!BnBMod) return this.errorReply(`BITCHANDBEGGARMOD not found.`);
+		if(!BnBMod) return this.errorReply(`BnBMod not found.`);
 
 		// Do beggar evo calcs
 		const mixedSpecies = BnBMod.getMixedSpecies(beggarSpecies.name, bitchSpecies.name);
@@ -276,5 +218,3 @@ const commands = {
 	},
 	bitchandbeggarhelp: [`/bnb <pokemon> @ <beggar bitch> - Shows the Bitch and Beggar evolved Pokemon's type and stats.`],
 };
-
-exports.commands = commands;

@@ -1,7 +1,7 @@
 // Other Metas plugin by Spandan
 
 //#region TrashChannel
-const TrashChannelChatSupport = require('../../trashchannel/trashchannel-chatsupport');
+import {TrashChannelChatSupport} from '../../.trashchannel-dist/trashchannel-chatsupport';
 //#endregion
 import {Utils} from '../../lib/utils';
 

@@ -1114,12 +1114,13 @@ export class BasicChatRoom extends BasicRoom {
 		this.type = 'chat';
 		this.banwordRegex = null;
 		this.subRooms = new Map();
-		// FIXME: TrashChannel ts
-		this.introMessage = fs.readFileSync(pathModule.resolve(__dirname, '../config/roomintro.html'), 'utf8');
 
 		this.settings = options as RoomSettings;
 		if (!this.settings.creationTime) this.settings.creationTime = Date.now();
 		this.auth.load();
+
+		// TrashChannel roomintro
+		if (this.settings) this.settings.introMessage = fs.readFileSync(pathModule.resolve(__dirname, '../config/roomintro.html'), 'utf8');
 
 		if (!options.isPersonal) this.persist = true;
 

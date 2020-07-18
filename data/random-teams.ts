@@ -5,12 +5,9 @@ import {PRNG, PRNGSeed} from '../sim/prng';
 import {Utils} from '../lib/utils';
 
 //#region TrashChannel
-const DexCalculator = require('../trashchannel/dex-calculator');
+import {DexCalculator} from '../.trashchannel-dist/dex-calculator';
 
-const fs = require('fs');
-const path = require('path');
-
-const SCUSEFULMOVES = path.resolve(__dirname, '../data/mods/gen7suicidecup/usefulmoves');
+import {SuicideCupUsefulMoves} from '../.data-dist/mods/suicidecup/usefulmoves';
 //#endregion TrashChannel
 
 export interface TeamData {
@@ -1597,52 +1594,25 @@ export class RandomTeams {
 		return team;
 	}
 
-	/**
-	 * @param {string | Species} species
-	 * @param {number} [slot]
-	 * @param {RandomTeamsTypes.TeamDetails} [teamDetails]
-	 * @param {boolean} [isDoubles]
-	 * @return {RandomTeamsTypes.RandomSet}
-	 */
-	suicideCupRandomSet(species, slot = 1, teamDetails = {}, isDoubles = false) {
+	suicideCupRandomSet(species: string | Species, teamDetails: RandomTeamsTypes.TeamDetails = {}, isLead = false, isDoubles = false): RandomTeamsTypes.RandomSet {
 		species = this.dex.getSpecies(species);
-		let baseSpecies = species;
+		let baseSpecies = this.dex.getSpecies(species.baseSpecies);
 		let forme = species.name;
-
-		if (!species.exists || ((!isDoubles || !species.randomDoubleBattleMoves) && !species.randomBattleMoves && !species.learnset)) {
-			// GET IT? UNOWN? BECAUSE WE CAN'T TELL WHAT THE POKEMON IS
-			species = this.dex.getSpecies('unown');
-
-			let err = new Error('Species incompatible with random battles: ' + forme);
-			Monitor.crashlog(err, 'The randbat set generator');
-		}
+		const lsetData = this.dex.getLearnsetData(species.id);
 
 		const allowedMega = ['Absol', 'Gengar', 'Banette'];
 
-		if (species.battleOnly) {
-			// Only change the species. The species has custom moves, and may have different typing and requirements.
-			forme = species.baseSpecies;
-		}
-		let battleForme = this.checkBattleForme(species);
-		if (battleForme && battleForme.randomBattleMoves && species.otherFormes && (battleForme.isMega ? !teamDetails.megaStone && allowedMega.includes(species.name) : this.random(2))) {
-			species = this.dex.getSpecies(species.otherFormes.length >= 2 ? this.sample(species.otherFormes) : species.otherFormes[0]);
-		}
+		if (species.battleOnly && !species.isGigantamax && typeof species.battleOnly === 'string') {
+            // Only change the forme. The species has custom moves, and may have different typing and requirements.
+            forme = species.battleOnly;
+        }
+        if (species.cosmeticFormes) {
+            forme = this.sample([species.name].concat(species.cosmeticFormes));
+        }
 
-		// Load Suicide Cup useful moves array
-		/**@type {string[][]} */
-		let SCUsefulMoves;
-		try {
-			SCUsefulMoves = require(SCUSEFULMOVES).SuicideCupUsefulMoves;
-		} catch (e) {
-			console.log('e.code: ' + e.code);
-			if (e.code !== 'MODULE_NOT_FOUND' && e.code !== 'ENOENT') {
-				throw e;
-			}
-			SCUsefulMoves = null;
-		}
-		let nSCUMTierCount = SCUsefulMoves.length;
+		let nSCUMTierCount = SuicideCupUsefulMoves.length;
 
-		let movePool = baseSpecies.learnset ? Object.keys(baseSpecies.learnset) : []; // Directly use the learnset as a movepool
+		let movePool = lsetData.learnset ? Object.keys(lsetData.learnset) : []; // Directly use the learnset as a movepool
 		/**@type {string[]} */
 		let moves = [];
 		let ability = '';
@@ -1693,7 +1663,7 @@ export class RandomTeams {
 		let counter;
 
 		// Force megas to have either Curse or Perish Song to guarantee that they can kill themselves
-		if(battleForme && battleForme.isMega) {
+		if(species && species.isMega) {
 			let sForcedSuicideMoveId = null;
 			if(hasType['Ghost'] && movePool.includes('curse')) {
 				sForcedSuicideMoveId = 'curse';
@@ -1719,7 +1689,7 @@ export class RandomTeams {
 				(!movesTierArray || (0 == movesTierArray.length) ) )
 			{
 				nMoveTier++;
-				movesTierArray = this.dex.deepClone(SCUsefulMoves[nMoveTier]);
+				movesTierArray = this.dex.deepClone(SuicideCupUsefulMoves[nMoveTier]);
 
 				// Cull moves we can't learn or already have
 				for(nMoveItr=movesTierArray.length-1; nMoveItr>-1; --nMoveItr) {
@@ -1739,7 +1709,7 @@ export class RandomTeams {
 				if( ('curse' === sNextMoveId) && !hasType['Ghost']) { // Non-ghosts can't damage themselves with Curse
 					bAcceptMove = false;
 				}
-				else if( battleForme && battleForme.isMega && ( ('trick' === sNextMoveId) || ('switcheroo' === sNextMoveId) ) ) { // Megas can't trick their item
+				else if( species && species.isMega && ( ('trick' === sNextMoveId) || ('switcheroo' === sNextMoveId) ) ) { // Megas can't trick their item
 					bAcceptMove = false;
 				}
 
@@ -2001,7 +1971,7 @@ export class RandomTeams {
 		let pokemon = [];
 
 		// For Monotype
-		let isMonotype = this.format.id === 'gen7monotyperandombattle';
+		let isMonotype = this.format.id === 'gen8monotyperandombattle';
 		let typePool = Object.keys(this.dex.data.TypeChart);
 		let type = this.sample(typePool);
 
@@ -2019,10 +1989,10 @@ export class RandomTeams {
 		}
 
 		// PotD stuff
-		let potd;
-		if (global.Config && Config.potd && this.dex.getRuleTable(this.format).has('potd')) {
-			potd = this.dex.getSpecies(Config.potd);
-		}
+		let potd: Species | false = false;
+        if (global.Config && Config.potd && ruleTable.has('potd')) {
+            potd = this.dex.getSpecies(Config.potd);
+        }
 
 		/**@type {{[k: string]: number}} */
 		let baseFormes = {};
@@ -2090,6 +2060,7 @@ export class RandomTeams {
 			}
 
 			let set = this.suicideCupRandomSet(species, pokemon.length, teamDetails, this.format.gameType !== 'singles');
+			if (!set.moves || (set.moves.length  < 1) ) continue; // Deal with situations where we couldn't find any legitimate moves
 
 			// Illusion shouldn't be the last Pokemon of the team
 			if (set.ability === 'Illusion' && pokemon.length > 4) continue;

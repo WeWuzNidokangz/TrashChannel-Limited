@@ -16,10 +16,7 @@ import {BattleQueue, Action} from './battle-queue';
 import {Utils} from '../lib/utils';
 
 //#region TrashChannel
-import * as fs from 'fs';
-import * as path from 'path';
-
-const RULESETS = path.resolve(__dirname, '../data/rulesets');
+import {BattleFormats} from '../.data-dist/rulesets';
 //#endregion
 
 /** A Pokemon that has fainted. */
@@ -240,20 +237,6 @@ export class Battle {
 		}
 		this.inputLog.push(`>start ` + JSON.stringify(inputOptions));
 
-		//#region TrashChannel
-		// Load rulesets
-		/**@type {{[k: string]: FormatsData}} */
-		let Rulesets;
-		try {
-			Rulesets = require(RULESETS).BattleFormats;
-		} catch (e) {
-			console.log('e.code: ' + e.code);
-			if (e.code !== 'MODULE_NOT_FOUND' && e.code !== 'ENOENT') {
-				throw e;
-			}
-		}
-		//#endregion
-
 		// FIXME: May not be necessary anymore
 		//for (const rule of this.getRuleTable(format).keys()) {
 		for (const rule of this.ruleTable.keys()) {
@@ -267,7 +250,7 @@ export class Battle {
 			}
 
 			//#region TrashChannel
-			const eventRule = Rulesets[rule];
+			const eventRule = BattleFormats[rule];
 			if(eventRule) {
 				const hasEventHandler = Object.keys(eventRule).some(val =>
 					val.startsWith('on') && !['onBegin', 'onValidateTeam', 'onChangeSet', 'onValidateSet'].includes(val)

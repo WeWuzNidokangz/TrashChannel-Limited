@@ -9,21 +9,10 @@
  * @license MIT license
  */
 
-'use strict';
+import {Utils} from '../lib/utils';
 
-//const fs = require('fs');
-//const path = require('path');
-
-class TrashChannelChatSupport {
-	constructor() {
-
-	}
-
-	/**
-	 * @param {string} stone
-	 * @return {Object}
-	 */
-	static getMegaStone(stone, mod = 'gen8') {
+export const TrashChannelChatSupport = new class TrashChannelChatSupport {
+	getMegaStone(stone: string, mod = 'gen8') {
 		let item = Dex.getItem(stone);
 		let dex = Dex;
 		if (mod && toID(mod) in Dex.dexes) dex = Dex.mod(toID(mod));
@@ -51,18 +40,10 @@ class TrashChannelChatSupport {
 		return item;
 	}
 
-	/**
-	 * @param {CommandContext} commandContext
-	 * @param {Species} species
-	 * @param {string} stoneName
-	 * @param {string} mod
-	 * @param {string} tierTextSuffix
-	 * @return {Object}
-	 */
-	static mixandmegainternal(commandContext, species, stoneName, mod, tierTextSuffix) {
+	mixandmegainternal(commandContext: CommandContext, species: Species, stoneName: string, mod: string, tierTextSuffix: string) {
 		let dex = Dex;
 		if (mod && toID(mod) in Dex.dexes) dex = Dex.mod(toID(mod));
-		let stone = TrashChannelChatSupport.getMegaStone(stoneName);
+		let stone = this.getMegaStone(stoneName);
 		if (!stone || (dex.gen >= 8 && ['redorb', 'blueorb'].includes(stone.id))) return commandContext.errorReply(`Error: Mega Stone not found.`);
 		if (!species) return commandContext.errorReply(`Error: Pokemon not found.`);
 		if (!species.exists) return commandContext.errorReply(`Error: Pokemon not found.`);
@@ -73,7 +54,7 @@ class TrashChannelChatSupport {
 		if (banlist.includes(stone.name)) {
 			commandContext.errorReply(`Warning: ${stone.name} is banned from Mix and Mega.`);
 		}
-		let restrictedStones = Dex.getFormat('gen8mixandmega').restrictedStones || [];
+		let restrictedStones = Dex.getFormat('gen8mixandmega').banlist || [];
 		if (restrictedStones.includes(stone.name) && species.name !== stone.megaEvolves) {
 			commandContext.errorReply(`Warning: ${stone.name} is restricted to ${stone.megaEvolves} in Mix and Mega.`);
 		}
@@ -170,15 +151,8 @@ class TrashChannelChatSupport {
 		}).join("&nbsp;|&ThickSpace;") + '</font>');
 	}
 
-	/**
-	 * @param {CommandContext} commandContext
-	 * @param {Species} species
-	 * @param {string} stoneName
-	 * @param {string} tierTextSuffix
-	 * @return {Object}
-	 */
-	static gen7mixandmegainternal(commandContext, species, stoneName, tierTextSuffix) {
-		let stone = TrashChannelChatSupport.getMegaStone(stoneName);
+	gen7mixandmegainternal(commandContext: CommandContext, species: Species, stoneName: string, tierTextSuffix: string) {
+		let stone = this.getMegaStone(stoneName);
 		if (!stone.exists) return commandContext.errorReply(`Error: Mega Stone not found.`);
 		if (!species) return commandContext.errorReply(`Error: Pokemon not found.`);
 		if (!species.exists) return commandContext.errorReply(`Error: Pokemon not found.`);
@@ -284,6 +258,4 @@ class TrashChannelChatSupport {
 			return '<font color="#686868">' + detail + ':</font> ' + details[detail];
 		}).join("&nbsp;|&ThickSpace;") + '</font>');
 	}
-}
-
-module.exports = TrashChannelChatSupport;
+};

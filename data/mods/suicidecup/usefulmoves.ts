@@ -1,7 +1,4 @@
-'use strict';
-
-/**@type {string[][]} */
-let SuicideCupUsefulMoves = [
+export const SuicideCupUsefulMoves: string[][] = [
 	[ // S Tier
 		"mindblown",
 	],
@@ -186,5 +183,3 @@ let SuicideCupUsefulMoves = [
 
 // Banned
 //"magicroom",
-
-exports.SuicideCupUsefulMoves = SuicideCupUsefulMoves;
