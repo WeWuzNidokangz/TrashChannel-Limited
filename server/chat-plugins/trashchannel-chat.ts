@@ -116,16 +116,20 @@ export const commands: ChatCommands = {
 	mixandmegatiershift(target, room, user) {
 		if (!this.runBroadcast()) return;
 		if (!toID(target) || !target.includes('@')) return this.parse('/help mixandmegatiershift');
-		let sep = target.split('@');
-		let species = Dex.getSpecies(sep[0]);
+		let dex = Dex;
+		const sep = target.split('@');
+		const stoneName = sep.slice(1).join('@').trim().split(',');
+		const mod = stoneName[1];
+		if (mod && toID(mod) in Dex.dexes) dex = Dex.mod(toID(mod));
+		const species = Dex.getSpecies(sep[0]);
 
 		let cloneSpecies = DexCalculator.deepClone(species);
 		cloneSpecies = Rulesets['tiershiftrule'].onModifySpecies(cloneSpecies, null, null, 'dummy'); // Set dummy effect to bypass internal validation
 		if(!cloneSpecies) return this.errorReply(`tiershiftrule.onModifySpecies failed on this Pokemon.`);
 
-		TrashChannelChatSupport.mixandmegainternal(this, cloneSpecies, sep[1], "TS");
+		TrashChannelChatSupport.mixandmegainternal(this, cloneSpecies, stoneName[0], mod, "TS");
 	},
-	mixandmegatiershifthelp: [`/mnmts <pokemon> @ <mega stone> - Shows the Tier Shifted Mix and Mega evolved Pokemon's type and stats.`],
+	mixandmegatiershifthelp: [`/mnmts <pokemon> @ <mega stone[, generation]> - Shows the Tier Shifted Mix and Mega evolved Pokemon's type and stats.`],
 
 	'!bitchandbeggar': true,
 	bnb: 'bitchandbeggar',
