@@ -41,8 +41,8 @@ const BATTLE = new Set([
 const FIELD = new Set(['id', 'battle']);
 const SIDE = new Set(['battle', 'team', 'pokemon', 'choice', 'activeRequest']);
 const POKEMON = new Set([
-	'side', 'battle', 'set', 'name', 'fullname', 'id', 'species',
-	'id', 'happiness', 'level', 'pokeball', 'baseMoveSlots',
+	'side', 'battle', 'set', 'name', 'fullname', 'id',
+	'happiness', 'level', 'pokeball', 'baseMoveSlots',
 ]);
 const CHOICE = new Set(['switchIns']);
 const ACTIVE_MOVE = new Set(['move']);
@@ -68,7 +68,7 @@ export const State = new class {
 		// We treat log specially because we only set it back on Battle after everything
 		// else has been deserialized to avoid anything accidentally `add`-ing to it.
 		state.log = battle.log;
-		state.queue = this.serializeWithRefs([...battle.queue], battle);
+		state.queue = this.serializeWithRefs(battle.queue.list, battle);
 		state.formatid = battle.format.id;
 		return state;
 	}
@@ -146,7 +146,7 @@ export const State = new class {
 		}
 		battle.prng = new PRNG(state.prng);
 		const queue = this.deserializeWithRefs(state.queue, battle);
-		battle.queue.push(...queue);
+		battle.queue.list = queue;
 		// @ts-ignore - readonly
 		battle.hints = new Set(state.hints);
 		// @ts-ignore - readonly

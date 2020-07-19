@@ -604,13 +604,7 @@ export class TeamValidator {
 		const lsetProblems = this.reconcileLearnset(outOfBattleSpecies, setSources, lsetProblem, name);
 		if (lsetProblems) problems.push(...lsetProblems);
 
-		if (ruleTable.has('obtainablemisc') && outOfBattleSpecies.forme?.includes('Gmax')) {
-			if (!setSources.sourcesBefore) {
-				problems.push(`${name} has an exclusive move that it doesn't qualify for (because Gmax Pokemon can only be obtained from a Max Raid).`);
-			} else if (setSources.sourcesBefore < 8) {
-				problems.push(`${name} has a Gen ${setSources.sourcesBefore} move that it doesn't qualify for (because Gmax Pokemon can only be obtained from a Max Raid in Gen 8).`);
-			}
-		} else if (!setSources.sourcesBefore && setSources.sources.length) {
+		if (!setSources.sourcesBefore && setSources.sources.length) {
 			let legal = false;
 			for (const source of setSources.sources) {
 				if (this.validateSource(set, source, setSources, outOfBattleSpecies)) continue;
@@ -2032,7 +2026,7 @@ export class TeamValidator {
 		} else if (species.changesFrom && species.baseSpecies !== 'Kyurem') {
 			// For Pokemon like Rotom, Necrozma, and Gmax formes whose movesets are extensions are their base formes
 			return this.dex.getSpecies(species.changesFrom);
-		} else if (species.baseSpecies === 'Pumpkaboo') {
+		} else if (species.baseSpecies === 'Pumpkaboo' && species.forme) {
 			return this.dex.getSpecies('Pumpkaboo');
 		}
 		return null;
