@@ -154,6 +154,30 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 		section: "Mashups Spotlight",
 	},
 	{
+		name: "[Gen 8] Almost Any Ability Ubers",
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3659981/">Vanilla Ubers Metagame Discussion</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3658364/">Vanilla Ubers Sample Teams</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3661412/">Vanilla Ubers Viability Rankings</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3656414/">Vanilla Almost Any Ability</a>`,
+		],
+
+		mod: 'gen8',
+		ruleset: [
+			'Standard', // Ubers
+			'!Obtainable Abilities', '2 Ability Clause', 'Dynamax Clause' // AAA
+		],
+        banlist: [
+			'Arena Trap', 'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Gorilla Tactics', 'Huge Power', 'Ice Scales', 'Illusion',
+			'Imposter', 'Innards Out', 'Intrepid Sword', 'Libero', 'Moody', 'Neutralizing Gas', 'Parental Bond', 'Protean',
+			'Pure Power', 'Shadow Tag', 'Simple', 'Stakeout', 'Speed Boost', 'Water Bubble', 'Wonder Guard', 'Shedinja' // AAA
+		],
+        restricted: ['Ditto', 'Kyurem-White', 'Lunala', 'Marshadow', 'Mewtwo', 'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane', 'Reshiram', 'Solgaleo', 'Zekrom'],
+	},
+	{
+		section: "Official OM Mashups (Singles)",
+	},
+	{
 		name: "[Gen 8] STAAABmons",
 		desc: `Pokemon can use almost any ability and any move of their typing.`,
 		threads: [
@@ -169,20 +193,19 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 			'!Obtainable Abilities', '2 Ability Clause', // AAA
 		],
 		banlist: [
-			'Kyurem-Black', 'Kyurem-White', 'Lunala', 'Marshadow', 'Mewtwo',
-			'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane', 'Reshiram', 'Solgaleo', 'Zekrom',
-			'Darmanitan-Galar', 'Eternatus', 'Silvally', 'Zacian', 'Zamazenta', 'King\'s Rock', 'Razor Fang', 'Moody', 'Shadow Tag', 'Baton Pass', // STABmons
-			'Shedinja',
-			'Arena Trap', 'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Gorilla Tactics', 'Huge Power', 'Ice Scales', 'Illusion', 'Imposter', 'Innards Out', 'Intrepid Sword',
-			'Libero', 'Neutralizing Gas', 'Parental Bond', 'Protean', 'Pure Power', 'Simple', 'Stakeout', 'Speed Boost', 'Water Bubble', 'Wonder Guard', // AAA
-			'Terrakion', 'Keldeo', // STAAABmons
+			'Dragapult', 'Eternatus', 'Kyurem-Black', 'Kyurem-White', 'Lunala', 'Marshadow',
+			'Mewtwo', 'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane', 'Reshiram', 'Silvally', 'Solgaleo', 'Zacian', 'Zamazenta', 'Zekrom',
+			'King\'s Rock', 'Moody', 'Shadow Tag', 'Baton Pass', // STABmons
+			'Shedinja', // AAA
+			'Arena Trap', 'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Gorilla Tactics', 'Huge Power', 'Ice Scales', 'Illusion',
+			'Imposter', 'Innards Out', 'Intrepid Sword', 'Libero', 'Moody', 'Neutralizing Gas', 'Parental Bond', 'Protean',
+			'Pure Power', 'Shadow Tag', 'Simple', 'Stakeout', 'Speed Boost', 'Water Bubble', 'Wonder Guard', // AAA
+			'Hypnosis', 'Sing', 'Sleep Powder', 'Wicked Blow', 'Terrakion', 'Keldeo', 'Zeraora' // STAAABmons
 		],
 		restricted: [
-			'Acupressure', 'Belly Drum', 'Bolt Beak', 'Double Iron Bash', 'Extreme Speed', 'Fishious Rend', 'Shell Smash', 'Shift Gear', 'Spore', 'V-create', // STABmons
+			'Acupressure', 'Belly Drum', 'Bolt Beak', 'Double Iron Bash', 'Electrify', 'Extreme Speed', 'Fishious Rend', 'Shell Smash', 'Shift Gear', 'Spore', 'Wicked Blow', // STABmons
+			'No Retreat', 'V-create', // STAAABmons
 		],
-	},
-	{
-		section: "Official OM Mashups (Singles)",
 	},
 	{
 		name: "[Gen 8] Balanced Hackmons Camomons",
@@ -198,9 +221,9 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 			'Camomons Rule', 'Balanced Hackmons Validation', // BH Camomons
 		 ],
 		 banlist: [
-			'Eternatus-Eternamax', 'Shedinja', 'Comatose + Sleep Talk', 'Double Iron Bash', 'Octolock',
+			'Eternatus-Eternamax', 'Comatose + Sleep Talk', 'Double Iron Bash', 'Octolock', 'Shell Smash',
 			'Arena Trap', 'Contrary', 'Gorilla Tactics', 'Huge Power', 'Illusion', 'Innards Out', 'Libero', 'Magnet Pull', 'Moody',
-			'Neutralizing Gas', 'Parental Bond', 'Protean', 'Psychic Surge', 'Pure Power', 'Shadow Tag', 'Stakeout', 'Water Bubble', 'Wonder Guard', // BH
+			'Neutralizing Gas', 'Parental Bond', 'Protean', 'Pure Power', 'Shadow Tag', 'Stakeout', 'Water Bubble', 'Wonder Guard', // BH
 		],
 	},
 	{
@@ -219,10 +242,12 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 
 		],
 		banlist: [
-			'Kyurem-Black', 'Kyurem-White', 'Lunala', 'Marshadow', 'Melmetal', 'Mewtwo',
-			'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane', 'Reshiram', 'Solgaleo', 'Zekrom',
-			'Dracovish', 'Darmanitan-Galar', 'Eternatus', 'Shedinja', 'Zacian', 'Zamazenta',
-			'Hydreigon', 'Arena Trap', 'Moody', 'Shadow Tag', 'Baton Pass', // Camomons
+			'Darmanitan-Galar', 'Dracovish', 'Eternatus', 'Hydreigon', 'Kyurem', 'Kyurem-Black', 'Kyurem-White', 'Lunala', 'Marshadow', 'Melmetal',
+			'Mewtwo', 'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane', 'Reshiram', 'Shedinja', 'Solgaleo', 'Zacian', 'Zamazenta', 'Zekrom', 'Zeraora',
+			'Arena Trap', 'Moody', 'Shadow Tag', 'Baton Pass', // Camomons
+			'Arena Trap', 'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Gorilla Tactics', 'Huge Power', 'Ice Scales', 'Illusion',
+			'Imposter', 'Innards Out', 'Intrepid Sword', 'Libero', 'Moody', 'Neutralizing Gas', 'Parental Bond', 'Protean',
+			'Pure Power', 'Shadow Tag', 'Simple', 'Stakeout', 'Speed Boost', 'Water Bubble', 'Wonder Guard' // AAA
 		]
 	},
 	{
@@ -242,14 +267,14 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 			'Mix and Mega Standard Package', // STAB n Mega
 		],
 		banlist: [
-			'Eternatus', 'Gothitelle', 'Gothorita', 'Zacian', 'Moody', 'Baton Pass', 'Electrify',
-			'Beedrillite', 'Blazikenite', 'Gengarite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite', // Mix and Mega
+			'Zacian-Crowned', 'Moody', 'Shadow Tag', 'Baton Pass', 'Electrify',
+			'Beedrillite', 'Blazikenite', 'Gengarite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite',// Mix and Mega
 			'Ditto', // STAB n Mega
 		],
 		restricted: [
-			'Kyurem-Black', 'Kyurem-White', 'Lunala', 'Marshadow', 'Melmetal', 'Mewtwo', 'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane', 'Reshiram', 'Solgaleo', 'Zamazenta', 'Zekrom', // Mix and Mega
-			'Acupressure', 'Belly Drum', 'Bolt Beak', 'Double Iron Bash', 'Extreme Speed', 'Fishious Rend', 'Shell Smash', 'Shift Gear', 'Spore', // STABmons
-			'Extreme Speed', 'Double Iron Bash', // STAB n Mega
+			'Gengar', 'Kyurem-Black', 'Kyurem-White', 'Marshadow', 'Melmetal', 'Mewtwo', 'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane', 'Reshiram', 'Solgaleo', 'Zacian', 'Zekrom', 'Zeraora', // Mix and Mega
+			'Acupressure', 'Belly Drum', 'Bolt Beak', 'Double Iron Bash', 'Extreme Speed', 'Fishious Rend', 'Shell Smash', 'Shift Gear', 'Spore', 'Wicked Blow', // STABmons
+			'Blissey', 'Chansey', 'Eternatus', 'Lunala', // STAB n Mega
 		],
 	},
 	{
@@ -273,8 +298,9 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 		banlist: [
 			'DUber', // Doubles OU
 			'Shedinja',
-			'Arena Trap', 'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Gorilla Tactics', 'Huge Power', 'Ice Scales', 'Illusion', 'Imposter', 'Innards Out', 'Intrepid Sword',
-			'Libero', 'Moody', 'Neutralizing Gas', 'Parental Bond', 'Protean', 'Pure Power', 'Shadow Tag', 'Simple', 'Stakeout', 'Speed Boost', 'Water Bubble', 'Wonder Guard', // AAA
+			'Arena Trap', 'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Gorilla Tactics', 'Huge Power', 'Ice Scales', 'Illusion',
+			'Imposter', 'Innards Out', 'Intrepid Sword', 'Libero', 'Moody', 'Neutralizing Gas', 'Parental Bond', 'Protean',
+			'Pure Power', 'Shadow Tag', 'Simple', 'Stakeout', 'Speed Boost', 'Water Bubble', 'Wonder Guard', // AAA
 			'Anger Point', // Doubles AAA
 		],
 	},
@@ -294,8 +320,9 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 			'!Obtainable', 'Balanced Hackmons Validation', // BH Doubles
 		],
 		banlist: [
-			'Eternatus-Eternamax', 'Comatose + Sleep Talk', 'Arena Trap', 'Contrary', 'Gorilla Tactics', 'Huge Power', 'Illusion', 'Innards Out',
-			'Libero', 'Magnet Pull', 'Moody', 'Neutralizing Gas', 'Parental Bond', 'Protean', 'Pure Power', 'Shadow Tag', 'Stakeout', 'Water Bubble', 'Wonder Guard', // BH
+			'Shedinja', 'Comatose + Sleep Talk', 'Double Iron Bash', 'Octolock', 'Arena Trap', 'Contrary', 'Gorilla Tactics', 'Huge Power',
+			'Illusion', 'Innards Out', 'Libero', 'Moody', 'Neutralizing Gas', 'Parental Bond', 'Protean', 'Pure Power', 'Shadow Tag', 'Stakeout',
+			'Water Bubble', 'Wonder Guard', 'Justified', 'Anger Point', 'Steam Engine', 'Stamina', 'Rattled', 'Wandering Spirit', 'Soul-Heart', // BH Doubles
 		],
 	},
 	{
@@ -315,8 +342,9 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 		],
 		banlist: [
 			'DUber', // Doubles OU
-			'Darmanitan-Galar', 'Eternatus', 'Shedinja', 'Zacian', 'Zamazenta',
-			'Hydreigon', 'Arena Trap', 'Moody', 'Shadow Tag', 'Baton Pass', // Camomons
+			'Darmanitan-Galar', 'Dracovish', 'Eternatus', 'Hydreigon', 'Kyurem', 'Kyurem-Black', 'Kyurem-White', 'Lunala', 'Marshadow', 'Melmetal',
+			'Mewtwo', 'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane', 'Reshiram', 'Shedinja', 'Solgaleo', 'Zacian', 'Zamazenta', 'Zekrom', 'Zeraora',
+			'Arena Trap', 'Moody', 'Shadow Tag', 'Baton Pass', // Camomons
 		],
 	},
 	{
@@ -336,9 +364,10 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 		],
 		banlist: [
 			'DUber', // Doubles OU
+			'Shedinja', 'Silvally', 'Snorlax', 'Drizzle++Swift Swim', // STABmons Doubles
 		],
 		restricted: [
-			'Acupressure', 'Belly Drum', 'Bolt Beak', 'Double Iron Bash', 'Extreme Speed', 'Fishious Rend', 'Shell Smash', 'Shift Gear', 'Spore', // STABmons
+			'Acupressure', 'Belly Drum', 'Bolt Beak', 'Double Iron Bash', 'Electrify', 'Extreme Speed', 'Fishious Rend', 'Shell Smash', 'Shift Gear', 'Spore', 'Wicked Blow', // STABmons
 		],
 	},
 	{
@@ -361,9 +390,11 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 			'!Obtainable Abilities', '2 Ability Clause', // AAA
 		],
 		banlist: [
-			'Cherubi', 'Corsola-Galar', 'Drifloon', 'Gastly', 'Gothita', 'Sneasel', 'Swirlix', 'Moody', 'Baton Pass', // LC
-			'Arena Trap', 'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Gorilla Tactics', 'Huge Power', 'Ice Scales', 'Illusion', 'Imposter', 'Innards Out', 'Intrepid Sword',
-			'Libero', 'Moody', 'Neutralizing Gas', 'Parental Bond', 'Protean', 'Pure Power', 'Shadow Tag', 'Simple', 'Stakeout', 'Speed Boost', 'Water Bubble', 'Wonder Guard', // AAA
+			'Corsola-Galar', 'Cutiefly', 'Drifloon', 'Gastly', 'Rufflet', 'Scyther', 'Sneasel', 'Swirlix', 'Tangela', 'Vulpix-Alola',
+			'Chlorophyll', 'Moody', 'Baton Pass', // LC
+			'Arena Trap', 'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Gorilla Tactics', 'Huge Power', 'Ice Scales', 'Illusion',
+			'Imposter', 'Innards Out', 'Intrepid Sword', 'Libero', 'Moody', 'Neutralizing Gas', 'Parental Bond', 'Protean',
+			'Pure Power', 'Shadow Tag', 'Simple', 'Stakeout', 'Speed Boost', 'Water Bubble', 'Wonder Guard', // AAA
 		],
 	},
 	{
@@ -408,7 +439,8 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 			'Camomons Rule', // Camomons Doubles
 		],
 		banlist: [
-			'Cherubi', 'Corsola-Galar', 'Drifloon', 'Gastly', 'Gothita', 'Sneasel', 'Swirlix', 'Vulpix', 'Vulpix-Alola', 'Moody', 'Baton Pass', // LC
+			'Corsola-Galar', 'Cutiefly', 'Drifloon', 'Gastly', 'Gothita', 'Rufflet', 'Scyther', 'Sneasel', 'Swirlix', 'Tangela', 'Vulpix-Alola',
+			'Chlorophyll', 'Moody', 'Baton Pass', // LC
 		],
 	},
 	{
@@ -429,9 +461,12 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 			'STABmons Move Legality', // STABmons
 		],
 		banlist: [
-			'Cherubi', 'Corsola-Galar', 'Drifloon', 'Gastly', 'Gothita', 'Sneasel', 'Swirlix', 'Vulpix', 'Vulpix-Alola', 'Moody', 'Baton Pass', // LC
+			'Corsola-Galar', 'Cutiefly', 'Drifloon', 'Gastly', 'Gothita', 'Rufflet', 'Scyther', 'Sneasel', 'Swirlix', 'Tangela', 'Vulpix-Alola',
+			'Chlorophyll', 'Moody', 'Baton Pass', // LC
 		],
-		restricted: ['Acupressure', 'Belly Drum', 'Bolt Beak', 'Double Iron Bash', 'Extreme Speed', 'Fishious Rend', 'Shell Smash', 'Shift Gear', 'Spore'],
+		restricted: [
+			'Acupressure', 'Belly Drum', 'Bolt Beak', 'Double Iron Bash', 'Electrify', 'Extreme Speed', 'Fishious Rend', 'Shell Smash', 'Shift Gear', 'Spore', 'Wicked Blow', // STABmons
+		],
 	},
 	{
 		section: "Other Mashups",
