@@ -1,13 +1,10 @@
-'use strict';
-
-/**@type {ModdedBattleScriptsData} */
-exports.BattleScripts = {
+export const BattleScripts: ModdedBattleScriptsData = {
 	getEffect(name) {
 		if (name && typeof name !== 'string') {
 			return name;
 		}
 		let id = toID(name);
-		if (id.startsWith('ability')) return Object.assign(Object.create(this.getAbility(id.slice(7))), {id});
+		if (id.startsWith('ability:')) return Object.assign(Object.create(this.getAbility(id.slice(8))), {id});
 		return Object.getPrototypeOf(this).getEffect.call(this, name, true);
 	},
 	suppressingWeather() {
@@ -27,7 +24,7 @@ exports.BattleScripts = {
 			if (this.ignoringAbility()) return false;
 			if (Array.isArray(ability)) return ability.some(ability => this.hasAbility(ability));
 			ability = toID(ability);
-			return this.ability === ability || !!this.volatiles['ability' + ability];
+			return this.ability === ability || !!this.volatiles['ability:' + ability];
 		},
 		transformInto(pokemon, effect) {
 			let species = pokemon.species;
@@ -89,14 +86,12 @@ exports.BattleScripts = {
 			if (this.innates) {
 				// @ts-ignore
 				for (let innate of this.innates) {
-					this.removeVolatile('ability' + innate);
+					this.removeVolatile('ability:' + innate);
 				}
 			}
-			// @ts-ignore
-			if (pokemon.innates) {
-				// @ts-ignore
-				for (let innate of pokemon.innates) {
-					this.addVolatile('ability' + innate, this);
+			if (pokemon.m.innates) {
+				for (let innate of pokemon.m.innates) {
+					this.addVolatile('ability:' + innate, this);
 				}
 			}
 			return true;

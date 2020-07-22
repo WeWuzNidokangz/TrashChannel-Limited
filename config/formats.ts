@@ -55,7 +55,7 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
             }
         },
 	},
-	/*{
+	{
 		name: "[Gen 8] Partners in Crime: Hackmons Cup (Beta)",
 		desc: `Randomized teams of level-balanced Pok&eacute;mon where both active ally Pok&eacute;mon share dumb abilities and moves.`,
 		threads: [
@@ -66,35 +66,30 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 		gameType: 'doubles',
 		team: 'randomHCPiC',
 		ruleset: ['Obtainable', 'HP Percentage Mod', 'Cancel Mod'],
+		onBeforeSwitchIn(pokemon) {
+			for (const side of this.sides) {
+				if (side.active.every(ally => ally && !ally.fainted)) {
+					let pokeA = side.active[0], pokeB = side.active[1];
+					if (pokeA.ability !== pokeB.ability) {
+						const pokeAInnate = 'ability:' + pokeB.ability;
+						pokeA.volatiles[pokeAInnate] = {id: toID(pokeAInnate), target: pokeA};
+						const pokeBInnate = 'ability:' + pokeA.ability;
+						pokeB.volatiles[pokeBInnate] = {id: toID(pokeBInnate), target: pokeB};
+					}
+				}
+			}
+		},
 		onSwitchInPriority: 2,
 		onSwitchIn(pokemon) {
-			if (this.sides[0].active.every(ally => ally && !ally.fainted)) {
-				let p1a = this.sides[0].active[0], p1b = this.sides[0].active[1];
-				if (p1a.ability !== p1b.ability) {
-					let p1aInnate = 'ability' + p1b.ability;
-					p1a.volatiles[p1aInnate] = {id: p1aInnate, target: p1a};
-					let p1bInnate = 'ability' + p1a.ability;
-					p1b.volatiles[p1bInnate] = {id: p1bInnate, target: p1b};
-				}
-			}
-			if (this.sides[1].active.every(ally => ally && !ally.fainted)) {
-				let p2a = this.sides[1].active[0], p2b = this.sides[1].active[1];
-				if (p2a.ability !== p2b.ability) {
-					let p2a_innate = 'ability' + p2b.ability;
-					p2a.volatiles[p2a_innate] = {id: p2a_innate, target: p2a};
-					let p2b_innate = 'ability' + p2a.ability;
-					p2b.volatiles[p2b_innate] = {id: p2b_innate, target: p2b};
-				}
-			}
 			let ally = pokemon.side.active.find(ally => ally && ally !== pokemon && !ally.fainted);
 			if (ally && ally.ability !== pokemon.ability) {
 				if (!pokemon.m.innate) {
-					pokemon.m.innate = 'ability' + ally.ability;
+					pokemon.m.innate = 'ability:' + ally.ability;
 					delete pokemon.volatiles[pokemon.m.innate];
 					pokemon.addVolatile(pokemon.m.innate);
 				}
 				if (!ally.m.innate) {
-					ally.m.innate = 'ability' + pokemon.ability;
+					ally.m.innate = 'ability:' + pokemon.ability;
 					delete ally.volatiles[ally.m.innate];
 					ally.addVolatile(ally.m.innate);
 				}
@@ -122,7 +117,46 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 				delete ally.m.innate;
 			}
 		},
-	},*/
+		field: {
+			suppressingWeather() {
+				for (const side of this.battle.sides) {
+					for (const pokemon of side.active) {
+						if (pokemon && !pokemon.ignoringAbility() && pokemon.hasAbility('Cloud Nine')) {
+							return true;
+						}
+					}
+				}
+				return false;
+			},
+		},
+	},
+	{
+		name: "[Gen 8] Pokebilities: Random Battle (Beta)",
+		desc: `Randomized teams of level-balanced Pok&eacute;mon with all of their released Abilities simultaneously.`,
+
+		mod: 'pokebilities',
+		team: 'randomPokebilities',
+		ruleset: ['[Gen 8] OU'],
+		onBegin() {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let pokemon of allPokemon) {
+				if (pokemon.ability === toID(pokemon.species.abilities['S'])) {
+					continue;
+				}
+				// @ts-ignore
+				pokemon.m.innates = Object.keys(pokemon.species.abilities).filter(key => key !== 'S' && (key !== 'H' || !pokemon.species.unreleasedHidden)).map(key => toID(pokemon.species.abilities[key])).filter(ability => ability !== pokemon.ability);
+			}
+		},
+		onSwitchInPriority: 2,
+		onSwitchIn(pokemon) {
+			// @ts-ignore
+			if (pokemon.m.innates) pokemon.m.innates.forEach(innate => pokemon.addVolatile("ability:" + innate, pokemon));
+		},
+		onAfterMega(pokemon) {
+			Object.keys(pokemon.volatiles).filter(innate => innate.startsWith('ability:')).forEach(innate => pokemon.removeVolatile(innate));
+			pokemon.m.innates = undefined;
+		},
+	},
 	{
 		name: "[Gen 8] Trademarked: Hackmons Cup",
 		desc: `Randomized teams of level-balanced Pok&eacute;mon with random trademarks.`,
@@ -1998,6 +2032,108 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 				const abilityid = toID(ability);
 				return this.ability === abilityid || !!this.volatiles['ability:' + abilityid];
 			},
+		},
+	},
+	{
+		name: "[Gen 8] Partners in Crime (Beta)",
+		desc: `Doubles-based metagame where both active ally Pok&eacute;mon share abilities and moves.`,
+
+		mod: 'pic',
+		gameType: 'doubles',
+		ruleset: ['[Gen 8] Doubles OU', 'Sleep Clause Mod'],
+		banlist: [
+			'Huge Power', 'Pure Power', 'Wonder Guard', 'Shadow Tag', 'Normalize', 'Trace', 'Imposter', 'Transform',
+			'Arctovish', 'Arctozolt', 'Dracovish', 'Dracozolt',
+		],
+		onBeforeSwitchIn(pokemon) {
+			for (const side of this.sides) {
+				if (side.active.every(ally => ally && !ally.fainted)) {
+					let pokeA = side.active[0], pokeB = side.active[1];
+					if (pokeA.ability !== pokeB.ability) {
+						const pokeAInnate = 'ability:' + pokeB.ability;
+						pokeA.volatiles[pokeAInnate] = {id: toID(pokeAInnate), target: pokeA};
+						const pokeBInnate = 'ability:' + pokeA.ability;
+						pokeB.volatiles[pokeBInnate] = {id: toID(pokeBInnate), target: pokeB};
+					}
+				}
+			}
+		},
+		onSwitchInPriority: 2,
+		onSwitchIn(pokemon) {
+			let ally = pokemon.side.active.find(ally => ally && ally !== pokemon && !ally.fainted);
+			if (ally && ally.ability !== pokemon.ability) {
+				if (!pokemon.m.innate) {
+					pokemon.m.innate = 'ability:' + ally.ability;
+					delete pokemon.volatiles[pokemon.m.innate];
+					pokemon.addVolatile(pokemon.m.innate);
+				}
+				if (!ally.m.innate) {
+					ally.m.innate = 'ability:' + pokemon.ability;
+					delete ally.volatiles[ally.m.innate];
+					ally.addVolatile(ally.m.innate);
+				}
+			}
+		},
+		onSwitchOut(pokemon) {
+			if (pokemon.m.innate) {
+				pokemon.removeVolatile(pokemon.m.innate);
+				delete pokemon.m.innate;
+			}
+			let ally = pokemon.side.active.find(ally => ally && ally !== pokemon && !ally.fainted);
+			if (ally && ally.m.innate) {
+				ally.removeVolatile(ally.m.innate);
+				delete ally.m.innate;
+			}
+		},
+		onFaint(pokemon) {
+			if (pokemon.m.innate) {
+				pokemon.removeVolatile(pokemon.m.innate);
+				delete pokemon.m.innate;
+			}
+			let ally = pokemon.side.active.find(ally => ally && ally !== pokemon && !ally.fainted);
+			if (ally && ally.m.innate) {
+				ally.removeVolatile(ally.m.innate);
+				delete ally.m.innate;
+			}
+		},
+		field: {
+			suppressingWeather() {
+				for (const side of this.battle.sides) {
+					for (const pokemon of side.active) {
+						if (pokemon && !pokemon.ignoringAbility() && pokemon.hasAbility('Cloud Nine')) {
+							return true;
+						}
+					}
+				}
+				return false;
+			},
+		},
+	},
+	{
+		name: "[Gen 8] Pokebilities (Beta)",
+		desc: `Pok&eacute;mon have all of their released Abilities simultaneously.`,
+
+		mod: 'pokebilities',
+		ruleset: ['[Gen 8] OU'],
+		banlist: ['Diglett', 'Dugtrio', 'Excadrill', 'Glalie', 'Gothita', 'Gothitelle', 'Gothorita', 'Octillery', 'Porygon-Z', 'Remoraid', 'Snorunt', 'Trapinch', 'Wobbuffet', 'Wynaut'],
+		onBegin() {
+			let allPokemon = this.p1.pokemon.concat(this.p2.pokemon);
+			for (let pokemon of allPokemon) {
+				if (pokemon.ability === toID(pokemon.species.abilities['S'])) {
+					continue;
+				}
+				// @ts-ignore
+				pokemon.m.innates = Object.keys(pokemon.species.abilities).filter(key => key !== 'S' && (key !== 'H' || !pokemon.species.unreleasedHidden)).map(key => toID(pokemon.species.abilities[key])).filter(ability => ability !== pokemon.ability);
+			}
+		},
+		onSwitchInPriority: 2,
+		onSwitchIn(pokemon) {
+			// @ts-ignore
+			if (pokemon.m.innates) pokemon.m.innates.forEach(innate => pokemon.addVolatile("ability:" + innate, pokemon));
+		},
+		onAfterMega(pokemon) {
+			Object.keys(pokemon.volatiles).filter(innate => innate.startsWith('ability:')).forEach(innate => pokemon.removeVolatile(innate));
+			pokemon.m.innates = undefined;
 		},
 	},
 	{

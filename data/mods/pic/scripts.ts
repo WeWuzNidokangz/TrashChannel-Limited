@@ -1,13 +1,10 @@
-'use strict';
-
-/**@type {ModdedBattleScriptsData} */
-exports.BattleScripts = {
+export const BattleScripts: ModdedBattleScriptsData = {
 	getEffect(name) {
 		if (name && typeof name !== 'string') {
 			return name;
 		}
 		let id = toID(name);
-		if (id.startsWith('ability') && !['abilitypowerofalchemy', 'abilityreceiver', 'abilitytrace'].includes(id)) return Object.assign(Object.create(this.getAbility(id.slice(7))), {id});
+		if (id.startsWith('ability:') && !['ability:powerofalchemy', 'ability:receiver', 'ability:trace'].includes(id)) return Object.assign(Object.create(this.getAbility(id.slice(8))), {id});
 		return Object.getPrototypeOf(this).getEffect.call(this, name, true);
 	},
 	pokemon: {
@@ -16,8 +13,8 @@ exports.BattleScripts = {
 			ability = this.battle.dex.getAbility(ability);
 			let oldAbility = this.ability;
 			if (!isFromFormechange) {
-				if (['illusion', 'battlebond', 'comatose', 'disguise', 'multitype', 'powerconstruct', 'rkssystem', 'schooling', 'shieldsdown', 'stancechange'].includes(ability.id)) return false;
-				if (['battlebond', 'comatose', 'disguise', 'multitype', 'powerconstruct', 'rkssystem', 'schooling', 'shieldsdown', 'stancechange'].includes(oldAbility)) return false;
+				if (['illusion', 'battlebond', 'comatose', 'disguise', 'multitype', 'powerconstruct', 'rkssystem', 'schooling', 'shieldsdown', 'stancechange', 'gulpmissile', 'hungerswitch', 'iceface'].includes(ability.id)) return false;
+				if (['battlebond', 'comatose', 'disguise', 'multitype', 'powerconstruct', 'rkssystem', 'schooling', 'shieldsdown', 'stancechange', 'gulpmissile', 'hungerswitch', 'iceface'].includes(oldAbility)) return false;
 			}
 			this.battle.singleEvent('End', this.battle.dex.getAbility(oldAbility), this.abilityData, this, source);
 			let ally = this.side.active.find(ally => ally && ally !== this && !ally.fainted);
@@ -30,7 +27,7 @@ exports.BattleScripts = {
 			if (ability.id) {
 				this.battle.singleEvent('Start', ability, this.abilityData, this, source);
 				if (ally && ally.ability !== this.ability) {
-					ally.m.innate = 'ability' + ability.id;
+					ally.m.innate = 'ability:' + ability.id;
 					ally.addVolatile(ally.m.innate);
 				}
 			}

@@ -1,8 +1,5 @@
-'use strict';
-
-/**@type {{[k: string]: ModdedMoveData}} */
-exports.BattleMovedex = {
-	"skillswap": {
+export const BattleMovedex: {[k: string]: ModdedMoveData} = {
+	skillswap: {
 		inherit: true,
 		onHit(target, source, move) {
 			let targetAbility = this.dex.getAbility(target.ability);

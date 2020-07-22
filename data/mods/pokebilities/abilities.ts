@@ -1,7 +1,4 @@
-'use strict';
-
-/**@type {{[k: string]: ModdedAbilityData}} */
-exports.BattleAbilities = {
+export const BattleAbilities: {[k: string]: ModdedAbilityData} = {
 	powerofalchemy: {
 		inherit: true,
 		onAllyFaint(ally) {
@@ -10,11 +7,10 @@ exports.BattleAbilities = {
 			let isAbility = pokemon.ability === 'powerofalchemy';
 			/**@type {string[]} */
 			let possibleAbilities = [ally.ability];
-			// @ts-ignore
-			if (ally.innates) possibleAbilities = possibleAbilities.concat(ally.innates);
+			if (ally.m.innates) possibleAbilities = possibleAbilities.concat(ally.m.innates);
 			let bannedAbilities = ['battlebond', 'comatose', 'disguise', 'flowergift', 'forecast', 'illusion', 'imposter', 'multitype', 'powerconstruct', 'powerofalchemy', 'receiver', 'rkssystem', 'schooling', 'shieldsdown', 'stancechange', 'trace', 'wonderguard', 'zenmode'];
 			bannedAbilities.push(pokemon.ability);
-			if (pokemon.innates) bannedAbilities = bannedAbilities.concat(pokemon.innates);
+			if (pokemon.m.innates) bannedAbilities = bannedAbilities.concat(pokemon.m.innates);
 			possibleAbilities = possibleAbilities.filter(val => !bannedAbilities.includes(val));
 			if (!possibleAbilities.length) return;
 			let ability = this.dex.getAbility(possibleAbilities[this.random(possibleAbilities.length)]);
@@ -23,7 +19,7 @@ exports.BattleAbilities = {
 				pokemon.setAbility(ability);
 			} else {
 				pokemon.removeVolatile("abilitypowerofalchemy");
-				pokemon.addVolatile("ability" + ability, pokemon);
+				pokemon.addVolatile("ability:" + ability, pokemon);
 			}
 		},
 	},
@@ -35,11 +31,10 @@ exports.BattleAbilities = {
 			let isAbility = pokemon.ability === 'receiver';
 			/**@type {string[]} */
 			let possibleAbilities = [ally.ability];
-			// @ts-ignore
-			if (ally.innates) possibleAbilities = possibleAbilities.concat(ally.innates);
+			if (ally.m.innates) possibleAbilities = possibleAbilities.concat(ally.m.innates);
 			let bannedAbilities = ['battlebond', 'comatose', 'disguise', 'flowergift', 'forecast', 'illusion', 'imposter', 'multitype', 'powerconstruct', 'powerofalchemy', 'receiver', 'rkssystem', 'schooling', 'shieldsdown', 'stancechange', 'trace', 'wonderguard', 'zenmode'];
 			bannedAbilities.push(pokemon.ability);
-			if (pokemon.innates) bannedAbilities = bannedAbilities.concat(pokemon.innates);
+			if (pokemon.m.innates) bannedAbilities = bannedAbilities.concat(pokemon.m.innates);
 			possibleAbilities = possibleAbilities.filter(val => !bannedAbilities.includes(val));
 			if (!possibleAbilities.length) return;
 			let ability = this.dex.getAbility(possibleAbilities[this.random(possibleAbilities.length)]);
@@ -47,8 +42,8 @@ exports.BattleAbilities = {
 			if (isAbility) {
 				pokemon.setAbility(ability);
 			} else {
-				pokemon.removeVolatile("abilityreceiver");
-				pokemon.addVolatile("ability" + ability, pokemon);
+				pokemon.removeVolatile("ability:receiver");
+				pokemon.addVolatile("ability:" + ability, pokemon);
 			}
 		},
 	},
@@ -69,12 +64,10 @@ exports.BattleAbilities = {
 				let target = possibleTargets[rand];
 				/**@type {string[]} */
 				let possibleAbilities = [target.ability];
-				// @ts-ignore
-				if (target.innates) possibleAbilities = possibleAbilities.concat(target.innates);
+				if (target.m.innates) possibleAbilities = possibleAbilities.concat(target.m.innates);
 				let bannedAbilities = ['battlebond', 'comatose', 'disguise', 'flowergift', 'forecast', 'illusion', 'imposter', 'multitype', 'powerconstruct', 'powerofalchemy', 'receiver', 'rkssystem', 'schooling', 'shieldsdown', 'stancechange', 'trace', 'zenmode'];
 				bannedAbilities.push(pokemon.ability);
-				// @ts-ignore
-				if (pokemon.innates) bannedAbilities = bannedAbilities.concat(pokemon.innates);
+				if (pokemon.m.innates) bannedAbilities = bannedAbilities.concat(pokemon.m.innates);
 				possibleAbilities = possibleAbilities.filter(val => !bannedAbilities.includes(val));
 				if (!possibleAbilities.length) {
 					possibleTargets.splice(rand, 1);
@@ -85,8 +78,8 @@ exports.BattleAbilities = {
 				if (isAbility) {
 					pokemon.setAbility(ability);
 				} else {
-					pokemon.removeVolatile("abilitytrace");
-					pokemon.addVolatile("ability" + ability, pokemon);
+					pokemon.removeVolatile("ability:trace");
+					pokemon.addVolatile("ability:" + ability, pokemon);
 				}
 				return;
 			}
