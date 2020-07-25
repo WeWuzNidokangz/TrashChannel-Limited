@@ -188,25 +188,28 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 		section: "Mashups Spotlight",
 	},
 	{
-		name: "[Gen 8] Almost Any Ability Ubers",
+		name: "[Gen 8] CAAAmomons",
+		desc: `Pokemon can use almost any ability and will be the typing of their first two moves.`,
 		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3659981/">Vanilla Ubers Metagame Discussion</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3658364/">Vanilla Ubers Sample Teams</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3661412/">Vanilla Ubers Viability Rankings</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3657159/#post-8299984">CAAAmomons Resources</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3656413/">Vanilla Camomons</a>`,
 			`&bullet; <a href="https://www.smogon.com/forums/threads/3656414/">Vanilla Almost Any Ability</a>`,
 		],
-
 		mod: 'gen8',
 		ruleset: [
-			'Standard', // Ubers
-			'!Obtainable Abilities', '2 Ability Clause', 'Dynamax Clause' // AAA
+			'Obtainable', 'Species Clause', 'Nickname Clause', 'OHKO Clause', 'Evasion Moves Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Dynamax Clause', 'Sleep Clause Mod', 'Endless Battle Clause', // Camomons
+			'!Obtainable Abilities', '2 Ability Clause', // AAA
+			'Camomons Rule', // CAAAmomons
+
 		],
-        banlist: [
+		banlist: [
+			'Dracovish', 'Eternatus', 'Hydreigon', 'Kyurem', 'Kyurem-Black', 'Kyurem-White', 'Lunala', 'Marshadow', 'Melmetal',
+			'Mewtwo', 'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane', 'Reshiram', 'Shedinja', 'Solgaleo', 'Zacian', 'Zamazenta', 'Zekrom', 'Zeraora',
+			'Arena Trap', 'Moody', 'Shadow Tag', 'Baton Pass', // Camomons
 			'Arena Trap', 'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Gorilla Tactics', 'Huge Power', 'Ice Scales', 'Illusion',
 			'Imposter', 'Innards Out', 'Intrepid Sword', 'Libero', 'Moody', 'Neutralizing Gas', 'Parental Bond', 'Protean',
-			'Pure Power', 'Shadow Tag', 'Simple', 'Stakeout', 'Speed Boost', 'Water Bubble', 'Wonder Guard', 'Shedinja' // AAA
-		],
-        restricted: ['Ditto', 'Kyurem-White', 'Lunala', 'Marshadow', 'Mewtwo', 'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane', 'Reshiram', 'Solgaleo', 'Zekrom'],
+			'Pure Power', 'Shadow Tag', 'Simple', 'Stakeout', 'Speed Boost', 'Water Bubble', 'Wonder Guard' // AAA
+		]
 	},
 	{
 		section: "Official OM Mashups (Singles)",
@@ -234,11 +237,11 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 			'Arena Trap', 'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Gorilla Tactics', 'Huge Power', 'Ice Scales', 'Illusion',
 			'Imposter', 'Innards Out', 'Intrepid Sword', 'Libero', 'Moody', 'Neutralizing Gas', 'Parental Bond', 'Protean',
 			'Pure Power', 'Shadow Tag', 'Simple', 'Stakeout', 'Speed Boost', 'Water Bubble', 'Wonder Guard', // AAA
-			'Hypnosis', 'Sing', 'Sleep Powder', 'Wicked Blow', 'Terrakion', 'Keldeo', 'Zeraora' // STAAABmons
+			'Hypnosis', 'Sing', 'Sleep Powder', 'Wicked Blow', 'Terrakion', 'Keldeo', 'Zeraora', 'Chandelure' // STAAABmons
 		],
 		restricted: [
 			'Acupressure', 'Belly Drum', 'Bolt Beak', 'Double Iron Bash', 'Electrify', 'Extreme Speed', 'Fishious Rend', 'Shell Smash', 'Shift Gear', 'Spore', 'Wicked Blow', // STABmons
-			'No Retreat', 'V-create', // STAAABmons
+			'No Retreat', 'Transform', 'V-create', // STAAABmons
 		],
 	},
 	{
@@ -253,36 +256,12 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 		ruleset: [ 
 			'-Nonexistent', 'OHKO Clause', 'Evasion Moves Clause', 'Forme Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod', 'Endless Battle Clause', // BH
 			'Camomons Rule', 'Balanced Hackmons Validation', // BH Camomons
-		 ],
-		 banlist: [
+		],
+		banlist: [
 			'Eternatus-Eternamax', 'Comatose + Sleep Talk', 'Double Iron Bash', 'Octolock', 'Shell Smash',
 			'Arena Trap', 'Contrary', 'Gorilla Tactics', 'Huge Power', 'Illusion', 'Innards Out', 'Libero', 'Magnet Pull', 'Moody',
 			'Neutralizing Gas', 'Parental Bond', 'Protean', 'Pure Power', 'Shadow Tag', 'Stakeout', 'Water Bubble', 'Wonder Guard', // BH
 		],
-	},
-	{
-		name: "[Gen 8] CAAAmomons",
-		desc: `Pokemon can use almost any ability and will be the typing of their first two moves.`,
-		threads: [
-			`&bullet; <a href="https://www.smogon.com/forums/threads/om-mashup-megathread.3657159/#post-8299984">CAAAmomons Resources</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3656413/">Vanilla Camomons</a>`,
-			`&bullet; <a href="https://www.smogon.com/forums/threads/3656414/">Vanilla Almost Any Ability</a>`,
-		],
-		mod: 'gen8',
-		ruleset: [
-			'Obtainable', 'Species Clause', 'Nickname Clause', 'OHKO Clause', 'Evasion Moves Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Dynamax Clause', 'Sleep Clause Mod', 'Endless Battle Clause', // Camomons
-			'!Obtainable Abilities', '2 Ability Clause', // AAA
-			'Camomons Rule', // CAAAmomons
-
-		],
-		banlist: [
-			'Darmanitan-Galar', 'Dracovish', 'Eternatus', 'Hydreigon', 'Kyurem', 'Kyurem-Black', 'Kyurem-White', 'Lunala', 'Marshadow', 'Melmetal',
-			'Mewtwo', 'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane', 'Reshiram', 'Shedinja', 'Solgaleo', 'Zacian', 'Zamazenta', 'Zekrom', 'Zeraora',
-			'Arena Trap', 'Moody', 'Shadow Tag', 'Baton Pass', // Camomons
-			'Arena Trap', 'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Gorilla Tactics', 'Huge Power', 'Ice Scales', 'Illusion',
-			'Imposter', 'Innards Out', 'Intrepid Sword', 'Libero', 'Moody', 'Neutralizing Gas', 'Parental Bond', 'Protean',
-			'Pure Power', 'Shadow Tag', 'Simple', 'Stakeout', 'Speed Boost', 'Water Bubble', 'Wonder Guard' // AAA
-		]
 	},
 	{
 		name: "[Gen 8] STAB n Mega",
@@ -310,6 +289,27 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 			'Acupressure', 'Belly Drum', 'Bolt Beak', 'Double Iron Bash', 'Extreme Speed', 'Fishious Rend', 'Shell Smash', 'Shift Gear', 'Spore', 'Wicked Blow', // STABmons
 			'Blissey', 'Chansey', 'Eternatus', 'Lunala', // STAB n Mega
 		],
+	},
+	{
+		name: "[Gen 8] Almost Any Ability Ubers",
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3659981/">Vanilla Ubers Metagame Discussion</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3658364/">Vanilla Ubers Sample Teams</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3661412/">Vanilla Ubers Viability Rankings</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3656414/">Vanilla Almost Any Ability</a>`,
+		],
+
+		mod: 'gen8',
+		ruleset: [
+			'Standard', // Ubers
+			'!Obtainable Abilities', '2 Ability Clause', 'Dynamax Clause' // AAA
+		],
+        banlist: [
+			'Arena Trap', 'Comatose', 'Contrary', 'Fluffy', 'Fur Coat', 'Gorilla Tactics', 'Huge Power', 'Ice Scales', 'Illusion',
+			'Imposter', 'Innards Out', 'Intrepid Sword', 'Libero', 'Moody', 'Neutralizing Gas', 'Parental Bond', 'Protean',
+			'Pure Power', 'Shadow Tag', 'Simple', 'Stakeout', 'Speed Boost', 'Water Bubble', 'Wonder Guard', 'Shedinja' // AAA
+		],
+        restricted: ['Ditto', 'Kyurem-White', 'Lunala', 'Marshadow', 'Mewtwo', 'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane', 'Reshiram', 'Solgaleo', 'Zekrom'],
 	},
 	{
 		section: "Official OM Mashups (Doubles)",
