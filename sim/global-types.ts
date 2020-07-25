@@ -1437,6 +1437,14 @@ interface ModdedBattleScriptsData extends Partial<BattleScriptsData> {
 
 	//#region TrashChannel
 	getAbilityMapping?: (this: Battle, pokemon: Pokemon) => SpeciesAbility;
+	doOnShowAbility?: (this: Battle, abilityName: string) => void;
+	doOnRunSingleEvent?: (this: Battle,
+		eventid: string, effect: Effect, effectData: AnyObject | null,
+		target: string | Pokemon | Side | Field | Battle | null, source?: string | Pokemon | Effect | false | null,
+		sourceEffect?: Effect | string | null, relayVar?: any
+	) => void;
+	doOnRunEvent?: (this: Battle, eventid: string, target?: Pokemon | Pokemon[] | Side | Battle | null, source?: string | Pokemon | false | null,
+		sourceEffect?: Effect | null, relayVar?: any, onEffect?: boolean, fastExit?: boolean) => void;
 	//#endregion
 }
 

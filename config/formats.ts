@@ -3534,6 +3534,321 @@ export const Formats: (FormatsData | {section: string, column?: number})[] = [
 		},
 	},
 	{
+		name: "[Gen 8] Live and Learn",
+		desc: `Pok&eacute;mon can learn each other's moves and abilities when they are activated.`,
+		threads: [
+            `&bullet; <a href="https://www.youtube.com/watch?v=z1BRZg0GG0A">OST</a>`,
+        ],
+
+		mod: 'gen8',
+		ruleset: ['Standard', 'Dynamax Clause'],
+		banlist: [
+			'Darmanitan-Galar', 'Eternatus', 'Kyurem-Black', 'Kyurem-White', 'Lunala', 'Marshadow', 'Melmetal',
+			'Mewtwo', 'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane', 'Reshiram', 'Shedinja', 'Solgaleo', 'Toxapex',
+			'Zacian', 'Zamazenta', 'Zekrom', 'Leppa Berry', 'Baton Pass',
+			'Arena Trap', 'Gorilla Tactics', 'Imposter', 'Mirror Armor', 'Moody', 'Neutralizing Gas', 'Shadow Tag',
+			'Trace',
+		],
+		// @ts-ignore
+		runTeachableMoment(battle: Battle, effectName: string, checkAbility?: boolean, checkMove?: boolean) {
+			// @ts-ignore
+			if (this.format && this.format.banlist && this.format.banlist.includes(effectName)) return;
+
+			const effectID = toID(effectName);
+			const effectAsAbility = checkAbility ? battle.dex.getAbility(effectID) : null;
+			const effectAsMove = checkMove ? battle.dex.getMove(effectID) : null;
+
+			for (const side of battle.sides) {
+				if (!side) continue;
+				if (side.active.every(ally => ally && !ally.fainted)) {
+					for (const activePokemon of side.active) {
+						if (!activePokemon) continue;
+
+						// Ability case
+						if (checkAbility && effectAsAbility && effectAsAbility.exists) {
+							const lAbilities = activePokemon.m.learnedAbilities;
+							if (!lAbilities) continue;
+							if (lAbilities.has(effectID)) continue;
+							lAbilities.add(effectID);
+							const effect = 'ability:' + effectID;
+							battle.add('message', activePokemon.name+' noticed and learned the ability '+effectAsAbility.name+'!');
+							// Non-immediate additions (depending on timing may be called twice, etc)
+							if (['intimidate', 'download', 'intrepidsword', 'dauntlessshield'].includes(effectID)) continue;
+							activePokemon.addVolatile(effect);
+							//console.log('adding volatile: ' + effectID);
+						}
+
+						// Move case
+						if (checkMove && effectAsMove && effectAsMove.exists) {
+							const lMoves = activePokemon.m.learnedMoves;
+							if (!lMoves) continue;
+							if (lMoves.has(effectID)) continue;
+							if (lMoves.length >= 24) {
+								battle.add('message', activePokemon.name+' has run out of moveslots and cannot learn the move '+effectName+'!');
+								continue;
+							}
+							lMoves.add(effectID);
+							activePokemon.moveSlots.push({
+								move: effectAsMove.name,
+								id: effectAsMove.id,
+								pp: ((effectAsMove.noPPBoosts || effectAsMove.isZ) ? effectAsMove.pp : effectAsMove.pp * 8 / 5),
+								maxpp: ((effectAsMove.noPPBoosts || effectAsMove.isZ) ? effectAsMove.pp : effectAsMove.pp * 8 / 5),
+								target: effectAsMove.target,
+								disabled: false,
+								disabledSource: '',
+								used: false,
+							});
+							battle.add('message', activePokemon.name+' noticed and learned the move '+effectAsMove.name+'!');
+						}
+					}
+				}
+			}
+		},
+		onBegin() {
+			for (const pokemon of this.getAllPokemon()) {
+				pokemon.m.learnedAbilities = new Set<string>();
+				pokemon.m.learnedAbilities.add(pokemon.baseAbility);
+				//console.log('adding base ability: ' + pokemon.baseAbility);
+
+				pokemon.m.learnedMoves = new Set<string>();
+				for (const move of pokemon.baseMoves) {
+					if (!move) continue;
+					pokemon.m.learnedMoves.add(move);
+					//console.log('adding base move: ' + move);
+				}
+			}
+		},
+		onBeforeSwitchIn(pokemon) {
+			for (const ability of pokemon.m.learnedAbilities) {
+				if (ability === pokemon.baseAbility) continue;
+				//console.log('adding extra ability: ' + ability);
+				const effect = 'ability:' + ability;
+				pokemon.volatiles[effect] = {id: toID(effect), target: pokemon};
+			}
+		},
+		onSwitchInPriority: 2,
+		onSwitchIn(pokemon) {
+			for (const ability of pokemon.m.learnedAbilities) {
+				if (ability === pokemon.baseAbility) continue;
+				const effect = 'ability:' + ability;
+				//console.log('adding extra ability: ' + ability);
+				delete pokemon.volatiles[effect];
+				pokemon.addVolatile(effect);
+			}
+		},
+		onAfterMove(pokemon, target, move) {
+			if (!move) return;
+			//console.log('onAfterMove: ' + move);
+			let format = this.format;
+			// @ts-ignore
+			if (!format.runTeachableMoment) format = this.dex.getFormat('gen8liveandlearn');
+			// @ts-ignore
+			format.runTeachableMoment!(this, move.name, false, true);
+			if(move.hasBounced) {
+				// @ts-ignore
+				format.runTeachableMoment!(this, 'Magic Bounce', true, false);
+			}
+		},
+		battle: {
+			doOnShowAbility(abilityName: string)
+			{
+				let format = this.format;
+				// @ts-ignore
+				if (!format.runTeachableMoment) format = this.dex.getFormat('gen8liveandlearn');
+				// @ts-ignore
+				format.runTeachableMoment!(this, abilityName, true, false);
+			},
+			/*doOnRunSingleEvent(
+				eventid: string, effect: Effect, effectData: AnyObject | null,
+				target: string | Pokemon | Side | Field | Battle | null, source?: string | Pokemon | Effect | false | null,
+				sourceEffect?: Effect | string | null, relayVar?: any
+			)
+			{
+				let format = this.format;
+				// @ts-ignore
+				if (!format.runTeachableMoment) format = this.dex.getFormat('gen8liveandlearn');
+
+				if (effect) {
+					if ( ('Ability' !== effect.effectType) &&
+						('Move' !== effect.effectType) ) {
+						return;
+					}
+					// @ts-ignore
+					format.runTeachableMoment!(this, effect.id, true, false);
+				}
+
+				if (!sourceEffect) return;
+				// @ts-ignore
+				format.runTeachableMoment!(this, sourceEffect.name, true, false);
+			},
+			doOnRunEvent(eventid: string, target?: Pokemon | Pokemon[] | Side | Battle | null, source?: string | Pokemon | false | null,
+				sourceEffect?: Effect | null, relayVar?: any, onEffect?: boolean, fastExit?: boolean)
+			{
+				//if (eventid) console.log('eventid: ' + eventid);
+				if ( ('Ability' !== eventid) &&
+					('Move' !== eventid) ) {
+					return;
+				}
+
+				if (!sourceEffect) return;
+				//console.log('sourceEffect.name: ' + sourceEffect.name);
+
+				let format = this.format;
+				// @ts-ignore
+				if (!format.runTeachableMoment) format = this.dex.getFormat('gen8liveandlearn');
+				// @ts-ignore
+				format.runTeachableMoment!(this, sourceEffect.name, true, false);
+			},*/
+		},
+		field: {
+			suppressingWeather() {
+				for (const side of this.battle.sides) {
+					for (const pokemon of side.active) {
+						if (pokemon && !pokemon.ignoringAbility() && pokemon.hasAbility('Cloud Nine')) {
+							return true;
+						}
+					}
+				}
+				return false;
+			},
+		},
+		pokemon: {
+			hasAbility(ability) {
+				if (this.ignoringAbility()) return false;
+				if (Array.isArray(ability)) return ability.some(abil => this.hasAbility(abil));
+				const abilityid = toID(ability);
+				return this.ability === abilityid || !!this.volatiles['ability:' + abilityid];
+			},
+		},
+	},
+	{
+		name: "[Gen 8] Live and Learn: Random Battle",
+		desc: `Pok&eacute;mon can learn each other's moves and abilities when they are activated.`,
+		threads: [
+            `&bullet; <a href="https://www.youtube.com/watch?v=z1BRZg0GG0A">OST</a>`,
+        ],
+
+		mod: 'liveandlearn',
+		team: 'randomLaL',
+		ruleset: ['Standard', 'Dynamax Clause'],
+		onBegin() {
+			for (const pokemon of this.getAllPokemon()) {
+				pokemon.m.learnedAbilities = new Set<string>();
+				pokemon.m.learnedAbilities.add(pokemon.baseAbility);
+				//console.log('adding base ability: ' + pokemon.baseAbility);
+
+				pokemon.m.learnedMoves = new Set<string>();
+				for (const move of pokemon.baseMoves) {
+					if (!move) continue;
+					pokemon.m.learnedMoves.add(move);
+					//console.log('adding base move: ' + move);
+				}
+			}
+		},
+		onBeforeSwitchIn(pokemon) {
+			for (const ability of pokemon.m.learnedAbilities) {
+				if (ability === pokemon.baseAbility) continue;
+				//console.log('adding extra ability: ' + ability);
+				const effect = 'ability:' + ability;
+				pokemon.volatiles[effect] = {id: toID(effect), target: pokemon};
+			}
+		},
+		onSwitchInPriority: 2,
+		onSwitchIn(pokemon) {
+			for (const ability of pokemon.m.learnedAbilities) {
+				if (ability === pokemon.baseAbility) continue;
+				const effect = 'ability:' + ability;
+				//console.log('adding extra ability: ' + ability);
+				delete pokemon.volatiles[effect];
+				pokemon.addVolatile(effect);
+			}
+		},
+		onAfterMove(pokemon, target, move) {
+			if (!move) return;
+			//console.log('onAfterMove: ' + move);
+			let format = this.format;
+			// @ts-ignore
+			if (!format.runTeachableMoment) format = this.dex.getFormat('gen8liveandlearn');
+			// @ts-ignore
+			format.runTeachableMoment!(this, move.name, false, true);
+			if(move.hasBounced) {
+				// @ts-ignore
+				format.runTeachableMoment!(this, 'Magic Bounce', true, false);
+			}
+		},
+		battle: {
+			doOnShowAbility(abilityName: string)
+			{
+				let format = this.format;
+				// @ts-ignore
+				if (!format.runTeachableMoment) format = this.dex.getFormat('gen8liveandlearn');
+				// @ts-ignore
+				format.runTeachableMoment!(this, abilityName, true, false);
+			},
+			/*doOnRunSingleEvent(
+				eventid: string, effect: Effect, effectData: AnyObject | null,
+				target: string | Pokemon | Side | Field | Battle | null, source?: string | Pokemon | Effect | false | null,
+				sourceEffect?: Effect | string | null, relayVar?: any
+			)
+			{
+				let format = this.format;
+				// @ts-ignore
+				if (!format.runTeachableMoment) format = this.dex.getFormat('gen8liveandlearn');
+
+				if (effect) {
+					if ( ('Ability' !== effect.effectType) &&
+						('Move' !== effect.effectType) ) {
+						return;
+					}
+					// @ts-ignore
+					format.runTeachableMoment!(this, effect.id, true, false);
+				}
+
+				if (!sourceEffect) return;
+				// @ts-ignore
+				format.runTeachableMoment!(this, sourceEffect.name, true, false);
+			},
+			doOnRunEvent(eventid: string, target?: Pokemon | Pokemon[] | Side | Battle | null, source?: string | Pokemon | false | null,
+				sourceEffect?: Effect | null, relayVar?: any, onEffect?: boolean, fastExit?: boolean)
+			{
+				//if (eventid) console.log('eventid: ' + eventid);
+				if ( ('Ability' !== eventid) &&
+					('Move' !== eventid) ) {
+					return;
+				}
+
+				if (!sourceEffect) return;
+				//console.log('sourceEffect.name: ' + sourceEffect.name);
+
+				let format = this.format;
+				// @ts-ignore
+				if (!format.runTeachableMoment) format = this.dex.getFormat('gen8liveandlearn');
+				// @ts-ignore
+				format.runTeachableMoment!(this, sourceEffect.name, true, false);
+			},*/
+		},
+		field: {
+			suppressingWeather() {
+				for (const side of this.battle.sides) {
+					for (const pokemon of side.active) {
+						if (pokemon && !pokemon.ignoringAbility() && pokemon.hasAbility('Cloud Nine')) {
+							return true;
+						}
+					}
+				}
+				return false;
+			},
+		},
+		pokemon: {
+			hasAbility(ability) {
+				if (this.ignoringAbility()) return false;
+				if (Array.isArray(ability)) return ability.some(abil => this.hasAbility(abil));
+				const abilityid = toID(ability);
+				return this.ability === abilityid || !!this.volatiles['ability:' + abilityid];
+			},
+		},
+	},
+	{
 		name: "[Gen 7] The Call of Pikacthulhu",
 		desc: `Pok&eacute;mon have Perish status applied when entering battle.`,
 		threads: [

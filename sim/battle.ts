@@ -501,6 +501,12 @@ export class Battle {
 		this.effectData = parentEffectData;
 		this.event = parentEvent;
 
+		//#region TrashChannel
+		// 20/07/23: For Live and Learn
+		//if (effect) console.log( 'runsingle: effectType：' +　effect.effectType + ', id: ' + effect.id + ', sourceEffect: ' + effect.sourceEffect );
+		if (this.doOnRunSingleEvent) this.doOnRunSingleEvent(eventid, effect, effectData, target, source, sourceEffect, relayVar);
+		//#endregion
+
 		return returnVal === undefined ? relayVar : returnVal;
 	}
 
@@ -767,6 +773,11 @@ export class Battle {
 					args[0] = relayVar;
 				}
 			}
+
+			//#region TrashChannel
+			// 20/07/23: For Live and Learn
+			if (this.doOnRunEvent) this.doOnRunEvent(eventid, target, source, sourceEffect, relayVar, onEffect, fastExit);
+			//#endregion
 		}
 
 		this.eventDepth--;
@@ -2871,6 +2882,27 @@ export class Battle {
 	}
 
 	add(...parts: (Part | (() => {side: SideID, secret: string, shared: string}))[]) {
+		//#region TrashChannel
+		// 20/07/23: For Live and Learn
+		//console.log("Adding: " + parts.toString());
+		if (this.doOnShowAbility) {
+			for (const part of parts) {
+				if (typeof part === 'string') {
+					//console.log("part: " + part);
+					const abilityPrefix = '[from] ability: ';
+					if (part.startsWith(abilityPrefix)) {
+						const abilityName = part.slice(abilityPrefix.length);
+						//console.log("abilityName: " + abilityName);
+						this.doOnShowAbility(abilityName);
+					}
+					else {
+						this.doOnShowAbility(part);
+					}
+				}
+			}
+		}
+		//#endregion
+
 		if (!parts.some(part => typeof part === 'function')) {
 			this.log.push(`|${parts.join('|')}`);
 			return;
