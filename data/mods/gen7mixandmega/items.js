@@ -1,7 +1,7 @@
 'use strict';
 
 /**@type {{[k: string]: ModdedItemData}} */
-let BattleItems = {
+let Items = {
 	blueorb: {
 		inherit: true,
 		onSwitchIn(pokemon) {
@@ -60,4 +60,4 @@ let BattleItems = {
 	},
 };
 
-exports.BattleItems = BattleItems;
+exports.Items = Items;

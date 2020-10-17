@@ -1,5 +1,6 @@
 import RandomTeams from '../../random-teams';
-import {BattleItems} from './../../../.data-dist/items';
+import {Items} from './../../../.data-dist/items';
+import {toID} from './../../../sim/dex';
 
 class RandomMnMTeams extends RandomTeams {
 	randomHCMnMTeam() {
@@ -8,13 +9,13 @@ class RandomMnMTeams extends RandomTeams {
 		/**@type {string[]} */
 		let itemPool = [];
 		
-		for( let item of Object.keys(BattleItems) ) {
-			//console.log("BattleItems[item].name: " + BattleItems[item].name);
-			if( (BattleItems[item].megaStone) &&
-				("Crucibellite" !== BattleItems[item].name) )
+		for( let item of Object.keys(Items) ) {
+			//console.log("Items[item].name: " + Items[item].name);
+			if( (Items[item].megaStone) &&
+				("Crucibellite" !== Items[item].name) )
 			{
-				//console.log("Push mega item: " + BattleItems[item].name);
-				itemPool.push( toID(BattleItems[item].name) );
+				//console.log("Push mega item: " + Items[item].name);
+				itemPool.push( toID(Items[item].name) );
 			}
 		}
 		

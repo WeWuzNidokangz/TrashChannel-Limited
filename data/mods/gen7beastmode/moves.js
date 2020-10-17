@@ -7,7 +7,7 @@ const Pokemon = require(/** @type {any} */ ('../../../.sim-dist/pokemon')).Pokem
 const DexCalculator = require('../../../trashchannel/dex-calculator');
 
 /** @type {{[k: string]: ModdedMoveData}} */
-let BattleMovedex = {
+let Moves = {
 	"beastmodebase": {
 		accuracy: true,
 		basePower: 0,
@@ -96,4 +96,4 @@ let BattleMovedex = {
 	},
 };
 
-exports.BattleMovedex = BattleMovedex;
+exports.Moves = Moves;

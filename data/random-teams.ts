@@ -1648,7 +1648,7 @@ export class RandomTeams {
 	randomHCTMTeam() { // Team for Trademarked: Hackmons Cup
 		let team = this.randomHCTeam();
 
-		let movePool = Object.keys(this.dex.data.Movedex);
+		let movePool = Object.keys(this.dex.data.Moves);
 
 		let trademarkPool = [];
 		for (const moveid of movePool) {

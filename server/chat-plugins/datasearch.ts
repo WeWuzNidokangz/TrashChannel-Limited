@@ -1904,7 +1904,7 @@ function runMovesearch(target: string, cmd: string, canAll: boolean, message: st
 
 function runMergeMovesearch(target: string, cmd: string, canAll: boolean, message: string) {
 	let learnsets = Object.assign({}, Dex.data.Learnsets);
-	let mergeLearnsets = Dex.deepClone(Dex.data.Learnsets);
+	let mergeLearnsets = Utils.deepClone(Dex.data.Learnsets);
 	let mergeDex = [];
 	for (let i in Dex.data.Pokedex) {
 		if (Dex.data.Pokedex[i].num <= 0 || Dex.data.FormatsData[i].isUnreleased) continue;
@@ -2303,7 +2303,7 @@ function runMergeMovesearch(target: string, cmd: string, canAll: boolean, messag
 
 	// Since we assume we have no target mons at first
 	// then the valid moveset we can search is the set of all moves.
-	const validMoves = new Set(Object.keys(Dex.data.Movedex));
+	const validMoves = new Set(Object.keys(Dex.data.Moves));
 	validMoves.delete('magikarpsrevenge');
 	for (const mon of targetMons) {
 		const species = Dex.getSpecies(mon.name);

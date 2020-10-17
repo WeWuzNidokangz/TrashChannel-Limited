@@ -7,7 +7,7 @@ const path = require('path');
 const MNM_ITEMS = path.resolve(__dirname, '../mixandmega/items');
 
 /**@type {{[k: string]: ModdedItemData}} */
-let BattleItems = require(MNM_ITEMS).BattleItems;
+let Items = require(MNM_ITEMS).Items;
 // This should be OK as validator forces orb users to validate as MnM
 
-exports.BattleItems = BattleItems;
+exports.Items = Items;

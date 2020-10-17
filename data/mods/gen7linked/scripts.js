@@ -1,7 +1,7 @@
 'use strict';
 
 /**@type {ModdedBattleScriptsData} */
-exports.BattleScripts = {
+exports.Scripts = {
 	inherit: 'gen7',
 	runMove(moveOrMoveName, pokemon, targetLoc, sourceEffect, zMove, externalMove) {
 		let target = this.getTarget(pokemon, zMove || moveOrMoveName, targetLoc);

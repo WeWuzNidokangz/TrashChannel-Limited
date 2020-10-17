@@ -1,7 +1,7 @@
 'use strict';
 
 /**@type {ModdedBattleScriptsData} */
-exports.BattleScripts = {
+exports.Scripts = {
 	inherit: 'gen7',
 	init() {
 		let learnsets = Object.assign({}, this.data.Learnsets);

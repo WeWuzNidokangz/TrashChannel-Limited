@@ -9,19 +9,19 @@ class RandomMnMTeams extends RandomTeams {
 
 		// Load items
 		/**@type {{[k: string]: ItemData}} */
-		let BattleItems = ITEMS.BattleItems;
+		let Items = ITEMS.Items;
 
 		/**@type {string[]} */
 		let itemPool = [];
 		
-		for( let item of Object.keys(BattleItems) ) {
-			//console.log("BattleItems[item].name: " + BattleItems[item].name);
-			if( (BattleItems[item].megaStone) ||
-				("Blue Orb" == BattleItems[item].name) || 
-				("Red Orb" == BattleItems[item].name) )
+		for( let item of Object.keys(Items) ) {
+			//console.log("Items[item].name: " + Items[item].name);
+			if( (Items[item].megaStone) ||
+				("Blue Orb" == Items[item].name) || 
+				("Red Orb" == Items[item].name) )
 			{
-				console.log("Push mega item: " + BattleItems[item].name);
-				itemPool.push( BattleItems[item].id );
+				console.log("Push mega item: " + Items[item].name);
+				itemPool.push( Items[item].id );
 			}
 		}
 		

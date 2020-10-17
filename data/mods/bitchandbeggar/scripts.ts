@@ -2,7 +2,7 @@ import {DexCalculator} from '../../../.trashchannel-dist/dex-calculator';
 
 // 18/10/27 TrashChannel: Based on mixandmega/scripts.js
 
-export const BattleScripts: ModdedBattleScriptsData = {
+export const Scripts: ModdedBattleScriptsData = {
 	init() {
 		for (let id in this.data.Items) {
 			let bitchSpecies = this.getSpecies(id);

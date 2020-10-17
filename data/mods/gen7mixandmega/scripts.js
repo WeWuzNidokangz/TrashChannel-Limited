@@ -1,7 +1,7 @@
 'use strict';
 
 /**@type {ModdedBattleScriptsData} */
-let BattleScripts = {
+let Scripts = {
 	inherit: 'gen7',
 	init() {
 		for (let id in this.data.Items) {
@@ -114,4 +114,4 @@ let BattleScripts = {
 	},
 };
 
-exports.BattleScripts = BattleScripts;
+exports.Scripts = Scripts;

@@ -6,11 +6,11 @@ const POKEDEX = require('./../../pokedex');
 const MODMOVES = require('./moves');
 
 /**@type {ModdedBattleScriptsData} */
-let BattleScripts = {
+let Scripts = {
 	inherit: 'gen7',
 	init() {
 		// Generate a beast mode move for every pokemon
-		let beastModeBaseMove = this.data.Movedex['beastmodebase'];
+		let beastModeBaseMove = this.data.Moves['beastmodebase'];
 		/**@type {Species} */
 		let modMoveSpecies;
 		for (let modMoveId in this.data.Pokedex) {
@@ -28,9 +28,9 @@ let BattleScripts = {
 				modMove.isNonstandard = true;
 			}
 
-			this.data.Movedex[modMoveId] = modMove;
+			this.data.Moves[modMoveId] = modMove;
 
-			//console.log('modMoveId: '+ this.data.Movedex[modMoveId].toString());
+			//console.log('modMoveId: '+ this.data.Moves[modMoveId].toString());
 		}
 
 		// Let every pokemon learn a beast mode move to transform into every other pokemon
@@ -47,4 +47,4 @@ let BattleScripts = {
 	},
 };
 
-exports.BattleScripts = BattleScripts;
+exports.Scripts = Scripts;

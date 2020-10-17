@@ -18,7 +18,7 @@ import {FS} from '../lib/fs';
 const suspectTests = JSON.parse(FS('../config/suspects.json').readIfExistsSync() || "{}");
 
 //#region TrashChannel
-import {BattleFormats} from '../.data-dist/rulesets';
+import {Formats} from '../.data-dist/rulesets';
 //#endregion
 
 /** A Pokemon that has fainted. */
@@ -254,7 +254,7 @@ export class Battle {
 			}
 
 			//#region TrashChannel
-			const eventRule = BattleFormats[rule];
+			const eventRule = Formats[rule];
 			if(eventRule) {
 				const hasEventHandler = Object.keys(eventRule).some(val =>
 					val.startsWith('on') && !['onBegin', 'onValidateTeam', 'onChangeSet', 'onValidateSet'].includes(val)

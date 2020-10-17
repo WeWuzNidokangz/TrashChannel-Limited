@@ -168,7 +168,24 @@ function mergeFormats(main: FormatList, custom: FormatList | undefined): FormatL
 					build.push(current);
 				}
 			} else if ((element as FormatData).name) { // otherwise, adds the element to its section.
-				current.formats.push(element as FormatData);
+//#region TrashChannel: Filter main formats
+				let formatElem : FormatData = (element as FormatData);
+				if(formatElem) {
+					// Random Battle must be completely removed not to be selected as the default format
+					if("[Gen 8] Random Battle" === formatElem.name) continue;
+
+					// Disable ladders and challenging for normie formats to clear space
+					if(current &&
+						("National Dex" !== current.section) &&
+						("Pet Mods" !== current.section) &&
+						("OM of the Month" !== current.section) &&
+						("Other Metagames" !== current.section)) {
+						formatElem.searchShow = false;
+						formatElem.challengeShow = false;
+					}
+				}
+				current.formats.push(formatElem);
+//#endregion
 			}
 		}
 	}
@@ -1632,7 +1649,9 @@ export class ModdedDex {
 			}
 		}
 		try {
-			Formats = mergeFormats(require(MAIN_FORMATS).Formats, customFormats);
+//#region TrashChannel: Prioritise custom formats over main
+			Formats = mergeFormats(customFormats, require(MAIN_FORMATS).Formats);
+//#endregion
 		} catch (e) {
 			if (e.code !== 'MODULE_NOT_FOUND' && e.code !== 'ENOENT') {
 				throw e;

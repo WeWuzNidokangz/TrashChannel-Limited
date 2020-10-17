@@ -1,7 +1,7 @@
 'use strict';
 
 /**@type {{[k: string]: ModdedItemData}} */
-let BattleItems = {
+let Items = {
 	blueorb: {
 		inherit: true,
 		onSwitchIn(pokemon) { // 19/07/14 TrashChannel: Allow real Primal Pokemon to revert again, but only once
@@ -63,4 +63,4 @@ let BattleItems = {
 	},
 };
 
-exports.BattleItems = BattleItems;
+exports.Items = Items;

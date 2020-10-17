@@ -1,7 +1,7 @@
 'use strict';
 
 /**@type {{[k: string]: ModdedItemData}} */
-exports.BattleItems = {
+exports.Items = {
 	leppaberry: {
 		inherit: true,
 		onUpdate(pokemon) {

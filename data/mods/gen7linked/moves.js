@@ -1,7 +1,7 @@
 'use strict';
 
 /**@type {{[k: string]: ModdedMoveData}} */
-exports.BattleMovedex = {
+exports.Moves = {
 	/**
 	 * Artificial priority
 	 *

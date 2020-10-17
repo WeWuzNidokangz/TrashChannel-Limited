@@ -13,7 +13,7 @@ const MMCOLLECTION = path.resolve(__dirname, './mixedmetacollection');
 // 18/12/20 TrashChannel: IT'S TIEM
 
 /**@type {ModdedBattleScriptsData} */
-let BattleScripts = {
+let Scripts = {
 	inherit: 'gen7',
 	init() {
 		console.log("1 init");
@@ -45,7 +45,7 @@ let BattleScripts = {
 			try {
 				// Load meta script functions
 				/**@type {ModdedBattleScriptsData} */
-				metaScript = require(metaScriptPath).BattleScripts;
+				metaScript = require(metaScriptPath).Scripts;
 
 				if(undefined !== metaScript.init) {
 					return metaScript.init.call(this);
@@ -77,7 +77,7 @@ let BattleScripts = {
 
 				// Load meta script functions
 				/**@type {ModdedBattleScriptsData} */
-				metaScript = require(metaScriptPath).BattleScripts;
+				metaScript = require(metaScriptPath).Scripts;
 
 				if(undefined !== metaScript.canMegaEvo) {
 					console.log("4 canMegaEvo");
@@ -89,7 +89,7 @@ let BattleScripts = {
 			}
 		}
 
-		let genericScript = require(GENERIC_SCRIPTS).BattleScripts;
+		let genericScript = require(GENERIC_SCRIPTS).Scripts;
 		if(undefined !== genericScript.canMegaEvo) {
 			return genericScript.canMegaEvo.call(this, pokemon);
 		}
@@ -105,7 +105,7 @@ let BattleScripts = {
 			try {
 				// Load meta script functions
 				/**@type {ModdedBattleScriptsData} */
-				metaScript = require(metaScriptPath).BattleScripts;
+				metaScript = require(metaScriptPath).Scripts;
 
 				if(undefined !== metaScript.runMegaEvo) {
 					return metaScript.runMegaEvo.call(this, pokemon);
@@ -150,7 +150,7 @@ let BattleScripts = {
 	getMixedSpecies(originalSpecies, megaSpecies) { // Can only enter from MnM (for now)
 		// Load MnM script functions
 		/**@type {ModdedBattleScriptsData} */
-		let MnMScript = require(MNM_SCRIPTS).BattleScripts;
+		let MnMScript = require(MNM_SCRIPTS).Scripts;
 
 		if(undefined !== MnMScript.getMixedSpecies) {
 			return MnMScript.getMixedSpecies.call(this, originalSpecies, megaSpecies);
@@ -159,7 +159,7 @@ let BattleScripts = {
 	getMegaDeltas(megaSpecies) { // Can only enter from MnM (for now)
 		// Load MnM script functions
 		/**@type {ModdedBattleScriptsData} */
-		let MnMScript = require(MNM_SCRIPTS).BattleScripts;
+		let MnMScript = require(MNM_SCRIPTS).Scripts;
 
 		if(undefined !== MnMScript.getMegaDeltas) {
 			return MnMScript.getMegaDeltas.call(this, megaSpecies);
@@ -168,7 +168,7 @@ let BattleScripts = {
 	doGetMixedSpecies(speciesOrSpeciesName, deltas) { // Can only enter from MnM (for now)
 		// Load MnM script functions
 		/**@type {ModdedBattleScriptsData} */
-		let MnMScript = require(MNM_SCRIPTS).BattleScripts;
+		let MnMScript = require(MNM_SCRIPTS).Scripts;
 
 		if(undefined !== MnMScript.doGetMixedSpecies) {
 			return MnMScript.doGetMixedSpecies.call(this, speciesOrSpeciesName, deltas);
@@ -176,4 +176,4 @@ let BattleScripts = {
 	},
 };
 
-exports.BattleScripts = BattleScripts;
+exports.Scripts = Scripts;

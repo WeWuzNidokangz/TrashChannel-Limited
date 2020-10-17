@@ -1,7 +1,7 @@
 'use strict';
 
 /**@type {{[k: string]: ModdedEffectData}} */
-exports.BattleStatuses = {
+exports.Conditions = {
 	slp: {
 		inherit: true,
 		// @ts-ignore

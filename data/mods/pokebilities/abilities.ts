@@ -1,4 +1,4 @@
-export const BattleAbilities: {[k: string]: ModdedAbilityData} = {
+export const Abilities: {[k: string]: ModdedAbilityData} = {
 	powerofalchemy: {
 		inherit: true,
 		onAllyFaint(ally) {

@@ -1,5 +1,5 @@
 import RandomTeams from '../../random-teams';
-import {BattlePokedex} from '../../pokedex';
+import {Pokedex} from '../../pokedex';
 
 class RandomBnBTeams extends RandomTeams {
 	randomHCBnBTeam() {
@@ -8,8 +8,8 @@ class RandomBnBTeams extends RandomTeams {
 		/**@type {string[]} */
 		let bitchPool = [];
 		
-		for( let bitch of Object.keys(BattlePokedex) ) {
-			bitchPool.push( BattlePokedex[bitch].name );
+		for( let bitch of Object.keys(Pokedex) ) {
+			bitchPool.push( Pokedex[bitch].name );
 		}
 		
 		/**@type {number} */

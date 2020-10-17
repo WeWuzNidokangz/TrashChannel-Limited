@@ -9,10 +9,10 @@
 import {DexCalculator} from '../../.trashchannel-dist/dex-calculator';
 import {TrashChannelChatSupport} from '../../.trashchannel-dist/trashchannel-chatsupport';
 
-import {BattleFormats as Rulesets} from '../../.data-dist/rulesets';
+import {Formats as Rulesets} from '../../.data-dist/rulesets';
 import {Formats} from '../../.config-dist/formats';
 
-import {BattleScripts as BnBMod} from '../../.data-dist/mods/bitchandbeggar/scripts';
+import {Scripts as BnBMod} from '../../.data-dist/mods/bitchandbeggar/scripts';
 
 function escapeHTML(str: string) {
 	if (!str) return '';

@@ -1,4 +1,6 @@
-export const BattleScripts: ModdedBattleScriptsData = {
+import {toID} from './../../../sim/dex';
+
+export const Scripts: ModdedBattleScriptsData = {
 	getEffect(name) {
 		if (name && typeof name !== 'string') {
 			return name;

@@ -1,7 +1,7 @@
 'use strict';
 
 /**@type {{[k: string]: ModdedAbilityData}} */
-exports.BattleAbilities = {
+exports.Abilities = {
 	powerofalchemy: {
 		inherit: true,
 		onAllyFaint(ally) {
