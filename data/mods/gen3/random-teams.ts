@@ -294,7 +294,7 @@ export class RandomGen3Teams extends RandomGen4Teams {
 					(hasType['Normal'] && !counter['Normal'] && counter.setupType === 'Physical') ||
 					(hasType['Psychic'] && (movePool.includes('psychic') || movePool.includes('psychoboost')) && species.baseStats.spa >= 100) ||
 					(hasType['Rock'] && !counter['Rock'] && species.baseStats.atk >= 100) ||
-					(hasType['Water'] && !counter['Water'] && !hasMove['icebeam'] && counter.setupType !== 'Physical' && species.baseStats.spa >= 60) ||
+					(hasType['Water'] && !counter['Water'] && counter.setupType !== 'Physical' && species.baseStats.spa >= 60) ||
 					(movePool.includes('meteormash') || movePool.includes('spore')) ||
 					(hasMove['protect'] && movePool.includes('wish')) ||
 					(hasMove['substitute'] && movePool.includes('morningsun')) ||
@@ -425,7 +425,7 @@ export class RandomGen3Teams extends RandomGen4Teams {
 			item = 'Petaya Berry';
 		} else if (counter.Physical >= 4) {
 			item = 'Choice Band';
-		} else if (counter.Physical >= 3 && (hasMove['firepunch'] || hasMove['icebeam'] || hasMove['overheat'] || moves.filter(m => this.dex.data.Movedex[m].category === 'Special' && hasType[this.dex.data.Movedex[m].type]).length)) {
+		} else if (counter.Physical >= 3 && (hasMove['firepunch'] || hasMove['icebeam'] || hasMove['overheat'] || moves.filter(m => this.dex.data.Moves[m].category === 'Special' && hasType[this.dex.data.Moves[m].type]).length)) {
 			item = 'Choice Band';
 
 		// Default to Leftovers

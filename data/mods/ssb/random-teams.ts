@@ -129,12 +129,6 @@ export class RandomStaffBrosTeams extends RandomTeams {
 				signatureMove: 'Come on you Gunners',
 				evs: {hp: 4, spa: 252, spe: 252}, ivs: {hp: 20, def: 20, spd: 20}, nature: 'Naive',
 			},
-			Asheviere: {
-				species: 'Slowbro', ability: 'Regenerator', item: 'Leftovers', gender: 'F',
-				moves: ['Scald', 'Slack Off', 'Psyshock'],
-				signatureMove: 'Wonder Trade',
-				evs: {hp: 252, def: 252, spa: 4}, nature: 'Bold',
-			},
 			Averardo: {
 				species: 'Tyrantrum', ability: 'Rock Head', item: 'Choice Scarf', gender: 'M',
 				moves: ['Head Smash', 'Flare Blitz', 'Photon Geyser'],
@@ -296,12 +290,6 @@ export class RandomStaffBrosTeams extends RandomTeams {
 				moves: ['Iron Head', ['Megahorn', 'Leech Life'], ['Wild Charge', 'Superpower']],
 				signatureMove: 'Quick Reload',
 				evs: {hp: 24, atk: 232, spe: 252}, nature: 'Jolly',
-			},
-			Flare: {
-				species: 'Zoroark', ability: 'Super Illusion', item: 'Choice Scarf', gender: 'N',
-				moves: ['Fleur Cannon', 'Parting Shot', 'Sludge Bomb'],
-				signatureMove: 'Distortion Blast',
-				evs: {spa: 252, spd: 4, spe: 252}, ivs: {atk: 0}, nature: 'Timid', shiny: true,
 			},
 			FOMG: {
 				species: 'Golem', ability: 'Serene Grace', item: 'Astleyium Z', gender: 'M',

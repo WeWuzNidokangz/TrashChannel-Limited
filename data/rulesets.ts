@@ -6,7 +6,7 @@ import {Utils} from './../lib/utils';
 import {DexCalculator} from '../.trashchannel-dist/dex-calculator';
 // #endregion TrashChannel Rules
 
-export const BattleFormats: {[k: string]: FormatsData} = {
+export const Formats: {[k: string]: FormatData} = {
 
 	// Rulesets
 	///////////////////////////////////////////////////////////////////
@@ -41,10 +41,10 @@ export const BattleFormats: {[k: string]: FormatsData} = {
 			'Victini', 'Reshiram', 'Zekrom', 'Kyurem', 'Keldeo', 'Meloetta', 'Genesect',
 			'Xerneas', 'Yveltal', 'Zygarde', 'Diancie', 'Hoopa', 'Volcanion',
 			'Cosmog', 'Cosmoem', 'Solgaleo', 'Lunala', 'Necrozma', 'Magearna', 'Marshadow', 'Zeraora',
-			'Meltan', 'Melmetal', 'Zacian', 'Zamazenta', 'Eternatus',
+			'Meltan', 'Melmetal', 'Zacian', 'Zamazenta', 'Eternatus', 'Zarude',
 		],
 		onValidateSet(set, format) {
-			if (this.gen < 7 && toID(set.item) === 'souldew') {
+			if (this.gen < 7 && this.toID(set.item) === 'souldew') {
 				return [`${set.name || set.species} has Soul Dew, which is banned in ${format.name}.`];
 			}
 		},
@@ -64,7 +64,7 @@ export const BattleFormats: {[k: string]: FormatsData} = {
 			'Magearna', 'Marshadow', 'Zeraora',
 		],
 		onValidateSet(set, format) {
-			if (this.gen < 7 && toID(set.item) === 'souldew') {
+			if (this.gen < 7 && this.toID(set.item) === 'souldew') {
 				return [`${set.name || set.species} has Soul Dew, which is banned in ${format.name}.`];
 			}
 		},
@@ -96,7 +96,8 @@ export const BattleFormats: {[k: string]: FormatsData} = {
 				return [`${set.name || set.species} does not exist in the National Dex.`];
 			}
 			if (species.tier === "Unreleased") {
-				if (this.ruleTable.has(`+pokemon:${species.id}`) || this.ruleTable.has(`+basepokemon:${toID(species.baseSpecies)}`)) {
+				const basePokemon = this.toID(species.baseSpecies);
+				if (this.ruleTable.has(`+pokemon:${species.id}`) || this.ruleTable.has(`+basepokemon:${basePokemon}`)) {
 					return;
 				}
 				return [`${set.name || set.species} does not exist in the National Dex.`];
@@ -280,6 +281,21 @@ export const BattleFormats: {[k: string]: FormatsData} = {
 			}
 		},
 	},
+	isleofarmorpokedex: {
+		effectType: 'ValidatorRule',
+		name: 'Isle of Armor Pokedex',
+		desc: "Only allows Pok&eacute;mon native to the Isle of Armor in the Galar Region (Sw/Sh DLC1)",
+		onValidateSet(set, format) {
+			const ioaDex = [
+				"Slowpoke", "Slowbro", "Slowking", "Buneary", "Lopunny", "Happiny", "Chansey", "Blissey", "Skwovet", "Greedent", "Igglybuff", "Jigglypuff", "Wigglytuff", "Blipbug", "Dottler", "Fomantis", "Lurantis", "Applin", "Flapple", "Appletun", "Fletchling", "Fletchinder", "Talonflame", "Shinx", "Luxio", "Luxray", "Klefki", "Pawniard", "Bisharp", "Abra", "Kadabra", "Alakazam", "Ralts", "Kirlia", "Gardevoir", "Gallade", "Krabby", "Kingler", "Tentacool", "Tentacruel", "Magikarp", "Gyarados", "Remoraid", "Octillery", "Mantyke", "Mantine", "Wingull", "Pelipper", "Skorupi", "Drapion", "Dunsparce", "Bouffalant", "Lickitung", "Lickilicky", "Chewtle", "Drednaw", "Wooper", "Quagsire", "Goomy", "Sliggoo", "Goodra", "Druddigon", "Shelmet", "Accelgor", "Karrablast", "Escavalier", "Bulbasaur", "Ivysaur", "Venusaur", "Squirtle", "Wartortle", "Blastoise", "Venipede", "Whirlipede", "Scolipede", "Foongus", "Amoonguss", "Comfey", "Tangela", "Tangrowth", "Croagunk", "Toxicroak", "Pichu", "Pikachu", "Raichu", "Zorua", "Zoroark", "Oranguru", "Passimian", "Corphish", "Crawdaunt", "Cramorant", "Goldeen", "Seaking", "Arrokuda", "Barraskewda", "Staryu", "Starmie", "Kubfu", "Urshifu", "Emolga", "Dedenne", "Morpeko", "Magnemite", "Magneton", "Magnezone", "Inkay", "Malamar", "Wishiwashi", "Carvanha", "Sharpedo", "Lillipup", "Herdier", "Stoutland", "Tauros", "Miltank", "Scyther", "Scizor", "Pinsir", "Heracross", "Dwebble", "Crustle", "Wimpod", "Golisopod", "Pincurchin", "Mareanie", "Toxapex", "Clobbopus", "Grapploct", "Shellder", "Cloyster", "Sandygast", "Palossand", "Drifloon", "Drifblim", "Barboach", "Whiscash", "Azurill", "Marill", "Azumarill", "Poliwag", "Poliwhirl", "Poliwrath", "Politoed", "Psyduck", "Golduck", "Whismur", "Loudred", "Exploud", "Woobat", "Swoobat", "Skarmory", "Roggenrola", "Boldore", "Gigalith", "Rockruff", "Lycanroc", "Salandit", "Salazzle", "Scraggy", "Scrafty", "Mienfoo", "Mienshao", "Jangmo-o", "Hakamo-o", "Kommo-o", "Sandshrew", "Sandslash", "Cubone", "Marowak", "Kangaskhan", "Torkoal", "Silicobra", "Sandaconda", "Sandile", "Krokorok", "Krookodile", "Rufflet", "Braviary", "Vullaby", "Mandibuzz", "Rhyhorn", "Rhydon", "Rhyperior", "Larvesta", "Volcarona", "Chinchou", "Lanturn", "Wailmer", "Wailord", "Frillish", "Jellicent", "Skrelp", "Dragalge", "Clauncher", "Clawitzer", "Horsea", "Seadra", "Kingdra", "Petilil", "Lilligant", "Combee", "Vespiquen", "Exeggcute", "Exeggutor", "Ditto", "Porygon", "Porygon2", "Porygon-Z",
+			];
+			const species = this.dex.getSpecies(set.species || set.name);
+			if (!ioaDex.includes(species.baseSpecies) && !ioaDex.includes(species.name) &&
+				!this.ruleTable.has('+' + species.id)) {
+				return [`${species.baseSpecies} is not in the Isle of Armor Pokédex.`];
+			}
+		},
+	},
 	potd: {
 		effectType: 'Rule',
 		name: 'PotD',
@@ -315,8 +331,7 @@ export const BattleFormats: {[k: string]: FormatsData} = {
 			}
 		},
 		onStart() {
-			// @ts-ignore
-			if (this.format.gameType === 'singles') this.format.teamLength = {battle: 1};
+			if (this.format.gameType === 'singles') (this.format as any).teamLength = {battle: 1};
 		},
 	},
 	twovstwo: {
@@ -329,8 +344,7 @@ export const BattleFormats: {[k: string]: FormatsData} = {
 			}
 		},
 		onStart() {
-			// @ts-ignore
-			if (this.format.gameType !== 'triples') this.format.teamLength = {battle: 2};
+			if (this.format.gameType !== 'triples') (this.format as any).teamLength = {battle: 2};
 		},
 	},
 	littlecup: {
@@ -419,7 +433,7 @@ export const BattleFormats: {[k: string]: FormatsData} = {
 		onValidateTeam(team) {
 			const itemTable: Set<string> = new Set();
 			for (const set of team) {
-				const item = toID(set.item);
+				const item = this.toID(set.item);
 				if (!item) continue;
 				if (itemTable.has(item)) {
 					return [
@@ -457,7 +471,7 @@ export const BattleFormats: {[k: string]: FormatsData} = {
 				turboblaze: 'moldbreaker',
 			};
 			for (const set of team) {
-				let ability: string = toID(set.ability);
+				let ability: string = this.toID(set.ability);
 				if (!ability) continue;
 				if (ability in base) ability = base[ability];
 				if (ability in abilityTable) {
@@ -546,8 +560,23 @@ export const BattleFormats: {[k: string]: FormatsData} = {
 		desc: "Bans sleep moves below 100% accuracy, in conjunction with Gravity or Gigantamax Orbeetle",
 		banlist: [
 			'Gravity ++ Grass Whistle', 'Gravity ++ Hypnosis', 'Gravity ++ Lovely Kiss', 'Gravity ++ Sing', 'Gravity ++ Sleep Powder',
-			'Orbeetle-Gmax ++ Grass Whistle', 'Orbeetle-Gmax ++ Hypnosis', 'Orbeetle-Gmax ++ Lovely Kiss', 'Orbeetle-Gmax ++ Sing', 'Orbeetle-Gmax ++ Sleep Powder',
 		],
+		onValidateTeam(team) {
+			let hasOrbeetle = false;
+			let hasSleepMove = false;
+			for (const set of team) {
+				const species = this.dex.getSpecies(set.species);
+				if (species.name === "Orbeetle" && set.gigantamax) hasOrbeetle = true;
+				if (!hasOrbeetle && species.name === "Orbeetle-Gmax") hasOrbeetle = true;
+				for (const moveid of set.moves) {
+					const move = this.dex.getMove(moveid);
+					if (move.status && move.status === 'slp' && move.accuracy < 100) hasSleepMove = true;
+				}
+			}
+			if (hasOrbeetle && hasSleepMove) {
+				return [`The combination of Gravity and Gigantamax Orbeetle on the same team is banned.`];
+			}
+		},
 		onBegin() {
 			this.add('rule', 'Gravity Sleep Clause: The combination of sleep-inducing moves with imperfect accuracy and Gravity or Gigantamax Orbeetle are banned');
 		},
@@ -591,7 +620,7 @@ export const BattleFormats: {[k: string]: FormatsData} = {
 			if (!('move:batonpass' in setHas)) return;
 
 			const item = this.dex.getItem(set.item);
-			const ability = toID(set.ability);
+			const ability = this.toID(set.ability);
 			let speedBoosted: boolean | string = false;
 			let nonSpeedBoosted: boolean | string = false;
 
@@ -848,9 +877,11 @@ export const BattleFormats: {[k: string]: FormatsData} = {
 		name: 'Dynamax Clause',
 		desc: "Prevents Pok&eacute;mon from dynamaxing",
 		onValidateSet(set) {
-			const species = this.dex.getSpecies(set.species);
-			if (species.isGigantamax) {
-				return [`Gigantamaxing is banned.`, `(Change ${species.name} to its base species, ${species.baseSpecies}.)`];
+			if (set.gigantamax) {
+				return [
+					`Your set for ${set.species} is flagged as Gigantamax, but Gigantamaxing is disallowed`,
+					`(If this was a mistake, disable Gigantamaxing on the set.)`,
+				];
 			}
 		},
 		onBegin() {
@@ -969,7 +1000,7 @@ export const BattleFormats: {[k: string]: FormatsData} = {
 								if (prevo.evos.includes(formeName)) continue;
 							}
 							const forme = dex.getSpecies(formeName);
-							if (forme.changesFrom === originalForme.name) {
+							if (forme.changesFrom === originalForme.name && !forme.battleOnly) {
 								types = types.concat(forme.types);
 							}
 						}
@@ -999,7 +1030,7 @@ export const BattleFormats: {[k: string]: FormatsData} = {
 		effectType: 'ValidatorRule',
 		name: 'Allow AVs',
 		desc: "Tells formats with the 'letsgo' mod to take Awakening Values into consideration when calculating stats",
-		// Implemented in mods/letsgo/rulesets.js
+		// implemented in TeamValidator#validateStats
 	},
 	nfeclause: {
 		effectType: 'ValidatorRule',
@@ -1049,6 +1080,41 @@ export const BattleFormats: {[k: string]: FormatsData} = {
 			}
 		},
 	},
+	'350cupmod': {
+		effectType: 'Rule',
+		name: '350 Cup Mod',
+		desc: "If a Pok&eacute;mon's BST is 350 or lower, all of its stats get doubled.",
+		onBegin() {
+			this.add('rule', '350 Cup Mod: If a Pokemon\'s BST is 350 or lower, all of its stats get doubled.');
+		},
+		onModifySpecies(species) {
+			const newSpecies = this.dex.deepClone(species);
+			if (newSpecies.bst <= 350) {
+				newSpecies.bst = 0;
+				for (const stat in newSpecies.baseStats) {
+					newSpecies.baseStats[stat] = this.clampIntRange(newSpecies.baseStats[stat] * 2, 1, 255);
+					newSpecies.bst += newSpecies.baseStats[stat];
+				}
+			}
+			return newSpecies;
+		},
+	},
+	flippedmod: {
+		effectType: 'Rule',
+		name: 'Flipped Mod',
+		desc: "Every Pok&eacute;mon's stats are reversed. HP becomes Spe, Atk becomes Sp. Def, Def becomes Sp. Atk, and vice versa.",
+		onBegin() {
+			this.add('rule', 'Flipped Mod: Pokemon have their stats flipped (HP becomes Spe, vice versa).');
+		},
+		onModifySpecies(species) {
+			const newSpecies = this.dex.deepClone(species);
+			const reversedNums = Object.values(newSpecies.baseStats).reverse();
+			for (const [i, statName] of Object.keys(newSpecies.baseStats).entries()) {
+				newSpecies.baseStats[statName] = reversedNums[i];
+			}
+			return newSpecies;
+		},
+	},
 	scalemonsmod: {
 		effectType: 'Rule',
 		name: 'Scalemons Mod',
@@ -1058,12 +1124,13 @@ export const BattleFormats: {[k: string]: FormatsData} = {
 		},
 		onModifySpecies(species) {
 			const newSpecies = this.dex.deepClone(species);
-			newSpecies.baseStats = this.dex.deepClone(newSpecies.baseStats);
-			const stats: StatName[] = ['atk', 'def', 'spa', 'spd', 'spe'];
-			const pst: number = stats.map(stat => newSpecies.baseStats[stat]).reduce((x, y) => x + y);
+			const bstWithoutHp: number = newSpecies.bst - newSpecies.baseStats['hp'];
 			const scale = 600 - newSpecies.baseStats['hp'];
-			for (const stat of stats) {
-				newSpecies.baseStats[stat] = this.clampIntRange(newSpecies.baseStats[stat] * scale / pst, 1, 255);
+			newSpecies.bst = newSpecies.baseStats['hp'];
+			for (const stat in newSpecies.baseStats) {
+				if (stat === 'hp') continue;
+				newSpecies.baseStats[stat] = this.clampIntRange(newSpecies.baseStats[stat] * scale / bstWithoutHp, 1, 255);
+				newSpecies.bst += newSpecies.baseStats[stat];
 			}
 			return newSpecies;
 		},

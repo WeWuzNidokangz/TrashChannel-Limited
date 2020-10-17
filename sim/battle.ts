@@ -4,8 +4,7 @@
  *
  * @license MIT
  */
-import {Dex} from './dex';
-global.toID = Dex.getId;
+import {Dex, toID} from './dex';
 import * as Data from './dex-data';
 import {Field} from './field';
 import {Pokemon, EffectState, RESTORATIVE_BERRIES} from './pokemon';
@@ -14,6 +13,9 @@ import {Side} from './side';
 import {State} from './state';
 import {BattleQueue, Action} from './battle-queue';
 import {Utils} from '../lib/utils';
+import {FS} from '../lib/fs';
+
+const suspectTests = JSON.parse(FS('../config/suspects.json').readIfExistsSync() || "{}");
 
 //#region TrashChannel
 import {BattleFormats} from '../.data-dist/rulesets';
@@ -47,10 +49,10 @@ interface EventListenerWithoutPriority {
 	effect: Effect;
 	target?: Pokemon;
 	index?: number;
-	// tslint:disable-next-line: ban-types
+	// eslint-disable-next-line @typescript-eslint/ban-types
 	callback?: Function;
 	state: EffectState | null;
-	// tslint:disable-next-line: ban-types
+	// eslint-disable-next-line @typescript-eslint/ban-types
 	end: Function | null;
 	endCallArgs?: any[];
 	effectHolder: Pokemon | Side | Field | Battle;
@@ -143,8 +145,11 @@ export class Battle {
 
 	trunc: (num: number, bits?: number) => number;
 	clampIntRange: (num: any, min?: number, max?: number) => number;
-
+	toID = toID;
 	constructor(options: BattleOptions) {
+		this.log = [];
+		this.add('t:', Math.floor(Date.now() / 1000));
+
 		const format = options.format || Dex.getFormat(options.formatid, true);
 		this.format = format;
 		this.dex = Dex.forFormat(format);
@@ -178,7 +183,6 @@ export class Battle {
 		this.queue = new BattleQueue(this);
 		this.faintQueue = [];
 
-		this.log = [];
 		this.inputLog = [];
 		this.messageLog = [];
 		this.sentLogPos = 0;
@@ -809,8 +813,9 @@ export class Battle {
 		handler.priority = handler.effect[`${callbackName}Priority`] || 0;
 		// @ts-ignore
 		handler.subOrder = handler.effect[`${callbackName}SubOrder`] || 0;
-		// @ts-ignore
-		if (handler.effectHolder && handler.effectHolder.getStat) handler.speed = handler.effectHolder.speed;
+		if (handler.effectHolder && (handler.effectHolder as Pokemon).getStat) {
+			(handler as EventListener).speed = (handler.effectHolder as Pokemon).speed;
+		}
 		return handler as EventListener;
 	}
 
@@ -910,7 +915,7 @@ export class Battle {
 			const slotConditionData = side.slotConditions[pokemon.position][conditionid];
 			const slotCondition = side.getSlotCondition(pokemon, conditionid)!;
 			// @ts-ignore - dynamic lookup
-			callback = slotCondition[callbackName] as Function | undefined;
+			callback = slotCondition[callbackName];
 			if (callback !== undefined || (getKey && slotConditionData[getKey])) {
 				handlers.push(this.resolvePriority({
 					effect: slotCondition,
@@ -933,7 +938,6 @@ export class Battle {
 		const format = this.format;
 		// @ts-ignore - dynamic lookup
 		callback = format[callbackName];
-		// @ts-ignore - dynamic lookup
 		if (callback !== undefined || (getKey && this.formatData[getKey])) {
 			handlers.push(this.resolvePriority({
 				effect: format, callback, state: this.formatData, end: null, effectHolder: this,
@@ -1459,6 +1463,7 @@ export class Battle {
 				}
 				this.runEvent('DisableMove', pokemon);
 				if (!pokemon.ateBerry) pokemon.disableMove('belch');
+				if (!pokemon.getItem().isBerry) pokemon.disableMove('stuffcheeks');
 
 				// If it was an illusion, it's not any more
 				if (pokemon.getLastAttackedBy() && this.gen >= 7) pokemon.knownType = true;
@@ -1524,15 +1529,14 @@ export class Battle {
 				if (pokemon.fainted) continue;
 
 				sideTrapped = sideTrapped && pokemon.trapped;
-				if (pokemon.staleness) {
-					sideStaleness = sideStaleness === 'external' ? sideStaleness : pokemon.staleness;
-				}
+				const staleness = pokemon.volatileStaleness || pokemon.staleness;
+				if (staleness) sideStaleness = sideStaleness === 'external' ? sideStaleness : staleness;
 				pokemon.activeTurns++;
 			}
 			trappedBySide.push(sideTrapped);
 			stalenessBySide.push(sideStaleness);
 			side.faintedLastTurn = side.faintedThisTurn;
-			side.faintedThisTurn = false;
+			side.faintedThisTurn = null;
 		}
 
 		if (this.maybeTriggerEndlessBattleClause(trappedBySide, stalenessBySide)) return;
@@ -1581,7 +1585,7 @@ export class Battle {
 			const side = this.sides[i];
 
 			for (const pokemon of side.pokemon) {
-				if (!pokemon.fainted && !pokemon.staleness) {
+				if (!pokemon.fainted && !(pokemon.volatileStaleness || pokemon.staleness)) {
 					canSwitch[i] = true;
 					break;
 				}
@@ -1642,6 +1646,10 @@ export class Battle {
 		if (this.rated) {
 			if (this.rated === 'Rated battle') this.rated = true;
 			this.add('rated', typeof this.rated === 'string' ? this.rated : '');
+			// Suspect test notice
+			if (suspectTests[format.id]) {
+				this.add('html', `<div class="broadcast-blue"><strong>${format.name} is currently suspecting ${suspectTests[format.id].suspect}! For information on how to participate check out the <a href="${suspectTests[format.id].url}">suspect thread</a>.</strong></div>`);
+			}
 		}
 
 		if (format.onBegin) format.onBegin.call(this);
@@ -1671,8 +1679,7 @@ export class Battle {
 	restart(send?: (type: string, data: string | string[]) => void) {
 		if (!this.deserialized) throw new Error('Attempt to restart a battle which has not been deserialized');
 
-		// @ts-ignore - readonly
-		this.send = send;
+		(this as any).send = send;
 	}
 
 	checkEVBalance() {
@@ -2241,7 +2248,7 @@ export class Battle {
 		// Final modifier. Modifiers that modify damage after min damage check, such as Life Orb.
 		baseDamage = this.runEvent('ModifyDamage', pokemon, target, move, baseDamage);
 
-		if ((move.isZOrMaxPowered || move.isZOrMaxPowered) && target.getMoveHitData(move).zBrokeProtect) {
+		if (move.isZOrMaxPowered && target.getMoveHitData(move).zBrokeProtect) {
 			baseDamage = this.modify(baseDamage, 0.25);
 			this.add('-zbroken', target);
 		}
@@ -2418,7 +2425,7 @@ export class Battle {
 				pokemon.illusion = null;
 				pokemon.isActive = false;
 				pokemon.isStarted = false;
-				pokemon.side.faintedThisTurn = true;
+				pokemon.side.faintedThisTurn = pokemon;
 			}
 		}
 
@@ -2600,8 +2607,7 @@ export class Battle {
 		}
 
 		case 'event':
-			// @ts-ignore - easier than defining a custom event attribute TBH
-			this.runEvent(action.event, action.pokemon);
+			this.runEvent(action.event!, action.pokemon);
 			break;
 		case 'team': {
 			action.pokemon.side.pokemon.splice(action.index, 0, action.pokemon);
@@ -2754,6 +2760,7 @@ export class Battle {
 
 	go() {
 		this.add('');
+		this.add('t:', Math.floor(Date.now() / 1000));
 		if (this.requestState) this.requestState = '';
 
 		if (!this.midTurn) {
@@ -2926,13 +2933,13 @@ export class Battle {
 		this.addSplit(side!, secret, shared);
 	}
 
-	// tslint:disable-next-line:ban-types
+	// eslint-disable-next-line @typescript-eslint/ban-types
 	addMove(...args: (string | number | Function | AnyObject)[]) {
 		this.lastMoveLine = this.log.length;
 		this.log.push(`|${args.join('|')}`);
 	}
 
-	// tslint:disable-next-line:ban-types
+	// eslint-disable-next-line @typescript-eslint/ban-types
 	attrLastMove(...args: (string | number | Function | AnyObject)[]) {
 		if (this.lastMoveLine < 0) return;
 		if (this.log[this.lastMoveLine].startsWith('|-anim|')) {
@@ -3297,8 +3304,7 @@ export class Battle {
 
 		// deallocate children and get rid of references to them
 		this.field.destroy();
-		// @ts-ignore - readonly
-		this.field = null!;
+		(this as any).field = null!;
 
 		for (let i = 0; i < this.sides.length; i++) {
 			if (this.sides[i]) {
@@ -3307,14 +3313,13 @@ export class Battle {
 			}
 		}
 		for (const action of this.queue.list) {
-			delete action.pokemon;
+			delete (action as any).pokemon;
 		}
 
 		this.queue.battle = null!;
 		this.queue = null!;
 		// in case the garbage collector really sucks, at least deallocate the log
-		// @ts-ignore - readonly
-		this.log = [];
+		(this as any).log = [];
 	}
 }
 
