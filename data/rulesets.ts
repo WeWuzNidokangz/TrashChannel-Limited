@@ -1477,9 +1477,9 @@ export const Formats: {[k: string]: FormatData} = {
 
 			// Legendary Pokemon must have at least 3 perfect IVs in gen 6
 			let baseSpecies = this.dex.getSpecies(species.baseSpecies);
-			if (set.ivs && this.gen >= 6 && (baseSpecies.gen >= 6 || format.requirePentagon) && (species.eggGroups[0] === 'Undiscovered' || species.species === 'Manaphy') && !species.prevo && !species.nfe &&
+			if (set.ivs && this.gen >= 6 && (baseSpecies.gen >= 6 || format.requirePentagon) && (species.eggGroups[0] === 'Undiscovered' || species.forme === 'Manaphy') && !species.prevo && !species.nfe &&
 				// exceptions
-				species.species !== 'Unown' && species.baseSpecies !== 'Pikachu' && (species.baseSpecies !== 'Diancie' || !set.shiny)) {
+				species.forme !== 'Unown' && species.baseSpecies !== 'Pikachu' && (species.baseSpecies !== 'Diancie' || !set.shiny)) {
 				let perfectIVs = 0;
 				for (let i in set.ivs) {
 					// @ts-ignore
@@ -1504,23 +1504,23 @@ export const Formats: {[k: string]: FormatData} = {
 			}
 			set.moves = moves;
 
-			let battleForme = species.battleOnly && species.species;
+			let battleForme = species.battleOnly && species.forme;
 			// 19/07/14 TrashChannel: Option to pass non-mega analogous behaviour like Primal Reversion and Ultra Burst
 			let allowIrregularMegaesques = !!(format && this.dex.getRuleTable(format).has('megamonsallowirregularmegaesques'));
 			if (battleForme && !species.isMega) {
 				if (species.requiredAbility && set.ability !== species.requiredAbility) {
-					problems.push("" + species.species + " transforms in-battle with " + species.requiredAbility + "."); // Darmanitan-Zen, Zygarde-Complete
+					problems.push("" + species.forme + " transforms in-battle with " + species.requiredAbility + "."); // Darmanitan-Zen, Zygarde-Complete
 				}
 				if (species.requiredItems && !allowIrregularMegaesques) {
-					if (species.species === 'Necrozma-Ultra') {
+					if (species.forme === 'Necrozma-Ultra') {
 						problems.push(`Necrozma-Ultra must start the battle as Necrozma-Dawn-Wings or Necrozma-Dusk-Mane holding Ultranecrozium Z.`); // Necrozma-Ultra transforms from one of two formes, and neither one is the base forme
 					} else if (!species.requiredItems.includes(item.name)) {
-						problems.push(`${species.species} transforms in-battle with ${Chat.plural(species.requiredItems.length, "either ") + species.requiredItems.join(" or ")}.`); // Mega or Primal
+						problems.push(`${species.forme} transforms in-battle with ${Chat.plural(species.requiredItems.length, "either ") + species.requiredItems.join(" or ")}.`); // Mega or Primal
 					}
 				}
 				if (species.requiredMove && set.moves.indexOf(toID(species.requiredMove)) < 0 &&
 				   (!allowIrregularMegaesques || ('dragonascent' !== toID(species.requiredMove)))) { // 19/07/14 TrashChannel: Allow Rayquaza-Mega without Dragon Ascent as an irregular megaesque
-					problems.push(`${species.species} transforms in-battle with ${species.requiredMove}.`); // Meloetta-Pirouette, Rayquaza-Mega
+					problems.push(`${species.forme} transforms in-battle with ${species.requiredMove}.`); // Meloetta-Pirouette, Rayquaza-Mega
 				}
 				if (!format.noChangeForme &&
 				   (!allowIrregularMegaesques || !species.requiredItems)) { // 19/07/14 TrashChannel: Prevent irregular megaesques from being reverted on battle start
@@ -1541,13 +1541,13 @@ export const Formats: {[k: string]: FormatData} = {
 
 				// Mismatches between the set forme (if not base) and the item signature forme will have been rejected already.
 				// It only remains to assign the right forme to a set with the base species (Arceus/Genesect/Giratina/Silvally).
-				if (item.forcedForme && species.species === this.dex.getSpecies(item.forcedForme).baseSpecies && !format.noChangeForme) {
+				if (item.forcedForme && species.forme === this.dex.getSpecies(item.forcedForme).baseSpecies && !format.noChangeForme) {
 					//console.log("Replacing (item): " + set.species.toString());
 					set.species = item.forcedForme;
 				}
 			}
 
-			if (set.species !== species.species) {
+			if (set.species !== species.forme) {
 				// Autofixed forme.
 				species = this.dex.getSpecies(set.species);
 
@@ -1614,10 +1614,10 @@ export const Formats: {[k: string]: FormatData} = {
 			let species = this.dex.getSpecies(set.species || set.name);
 			let item = this.dex.getItem(set.item);
 			if (!item.megaEvolves && !['blueorb', 'redorb', 'ultranecroziumz'].includes(item.id)) return;
-			if (species.baseSpecies === item.megaEvolves || (species.baseSpecies === 'Groudon' && item.id === 'redorb') || (species.baseSpecies === 'Kyogre' && item.id === 'blueorb') || (species.species.substr(0, 9) === 'Necrozma-' && item.id === 'ultranecroziumz')) return;
+			if (species.baseSpecies === item.megaEvolves || (species.baseSpecies === 'Groudon' && item.id === 'redorb') || (species.baseSpecies === 'Kyogre' && item.id === 'blueorb') || (species.forme.substr(0, 9) === 'Necrozma-' && item.id === 'ultranecroziumz')) return;
 			let uberStones = format.restricted || [];
 			let uberPokemon = format.cannotMega || [];
-			if (uberPokemon.includes(species.name) || set.ability === 'Power Construct' || uberStones.includes(item.name)) return ["" + species.species + " is not allowed to hold " + item.name + "."];
+			if (uberPokemon.includes(species.name) || set.ability === 'Power Construct' || uberStones.includes(item.name)) return ["" + species.forme + " is not allowed to hold " + item.name + "."];
 		},
 	},
 	gen7mixandmegabattleeffects: {
@@ -1626,16 +1626,16 @@ export const Formats: {[k: string]: FormatData} = {
 		desc: "Battle effects for Gen 7 Mix and Mega (insufficient to run MnM without mod, crashes when called though Mix and Meta).",
 		onBegin() {
 			for (const pokemon of this.getAllPokemon()) {
-				pokemon.m.originalSpecies = pokemon.baseSpecies.species;
+				pokemon.m.originalSpecies = pokemon.baseSpecies.name;
 			}
 		},
 		onSwitchIn(pokemon) {
 			// @ts-ignore
-			let oMegaSpecies = this.dex.getSpecies(pokemon.species.originalMega);
+			const oMegaSpecies = this.dex.getSpecies(pokemon.species.originalMega);
 			if (oMegaSpecies.exists && pokemon.m.originalSpecies !== oMegaSpecies.baseSpecies) {
 				// Place volatiles on the Pokémon to show its mega-evolved condition and details
 				this.add('-start', pokemon, oMegaSpecies.requiredItem || oMegaSpecies.requiredMove, '[silent]');
-				let oSpecies = this.dex.getSpecies(pokemon.m.originalSpecies);
+				const oSpecies = this.dex.getSpecies(pokemon.m.originalSpecies);
 				if (oSpecies.types.length !== pokemon.species.types.length || oSpecies.types[1] !== pokemon.species.types[1]) {
 					this.add('-start', pokemon, 'typechange', pokemon.species.types.join('/'), '[silent]');
 				}
@@ -1643,7 +1643,7 @@ export const Formats: {[k: string]: FormatData} = {
 		},
 		onSwitchOut(pokemon) {
 			// @ts-ignore
-			let oMegaSpecies = this.dex.getSpecies(pokemon.species.originalMega);
+			const oMegaSpecies = this.dex.getSpecies(pokemon.species.originalMega);
 			if (oMegaSpecies.exists && pokemon.m.originalSpecies !== oMegaSpecies.baseSpecies) {
 				this.add('-end', pokemon, oMegaSpecies.requiredItem || oMegaSpecies.requiredMove, '[silent]');
 			}

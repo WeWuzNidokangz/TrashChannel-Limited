@@ -1,7 +1,4 @@
-'use strict';
-
-/**@type {{[k: string]: ModdedItemData}} */
-let Items = {
+export const Items: {[k: string]: ModdedItemData} = {
 	blueorb: {
 		inherit: true,
 		onSwitchIn(pokemon) {

@@ -625,7 +625,7 @@ export const Formats: FormatList = [
 		],
 
 		mod: 'gen7mixandmega',
-		ruleset: ['Obtainable', 'Standard', 'Gen 7 Mix and Mega Standard Package', 'STABmons Move Legality', 'Mega Rayquaza Clause', 'Team Preview'],
+		ruleset: ['Obtainable', 'Standard', 'Gen 7 Mix and Mega Standard Package', 'STABmons Move Legality', 'Mega Rayquaza Clause'],
 		banlist: ['Shadow Tag', 'Gengarite', 'Baton Pass', 'Electrify', // Mix and Mega
 			'King\'s Rock', 'Razor Fang', // STABmons
 			'Arceus', 'Kangaskhanite', // STAB n Mega
@@ -671,7 +671,7 @@ export const Formats: FormatList = [
 
 		mod: 'gen7',
 		gameType: 'doubles',
-		ruleset: ['Obtainable', 'Standard Doubles', 'Swagger Clause', 'Team Preview', 'AAA Standard Package', '!Obtainable Abilities'],
+		ruleset: ['Obtainable', 'Standard Doubles', 'Swagger Clause', 'AAA Standard Package', '!Obtainable Abilities'],
 		banlist: [
 			'DUber', 'Power Construct', 'Eevium Z', 'Dark Void', 'Gravity ++ Grass Whistle', 'Gravity ++ Hypnosis', 'Gravity ++ Lovely Kiss', 'Gravity ++ Sing', 'Gravity ++ Sleep Powder', // Doubles OU
 			'Archeops', 'Dragonite', 'Hoopa-Unbound', 'Kartana', 'Keldeo', 'Kyurem-Black', 'Regigigas', 'Shedinja', 'Slaking', 'Terrakion', // Doubles AAA
@@ -693,7 +693,7 @@ export const Formats: FormatList = [
 
 		mod: 'gen7mixandmega',
 		gameType: 'doubles',
-		ruleset: ['Obtainable', 'Standard Doubles', 'Swagger Clause', 'Gen 7 Mix and Mega Standard Package', 'Mega Rayquaza Clause', 'Team Preview'],
+		ruleset: ['Obtainable', 'Standard Doubles', 'Swagger Clause', 'Gen 7 Mix and Mega Standard Package', 'Mega Rayquaza Clause'],
 		banlist: [
 			'Eevium Z', 'Dark Void', 'Gravity ++ Grass Whistle', 'Gravity ++ Hypnosis', 'Gravity ++ Lovely Kiss', 'Gravity ++ Sing', 'Gravity ++ Sleep Powder', // Doubles
 			'Shadow Tag', 'Gengarite', 'Baton Pass', 'Electrify', // MnM
@@ -719,7 +719,7 @@ export const Formats: FormatList = [
 
 		mod: 'gen7',
 		gameType: 'doubles',
-		ruleset: ['Obtainable', 'Standard Doubles', 'Swagger Clause', 'Team Preview', 'STABmons Move Legality'],
+		ruleset: ['Obtainable', 'Standard Doubles', 'Swagger Clause', 'STABmons Move Legality'],
 		banlist: [
 			'DUber', 'Power Construct', 'Eevium Z', 'Dark Void', 'Gravity ++ Grass Whistle', 'Gravity ++ Hypnosis', 'Gravity ++ Lovely Kiss', 'Gravity ++ Sing', 'Gravity ++ Sleep Powder', // Doubles OU
 			'Drizzle', 'Komala', 'Shedinja', 'Silvally', // STABmons Doubles
@@ -760,7 +760,7 @@ export const Formats: FormatList = [
 
 		mod: 'gen7',
 		maxLevel: 5,
-		ruleset: ['Obtainable', 'Standard', 'Swagger Clause', 'Team Preview', 'Little Cup', 'AAA Standard Package', '!Obtainable Abilities'],
+		ruleset: ['Obtainable', 'Standard', 'Swagger Clause', 'Little Cup', 'AAA Standard Package', '!Obtainable Abilities'],
 		banlist: [
 			'Aipom', 'Cutiefly', 'Gligar', 'Meditite', 'Misdreavus', 'Murkrow', 'Porygon',
 			'Scyther', 'Sneasel', 'Tangela', 'Yanma',
@@ -784,7 +784,7 @@ export const Formats: FormatList = [
 
 		mod: 'gen7',
 		maxLevel: 5,
-		ruleset: ['Obtainable', 'Standard', 'Swagger Clause', 'Team Preview', 'Little Cup', 'STABmons Move Legality'],
+		ruleset: ['Obtainable', 'Standard', 'Swagger Clause', 'Little Cup', 'STABmons Move Legality'],
 		banlist: [
 			'Aipom', 'Cutiefly', 'Drifloon', 'Gligar', 'Meditite', 'Misdreavus', 'Murkrow', 'Porygon',
 			'Scyther', 'Sneasel', 'Swirlix', 'Tangela', 'Torchic', 'Vulpix-Base', 'Yanma',
@@ -793,7 +793,7 @@ export const Formats: FormatList = [
 		],
 		restricted: ['Acupressure', 'Belly Drum', 'Chatter', 'Extreme Speed', 'Geomancy', 'Lovely Kiss', 'Shell Smash', 'Shift Gear', 'Spore', 'Thousand Arrows'],
 	},
-	/*{
+	{
 		name: "[Gen 7] Mix and Mega LC",
 		desc: `Mega Stones and Primal Orbs can be used on almost any Pok&eacute;mon with no Mega Evolution limit.`,
 		threads: [
@@ -802,17 +802,17 @@ export const Formats: FormatList = [
 
 		mod: 'gen7mixandmega',
 		maxLevel: 5,
-		ruleset: ['Obtainable', 'Standard', 'Team Preview', 'Little Cup', 'Gen 7 Mix and Mega Standard Package'],
+		ruleset: ['Obtainable', 'Standard', 'Little Cup', 'Gen 7 Mix and Mega Standard Package'],
 		banlist: ['Eevium Z', 'Baton Pass', 'Dragon Rage', 'Electrify', 'Sonic Boom'],
 		restricted: ['Beedrillite', 'Blazikenite', 'Gengarite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite', 'Ultranecrozium Z'],
 		cannotMega: [
 			'Dratini', 'Gligar', 'Misdreavus', 'Murkrow', 'Scyther', 'Sneasel', 'Tangela', 'Vulpix',
 		],
-	},*/
+	},
 	{
 		section: "US/UM Other Mashups",
 	},
-	/*{
+	{
 		name: "[Gen 7] Mix and Mega Tier Shift",
 		desc: `Mega Stones and Primal Orbs can be used on almost any Pok&eacute;mon with no Mega Evolution limit, and Pokemon get a +10 boost to each stat per tier below OU they are in. UU gets +10, RU +20, NU +30, and PU +40.`,
 		threads: [
@@ -822,7 +822,7 @@ export const Formats: FormatList = [
 		],
 
 		mod: 'gen7mixandmega',
-		ruleset: ['Obtainable', 'Standard', 'Gen 7 Mix and Mega Standard Package', 'Tier Shift Rule', 'Mega Rayquaza Clause', 'Team Preview'],
+		ruleset: ['Obtainable', 'Standard', 'Gen 7 Mix and Mega Standard Package', 'Tier Shift Rule', 'Mega Rayquaza Clause'],
 		banlist: ['Shadow Tag', 'Gengarite', 'Baton Pass', 'Electrify'],
 		restricted: ['Beedrillite', 'Blazikenite', 'Kangaskhanite', 'Mawilite', 'Medichamite', 'Pidgeotite', 'Ultranecrozium Z'],
 		cannotMega: [
@@ -830,7 +830,7 @@ export const Formats: FormatList = [
 			'Kyurem-White', 'Landorus-Therian', 'Lugia', 'Lunala', 'Marshadow', 'Mewtwo', 'Naganadel', 'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane',
 			'Palkia', 'Pheromosa', 'Rayquaza', 'Regigigas', 'Reshiram', 'Shuckle', 'Slaking', 'Solgaleo', 'Xerneas', 'Yveltal', 'Zekrom',
 		],
-	},*/
+	},
 	{
 		name: "[Gen 7] STAAABmons RU",
 		desc: `Pok&eacute;mon can use any ability, barring the few that are restricted to their natural users, and learn any move of their type, apart from those restricted to their natural users, in an RU environment.`,
@@ -1455,7 +1455,7 @@ export const Formats: FormatList = [
 		],
 
 		mod: 'gen7',
-		ruleset: ['Obtainable', 'Standard', 'Team Preview', 'Averagemons Rule'],
+		ruleset: ['Obtainable', 'Standard', 'Averagemons Rule'],
 		banlist: [
 			'Gengar-Mega', 'Mawile-Mega', 'Medicham-Mega', 'Smeargle',
 			'Arena Trap', 'Huge Power', 'Pure Power', 'Shadow Tag', 'Deep Sea Tooth', 'Eviolite', 'Light Ball', 'Thick Club', 'Baton Pass', 'Chatter',

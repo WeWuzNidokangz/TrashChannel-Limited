@@ -1,27 +1,23 @@
-'use strict';
-
-const RandomTeams = require('./../../../data/random-teams');
-const ITEMS = require('./../../../data/items');
+import RandomTeams from '../../random-teams';
+import {Items} from '../../../.data-dist/items';
+import {toID} from '../../../sim/dex';
 
 class RandomMnMTeams extends RandomTeams {
 	randomHCMnMTeam() {
 		let team = this.randomHCTeam();
-
-		// Load items
-		/**@type {{[k: string]: ItemData}} */
-		let Items = ITEMS.Items;
 
 		/**@type {string[]} */
 		let itemPool = [];
 		
 		for( let item of Object.keys(Items) ) {
 			//console.log("Items[item].name: " + Items[item].name);
-			if( (Items[item].megaStone) ||
+			if( ( (Items[item].megaStone) &&
+				("Crucibellite" !== Items[item].name) ) ||
 				("Blue Orb" == Items[item].name) || 
 				("Red Orb" == Items[item].name) )
 			{
-				console.log("Push mega item: " + Items[item].name);
-				itemPool.push( Items[item].id );
+				//console.log("Push mega item: " + Items[item].name);
+				itemPool.push( toID(Items[item].name) );
 			}
 		}
 		
@@ -39,4 +35,4 @@ class RandomMnMTeams extends RandomTeams {
 	}
 }
 
-module.exports = RandomMnMTeams;
+export default RandomMnMTeams;
