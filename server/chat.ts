@@ -117,8 +117,6 @@ const MAX_PARSE_RECURSION = 10;
 const VALID_COMMAND_TOKENS = '/!';
 const BROADCAST_TOKEN = '!';
 
-import {resolve as resolvePath} from 'path';
-
 import {FS} from '../lib/fs';
 import {Utils} from '../lib/utils';
 import {formatText, linkRegex, stripFormatting} from './chat-formatter';
@@ -129,7 +127,7 @@ import ProbeModule = require('probe-image-size');
 const probe: (url: string) => Promise<{width: number, height: number}> = ProbeModule;
 
 const EMOJI_REGEX = /[\p{Emoji_Modifier_Base}\p{Emoji_Presentation}\uFE0F]/u;
-const TRANSLATION_DIRECTORY = resolvePath(__dirname, '../.translations-dist');
+const TRANSLATION_DIRECTORY = `${__dirname}/../.translations-dist`;
 
 class PatternTester {
 	// This class sounds like a RegExp
@@ -322,6 +320,9 @@ export class PageContext extends MessageContext {
 
 		const parts = this.pageid.split('-');
 		parts.shift(); // first part is always `view`
+
+		if (!this.connection.openPages) this.connection.openPages = new Set();
+		this.connection.openPages.add(parts.join('-'));
 
 		let handler: PageHandler | PageTable = Chat.pages;
 		while (handler) {
@@ -518,9 +519,11 @@ export class CommandContext extends MessageContext {
 			}).catch(err => {
 				if (err.name?.endsWith('ErrorMessage')) {
 					this.errorReply(err.message);
+					this.update();
 					return false;
 				}
 				if (err.name.endsWith('Interruption')) {
+					this.update();
 					return;
 				}
 				Monitor.crashlog(err, 'An async chat command', {
@@ -773,7 +776,7 @@ export class CommandContext extends MessageContext {
 		this.add(`|html|<div class="infobox">${htmlContent}</div>`);
 	}
 	sendReplyBox(htmlContent: string) {
-		this.sendReply(`|c|${this.room ? this.user.getIdentity() : '~'}|/raw <div class="infobox">${htmlContent}</div>`);
+		this.sendReply(`|c|${this.room && this.broadcasting ? this.user.getIdentity() : '~'}|/raw <div class="infobox">${htmlContent}</div>`);
 	}
 	popupReply(message: string) {
 		this.connection.popup(message);
@@ -842,8 +845,11 @@ export class CommandContext extends MessageContext {
 			}
 		}
 		if (ip) entry.ip = ip;
-		this.room?.modlog(entry);
-		Rooms.global.modlog(entry, this.room?.roomid);
+		if (this.room) {
+			this.room.modlog(entry);
+		} else {
+			Rooms.global.modlog(entry);
+		}
 	}
 	modlog(
 		action: string,
@@ -1212,7 +1218,7 @@ export class CommandContext extends MessageContext {
 		htmlContent = ('' + (htmlContent || '')).trim();
 		if (!htmlContent) return '';
 		if (/>here.?</i.test(htmlContent) || /click here/i.test(htmlContent)) {
-			throw new Chat.ErrorMessage('Do not use "click here"');
+			throw new Chat.ErrorMessage('Do not use "click here" – See [[Design standard #2 <https://github.com/smogon/pokemon-showdown/blob/master/CONTRIBUTING.md#design-standards>]]');
 		}
 
 		// check for mismatched tags
@@ -1232,7 +1238,7 @@ export class CommandContext extends MessageContext {
 			const stack = [];
 			for (const tag of tags) {
 				const isClosingTag = tag.charAt(1) === '/';
-				const contentEndLoc = tag.charAt(tag.length - 1) === '/' ? -1 : undefined;
+				const contentEndLoc = tag.endsWith('/') ? -1 : undefined;
 				const tagContent = tag.slice(isClosingTag ? 2 : 1, contentEndLoc).replace(/\s+/, ' ').trim();
 				const tagNameEndIndex = tagContent.indexOf(' ');
 				const tagName = tagContent.slice(0, tagNameEndIndex >= 0 ? tagNameEndIndex : undefined).toLowerCase();
@@ -1341,11 +1347,31 @@ export class CommandContext extends MessageContext {
 		return rest;
 	}
 
-	requireRoom() {
+	requireRoom(id?: RoomID) {
 		if (!this.room) {
 			throw new Chat.ErrorMessage(`/${this.cmd} - must be used in a chat room, not a ${this.pmTarget ? "PM" : "console"}`);
 		}
+		if (id && this.room.roomid !== id) {
+			const targetRoom = Rooms.get(id);
+			if (!targetRoom) {
+				throw new Chat.ErrorMessage(`This command can only be used in the room '${id}', but that room does not exist.`);
+			}
+			throw new Chat.ErrorMessage(`This command can only be used in the ${targetRoom.title} room.`);
+		}
 		return this.room;
+	}
+	// eslint-disable-next-line @typescript-eslint/type-annotation-spacing
+	requireGame<T extends RoomGame>(constructor: new (...args: any[]) => T) {
+		const room = this.requireRoom();
+		if (!room.game) {
+			throw new Chat.ErrorMessage(`This command requires a game of ${constructor.name} (this room has no game).`);
+		}
+		const game = room.getGame(constructor);
+		// must be a different game
+		if (!game) {
+			throw new Chat.ErrorMessage(`This command requires a game of ${constructor.name} (this game is ${room.game.title}).`);
+		}
+		return game;
 	}
 	commandDoesNotExist(): never {
 		if (this.cmdToken === '!') {
@@ -1364,6 +1390,13 @@ export const Chat = new class {
 		});
 	}
 	translationsLoaded = false;
+	/**
+	 * As per the node.js documentation at https://nodejs.org/api/timers.html#timers_settimeout_callback_delay_args,
+	 * timers with durations that are too long for a 32-bit signed integer will be invoked after 1 millisecond,
+	 * which tends to cause unexpected behavior.
+	 */
+	readonly MAX_TIMEOUT_DURATION = 2147483647;
+
 	readonly multiLinePattern = new PatternTester();
 
 	/*********************************************************
@@ -1570,9 +1603,7 @@ export const Chat = new class {
 			throw new Error(`Trying to translate to a nonexistent language: ${language}`);
 		}
 		if (!strings.length) {
-			return ((fStrings: TemplateStringsArray | string, ...fKeys: any) => {
-				return Chat.tr(language, fStrings, ...fKeys);
-			});
+			return ((fStrings: TemplateStringsArray | string, ...fKeys: any) => Chat.tr(language, fStrings, ...fKeys));
 		}
 
 		const entry = Chat.translations.get(language)!.get(trString);
@@ -1875,10 +1906,12 @@ export const Chat = new class {
 	 * options.hhmmss = true will instead report the duration in 00:00:00 format
 	 *
 	 */
-	toDurationString(val: number, options: {hhmmss?: any, precision?: number} = {}) {
+	toDurationString(val: number, options: {hhmmss?: boolean, precision?: number} = {}) {
 		// TODO: replace by Intl.DurationFormat or equivalent when it becomes available (ECMA-402)
 		// https://github.com/tc39/ecma402/issues/47
 		const date = new Date(+val);
+		if (isNaN(date.getTime())) return 'forever';
+
 		const parts = [
 			date.getUTCFullYear() - 1970, date.getUTCMonth(), date.getUTCDate() - 1,
 			date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds(),
@@ -1886,21 +1919,30 @@ export const Chat = new class {
 		const roundingBoundaries = [6, 15, 12, 30, 30];
 		const unitNames = ["second", "minute", "hour", "day", "month", "year"];
 		const positiveIndex = parts.findIndex(elem => elem > 0);
-		const precision = (options?.precision ? options.precision : parts.length);
+		let precision = (options?.precision ? options.precision : 3);
 		if (options?.hhmmss) {
 			const str = parts.slice(positiveIndex).map(value => value < 10 ? "0" + value : "" + value).join(":");
 			return str.length === 2 ? "00:" + str : str;
 		}
+
 		// round least significant displayed unit
 		if (positiveIndex + precision < parts.length && precision > 0 && positiveIndex >= 0) {
 			if (parts[positiveIndex + precision] >= roundingBoundaries[positiveIndex + precision - 1]) {
 				parts[positiveIndex + precision - 1]++;
 			}
 		}
+
+		// don't display trailing 0's if the number is exact
+		let precisionIndex = 5;
+		while (precisionIndex > positiveIndex && !parts[precisionIndex]) {
+			precisionIndex--;
+		}
+		precision = Math.min(precision, precisionIndex - positiveIndex + 1);
+
 		return parts
 			.slice(positiveIndex)
 			.reverse()
-			.map((value, index) => value ? value + " " + unitNames[index] + (value > 1 ? "s" : "") : "")
+			.map((value, index) => `${value} ${unitNames[index]}${value !== 1 ? "s" : ""}`)
 			.reverse()
 			.slice(0, precision)
 			.join(" ")
@@ -2019,7 +2061,6 @@ export const Chat = new class {
 		return `<div class="message"><ul class="utilichart">${buf}<li style="clear:both"></li></ul></div>`;
 	}
 	getDataMoveHTML(move: Move) {
-		if (typeof move === 'string') move = Object.assign({}, Dex.getMove(move));
 		let buf = `<ul class="utilichart"><li class="result">`;
 		buf += `<span class="col movenamecol"><a href="https://${Config.routes.dex}/moves/${move.id}">${move.name}</a></span> `;
 		// encoding is important for the ??? type icon
@@ -2038,15 +2079,13 @@ export const Chat = new class {
 		return buf;
 	}
 	getDataAbilityHTML(ability: Ability) {
-		if (typeof ability === 'string') ability = Object.assign({}, Dex.getAbility(ability));
 		let buf = `<ul class="utilichart"><li class="result">`;
 		buf += `<span class="col namecol"><a href="https://${Config.routes.dex}/abilities/${ability.id}">${ability.name}</a></span> `;
 		buf += `<span class="col abilitydesccol">${ability.shortDesc || ability.desc}</span> `;
 		buf += `</li><li style="clear:both"></li></ul>`;
 		return buf;
 	}
-	getDataItemHTML(item: string | Item) {
-		if (typeof item === 'string') item = Object.assign({}, Dex.getItem(item));
+	getDataItemHTML(item: Item) {
 		let buf = `<ul class="utilichart"><li class="result">`;
 		buf += `<span class="col itemiconcol"><psicon item="${item.id}"></span> <span class="col namecol"><a href="https://${Config.routes.dex}/items/${item.id}">${item.name}</a></span> `;
 		buf += `<span class="col itemdesccol">${item.shortDesc || item.desc}</span> `;
@@ -2155,10 +2194,10 @@ CommandContext.prototype.requiresRoom = CommandContext.prototype.requireRoom;
 export interface FilterWord {
 	regex: RegExp;
 	word: string;
-	reason: string;
+	hits: number;
+	reason?: string;
 	publicReason?: string;
 	replacement?: string;
-	hits: number;
 }
 
 export type MonitorHandler = (

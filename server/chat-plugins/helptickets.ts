@@ -52,9 +52,9 @@ try {
 }
 
 function writeTickets() {
-	FS(TICKET_FILE).writeUpdate(() => (
-		JSON.stringify(Object.assign({}, tickets))
-	));
+	FS(TICKET_FILE).writeUpdate(
+		() => JSON.stringify(tickets)
+	);
 }
 
 function writeStats(line: string) {
@@ -119,9 +119,9 @@ export class HelpTicket extends Rooms.RoomGame {
 				this.firstClaimTime = Date.now();
 				// I'd use the player list for this, but it dosen't track DCs so were checking the userlist
 				// Non-staff users in the room currently (+ the ticket creator even if they are staff)
-				const users = Object.entries(this.room.users).filter(u => {
-					return !((u[1].isStaff && u[1].id !== this.ticket.userid) || !u[1].named);
-				});
+				const users = Object.entries(this.room.users).filter(
+					u => !((u[1].isStaff && u[1].id !== this.ticket.userid) || !u[1].named)
+				);
 				if (!users.length) this.emptyRoom = true;
 			}
 			if (this.ticket.active) {
@@ -342,12 +342,14 @@ export class HelpTicket extends Rooms.RoomGame {
 		// @ts-ignore
 		this.playerTable = null;
 	}
-	static ban(user: string, reason = '') {
+	static ban(user: User | ID, reason = '') {
 		const userid = toID(user);
+		const userObj = Users.get(user);
+		if (userObj) user = userObj;
 		const punishment: Punishment = ['TICKETBAN', userid, Date.now() + TICKET_BAN_DURATION, reason];
-		return Punishments.roomPunish('staff', userid, punishment);
+		return Punishments.roomPunish('staff', user, punishment);
 	}
-	static unban(user: string) {
+	static unban(user: ID | User) {
 		user = toID(user);
 		return Punishments.roomUnpunish('staff', user, 'TICKETBAN');
 	}
@@ -1133,17 +1135,21 @@ export const commands: ChatCommands = {
 						this.tr` Or if ${reportTarget} is not the user you want to report, please tell us the name of the user who you want to report.`;
 					break;
 				case 'Inappropriate Username':
-					staffIntroButtons = `<button class="button" name="send" value="/forcerename ${reportTarget}">Force-rename ${reportTarget}</button> `;
+					staffIntroButtons = Utils.html`<button class="button" name="send" value="/forcerename ${reportTarget}">Force-rename ${reportTarget}</button> `;
 					break;
 				}
-				staffIntroButtons += `<button class="button" name="send" value="/modlog global, ${reportTarget}">Global Modlog for ${reportTarget}</button> <button class="button" name="send" value="/sharedbattles ${user.id}, ${toID(reportTarget)}">Shared battles</button> `;
+				staffIntroButtons += Utils.html`<button class="button" name="send" value="/modlog global, user='${reportTarget}'">Global Modlog for ${reportTarget}</button> <button class="button" name="send" value="/sharedbattles ${user.id}, ${toID(reportTarget)}">Shared battles</button> `;
 			}
 			if (ticket.type === 'Appeal') {
-				staffIntroButtons += `<button class="button" name="send" value="/modlog global, ${user.name}">Global Modlog for ${user.name}</button>`;
+				staffIntroButtons += Utils.html`<button class="button" name="send" value="/modlog global, user='${user.name}'">Global Modlog for ${user.name}</button>`;
 			}
 			const introMsg = Utils.html`<h2 style="margin-top:0">${this.tr`Help Ticket`} - ${user.name}</h2>` +
 				`<p><b>${this.tr`Issue`}</b>: ${ticket.type}<br />${this.tr`A Global Staff member will be with you shortly.`}</p>`;
-			const staffMessage = `<p>${closeButtons} <details><summary class="button">More Options</summary> ${staffIntroButtons}<button class="button" name="send" value="/helpticket ban ${user.id}"><small>Ticketban</small></button></details></p>`;
+			const staffMessage = [
+				`<p>${closeButtons} <details><summary class="button">More Options</summary> ${staffIntroButtons}`,
+				`<button class="button" name="send" value="/modlog global, user='${ticket.userid}'"><small>Global Modlog for ${ticket.creator}</small></button>`,
+				`<button class="button" name="send" value="/helpticket ban ${user.id}"><small>Ticketban</small></button></details></p>`,
+			].join(' ');
 			const staffHint = staffContexts[ticketType] || '';
 			let reportTargetInfo = '';
 			if (reportTargetType === 'room') {
@@ -1155,16 +1161,19 @@ export const commands: ChatCommands = {
 			} else if (reportTargetType === 'user') {
 				reportTargetInfo = `Reported user: <strong class="username">${reportTarget}</strong><p></p>`;
 
-				const commonBattles = getCommonBattles(
-					toID(reportTarget), Users.get(reportTarget),
-					ticket.userid, Users.get(ticket.userid)
-				);
+				const targetID = toID(reportTarget);
+				if (targetID !== ticket.userid) {
+					const commonBattles = getCommonBattles(
+						targetID, Users.get(reportTarget),
+						ticket.userid, Users.get(ticket.userid)
+					);
 
-				if (!commonBattles.length) {
-					reportTargetInfo += Utils.html`There are no common battles between '${reportTarget}' and '${ticket.creator}'.`;
-				} else {
-					reportTargetInfo += Utils.html`Showing ${commonBattles.length} common battle(s) between '${reportTarget}' and '${ticket.creator}': `;
-					reportTargetInfo += commonBattles.map(roomid => Utils.html`<a href=/${roomid}>${roomid.replace(/^battle-/, '')}`);
+					if (!commonBattles.length) {
+						reportTargetInfo += Utils.html`There are no common battles between '${reportTarget}' and '${ticket.creator}'.`;
+					} else {
+						reportTargetInfo += Utils.html`Showing ${commonBattles.length} common battle(s) between '${reportTarget}' and '${ticket.creator}': `;
+						reportTargetInfo += commonBattles.map(roomid => Utils.html`<a href=/${roomid}>${roomid.replace(/^battle-/, '')}`);
+					}
 				}
 			}
 			let helpRoom = Rooms.get(`help-${user.id}`) as ChatRoom | null;
@@ -1282,7 +1291,7 @@ export const commands: ChatCommands = {
 				targetUser.popup(`|modal|${user.name} has banned you from creating help tickets.${(target ? `\n\nReason: ${target}` : ``)}\n\nYour ban will expire in a few days.`);
 			}
 
-			const affected = HelpTicket.ban(userid, target);
+			const affected = HelpTicket.ban(targetUser || userid, target);
 			this.addModAction(`${username} was ticket banned by ${user.name}.${target ? ` (${target})` : ``}`);
 			const acAccount = (targetUser && targetUser.autoconfirmed !== userid && targetUser.autoconfirmed);
 			let displayMessage = '';
@@ -1323,7 +1332,7 @@ export const commands: ChatCommands = {
 				return this.errorReply(this.tr`${targetUser ? targetUser.name : target} is not ticket banned.`);
 			}
 
-			const affected = HelpTicket.unban(target);
+			const affected = HelpTicket.unban(targetUser);
 			this.addModAction(`${affected} was ticket unbanned by ${user.name}.`);
 			this.globalModlog("UNTICKETBAN", toID(target));
 			if (targetUser) targetUser.popup(`${user.name} has ticket unbanned you.`);

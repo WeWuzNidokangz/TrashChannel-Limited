@@ -527,7 +527,7 @@ export class Pokemon {
 
 		// stat boosts
 		if (!unboosted) {
-			const boosts = this.battle.runEvent('ModifyBoost', this, null, null, Object.assign({}, this.boosts));
+			const boosts = this.battle.runEvent('ModifyBoost', this, null, null, {...this.boosts});
 			let boost = boosts[statName];
 			const boostTable = [1, 1.5, 2, 2.5, 3, 3.5, 4];
 			if (boost > 6) boost = 6;
@@ -725,7 +725,7 @@ export class Pokemon {
 
 	ignoringAbility() {
 		const abilities = [
-			'battlebond', 'comatose', 'disguise', 'gulpmissile', 'iceface', 'multitype', 'powerconstruct', 'rkssystem', 'schooling', 'shieldsdown', 'stancechange',
+			'asoneglastrier', 'asonespectrier', 'battlebond', 'comatose', 'disguise', 'gulpmissile', 'iceface', 'multitype', 'powerconstruct', 'rkssystem', 'schooling', 'shieldsdown', 'stancechange',
 		];
 		// Check if any active pokemon have the ability Neutralizing Gas
 		let neutralizinggas = false;
@@ -1050,7 +1050,7 @@ export class Pokemon {
 		for (const i in pokemon.volatiles) {
 			if (this.battle.dex.getEffectByID(i as ID).noCopy) continue;
 			// shallow clones
-			this.volatiles[i] = Object.assign({}, pokemon.volatiles[i]);
+			this.volatiles[i] = {...pokemon.volatiles[i]};
 			if (this.volatiles[i].linkedPokemon) {
 				delete pokemon.volatiles[i].linkedPokemon;
 				delete pokemon.volatiles[i].linkedStatus;
@@ -1172,7 +1172,7 @@ export class Pokemon {
 		this.knownType = true;
 		this.weighthg = species.weighthg;
 
-		const stats = this.battle.dex.spreadModify(this.species.baseStats, this.set);
+		const stats = this.battle.spreadModify(this.species.baseStats, this.set);
 		if (this.species.maxHP) stats.hp = this.species.maxHP;
 
 		if (!this.maxhp) {
@@ -1642,7 +1642,7 @@ export class Pokemon {
 		const oldAbility = this.ability;
 		if (!isFromFormeChange) {
 			const abilities = [
-				'battlebond', 'comatose', 'disguise', 'gulpmissile', 'hungerswitch', 'iceface', 'multitype', 'powerconstruct', 'rkssystem', 'schooling', 'shieldsdown', 'stancechange',
+				'asoneglastrier', 'asonespectrier', 'battlebond', 'comatose', 'disguise', 'gulpmissile', 'hungerswitch', 'iceface', 'multitype', 'powerconstruct', 'rkssystem', 'schooling', 'shieldsdown', 'stancechange',
 			];
 			if (ability.id === 'illusion' || abilities.includes(ability.id) || abilities.includes(oldAbility)) return false;
 			if (this.battle.gen >= 7 && (ability.id === 'zenmode' || oldAbility === 'zenmode')) return false;

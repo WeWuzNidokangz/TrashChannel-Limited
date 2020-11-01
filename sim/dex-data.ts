@@ -660,7 +660,7 @@ export class Species extends BasicEffect implements Readonly<BasicEffect & Speci
 	readonly gmaxUnreleased?: boolean;
 	/** True if a Pokemon species is incapable of dynamaxing */
 	readonly cannotDynamax?: boolean;
-	/** True if a pokemon is a forme that is only accessible in battle. */
+	/** What it transforms from, if a pokemon is a forme that is only accessible in battle. */
 	readonly battleOnly?: string | string[];
 	/** Required item. Do not use this directly; see requiredItems. */
 	readonly requiredItem?: string;
@@ -758,6 +758,7 @@ export class Species extends BasicEffect implements Readonly<BasicEffect & Speci
 		this.battleOnly = data.battleOnly || (this.isMega ? this.baseSpecies : undefined);
 		this.changesFrom = data.changesFrom ||
 			(this.battleOnly !== this.baseSpecies ? this.battleOnly : this.baseSpecies);
+		if (Array.isArray(data.changesFrom)) this.changesFrom = data.changesFrom[0];
 
 		if (!this.gen && this.num >= 1) {
 			if (this.num >= 810 || ['Gmax', 'Galar', 'Galar-Zen'].includes(this.forme)) {
@@ -1052,6 +1053,22 @@ export class Move extends BasicEffect implements Readonly<BasicEffect & MoveData
 				this.gen = 1;
 			}
 		}
+	}
+}
+
+export class Nature extends BasicEffect implements Readonly<BasicEffect & NatureData> {
+	readonly effectType: 'Nature';
+	readonly plus?: StatNameExceptHP;
+	readonly minus?: StatNameExceptHP;
+	constructor(data: AnyObject, ...moreData: (AnyObject | null)[]) {
+		super(data, moreData);
+		data = this;
+
+		this.fullname = `nature: ${this.name}`;
+		this.effectType = 'Nature';
+		this.gen = 3;
+		this.plus = data.plus || undefined;
+		this.minus = data.minus || undefined;
 	}
 }
 

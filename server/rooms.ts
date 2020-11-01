@@ -26,6 +26,9 @@ const LAST_BATTLE_WRITE_THROTTLE = 10;
 
 const RETRY_AFTER_LOGIN = null;
 
+const MODLOG_PATH = 'logs/modlog';
+const MODLOG_DB_PATH = `${__dirname}/../databases/modlog.db`;
+
 import {FS} from '../lib/fs';
 import {Utils} from '../lib/utils';
 import {WriteStream} from '../lib/streams';
@@ -38,7 +41,7 @@ import {RoomGame, RoomGamePlayer} from './room-game';
 import {Roomlogs} from './roomlogs';
 import * as crypto from 'crypto';
 import {RoomAuth} from './user-groups';
-import {modlog, ModlogEntry} from './modlog';
+import {Modlog, ModlogEntry} from './modlog';
 //#region TrashChannel
 import * as fs from 'fs';
 import * as pathModule from 'path';
@@ -346,6 +349,9 @@ export abstract class BasicRoom {
 		this.log.roomlog(message);
 		return this;
 	}
+	/**
+	 * Writes an entry to the modlog for that room, and the global modlog if entry.isGlobal is true.
+	 */
 	modlog(entry: ModlogEntry) {
 		const override = this.tour ? `${this.roomid} tournament: ${this.tour.roomid}` : undefined;
 		this.log.modlog(entry, override);
@@ -704,6 +710,18 @@ export abstract class BasicRoom {
 		const end = this.roomid.length - 2;
 		const lastHyphen = this.roomid.lastIndexOf('-', end);
 		return {id: this.roomid.slice(7, lastHyphen), password: this.roomid.slice(lastHyphen, end)};
+	}
+
+	/**
+	 * Displays a warning popup to all users in the room.
+	 * Returns a list of all the user IDs that were warned.
+	 */
+	warnParticipants(message: string) {
+		const warned = Object.values(this.users);
+		for (const user of warned) {
+			user.popup(`|modal|${message}`);
+		}
+		return warned;
 	}
 
 	/**
@@ -1671,7 +1689,9 @@ function getRoom(roomid?: string | BasicRoom) {
 }
 
 export const Rooms = {
-	Modlog: modlog,
+	MODLOG_PATH,
+	MODLOG_DB_PATH,
+	Modlog: new Modlog(MODLOG_PATH, MODLOG_DB_PATH),
 	/**
 	 * The main roomid:Room table. Please do not hold a reference to a
 	 * room long-term; just store the roomid and grab it from here (with

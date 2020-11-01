@@ -69,13 +69,6 @@ const DATA_FILES = {
 
 const nullEffect: Condition = new Data.Condition({name: '', exists: false});
 
-export interface Nature {
-	name: string;
-	plus?: StatNameExceptHP;
-	minus?: StatNameExceptHP;
-	[k: string]: any;
-}
-
 interface DexTableData {
 	Abilities: DexTable<Ability>;
 	Aliases: {[id: string]: string};
@@ -84,7 +77,7 @@ interface DexTableData {
 	Items: DexTable<Item>;
 	Learnsets: DexTable<LearnsetData>;
 	Moves: DexTable<Move>;
-	Natures: DexTable<Nature>;
+	Natures: DexTable<NatureData>;
 	Pokedex: DexTable<Species>;
 	Scripts: DexTable<AnyObject>;
 	Conditions: DexTable<EffectData>;
@@ -95,35 +88,9 @@ interface TextTableData {
 	Items: AnyObject;
 	Moves: AnyObject;
 	Pokedex: AnyObject;
+	Default: AnyObject;
 }
 
-const Natures: {[k: string]: Nature} = {
-	adamant: {name: "Adamant", plus: 'atk', minus: 'spa'},
-	bashful: {name: "Bashful"},
-	bold: {name: "Bold", plus: 'def', minus: 'atk'},
-	brave: {name: "Brave", plus: 'atk', minus: 'spe'},
-	calm: {name: "Calm", plus: 'spd', minus: 'atk'},
-	careful: {name: "Careful", plus: 'spd', minus: 'spa'},
-	docile: {name: "Docile"},
-	gentle: {name: "Gentle", plus: 'spd', minus: 'def'},
-	hardy: {name: "Hardy"},
-	hasty: {name: "Hasty", plus: 'spe', minus: 'def'},
-	impish: {name: "Impish", plus: 'def', minus: 'spa'},
-	jolly: {name: "Jolly", plus: 'spe', minus: 'spa'},
-	lax: {name: "Lax", plus: 'def', minus: 'spd'},
-	lonely: {name: "Lonely", plus: 'atk', minus: 'def'},
-	mild: {name: "Mild", plus: 'spa', minus: 'def'},
-	modest: {name: "Modest", plus: 'spa', minus: 'atk'},
-	naive: {name: "Naive", plus: 'spe', minus: 'spd'},
-	naughty: {name: "Naughty", plus: 'atk', minus: 'spd'},
-	quiet: {name: "Quiet", plus: 'spa', minus: 'spe'},
-	quirky: {name: "Quirky"},
-	rash: {name: "Rash", plus: 'spa', minus: 'spd'},
-	relaxed: {name: "Relaxed", plus: 'def', minus: 'spe'},
-	sassy: {name: "Sassy", plus: 'spd', minus: 'spe'},
-	serious: {name: "Serious"},
-	timid: {name: "Timid", plus: 'spe', minus: 'atk'},
-};
 export const toID = Data.toID;
 
 // function for merging the two lists
@@ -215,6 +182,7 @@ export class ModdedDex {
 	readonly learnsetCache: Map<ID, LearnsetData>;
 	readonly moveCache: Map<ID, Move>;
 	readonly speciesCache: Map<ID, Species>;
+	readonly natureCache: Map<ID, Nature>;
 	readonly typeCache: Map<string, TypeInfo>;
 
 	gen: number;
@@ -243,6 +211,7 @@ export class ModdedDex {
 		this.moveCache = new Map();
 		this.learnsetCache = new Map();
 		this.speciesCache = new Map();
+		this.natureCache = new Map();
 		this.typeCache = new Map();
 
 		this.gen = 0;
@@ -403,9 +372,9 @@ export class ModdedDex {
 
 		name = (name || '').trim();
 		let id = toID(name);
-		if (id === 'nidoran' && name.slice(-1) === '♀') {
+		if (id === 'nidoran' && name.endsWith('♀')) {
 			id = 'nidoranf' as ID;
-		} else if (id === 'nidoran' && name.slice(-1) === '♂') {
+		} else if (id === 'nidoran' && name.endsWith('♂')) {
 			id = 'nidoranm' as ID;
 		}
 		let species: any = this.speciesCache.get(id);
@@ -696,10 +665,11 @@ export class ModdedDex {
 		if (!customRulesString) return format.id;
 		const ruleTable = this.getRuleTable(format);
 		const customRules = customRulesString.split(',').map(rule => {
+			rule = rule.replace(/[\r\n|]*/g, '').trim();
 			const ruleSpec = this.validateRule(rule);
 			if (typeof ruleSpec === 'string' && ruleTable.has(ruleSpec)) return null;
-			return rule.replace(/[\r\n|]*/g, '').trim();
-		}).filter(rule => rule);
+			return rule;
+		}).filter(Boolean);
 		if (!customRules.length) throw new Error(`The format already has your custom rules`);
 		const validatedFormatid = format.id + '@@@' + customRules.join(',');
 		const moddedFormat = this.getFormat(validatedFormatid, true);
@@ -840,51 +810,25 @@ export class ModdedDex {
 
 		name = (name || '').trim();
 		const id = toID(name);
-		// tslint:disable-next-line:no-object-literal-type-assertion
-		let nature: Nature = {} as Nature;
-		if (id && id !== 'constructor' && this.data.Natures[id]) {
-			nature = this.data.Natures[id];
-			if (nature.cached) return nature;
-			nature.cached = true;
-			nature.exists = true;
+		let nature = this.natureCache.get(id);
+		if (nature) return nature;
+		if (this.data.Aliases.hasOwnProperty(id)) {
+			nature = this.getNature(this.data.Aliases[id]);
+			if (nature.exists) {
+				this.natureCache.set(id, nature);
+			}
+			return nature;
 		}
-		if (!nature.id) nature.id = id;
-		if (!nature.name) nature.name = name;
-		nature.toString = this.effectToString;
-		if (!nature.effectType) nature.effectType = 'Nature';
-		if (!nature.gen) nature.gen = 3;
+		if (id && this.data.Natures.hasOwnProperty(id)) {
+			const natureData = this.data.Natures[id];
+			nature = new Data.Nature(natureData);
+			if (nature.gen > this.gen) nature.isNonstandard = 'Future';
+		} else {
+			nature = new Data.Nature({id, name, exists: false});
+		}
 
+		if (nature.exists) this.natureCache.set(id, nature);
 		return nature;
-	}
-
-	/** Given a table of base stats and a pokemon set, return the actual stats. */
-	spreadModify(baseStats: StatsTable, set: PokemonSet): StatsTable {
-		const modStats: SparseStatsTable = {atk: 10, def: 10, spa: 10, spd: 10, spe: 10};
-		const tr = this.trunc;
-		let statName: keyof StatsTable;
-		for (statName in modStats) {
-			const stat = baseStats[statName];
-			modStats[statName] = tr(tr(2 * stat + set.ivs[statName] + tr(set.evs[statName] / 4)) * set.level / 100 + 5);
-		}
-		if ('hp' in baseStats) {
-			const stat = baseStats['hp'];
-			modStats['hp'] = tr(tr(2 * stat + set.ivs['hp'] + tr(set.evs['hp'] / 4) + 100) * set.level / 100 + 10);
-		}
-		return this.natureModify(modStats as StatsTable, set);
-	}
-
-	natureModify(stats: StatsTable, set: PokemonSet): StatsTable {
-		const nature = this.getNature(set.nature);
-		let stat: keyof StatsTable;
-		if (nature.plus) {
-			stat = nature.plus;
-			stats[stat] = Math.floor(stats[stat] * 1.1);
-		}
-		if (nature.minus) {
-			stat = nature.minus;
-			stats[stat] = Math.floor(stats[stat] * 0.9);
-		}
-		return stats;
 	}
 
 	getHiddenPower(ivs: AnyObject) {
@@ -1060,6 +1004,7 @@ export class ModdedDex {
 	}
 
 	validateRule(rule: string, format: Format | null = null) {
+		if (rule !== rule.trim()) throw new Error(`Rule "${rule}" should be trimmed`);
 		switch (rule.charAt(0)) {
 		case '-':
 		case '*':
@@ -1068,7 +1013,7 @@ export class ModdedDex {
 			if (rule.slice(1).includes('>') || rule.slice(1).includes('+')) {
 				let buf = rule.slice(1);
 				const gtIndex = buf.lastIndexOf('>');
-				let limit = rule.charAt(0) === '+' ? Infinity : 0;
+				let limit = rule.startsWith('+') ? Infinity : 0;
 				if (gtIndex >= 0 && /^[0-9]+$/.test(buf.slice(gtIndex + 1).trim())) {
 					if (limit === 0) limit = parseInt(buf.slice(gtIndex + 1));
 					buf = buf.slice(0, gtIndex);
@@ -1093,7 +1038,7 @@ export class ModdedDex {
 			if (!this.data.Formats.hasOwnProperty(id)) {
 				throw new Error(`Unrecognized rule "${rule}"`);
 			}
-			if (rule.charAt(0) === '!') return `!${id}`;
+			if (rule.startsWith('!')) return `!${id}`;
 			return id;
 		}
 	}
@@ -1103,9 +1048,9 @@ export class ModdedDex {
 		if (id === 'unreleased') return 'unreleased';
 		if (id === 'nonexistent') return 'nonexistent';
 		const matches = [];
-		let matchTypes = ['pokemon', 'move', 'ability', 'item', 'pokemontag'];
+		let matchTypes = ['pokemon', 'move', 'ability', 'item', 'nature', 'pokemontag'];
 		for (const matchType of matchTypes) {
-			if (rule.slice(0, 1 + matchType.length) === matchType + ':') {
+			if (rule.startsWith(`${matchType}:`)) {
 				matchTypes = [matchType];
 				id = id.slice(matchType.length) as ID;
 				break;
@@ -1129,6 +1074,7 @@ export class ModdedDex {
 				break;
 			case 'item': table = this.data.Items; break;
 			case 'ability': table = this.data.Abilities; break;
+			case 'nature': table = this.data.Natures; break;
 			case 'pokemontag':
 				// valid pokemontags
 				const validTags = [
@@ -1141,7 +1087,7 @@ export class ModdedDex {
 					// illegal/nonstandard reasons
 					'past', 'future', 'unobtainable', 'lgpe', 'custom',
 					// all
-					'allpokemon', 'allitems', 'allmoves', 'allabilities',
+					'allpokemon', 'allitems', 'allmoves', 'allabilities', 'allnatures',
 				];
 				if (validTags.includes(ruleid)) matches.push('pokemontag:' + ruleid);
 				continue;
@@ -1157,7 +1103,7 @@ export class ModdedDex {
 					}
 				}
 				matches.push(matchType + ':' + id);
-			} else if (matchType === 'pokemon' && id.slice(-4) === 'base') {
+			} else if (matchType === 'pokemon' && id.endsWith('base')) {
 				id = id.slice(0, -4) as ID;
 				if (table.hasOwnProperty(id)) {
 					matches.push('pokemon:' + id);
@@ -1210,7 +1156,7 @@ export class ModdedDex {
 				searchResults.push({
 					isInexact,
 					searchType: searchTypes[table],
-					name: res.species ? res.species : res.name,
+					name: res.name,
 				});
 			}
 		}
@@ -1249,6 +1195,10 @@ export class ModdedDex {
 
 	packTeam(team: PokemonSet[] | null): string {
 		if (!team) return '';
+
+		function getIv(ivs: StatsTable, s: keyof StatsTable): string {
+			return ivs[s] === 31 || ivs[s] === undefined ? '' : ivs[s].toString();
+		}
 
 		let buf = '';
 		for (const set of team) {
@@ -1292,9 +1242,6 @@ export class ModdedDex {
 			}
 
 			// ivs
-			const getIv = (ivs: StatsTable, s: keyof StatsTable): string => {
-				return ivs[s] === 31 || ivs[s] === undefined ? '' : ivs[s].toString();
-			};
 			let ivs = '|';
 			if (set.ivs) {
 				ivs = '|' + getIv(set.ivs, 'hp') + ',' + getIv(set.ivs, 'atk') + ',' + getIv(set.ivs, 'def') +
@@ -1328,8 +1275,8 @@ export class ModdedDex {
 			}
 
 			if (set.pokeball || set.hpType || set.gigantamax) {
-				buf += ',' + set.hpType;
-				buf += ',' + toID(set.pokeball);
+				buf += ',' + (set.hpType || '');
+				buf += ',' + toID(set.pokeball || '');
 				buf += ',' + (set.gigantamax ? 'G' : '');
 			}
 		}
@@ -1340,7 +1287,7 @@ export class ModdedDex {
 	fastUnpackTeam(buf: string): PokemonSet[] | null {
 		if (!buf) return null;
 		if (typeof buf !== 'string') return buf;
-		if (buf.charAt(0) === '[' && buf.charAt(buf.length - 1) === ']') {
+		if (buf.startsWith('[') && buf.endsWith(']')) {
 			buf = this.packTeam(JSON.parse(buf));
 		}
 
@@ -1350,7 +1297,6 @@ export class ModdedDex {
 
 		// limit to 24
 		for (let count = 0; count < 24; count++) {
-			// tslint:disable-next-line:no-object-literal-type-assertion
 			const set: PokemonSet = {} as PokemonSet;
 			team.push(set);
 
@@ -1454,8 +1400,8 @@ export class ModdedDex {
 			}
 			if (misc) {
 				set.happiness = (misc[0] ? Number(misc[0]) : 255);
-				set.hpType = misc[1];
-				set.pokeball = misc[2];
+				set.hpType = misc[1] || '';
+				set.pokeball = this.toID(misc[2] || '');
 				set.gigantamax = !!misc[3];
 			}
 			if (j < 0) break;
@@ -1551,6 +1497,7 @@ export class ModdedDex {
 			Moves: this.loadTextFile('moves', 'MovesText'),
 			Abilities: this.loadTextFile('abilities', 'AbilitiesText'),
 			Items: this.loadTextFile('items', 'ItemsText'),
+			Default: this.loadTextFile('default', 'DefaultText'),
 		};
 		return dexes['base'].textCache;
 	}
@@ -1576,10 +1523,6 @@ export class ModdedDex {
 		}
 
 		for (const dataType of DATA_TYPES.concat('Aliases')) {
-			if (dataType === 'Natures' && this.isBase) {
-				dataCache[dataType] = Natures;
-				continue;
-			}
 			const BattleData = this.loadDataFile(basePath, dataType);
 			if (BattleData !== dataCache[dataType]) dataCache[dataType] = Object.assign(BattleData, dataCache[dataType]);
 			if (dataType === 'Formats' && !parentDex) Object.assign(BattleData, this.formats);
