@@ -87,7 +87,7 @@ export const Scripts: ModdedBattleScriptsData = {
 		if (megaSpecies.types.length > baseSpecies.types.length) {
 			deltas.type = megaSpecies.types[1];
 		} else if (megaSpecies.types.length < baseSpecies.types.length) {
-			deltas.type = (undefined !== baseSpecies.types[1]) ? baseSpecies.types[1] : baseSpecies.types[0];
+			deltas.type = baseSpecies.types[0];
 		} else if (megaSpecies.types[1] !== baseSpecies.types[1]) {
 			deltas.type = megaSpecies.types[1];
 		}
