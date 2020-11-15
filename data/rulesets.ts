@@ -1600,14 +1600,15 @@ export const Formats: {[k: string]: FormatData} = {
 		name: 'Gen 7 Mix and Mega Standard Validation',
 		desc: "Standard validation for Gen 7 Mix and Mega.",
 		onValidateTeam(team) {
-			/**@type {{[k: string]: true}} */
-			let itemTable = {};
+			const itemTable = new Set<ID>();
 			for (const set of team) {
-				let item = this.dex.getItem(set.item);
+				const item = this.dex.getItem(set.item);
 				if (!item) continue;
-				if (itemTable[item.id] && item.megaStone) return ["You are limited to one of each Mega Stone.", "(You have more than one " + this.dex.getItem(item).name + ")"];
-				if (itemTable[item.id] && ['blueorb', 'redorb'].includes(item.id)) return ["You are limited to one of each Primal Orb.", "(You have more than one " + this.dex.getItem(item).name + ")"];
-				itemTable[item.id] = true;
+				if (itemTable.has(item.id)) {
+					if (item.megaStone) return ["You are limited to one of each Mega Stone.", "(You have more than one " + this.dex.getItem(item).name + ")"];
+					if (['blueorb', 'redorb'].includes(item.id)) return ["You are limited to one of each Primal Orb.", "(You have more than one " + this.dex.getItem(item).name + ")"];
+				}
+				itemTable.add(item.id);
 			}
 		},
 		onValidateSet(set, format) {
@@ -1616,8 +1617,7 @@ export const Formats: {[k: string]: FormatData} = {
 			if (!item.megaEvolves && !['blueorb', 'redorb', 'ultranecroziumz'].includes(item.id)) return;
 			if (species.baseSpecies === item.megaEvolves || (species.baseSpecies === 'Groudon' && item.id === 'redorb') || (species.baseSpecies === 'Kyogre' && item.id === 'blueorb') || (species.forme.substr(0, 9) === 'Necrozma-' && item.id === 'ultranecroziumz')) return;
 			let uberStones = format.restricted || [];
-			let uberPokemon = format.cannotMega || [];
-			if (uberPokemon.includes(species.name) || set.ability === 'Power Construct' || uberStones.includes(item.name)) return ["" + species.forme + " is not allowed to hold " + item.name + "."];
+			if (this.ruleTable.isRestrictedSpecies(species) || set.ability === 'Power Construct' || uberStones.includes(item.name)) return ["" + species.name + " is not allowed to hold " + item.name + "."];
 		},
 	},
 	gen7mixandmegabattleeffects: {
@@ -1626,8 +1626,8 @@ export const Formats: {[k: string]: FormatData} = {
 		desc: "Battle effects for Gen 7 Mix and Mega (insufficient to run MnM without mod, crashes when called though Mix and Meta).",
 		onBegin() {
 			for (const pokemon of this.getAllPokemon()) {
-				pokemon.m.originalSpecies = pokemon.baseSpecies.name;
-			}
+                pokemon.m.originalSpecies = pokemon.baseSpecies.name;
+            }
 		},
 		onSwitchIn(pokemon) {
 			// @ts-ignore
@@ -1659,22 +1659,21 @@ export const Formats: {[k: string]: FormatData} = {
 		effectType: 'ValidatorRule',
 		name: 'Mix and Mega Standard Validation',
 		desc: "Standard validation for Mix and Mega.",
-		onValidateTeam(team, format) {
-			const restrictedPokemon = format.restricted || [];
-            const itemTable = new Set<ID>();
-            for (const set of team) {
-                const item = this.dex.getItem(set.item);
-                if (!item || !item.megaStone) continue;
-                const species = this.dex.getSpecies(set.species);
-                if (species.isNonstandard) return [`${species.baseSpecies} does not exist in gen 8.`];
-                if (restrictedPokemon.includes(species.name)) {
-                    return [`${species.name} is not allowed to hold ${item.name}.`];
-                }
-                if (itemTable.has(item.id)) {
-                    return [`You are limited to one of each mega stone.`, `(You have more than one ${item.name})`];
-                }
-                itemTable.add(item.id);
-            }
+		onValidateTeam(team) {
+			const itemTable = new Set<ID>();
+			for (const set of team) {
+				const item = this.dex.getItem(set.item);
+				if (!item || !item.megaStone) continue;
+				const species = this.dex.getSpecies(set.species);
+				if (species.isNonstandard) return [`${species.baseSpecies} does not exist in gen 8.`];
+				if (this.ruleTable.isRestrictedSpecies(species) || this.toID(set.ability) === 'powerconstruct') {
+					return [`${species.name} is not allowed to hold ${item.name}.`];
+				}
+				if (itemTable.has(item.id)) {
+					return [`You are limited to one of each mega stone.`, `(You have more than one ${item.name})`];
+				}
+				itemTable.add(item.id);
+			}
 		},
 	},
 	mixandmegabattleeffects: {
@@ -1688,11 +1687,11 @@ export const Formats: {[k: string]: FormatData} = {
 		},
 		onSwitchIn(pokemon) {
 			// @ts-ignore
-			let oMegaSpecies = this.dex.getSpecies(pokemon.species.originalMega);
+			const oMegaSpecies = this.dex.getSpecies(pokemon.species.originalMega);
 			if (oMegaSpecies.exists && pokemon.m.originalSpecies !== oMegaSpecies.baseSpecies) {
 				// Place volatiles on the Pokémon to show its mega-evolved condition and details
 				this.add('-start', pokemon, oMegaSpecies.requiredItem || oMegaSpecies.requiredMove, '[silent]');
-				let oSpecies = this.dex.getSpecies(pokemon.m.originalSpecies);
+				const oSpecies = this.dex.getSpecies(pokemon.m.originalSpecies);
 				if (oSpecies.types.length !== pokemon.species.types.length || oSpecies.types[1] !== pokemon.species.types[1]) {
 					this.add('-start', pokemon, 'typechange', pokemon.species.types.join('/'), '[silent]');
 				}
@@ -1700,7 +1699,7 @@ export const Formats: {[k: string]: FormatData} = {
 		},
 		onSwitchOut(pokemon) {
 			// @ts-ignore
-			let oMegaSpecies = this.dex.getSpecies(pokemon.species.originalMega);
+			const oMegaSpecies = this.dex.getSpecies(pokemon.species.originalMega);
 			if (oMegaSpecies.exists && pokemon.m.originalSpecies !== oMegaSpecies.baseSpecies) {
 				this.add('-end', pokemon, oMegaSpecies.requiredItem || oMegaSpecies.requiredMove, '[silent]');
 			}
