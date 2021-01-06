@@ -212,6 +212,12 @@ exports.transpile = (doForce) => {
 		]);
 	}
 
+	if (sucrase('./trashchannel', './.trashchannel-dist')) {
+		replace('.trashchannel-dist', [
+			{regex: /(require\(.*?)(lib|sim)/g, replace: `$1.$2-dist`},
+		]);
+	}
+
 	if (!fs.existsSync('./.data-dist/README.md')) {
 		const text = '**NOTE**: This folder contains the compiled output of the `data/` directory.\n' +
 			'You should be editing the `.ts` files there and then running `npm run build` or\n' +

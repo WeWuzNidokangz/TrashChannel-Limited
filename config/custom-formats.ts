@@ -1341,14 +1341,14 @@ export const Formats: FormatList = [
 			let problems = this.validateSet(set, teamHas) || [];
 			set.item = item;
 			// @ts-ignore
-			if (this.format.checkLearnset.call(this, move, this.dex.getSpecies(set.species))) problems.push(`${set.species} can't learn ${move.name}.`);
+			if (this.format.checkCanLearn.call(this, move, this.dex.getSpecies(set.species))) problems.push(`${set.species} can't learn ${move.name}.`);
 			// @ts-ignore
 			if (move.secondaries && move.secondaries.some(secondary => secondary.boosts && secondary.boosts.accuracy < 0)) problems.push(`${set.name || set.species}'s move ${move.name} can't be used as an item.`);
 			return problems.length ? problems : null;
 		},
-		checkLearnset(move, species, lsetData, set) {
+		checkCanLearn(move, species, lsetData, set) {
 			if (move.id === 'beatup' || move.id === 'fakeout' || move.damageCallback || move.multihit) return {type: 'invalid'};
-			return this.checkLearnset(move, species, lsetData, set);
+			return this.checkCanLearn(move, species, lsetData, set);
 		},
 		onValidateTeam(team, format) {
 			/**@type {{[k: string]: true}} */
@@ -1583,9 +1583,9 @@ export const Formats: FormatList = [
 		mod: 'gen7',
 		ruleset: ['[Gen 7] OU'],
 		banlist: ['Regigigas', 'Shedinja', 'Slaking', 'Smeargle', 'Imposter', 'Huge Power', 'Pure Power'],
-		checkLearnset(move, species, lsetData, set) {
+		checkCanLearn(move, species, lsetData, set) {
 			// @ts-ignore
-			return set.follower ? null : this.checkLearnset(move, species, lsetData, set);
+			return set.follower ? null : this.checkCanLearn(move, species, lsetData, set);
 		},
 		validateSet(set, teamHas) {
 			if (!teamHas.leader) {
@@ -1677,7 +1677,7 @@ export const Formats: FormatList = [
 		onChangeSet(set) {
 			if (set.species.endsWith('-Gmax')) set.species = set.species.slice(0, -5);
 		},
-		checkLearnset(move, species, lsetData, set) {
+		checkCanLearn(move, species, lsetData, set) {
 			if (species.name === 'Pikachu' || species.name === 'Pikachu-Gmax') {
 				if (['boltstrike', 'fusionbolt', 'pikapapow', 'zippyzap'].includes(move.id)) {
 					return null;
@@ -1693,7 +1693,7 @@ export const Formats: FormatList = [
 					return null;
 				}
 			}
-			return this.checkLearnset(move, species, lsetData, set);
+			return this.checkCanLearn(move, species, lsetData, set);
 		},
 		onModifySpecies(species) {
 			const newSpecies = this.dex.deepClone(species);

@@ -240,6 +240,9 @@ export interface MoveData extends EffectData, MoveEventMethods, HitEffect {
 	noSketch?: boolean;
 	stallingMove?: boolean;
 	baseMove?: string;
+	//#region TrashChannel
+	dontShowUseMoveMessage?: boolean;
+	//#endregion
 }
 
 export type ModdedMoveData = MoveData | Partial<Omit<MoveData, 'name'>> & {inherit: true, gen?: number};

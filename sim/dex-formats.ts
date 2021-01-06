@@ -239,6 +239,14 @@ export class Format extends BasicEffect implements Readonly<BasicEffect> {
 	readonly section?: string;
 	readonly column?: number;
 
+//#region TrashChannel
+	readonly onDesc?: (this: FormatData) => string;
+	readonly restrictionlist?: string[];
+	readonly modValueNumberA?: number;
+	// Where a format includes multiple potential metas, determine which one a Pokemon set qualifies as
+	readonly determineMeta?: (this: ModdedDex, set: PokemonSet, teamHas: AnyObject) => string | undefined;
+//#endregion
+
 	constructor(data: AnyObject, ...moreData: (AnyObject | null)[]) {
 		super(data, ...moreData);
 		data = this;
@@ -308,7 +316,24 @@ export function mergeFormatLists(main: FormatList, custom: FormatList | undefine
 					build.push(current);
 				}
 			} else if ((element as FormatData).name) { // otherwise, adds the element to its section.
-				current.formats.push(element as FormatData);
+//#region TrashChannel: Filter main formats
+				let formatElem : FormatData = (element as FormatData);
+				if(formatElem) {
+					// Random Battle must be completely removed not to be selected as the default format
+					if("[Gen 8] Random Battle" === formatElem.name) continue;
+
+					// Disable ladders and challenging for normie formats to clear space
+					if(current &&
+						("National Dex" !== current.section) &&
+						("Pet Mods" !== current.section) &&
+						("OM of the Month" !== current.section) &&
+						("Other Metagames" !== current.section)) {
+						formatElem.searchShow = false;
+						formatElem.challengeShow = false;
+					}
+				}
+				current.formats.push(formatElem);
+//#endregion
 			}
 		}
 	}
