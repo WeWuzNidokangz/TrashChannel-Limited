@@ -904,7 +904,24 @@ export const Moves: {[k: string]: ModdedMoveData} = {
 		inherit: true,
 		priority: 0,
 		selfSwitch: false,
-		onTryHit: false,
+		onTry: false,
+	},
+	toxic: {
+		inherit: true,
+		onPrepareHit(target, source, move) {
+			source.addVolatile('toxic');
+		},
+		condition: {
+			noCopy: true,
+			duration: 1,
+			onSourceInvulnerabilityPriority: 1,
+			onSourceInvulnerability(target, source, move) {
+				if (move && source === this.effectData.target) return 0;
+			},
+			onSourceAccuracy(accuracy, target, source, move) {
+				if (move && source === this.effectData.target) return true;
+			},
+		},
 	},
 	toxicthread: {
 		inherit: true,

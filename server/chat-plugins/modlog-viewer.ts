@@ -93,7 +93,7 @@ function prettifyResults(
 		if (result.userid) {
 			line += `: [${result.userid}]`;
 			if (result.autoconfirmedID) line += ` ac: [${result.autoconfirmedID}]`;
-			if (result.alts) line += ` alts: [${result.alts.join('], [')}]`;
+			if (result.alts.length) line += ` alts: [${result.alts.join('], [')}]`;
 			if (!hideIps && result.ip) line += ` [${result.ip}]`;
 		}
 
@@ -199,13 +199,15 @@ async function getModlog(
 	if (timed) connection.popup(`The modlog query took ${response.duration} ms to complete.`);
 }
 
+const shouldSearchGlobal = ['staff', 'adminlog'];
+
 export const commands: ChatCommands = {
 	ml: 'modlog',
 	punishlog: 'modlog',
 	pl: 'modlog',
 	timedmodlog: 'modlog',
 	modlog(target, room, user, connection, cmd) {
-		let roomid: ModlogID = (!room || room.roomid === 'staff' ? 'global' : room.roomid);
+		let roomid: ModlogID = (!room || shouldSearchGlobal.includes(room.roomid) ? 'global' : room.roomid);
 		let lines;
 		const search: ModlogSearch = {};
 		const targets = target.split(',');
@@ -303,4 +305,3 @@ export const commands: ChatCommands = {
 		);
 	},
 };
-

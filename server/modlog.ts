@@ -8,13 +8,10 @@
  * @license MIT
  */
 
-import * as child_process from 'child_process';
-import * as util from 'util';
-
 import {FS} from '../lib/fs';
-import {QueryProcessManager} from '../lib/process-manager';
+import {QueryProcessManager, exec} from '../lib/process-manager';
 import {Repl} from '../lib/repl';
-import * as Database from 'better-sqlite3';
+import type * as Database from 'better-sqlite3';
 import {checkRipgrepAvailability} from './config-loader';
 
 import {parseModlog} from '../tools/modlog/converter';
@@ -22,8 +19,11 @@ import {parseModlog} from '../tools/modlog/converter';
 const MAX_PROCESSES = 1;
 // If a modlog query takes longer than this, it will be logged.
 const LONG_QUERY_DURATION = 2000;
+const MODLOG_PM_TIMEOUT = 30 * 60 * 60 * 1000; // 30 minutes
 
 const MODLOG_SCHEMA_PATH = 'databases/schemas/modlog.sql';
+export const MODLOG_PATH = 'logs/modlog';
+export const MODLOG_DB_PATH = `${__dirname}/../databases/modlog.db`;
 
 const GLOBAL_PUNISHMENTS = [
 	'WEEKLOCK', 'LOCK', 'BAN', 'RANGEBAN', 'RANGELOCK', 'FORCERENAME',
@@ -40,8 +40,6 @@ const PUNISHMENTS = [
 	'TOUR BAN', 'TOUR UNBAN', 'UNNAMELOCK',
 ];
 const PUNISHMENTS_REGEX_STRING = `\\b(${PUNISHMENTS.join('|')}):.*`;
-
-const execFile = util.promisify(child_process.execFile);
 
 export type ModlogID = RoomID | 'global';
 
@@ -74,18 +72,20 @@ export interface ModlogSearch {
 
 export interface ModlogEntry {
 	action: string;
-	roomID?: string;
-	visualRoomID?: string;
-	userid?: ID;
-	autoconfirmedID?: ID;
-	alts?: ID[];
-	ip?: string;
-	isGlobal?: boolean;
-	loggedBy?: ID;
-	note?: string;
+	roomID: string;
+	visualRoomID: string;
+	userid: ID | null;
+	autoconfirmedID: ID | null;
+	alts: ID[];
+	ip: string | null;
+	isGlobal: boolean;
+	loggedBy: ID | null;
+	note: string;
 	/** Milliseconds since the epoch */
-	time?: number;
+	time: number;
 }
+
+export type PartialModlogEntry = Partial<ModlogEntry> & {action: string};
 
 class SortedLimitedLengthList {
 	maxSize: number;
@@ -123,58 +123,53 @@ class SortedLimitedLengthList {
 export class Modlog {
 	readonly logPath: string;
 	/**
-	 * If a stream is undefined, that means it has not yet been initialized.
-	 * If a stream is truthy, it is open and ready to be written to.
-	 * If a stream is null, it has been destroyed/disabled.
+	 * If a room ID is not in the Map, that means the room's modlog stream
+	 * has not yet been initialized, or was previously destroyed.
+	 * If a room ID is in the Map, its modlog stream is open and ready to be written to.
 	 */
-	sharedStreams: Map<ID, Streams.WriteStream | null> = new Map();
-	streams: Map<ModlogID, Streams.WriteStream | null> = new Map();
+	sharedStreams = new Map<ID, Streams.WriteStream>();
+	streams = new Map<ModlogID, Streams.WriteStream>();
 
-	readonly database: Database.Database;
+	readonly database?: Database.Database;
 
-	readonly modlogInsertionQuery: Database.Statement<ModlogEntry>;
-	readonly altsInsertionQuery: Database.Statement<[number, string]>;
-	readonly renameQuery: Database.Statement<[string, string]>;
-	readonly insertionTransaction: Database.Transaction;
+	readonly modlogInsertionQuery?: Database.Statement<ModlogEntry>;
+	readonly altsInsertionQuery?: Database.Statement<[number, string]>;
+	readonly renameQuery?: Database.Statement<[string, string]>;
+	readonly insertionTransaction?: Database.Transaction;
 
 	constructor(flatFilePath: string, databasePath: string) {
 		this.logPath = flatFilePath;
 
-		const dbExists = FS(databasePath).existsSync();
+		if (Config.usesqlite) {
+			const dbExists = FS(databasePath).existsSync();
+			const SQL = require('better-sqlite3');
+			this.database = new SQL(databasePath);
+			this.database!.exec("PRAGMA foreign_keys = ON;");
 
-		this.database = new Database(databasePath);
-		this.database.exec("PRAGMA foreign_keys = ON;");
+			// Set up tables, etc
 
-		// Set up tables, etc
-
-		if (!dbExists) {
-			this.database.exec(FS(MODLOG_SCHEMA_PATH).readIfExistsSync());
-		}
-
-		let insertionQuerySource = `INSERT INTO modlog (timestamp, roomid, visual_roomid, action, userid, autoconfirmed_userid, ip, action_taker_userid, note)`;
-		insertionQuerySource += ` VALUES ($time, $roomID, $visualRoomID, $action, $userid, $autoconfirmedID, $ip, $loggedBy, $note)`;
-		this.modlogInsertionQuery = this.database.prepare(insertionQuerySource);
-
-		this.altsInsertionQuery = this.database.prepare(`INSERT INTO alts (modlog_id, userid) VALUES (?, ?)`);
-		this.renameQuery = this.database.prepare(`UPDATE modlog SET roomid = ? WHERE roomid = ?`);
-
-		this.insertionTransaction = this.database.transaction((entries: Iterable<ModlogEntry>) => {
-			for (const entry of entries) {
-				if (!entry.visualRoomID) entry.visualRoomID = undefined;
-				if (!entry.userid) entry.userid = undefined;
-				if (!entry.autoconfirmedID) entry.autoconfirmedID = undefined;
-				if (!entry.ip) entry.ip = undefined;
-				if (!entry.loggedBy) entry.loggedBy = undefined;
-				if (!entry.note) entry.note = undefined;
-
-				const result = this.modlogInsertionQuery.run(entry);
-				const rowid = result.lastInsertRowid as number;
-
-				for (const alt of entry.alts || []) {
-					this.altsInsertionQuery.run(rowid, alt);
-				}
+			if (!dbExists) {
+				this.database!.exec(FS(MODLOG_SCHEMA_PATH).readIfExistsSync());
 			}
-		});
+
+			let insertionQuerySource = `INSERT INTO modlog (timestamp, roomid, visual_roomid, action, userid, autoconfirmed_userid, ip, action_taker_userid, note)`;
+			insertionQuerySource += ` VALUES ($time, $roomID, $visualRoomID, $action, $userid, $autoconfirmedID, $ip, $loggedBy, $note)`;
+			this.modlogInsertionQuery = this.database!.prepare(insertionQuerySource);
+
+			this.altsInsertionQuery = this.database!.prepare(`INSERT INTO alts (modlog_id, userid) VALUES (?, ?)`);
+			this.renameQuery = this.database!.prepare(`UPDATE modlog SET roomid = ? WHERE roomid = ?`);
+
+			this.insertionTransaction = this.database!.transaction((entries: Iterable<ModlogEntry>) => {
+				for (const entry of entries) {
+					const result = this.modlogInsertionQuery!.run(entry);
+					const rowid = result.lastInsertRowid as number;
+
+					for (const alt of entry.alts || []) {
+						this.altsInsertionQuery!.run(rowid, alt);
+					}
+				}
+			});
+		}
 	}
 
 	/******************
@@ -231,25 +226,33 @@ export class Modlog {
 	/**
 	 * Writes to the modlog
 	 */
-	write(roomid: string, entry: ModlogEntry, overrideID?: string) {
-		// Filter out duplicate alts
-		if (entry.alts) entry.alts = [...new Set(entry.alts)];
+	write(roomid: string, entry: PartialModlogEntry, overrideID?: string) {
+		const insertableEntry: ModlogEntry = {
+			action: entry.action,
+			roomID: entry.roomID || roomid,
+			visualRoomID: overrideID || entry.visualRoomID || '',
+			userid: entry.userid || null,
+			autoconfirmedID: entry.autoconfirmedID || null,
+			alts: entry.alts ? [...new Set(entry.alts)] : [],
+			ip: entry.ip || null,
+			isGlobal: entry.isGlobal || false,
+			loggedBy: entry.loggedBy || null,
+			note: entry.note || '',
+			time: entry.time || Date.now(),
+		};
 
-		if (!entry.roomID) entry.roomID = roomid;
-		if (!entry.time) entry.time = Date.now();
-		if (overrideID) entry.visualRoomID = overrideID;
-
-		this.writeText([entry]);
+		this.writeText([insertableEntry]);
 		if (Config.usesqlitemodlog) {
-			if (entry.isGlobal && entry.roomID !== 'global' && !entry.roomID.startsWith('global-')) {
-				entry.roomID = `global-${entry.roomID}`;
+			if (insertableEntry.isGlobal && insertableEntry.roomID !== 'global' && !insertableEntry.roomID.startsWith('global-')) {
+				insertableEntry.roomID = `global-${insertableEntry.roomID}`;
 			}
-			this.writeSQL([entry]);
+			this.writeSQL([insertableEntry]);
 		}
 	}
 
 	writeSQL(entries: Iterable<ModlogEntry>) {
-		this.insertionTransaction(entries);
+		if (!Config.usesqlite) return;
+		this.insertionTransaction?.(entries);
 	}
 
 	writeText(entries: Iterable<ModlogEntry>) {
@@ -257,10 +260,10 @@ export class Modlog {
 		for (const entry of entries) {
 			const streamID = entry.roomID as ModlogID;
 
-			let entryText = `[${new Date(entry.time!).toJSON()}] (${entry.visualRoomID || entry.roomID}) ${entry.action}:`;
+			let entryText = `[${new Date(entry.time).toJSON()}] (${entry.visualRoomID || entry.roomID}) ${entry.action}:`;
 			if (entry.userid) entryText += ` [${entry.userid}]`;
 			if (entry.autoconfirmedID) entryText += ` ac:[${entry.autoconfirmedID}]`;
-			if (entry.alts) entryText += ` alts:[${entry.alts.join('], [')}]`;
+			if (entry.alts.length) entryText += ` alts:[${entry.alts.join('], [')}]`;
 			if (entry.ip) entryText += ` [${entry.ip}]`;
 			if (entry.loggedBy) entryText += ` by ${entry.loggedBy}`;
 			if (entry.note) entryText += `: ${entry.note}`;
@@ -282,10 +285,9 @@ export class Modlog {
 	async destroy(roomid: ModlogID) {
 		const stream = this.streams.get(roomid);
 		if (stream && !this.getSharedID(roomid)) {
-			this.streams.set(roomid, null);
 			await stream.writeEnd();
 		}
-		this.streams.set(roomid, null);
+		this.streams.delete(roomid);
 	}
 
 	async destroyAll() {
@@ -308,7 +310,7 @@ export class Modlog {
 		if (streamExists) this.initialize(newID);
 
 		// rename SQL modlogs
-		this.runSQL({statement: this.renameQuery, args: [newID, oldID]});
+		if (this.renameQuery) this.runSQL({statement: this.renameQuery, args: [newID, oldID]});
 	}
 
 	getActiveStreamIDs() {
@@ -367,7 +369,7 @@ export class Modlog {
 				...paths,
 				'-g', '!modlog_global.txt', '-g', '!README.md',
 			];
-			output = await execFile('rg', options, {cwd: `${__dirname}/../`});
+			output = await exec(['rg', ...options], {cwd: `${__dirname}/../`});
 		} catch (error) {
 			return results;
 		}
@@ -468,25 +470,27 @@ export class Modlog {
 // even though it's a type not a function...
 type ModlogResult = ModlogEntry | undefined;
 
+export const mainModlog = new Modlog(MODLOG_PATH, MODLOG_DB_PATH);
 
 // the ProcessManager only accepts text queries at this time
 // SQL support is to be determined
 export const PM = new QueryProcessManager<ModlogTextQuery, ModlogResult[]>(module, async data => {
 	const {rooms, regexString, maxLines, onlyPunishments} = data;
 	try {
-		const results = await Rooms.Modlog.runTextSearch(rooms, regexString, maxLines, onlyPunishments);
+		if (Config.debugmodlogprocesses && process.send) {
+			process.send('DEBUG\n' + JSON.stringify(data));
+		}
+		const results = await mainModlog.runTextSearch(rooms, regexString, maxLines, onlyPunishments);
 		return results.map((line: string, index: number) => parseModlog(line, results[index + 1]));
 	} catch (err) {
 		Monitor.crashlog(err, 'A modlog query', data);
 		return [];
 	}
-});
+}, MODLOG_PM_TIMEOUT);
 
 if (!PM.isParentProcess) {
 	global.Config = require('./config-loader').Config;
 	global.toID = require('../sim/dex').Dex.toID;
-
-	global.Rooms = require('./rooms').Rooms;
 
 	global.Monitor = {
 		crashlog(error: Error, source = 'A modlog process', details: AnyObject | null = null) {

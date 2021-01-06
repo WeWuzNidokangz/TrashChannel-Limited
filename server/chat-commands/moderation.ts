@@ -121,7 +121,7 @@ export const commands: ChatCommands = {
 		if (room.auth.getDirect(userid) === '#') return this.errorReply(`${name} is already a room owner.`);
 
 		room.auth.set(userid, '#');
-		const message = Utils.html`${name} was appointed Room Owner by ${user.name}.`;
+		const message = `${name} was appointed Room Owner by ${user.name}.`;
 		if (room.settings.isPrivate === true) {
 			this.addModAction(message);
 			Rooms.get(`upperstaff`)?.addByUser(user, `<<${room.roomid}>> ${message}`).update();
@@ -189,8 +189,11 @@ export const commands: ChatCommands = {
 			try {
 				shouldPopup = runPromote(user, room, userid, nextSymbol, toPromote, force);
 			} catch (err) {
-				if (err.name?.endsWith('ErrorMessage')) this.errorReply(err.message);
-				continue;
+				if (err.name?.endsWith('ErrorMessage')) {
+					this.errorReply(err.message);
+					continue;
+				}
+				throw err;
 			}
 			const targetUser = Users.getExact(userid);
 			const name = targetUser?.name || toPromote;
@@ -408,12 +411,18 @@ export const commands: ChatCommands = {
 	joim: 'join',
 	j: 'join',
 	async join(target, room, user, connection) {
+		target = target.trim();
 		if (!target) return this.parse('/help join');
 		if (target.startsWith('http://')) target = target.slice(7);
 		if (target.startsWith('https://')) target = target.slice(8);
 		if (target.startsWith(`${Config.routes.client}/`)) target = target.slice(Config.routes.client.length + 1);
 		if (target.startsWith(`${Config.routes.replays}/`)) target = `battle-${target.slice(Config.routes.replays.length + 1)}`;
 		if (target.startsWith('psim.us/')) target = target.slice(8);
+		// isn't in tryJoinRoom so you can still join your own battles / gameRooms etc
+		const numRooms = [...Rooms.rooms.values()].filter(r => user.id in r.users).length;
+		if (!user.can('altsself') && !target.startsWith('view-') && numRooms >= 50) {
+			return connection.sendTo(target as RoomID, `|noinit||You can only join 50 rooms at a time.`);
+		}
 		const ret = await user.tryJoinRoom(target as RoomID, connection);
 		if (ret === Rooms.RETRY_AFTER_LOGIN) {
 			connection.sendTo(
@@ -455,6 +464,7 @@ export const commands: ChatCommands = {
 		const globalWarn = room.roomid === 'staff' || room.roomid.startsWith('help-') || (room.battle && !room.parent);
 
 		target = this.splitTarget(target);
+		const targetID = toID(this.targetUsername);
 		let privateReason = '';
 		let publicReason = target;
 		const targetLowercase = target.toLowerCase();
@@ -473,6 +483,7 @@ export const commands: ChatCommands = {
 
 			this.addModAction(`${targetUser.name} would be warned by ${user.name} but is offline.${(publicReason ? ` (${publicReason})` : ``)}`);
 			this.globalModlog('WARN OFFLINE', targetUser, target ? `${publicReason} ${privateReason}` : ``);
+			Punishments.offlineWarns.set(targetID, target);
 			if (saveReplay) this.parse('/savereplay forpunishment');
 			return;
 		}
@@ -909,6 +920,7 @@ export const commands: ChatCommands = {
 			if (curUser.locked && !curUser.locked.startsWith('#') && !Punishments.getPunishType(curUser.id)) {
 				curUser.locked = null;
 				curUser.namelocked = null;
+				curUser.destroyPunishmentTimer();
 				curUser.updateIdentity();
 			}
 		}
@@ -945,6 +957,7 @@ export const commands: ChatCommands = {
 					curUser.namelocked = null;
 					curUser.resetName();
 				}
+				curUser.destroyPunishmentTimer();
 				curUser.updateIdentity();
 			}
 		}
@@ -1516,17 +1529,17 @@ export const commands: ChatCommands = {
 		}
 		this.checkCan('forcerename', targetUser);
 
+		Monitor.forceRenames.set(targetUser.id, (Monitor.forceRenames.get(targetUser.id) || 0) + 1);
+
 		let forceRenameMessage;
 		if (targetUser.connected) {
 			forceRenameMessage = `was forced to choose a new name by ${user.name}${(reason ? `: ${reason}` : ``)}`;
 			this.globalModlog('FORCERENAME', targetUser, reason);
-			Monitor.forceRenames.set(targetUser.id, (Monitor.forceRenames.get(targetUser.id) || 0) + 1);
 			Ladders.cancelSearches(targetUser);
 			targetUser.send(`|nametaken||${user.name} considers your name inappropriate${(reason ? `: ${reason}` : ".")}`);
 		} else {
 			forceRenameMessage = `would be forced to choose a new name by ${user.name} but is offline${(reason ? `: ${reason}` : ``)}`;
 			this.globalModlog('FORCERENAME OFFLINE', targetUser, reason);
-			if (!Monitor.forceRenames.has(targetUser.id)) Monitor.forceRenames.set(targetUser.id, 0);
 		}
 
 		if (room?.roomid !== 'staff') this.privateModAction(`${targetUser.name} ${forceRenameMessage}`);
@@ -1555,7 +1568,7 @@ export const commands: ChatCommands = {
 	async namelock(target, room, user, connection, cmd) {
 		if (!target) return this.parse('/help namelock');
 
-		const reason = this.splitTarget(target);
+		target = this.splitTarget(target);
 		const targetUser = this.targetUser;
 
 		if (!targetUser) {
@@ -1567,16 +1580,25 @@ export const commands: ChatCommands = {
 		this.checkCan('forcerename', targetUser);
 		if (targetUser.namelocked) return this.errorReply(`User '${targetUser.name}' is already namelocked.`);
 
-		const reasonText = reason ? ` (${reason})` : `.`;
+		let privateReason = '';
+		let publicReason = target;
+		const targetLowercase = target.toLowerCase();
+		if (target && (targetLowercase.includes('spoiler:') || targetLowercase.includes('spoilers:'))) {
+			const privateIndex = targetLowercase.indexOf(targetLowercase.includes('spoilers:') ? 'spoilers:' : 'spoiler:');
+			const bump = (targetLowercase.includes('spoilers:') ? 9 : 8);
+			privateReason = `(PROOF: ${target.substr(privateIndex + bump, target.length).trim()}) `;
+			publicReason = target.substr(0, privateIndex).trim();
+		}
+		const reasonText = publicReason ? ` (${publicReason})` : `.`;
 		this.privateGlobalModAction(`${targetUser.name} was namelocked by ${user.name}${reasonText}`);
-		this.globalModlog("NAMELOCK", targetUser, reasonText);
+		this.globalModlog("NAMELOCK", targetUser, target ? `${publicReason} ${privateReason}` : ``);
 
 		const roomauth = Rooms.global.destroyPersonalRooms(targetUser.id);
 		if (roomauth.length) {
 			Monitor.log(`[CrisisMonitor] Namelocked user ${targetUser.name} has public roomauth (${roomauth.join(', ')}), and should probably be demoted.`);
 		}
 		Ladders.cancelSearches(targetUser);
-		await Punishments.namelock(targetUser, null, null, false, reason);
+		await Punishments.namelock(targetUser, null, null, false, publicReason);
 		targetUser.popup(`|modal|${user.name} has locked your name and you can't change names anymore${reasonText}`);
 		// Automatically upload replays as evidence/reference to the punishment
 		if (room?.battle) this.parse('/savereplay forpunishment');
@@ -1616,6 +1638,7 @@ export const commands: ChatCommands = {
 	hidelines: 'hidetext',
 	hlines: 'hidetext',
 	cleartext: 'hidetext',
+	ctext: 'hidetext',
 	clearaltstext: 'hidetext',
 	clearlines: 'hidetext',
 	forcecleartext: 'hidetext',
@@ -1623,7 +1646,7 @@ export const commands: ChatCommands = {
 		if (!target) return this.parse(`/help hidetext`);
 		room = this.requireRoom();
 		const hasLineCount = cmd.includes('lines');
-		const hideRevealButton = cmd.includes('clear');
+		const hideRevealButton = cmd.includes('clear') || cmd === 'ctext';
 		target = this.splitTarget(target);
 		let lineCount = 0;
 		if (/^[0-9]+\s*(,|$)/.test(target)) {
@@ -1658,13 +1681,13 @@ export const commands: ChatCommands = {
 
 		// if the user hiding their own text, it would clear the "cleared" message,
 		// so we can't attribute it in that case
+		// and sending the message after `|unlink|` puts the "show lines" button in the wrong place
 		const sender = user === targetUser ? null : user;
 
+		let message = '';
 		if (targetUser && showAlts) {
-			room.sendByUser(
-				sender,
-				`${name}'s alts messages were cleared from ${room.title} by ${user.name}.${(reason ? ` (${reason})` : ``)}`
-			);
+			message = `${name}'s alts messages were cleared from ${room.title} by ${user.name}.${(reason ? ` (${reason})` : ``)}`;
+			room.sendByUser(sender, message);
 			this.modlog('HIDEALTSTEXT', targetUser, reason, {noip: 1});
 			room.hideText([
 				userid,
@@ -1673,18 +1696,15 @@ export const commands: ChatCommands = {
 			] as ID[]);
 		} else {
 			if (lineCount > 0) {
-				room.sendByUser(
-					sender,
-					`${lineCount} of ${name}'s messages were cleared from ${room.title} by ${user.name}.${(reason ? ` (${reason})` : ``)}`
-				);
+				message = `${lineCount} of ${name}'s messages were cleared from ${room.title} by ${user.name}.${(reason ? ` (${reason})` : ``)}`;
+				room.sendByUser(sender, message);
 			} else {
-				room.sendByUser(
-					sender,
-					`${name}'s messages were cleared from ${room.title} by ${user.name}.${(reason ? ` (${reason})` : ``)}`
-				);
+				message = `${name}'s messages were cleared from ${room.title} by ${user.name}.${(reason ? ` (${reason})` : ``)}`;
+				room.sendByUser(sender, message);
 			}
 			this.modlog('HIDETEXT', targetUser || userid, reason, {noip: 1, noalts: 1});
 			room.hideText([userid], lineCount, hideRevealButton);
+			this.roomlog(`|c|${user.getIdentity()}|/log ${message}`);
 		}
 	},
 	hidetexthelp: [
