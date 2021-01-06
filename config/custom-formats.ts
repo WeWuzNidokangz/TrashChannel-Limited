@@ -4,6 +4,7 @@
 import {toID} from './../sim/dex';
 
 export const Formats: FormatList = [
+
 	// Random Mashups
 	///////////////////////////////////////////////////////////////////
 
@@ -181,8 +182,10 @@ export const Formats: FormatList = [
 			},
 		},
 	},
+
 	// Mashups Spotlight
 	///////////////////////////////////////////////////////////////////
+	
 	{
 		section: "Mashups Spotlight",
 	},
@@ -210,6 +213,10 @@ export const Formats: FormatList = [
 			'Pure Power', 'Shadow Tag', 'Simple', 'Stakeout', 'Speed Boost', 'Water Bubble', 'Wonder Guard' // AAA
 		]
 	},
+
+	// Official OM Mashups
+	///////////////////////////////////////////////////////////////////
+
 	{
 		section: "Official OM Mashups (Singles)",
 	},
@@ -501,6 +508,10 @@ export const Formats: FormatList = [
 			'Acupressure', 'Belly Drum', 'Bolt Beak', 'Double Iron Bash', 'Electrify', 'Extreme Speed', 'Fishious Rend', 'Shell Smash', 'Shift Gear', 'Spore', 'Wicked Blow', // STABmons
 		],
 	},
+
+	// Other OM Mashups
+	///////////////////////////////////////////////////////////////////
+
 	{
 		section: "Other Mashups",
 	},
@@ -1727,7 +1738,6 @@ export const Formats: FormatList = [
 		},
 	},*/
 
-	//#region TrashChannel: Original Programming
 	// TrashChannel Original Programming
 	///////////////////////////////////////////////////////////////////
 
@@ -2212,6 +2222,7 @@ export const Formats: FormatList = [
 			pokemon.addVolatile('perishsong', pokemon);
 		},
 	},
+
 	// Mirror Universe Mashups
 	///////////////////////////////////////////////////////////////////
 
