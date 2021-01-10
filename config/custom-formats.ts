@@ -1794,6 +1794,43 @@ export const Formats: FormatList = [
 		},
 	},*/
 
+	// OM Theorymon
+	///////////////////////////////////////////////////////////////////
+
+	{
+		section: "OM Theorymon",
+		column: 2,
+	},
+	{
+		name: "[Gen 8] Camomons Triple Typing",
+		desc: `(OM Theorymon) Pok&eacute;mon change type to match their first three moves.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/om-theorymon-pilot-triple-typing-in-camomons.3675713/">OM Theorymon</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3656413/">Vanilla Camomons</a>`,
+		],
+
+		mod: 'gen8',
+		ruleset: ['Obtainable', 'Species Clause', 'Nickname Clause', 'OHKO Clause', 'Evasion Moves Clause', 'Team Preview', 'HP Percentage Mod', 'Cancel Mod', 'Dynamax Clause', 'Sleep Clause Mod', 'Endless Battle Clause', 'Camomons Triple Typing Rule'],
+		banlist: [
+			'Calyrex-Ice', 'Calyrex-Shadow', 'Darmanitan-Galar', 'Dialga', 'Dragonite', 'Eternatus', 'Genesect', 'Giratina', 'Giratina-Origin', 'Groudon', 'Ho-Oh',
+			'Kartana', 'Kyogre', 'Kyurem', 'Kyurem-Black', 'Kyurem-White', 'Lugia', 'Lunala', 'Marshadow', 'Mewtwo', 'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane', 'Palkia',
+			'Rayquaza', 'Reshiram', 'Shedinja', 'Solgaleo', 'Xerneas', 'Yveltal', 'Zacian', 'Zacian-Crowned', 'Zamazenta', 'Zamazenta-Crowned', 'Zekrom', 'Zygarde-Base',
+			'Arena Trap', 'Moody', 'Power Construct', 'Shadow Tag', 'Baton Pass',
+		],
+	},
+	{
+		name: "[Gen 8] Camomons Triple Typing: Random Battle",
+		desc: `(OM Theorymon) Randomized teams of Pok&eacute;mon change type to match their first three moves.`,
+		threads: [
+			`&bullet; <a href="https://www.smogon.com/forums/threads/om-theorymon-pilot-triple-typing-in-camomons.3675713/">OM Theorymon</a>`,
+			`&bullet; <a href="https://www.smogon.com/forums/threads/3656413/">Vanilla Camomons</a>`,
+		],
+
+		mod: 'gen8',
+		team: 'random',
+		ruleset: ['PotD', 'Obtainable', 'Species Clause', 'HP Percentage Mod', 'Cancel Mod', 'Sleep Clause Mod', 'Camomons Triple Typing Rule'],
+	},
+
 	// TrashChannel Original Programming
 	///////////////////////////////////////////////////////////////////
 

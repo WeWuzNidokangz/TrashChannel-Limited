@@ -1207,7 +1207,7 @@ export const Formats: {[k: string]: FormatData} = {
     "350cuprule": {
 		effectType: 'Rule',
 		name: '350 Cup Rule',
-		desc: "The mod for 350 Cup: Pok&eacute;mon with a base stat total of 350 or lower get their stats doubled.",
+		desc: "The battle effect rule for 350 Cup: Pok&eacute;mon with a base stat total of 350 or lower get their stats doubled.",
         onModifySpecies: function (species, target, source, effect) {
 			//console.log('350cuprule: onModifySpecies');
             let bst = 0;
@@ -1294,14 +1294,14 @@ export const Formats: {[k: string]: FormatData} = {
 	camomonsrule: {
 		effectType: 'Rule',
 		name: 'Camomons Rule',
-		desc: "The mod for Camomons: Pok&eacute;mon change type to match their first two moves.",
+		desc: "The battle effect rule for Camomons: Pok&eacute;mon change type to match their first two moves.",
 		onModifySpecies(species, target, source, effect) {
 			//console.log('camomonsrule: onModifySpecies');
 			if (!target) return; // Chat command
 			//console.log('passed target');
 			if (effect && ['imposter', 'transform'].includes(effect.id)) return;
 			let types = [...new Set(target.baseMoveSlots.slice(0, 2).map(move => this.dex.getMove(move.id).type))];
-			return Object.assign({}, species, {types: types});
+			return {...species, types: types};
 		},
 		onSwitchIn: function (pokemon) {
 			//console.log('camomonsrule: onSwitchIn');
@@ -1311,7 +1311,7 @@ export const Formats: {[k: string]: FormatData} = {
 				// @ts-ignore
 				pokemon.types[nTypeItr] = pokemon.lockTypesArray[nTypeItr];
 			}
-			this.add('-start', pokemon, 'typechange', pokemon.getTypes(true).join('/'), '[silent]');
+			this.add('-start', pokemon, 'typechange', (pokemon.illusion || pokemon).getTypes(true).join('/'), '[silent]');
 		},
 		onAfterMega: function (pokemon) {
 			//console.log('camomonsrule: onAfterMega');
@@ -1321,7 +1321,52 @@ export const Formats: {[k: string]: FormatData} = {
 				// @ts-ignore
 				pokemon.types[nTypeItr] = pokemon.lockTypesArray[nTypeItr];
 			}
-			this.add('-start', pokemon, 'typechange', pokemon.getTypes(true).join('/'), '[silent]');
+			this.add('-start', pokemon, 'typechange', (pokemon.illusion || pokemon).getTypes(true).join('/'), '[silent]');
+		},
+	},
+	camomonstripletypingrule: {
+		effectType: 'Rule',
+		name: 'Camomons Triple Typing Rule',
+		desc: "The battle effect rule for Camomons Triple Typing: Pok&eacute;mon change type to match their first three moves.",
+		onModifySpecies(species, target, source, effect) {
+			//console.log('camomonstripletypingrule: onModifySpecies');
+			if (!target) return; // Chat command
+			//console.log('passed target');
+			if (effect && ['imposter', 'transform'].includes(effect.id)) return;
+			let types = [...new Set(target.baseMoveSlots.slice(0, 3).map(move => this.dex.getMove(move.id).type))];
+			//console.log(types);
+			var addedType = '';
+			if(3 === types.length) {
+				addedType = types[2];
+				types = types.slice(0, 2);
+			}
+			return {...species, types: types, addedType:addedType};
+		},
+		onSwitchIn: function (pokemon) {
+			//console.log('camomonstripletypingrule: onSwitchIn');
+			var types = (pokemon.illusion || pokemon).getTypes(true);
+			//console.log(types);
+			var addedType = pokemon.addedType;
+			if('' === addedType) {
+				this.add('-start', pokemon, 'typechange', types.join('/'), '[silent]');
+			}
+			else {
+				this.add('-start', pokemon, 'typechange', types.slice(0, 2).join('/'), '[silent]');
+				this.add('-start', pokemon, 'typeadd', addedType, '[silent]');
+			}
+		},
+		onAfterMega: function (pokemon) {
+			//console.log('camomonstripletypingrule: onAfterMega');
+			var types = (pokemon.illusion || pokemon).getTypes(true);
+			//console.log(types);
+			var addedType = pokemon.addedType;
+			if('' === addedType) {
+				this.add('-start', pokemon, 'typechange', types.join('/'), '[silent]');
+			}
+			else {
+				this.add('-start', pokemon, 'typechange', types.slice(0, 2).join('/'), '[silent]');
+				this.add('-start', pokemon, 'typeadd', addedType, '[silent]');
+			}
 		},
 	},
 	crabmonsmovelegality: {
@@ -1790,7 +1835,7 @@ export const Formats: {[k: string]: FormatData} = {
 	tiershiftrule: {
 		effectType: 'Rule',
 		name: 'Tier Shift Rule',
-		desc: "The mod for Tier Shift: Pokemon get a +10 boost to each stat per tier below OU they are in. UU gets +10, RU +20, NU +30, and PU +40.",
+		desc: "The battle effect rule for Tier Shift: Pokemon get a +10 boost to each stat per tier below OU they are in. UU gets +10, RU +20, NU +30, and PU +40.",
         onModifySpecies(species, target, source, effect) {
 			//console.log('tiershiftrule: onModifySpecies');
 			if (!effect) return;
@@ -1836,7 +1881,7 @@ export const Formats: {[k: string]: FormatData} = {
 	suicidecupbattleeffects: {
 		effectType: 'Rule',
 		name: 'Suicide Cup Battle Effects',
-		desc: "The mod for Suicide Cup: Victory is obtained when all of your Pok&eacute;mon have fainted.",
+		desc: "The battle effect rule for Suicide Cup: Victory is obtained when all of your Pok&eacute;mon have fainted.",
 	},
 	suicidecupstandardteamvalidation: {
 		effectType: 'ValidatorRule',
