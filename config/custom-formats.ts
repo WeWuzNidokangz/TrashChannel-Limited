@@ -202,9 +202,9 @@ export const Formats: FormatList = [
             '[Gen 8] OU', 'Overflow Stat Mod', 'Tier Shift Rule', '2 Ability Clause', '!Obtainable Abilities',
         ],
         banlist: [
-            'Archeops', 'Arctovish', 'Regigigas', 'Shedinja', 'Arena Trap', 'Comatose', 'Contrary', 'Fluffy',
+            'Archeops', 'Arctovish', 'Regigigas', 'Shedinja', 'Comatose', 'Contrary', 'Fluffy',
 			'Fur Coat', 'Gorilla Tactics', 'Huge Power', 'Ice Scales', 'Illusion', 'Imposter', 'Innards Out', 'Intrepid Sword',
-			'Libero', 'Moody', 'Neutralizing Gas', 'Parental Bond', 'Protean', 'Pure Power', 'Shadow Tag', 'Simple',
+			'Libero', 'Neutralizing Gas', 'Parental Bond', 'Protean', 'Pure Power', 'Simple',
 			'Speed Boost', 'Stakeout', 'Water Bubble', 'Wonder Guard', 'Damp Rock', 'Eviolite', 'Heat Rock', 'Light Ball',
         ],
 		unbanlist: [
@@ -230,7 +230,7 @@ export const Formats: FormatList = [
 
         mod: 'gen8',
         ruleset: [
-            'Standard', 'Dynamax Clause', '2 Ability Clause', 'Dynamax Clause', '!Obtainable Abilities',
+            'Standard', '2 Ability Clause', '!Obtainable Abilities',
         ],
         banlist: [
             'Calyrex-Shadow', 'Shedinja', 'Urshifu-Base', 'Arena Trap', 'Comatose', 'Contrary', 'Fluffy', 'Fur Coat',
@@ -333,7 +333,7 @@ export const Formats: FormatList = [
 
         mod: 'gen8',
         ruleset: [
-            'Standard', 'Dynamax Clause', 'STABmons Move Legality', 'Dynamax Clause',
+            'Standard', 'STABmons Move Legality',
         ],
         banlist: [
             'King\'s Rock', 'Razor Fang', 'Baton Pass',
@@ -430,7 +430,7 @@ export const Formats: FormatList = [
         mod: 'gen8',
 		gameType: 'doubles',
         ruleset: [
-            'Standard Doubles', 'Dynamax Clause', 'Swagger Clause', 'Camomons Rule', '!Sleep Clause Mod',
+            'Standard Doubles', 'Dynamax Clause', 'Swagger Clause', 'Camomons Rule',
         ],
         banlist: [
             'DUber', 'Calyrex-Ice', 'Calyrex-Shadow', 'Dialga', 'Dragonite', 'Eternatus', 'Genesect', 'Giratina',
