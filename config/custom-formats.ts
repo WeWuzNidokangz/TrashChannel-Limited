@@ -364,7 +364,7 @@ export const Formats: FormatList = [
 		restricted: [
 			'Calyrex-Ice', 'Dialga', 'Eternatus', 'Gengar', 'Giratina', 'Groudon', 'Ho-Oh', 'Kyurem-Black',
 			'Kyurem-White', 'Lugia', 'Lunala', 'Mamoswine', 'Marshadow', 'Melmetal', 'Mewtwo', 'Naganadel',
-			'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane', 'Palkia', 'Rayquaza', 'Regigigas', 'Reshiram', 'Xerneas', 'Yveltal',
+			'Necrozma-Dawn-Wings', 'Necrozma-Dusk-Mane', 'Palkia', 'Rayquaza', 'Regigigas', 'Reshiram', 'Urshifu-Base', 'Xerneas', 'Yveltal',
 			'Zacian', 'Zekrom', 'Zygarde-Base', 'Zygarde-Complete', 'Acupressure', 'Belly Drum', 'Bolt Beak', 'Boomburst',
 			'Double Iron Bash', 'Extreme Speed', 'Fishious Rend', 'Geomancy', 'Lovely Kiss', 'Shell Smash', 'Shift Gear', 'Spore',
 			'Thousand Arrows', 'Transform', 'V-create', 'Wicked Blow',
